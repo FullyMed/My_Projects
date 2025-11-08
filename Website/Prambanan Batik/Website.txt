@@ -1,0 +1,24 @@
+https://prambananbatik.com
+
+  <head>
+    <meta name="keywords" content="Prambanan Batik, toko batik Surabaya, batik modern, baju batik, kain batik">
+    <meta name="author" content="Prambanan Batik">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <!-- Open Graph Meta Tags for Site Name -->
+    <meta property="og:site_name" content="Prambanan Batik" />
+    <meta property="og:title" content="Prambanan Batik" />
+    <meta property="og:description" content="Prambanan Batik - Trusted batik shop in Surabaya. Find a collection of quality batik clothes, pants, and fabrics." />
+    <meta property="og:url" content="https://prambananbatik.com" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="Images/favicon_io/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon_io/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="Images/favicon_io/favicon.ico" />
+    <link rel="apple-touch-icon" href="Images/favicon_io/apple-touch-icon.png" />
+    <link rel="manifest" href="Images/favicon_io/site.webmanifest" />
+  </head>
+
+  <body>
+
+    <elevenlabs-convai agent-id="iWjppZ2w2Ji84IxMLnNB"></elevenlabs-convai><script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+        <title>Login | Three Frogs Boardgame</title>
+        <meta name="description" content="Log in to access the full boardgame collection at Three Frogs Surabaya!" />
+        <meta name="author" content="Maximilliano Felix" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:site_name" content="Three Frogs" />
+        <meta property="og:title" content="Login | Three Frogs Boardgame" />
+        <meta property="og:description" content="Log in to access the full boardgame collection at Three Frogs Surabaya!" />
+        <meta property="og:url" content="https://threefrogsboardgame.com/Login.html" />
+        
+        <!-- Favicon Support -->
+        <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="Assets/Images/favicon_io/favicon-16x16.png" />
+        <link rel="icon" type="image/x-icon" href="Assets/Images/favicon_io/favicon.ico" />
+        <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
+        <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
+
+    </head>
+
+    <body>
+
+        <header>
+            <nav class="navbar">
+                <div class="logo">🐸 Three Frogs</div>
+                <ul class="nav-links" id="navLinks"></ul>
+            </nav>
+        </header>
+
+        <section class="login-container">
+            <h2>Login to Your Account</h2>
+            <form id="loginForm" action="Assets/PHP/login.php" method="POST">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" name="email" required />
+
+                <label for="loginPassword">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" name="password" placeholder="Enter password" required />
+                    <span id="toggleLoginPassword" class="toggle-password">👁️</span>
+                </div>             
+                <button type="submit">Login</button>
+            </form>
+            <div class="register">
+                <p><a href="Forgot-password.html">Forgot Password?</a></p>
+            </div>
+            <div class="register">
+                <p>Don't have an account? <a href="Signup.html">Register</a></p>
+            </div>
+            <div id="errorMessage" class="hidden"></div>
+            <div id="loginResult"></div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Three Frogs Boardgame Surabaya</p>
+        </footer>
+
+        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Login.js"></script>
+        <script src="Assets/JS/Navbar.js"></script>
+
+    </body>
+
+</html>

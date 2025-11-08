@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+        <title>Boardgame Collection | Three Frogs Boardgame</title>
+        <meta name="description" content="Explore over 200 exciting board games at Three Frogs Surabaya! Find your favorite games and book a spot to play." />
+        <meta name="author" content="Maximilliano Felix" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:site_name" content="Three Frogs" />
+        <meta property="og:title" content="Boardgame Collection | Three Frogs Boardgame" />
+        <meta property="og:description" content="Explore over 200 exciting board games at Three Frogs Surabaya! Find your favorite games and book a spot to play." />
+        <meta property="og:url" content="https://threefrogsboardgame.com/Collection.html" />
+
+        <!-- Favicon Support -->
+        <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="Assets/Images/favicon_io/favicon-16x16.png" />
+        <link rel="icon" type="image/x-icon" href="Assets/Images/favicon_io/favicon.ico" />
+        <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
+        <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
+
+    </head>
+
+    <body>
+
+        <header>
+            <nav class="navbar">
+                <div class="logo">🐸 Three Frogs</div>
+                <ul class="nav-links" id="navLinks"></ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="search-filter-bar">
+                <input type="text" id="searchInput" placeholder="Search boardgames..." />
+
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Party">Party</option>
+                    <option value="Family">Family</option>
+                    <option value="Abstract">Abstract</option>
+                    <option value="Strategy">Strategy</option>
+                    <option value="Dexterity">Dexterity</option>
+                    <option value="Thematic">Thematic</option>
+                    <option value="Word Game">Word Game</option>
+                    <option value="Cooperative">Cooperative</option>
+                    <option value="Card Game">Deck/Card Game</option>
+                    <option value="Bluffing">Bluffing/Deduction</option>
+                </select>
+            </div>
+            
+            <h2 class="section-title">All Boardgames</h2>
+            
+            <div id="boardgame-list"></div>
+
+            <div class="alphabet-nav">
+                <ul>
+                    <li><a href="#letter-#">#</a></li>
+                    <li><a href="#letter-A">A</a></li>
+                    <li><a href="#letter-B">B</a></li>
+                    <li><a href="#letter-C">C</a></li>
+                    <li><a href="#letter-D">D</a></li>
+                    <li><a href="#letter-E">E</a></li>
+                    <li><a href="#letter-F">F</a></li>
+                    <li><a href="#letter-G">G</a></li>
+                    <li><a href="#letter-H">H</a></li>
+                    <li><a href="#letter-I">I</a></li>
+                    <li><a href="#letter-J">J</a></li>
+                    <li><a href="#letter-K">K</a></li>
+                    <li><a href="#letter-L">L</a></li>
+                    <li><a href="#letter-M">M</a></li>
+                    <li><a href="#letter-N">N</a></li>
+                    <li><a href="#letter-O">O</a></li>
+                    <li><a href="#letter-P">P</a></li>
+                    <li><a href="#letter-Q">Q</a></li>
+                    <li><a href="#letter-R">R</a></li>
+                    <li><a href="#letter-S">S</a></li>
+                    <li><a href="#letter-T">T</a></li>
+                    <li><a href="#letter-U">U</a></li>
+                    <li><a href="#letter-V">V</a></li>
+                    <li><a href="#letter-W">W</a></li>
+                    <li><a href="#letter-X">X</a></li>
+                    <li><a href="#letter-Y">Y</a></li>
+                    <li><a href="#letter-Z">Z</a></li>
+                </ul>
+            </div>            
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Three Frogs Boardgame Surabaya</p>
+        </footer>
+
+        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Navbar.js"></script>
+        <script src="Assets/JS/Boardgame.js"></script>
+
+    </body>
+
+</html>

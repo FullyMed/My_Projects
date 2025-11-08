@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+        <title>User Dashboard | Three Frogs Boardgame</title>
+        <meta name="description" content="Manage your profile, view upcoming bookings, and check your booking history at Three Frogs Surabaya." />
+        <meta name="author" content="Maximilliano Felix" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:site_name" content="Three Frogs" />
+        <meta property="og:title" content="User Dashboard | Three Frogs Boardgame" />
+        <meta property="og:description" content="Manage your profile, view upcoming bookings, and check your booking history at Three Frogs Surabaya." />
+        <meta property="og:url" content="https://threefrogsboardgame.com/Dashboard.html" />
+        
+        <!-- Favicon Support -->
+        <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="Assets/Images/favicon_io/favicon-16x16.png" />
+        <link rel="icon" type="image/x-icon" href="Assets/Images/favicon_io/favicon.ico" />
+        <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
+        <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
+
+    </head>
+
+    <body>
+        
+        <header>
+            <nav class="navbar">
+                <div class="logo">🐸 Three Frogs</div>
+                <ul class="nav-links" id="navLinks"></ul>
+            </nav>
+        </header>
+
+        <section class="dashboard-container">
+            <h2>Your Profile</h2>
+            
+            <div class="avatar-profile">
+                <img id="currentAvatar" src="Assets/Images/Avatars/Clam.jpg" alt="Avatar" class="user-avatar" />
+                <span class="edit-avatar" id="editAvatarBtn" title="Change Avatar">🖉</span>
+            </div>
+
+            <div id="userInfo"></div>
+            
+            <div id="avatarChangeContainer" class="hidden">
+                <h3>Change Avatar</h3>
+                
+                <form id="changeAvatarForm" action="Assets/PHP/update_avatar.php" method="POST">
+                    <div class="avatar-scroll-wrapper">
+                        <div class="avatar-selection">
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Clam.jpg" checked />
+                                <img src="Assets/Images/Avatars/Clam.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Cow.jpg" />
+                                <img src="Assets/Images/Avatars/Cow.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Crab.jpg" />
+                                <img src="Assets/Images/Avatars/Crab.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Dolphin.jpg" />
+                                <img src="Assets/Images/Avatars/Dolphin.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Nemo.jpg" />
+                                <img src="Assets/Images/Avatars/Nemo.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Puffer.jpg" />
+                                <img src="Assets/Images/Avatars/Puffer.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Seahorse.jpg" />
+                                <img src="Assets/Images/Avatars/Seahorse.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Sealion.jpg" />
+                                <img src="Assets/Images/Avatars/Sealion.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Shark.jpg" />
+                                <img src="Assets/Images/Avatars/Shark.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Squid.jpg" />
+                                <img src="Assets/Images/Avatars/Squid.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Stingray.jpg" />
+                                <img src="Assets/Images/Avatars/Stingray.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Turtle.jpg" />
+                                <img src="Assets/Images/Avatars/Turtle.jpg" class="avatar-option" />
+                            </label>
+                            <label>
+                                <input type="radio" name="newAvatar" value="Assets/Images/Avatars/Whale.jpg" />
+                                <img src="Assets/Images/Avatars/Whale.jpg" class="avatar-option" />
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" style="margin-top: 10px;">Update Avatar</button>
+                </form>
+
+                <div id="avatarUpdateMessage" style="margin-top: 10px;"></div>
+            </div>
+
+            <h2 style="margin-top: 40px;">Upcoming Bookings</h2>
+            <div id="upcomingBookings"></div>
+
+            <h2 style="margin-top: 30px;">Booking History</h2>
+            <div id="bookingHistory"></div>
+
+            <div id="cancelPopup" class="cancel-popup hidden">
+                <div class="popup-content">
+                    <p id="cancelText"></p>
+                    <button id="confirmCancel" class="popup-btn">Yes, Cancel</button>
+                    <button id="closePopup" class="popup-btn cancel">No</button>
+                </div>
+            </div>
+
+            <button id="logoutBtn">Logout</button>
+        </section>
+
+        <footer>
+            <p>© 2025 Three Frogs Boardgame Surabaya</p>
+        </footer>
+
+        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Dashboard.js"></script>
+        <script src="Assets/JS/Navbar.js"></script>
+
+    </body>
+
+</html>

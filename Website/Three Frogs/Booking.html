@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+        <title>Booking | Three Frogs Boardgame</title>
+        <meta name="description" content="Book your game time at Three Frogs Surabaya! Reserve a spot to play exciting board games with friends." />
+        <meta name="author" content="Maximilliano Felix" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:site_name" content="Three Frogs" />
+        <meta property="og:title" content="Booking | Three Frogs Boardgame" />
+        <meta property="og:description" content="Book your game time at Three Frogs Surabaya! Reserve a spot to play exciting board games with friends." />
+        <meta property="og:url" content="https://threefrogsboardgame.com/Booking.html" />
+        
+        <!-- Favicon Support -->
+        <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="Assets/Images/favicon_io/favicon-16x16.png" />
+        <link rel="icon" type="image/x-icon" href="Assets/Images/favicon_io/favicon.ico" />
+        <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
+        <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
+
+    </head>
+
+    <body>
+
+        <header>
+            <nav class="navbar">
+                <div class="logo">🐸 Three Frogs</div>
+                <ul class="nav-links" id="navLinks"></ul>
+            </nav>
+        </header>
+
+        <div id="authPopup" class="popup hidden">
+            <div class="popup-content">
+              <h3>Please log in first</h3>
+              <p>You need to be logged in to make a booking.</p>
+              <div class="popup-buttons">
+                <button onclick="window.location.href='Login.html'">Login</button>
+                <button onclick="window.location.href='Signup.html'">Sign Up</button>
+              </div>
+            </div>
+        </div>          
+
+        <section class="booking-form">
+            <h2>Book Your Game Time</h2>
+            
+            <form id="bookingForm">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required />
+
+                <label for="email">Email</label>
+                <input type="email" id="email" required />
+
+                <label for="date">Date</label>
+                <input type="date" id="date" required />
+
+                <label for="start-time">Start Time</label>
+                <input type="time" id="start-time" required />
+
+                <label for="end-time">End Time</label>
+                <input type="time" id="end-time" required />
+
+                <label for="people">Number of People</label>
+                <input type="number" id="people" min="1" required />
+
+                <button type="submit">Book Now</button>
+            </form>
+
+            <div id="bookingResult"></div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Three Frogs Boardgame Surabaya</p>
+        </footer>
+
+        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+        
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Booking.js"></script>
+        <script src="Assets/JS/Navbar.js"></script>
+
+    </body>
+
+</html>
