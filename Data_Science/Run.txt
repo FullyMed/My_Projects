@@ -1,5 +1,0 @@
-venv\Scripts\activate
-
---- OR ---
-
-.\venv\Scripts\Activate.ps1
