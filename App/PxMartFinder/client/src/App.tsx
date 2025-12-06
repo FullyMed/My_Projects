@@ -27,6 +27,8 @@ function Router() {
   );
 }
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 function App() {
   const [language, setLanguage] = useState<Language>("en");
 
@@ -36,12 +38,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <LanguageContext.Provider value={{ language, setLanguage, t }}>
-          <Toaster />
-          <Router />
-        </LanguageContext.Provider>
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <TooltipProvider>
+          <LanguageContext.Provider value={{ language, setLanguage, t }}>
+            <Toaster />
+            <Router />
+          </LanguageContext.Provider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -87,7 +87,7 @@ export default function Home() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="pl-10 py-6 rounded-full bg-white text-foreground border-0 shadow-lg text-base placeholder:text-muted-foreground/70"
+            className="pl-10 py-6 rounded-full bg-background/95 dark:bg-secondary/50 dark:text-foreground text-foreground border-0 shadow-lg text-base placeholder:text-muted-foreground/70"
           />
         </form>
       </div>
@@ -110,13 +110,13 @@ export default function Home() {
               >
                 <Button
                   variant="outline"
-                  className="w-full h-auto aspect-square flex flex-col items-center justify-center gap-2 border-border/60 bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all shadow-sm group rounded-xl p-1"
+                  className="w-full h-auto aspect-square flex flex-col items-center justify-center gap-2 border-border/60 bg-card dark:bg-secondary/20 hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-all shadow-sm group rounded-xl p-1"
                   onClick={() => setLocation(`/category/${cat.id}`)}
                 >
-                  <div className="p-2 rounded-full bg-muted group-hover:bg-white group-hover:shadow-md transition-all text-primary">
+                  <div className="p-2 rounded-full bg-muted dark:bg-secondary group-hover:bg-white dark:group-hover:bg-primary group-hover:shadow-md transition-all text-primary dark:text-primary-foreground">
                     <Icon className="w-5 h-5" strokeWidth={2.5} />
                   </div>
-                  <span className="font-medium text-[10px] text-center leading-tight px-1 break-words w-full line-clamp-2 whitespace-normal">
+                  <span className="font-medium text-[10px] text-center leading-tight px-1 break-words w-full line-clamp-2 whitespace-normal text-foreground dark:text-foreground/90">
                     {language === "en" ? cat.en : cat.zh}
                   </span>
                 </Button>

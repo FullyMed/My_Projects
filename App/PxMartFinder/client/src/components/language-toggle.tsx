@@ -14,7 +14,7 @@ export function LanguageToggle() {
         className={cn(
           "rounded-full px-3 h-8 text-xs font-medium transition-all",
           language === "en" 
-            ? "bg-white text-primary shadow-sm hover:bg-white hover:text-primary" 
+            ? "bg-background text-foreground shadow-sm hover:bg-background hover:text-foreground dark:bg-primary dark:text-primary-foreground" 
             : "text-muted-foreground hover:text-foreground"
         )}
       >
@@ -27,7 +27,7 @@ export function LanguageToggle() {
         className={cn(
           "rounded-full px-3 h-8 text-xs font-medium transition-all",
           language === "zh" 
-            ? "bg-white text-primary shadow-sm hover:bg-white hover:text-primary" 
+            ? "bg-background text-foreground shadow-sm hover:bg-background hover:text-foreground dark:bg-primary dark:text-primary-foreground" 
             : "text-muted-foreground hover:text-foreground"
         )}
       >

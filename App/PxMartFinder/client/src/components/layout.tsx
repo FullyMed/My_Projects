@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { LanguageToggle } from "./language-toggle";
+import { ThemeToggle } from "./theme-toggle";
 import { useLanguage } from "@/lib/i18n";
 import { Search, ShoppingCart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isHome = location === '/';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden border-x border-border/40">
+    <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden border-x border-border/40 transition-colors duration-300">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-50 shadow-md">
+      <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-50 shadow-md transition-colors duration-300">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-1">
             {!isHome && (
@@ -35,7 +36,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </div>
             </Link>
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
         </div>
       </header>
 
