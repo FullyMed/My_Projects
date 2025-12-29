@@ -1,6 +1,9 @@
 Dataset/Raw/large_*.csv
 
 Dataset/Processed/merged_clean_sample.csv
+*.npy
+*.parquet
+*.joblib
 
 # Python venv
 .venv/
