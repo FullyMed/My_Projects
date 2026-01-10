@@ -1,6 +1,6 @@
-import type { Plugin } from 'vite';
 import fs from 'fs';
 import path from 'path';
+import type { Plugin } from 'vite';
 
 /**
  * Vite plugin that updates og:image and twitter:image meta tags
