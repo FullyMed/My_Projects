@@ -46,8 +46,10 @@ class FareResultCard extends StatelessWidget {
         final headerTitle = title ?? _modeLabel(context, result.mode);
 
         final adultPrice = 'NT\$${moneyFmt.format(result.fares.adult)}';
-        final metaLine = '${result.distanceKm} ${l10n.kmShort} • ${result.durationMinutes} ${l10n.minutesShort} • ${_transferText(l10n, result.transferSummary)}';
-        final updatedLine = '${l10n.lastUpdated}: ${updatedFmt.format(result.updatedAt)}';
+        final metaLine =
+            '${result.distanceKm} ${l10n.kmShort} • ${result.durationMinutes} ${l10n.minutesShort} • ${_transferText(l10n, result.transferSummary)}';
+        final updatedLine =
+            '${l10n.lastUpdated}: ${updatedFmt.format(result.updatedAt)}';
 
         return TffCard(
           child: Column(
@@ -75,23 +77,50 @@ class FareResultCard extends StatelessWidget {
               if (!isWide) ...[
                 _PriceBlock(adultPrice: adultPrice, fares: result.fares),
                 const SizedBox(height: AppSpacing.md),
-                Text(metaLine, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(metaLine,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: cs.onSurfaceVariant),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
                 const SizedBox(height: AppSpacing.sm),
-                Text(updatedLine, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(updatedLine,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               ] else ...[
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 7, child: _PriceBlock(adultPrice: adultPrice, fares: result.fares)),
+                    Expanded(
+                        flex: 7,
+                        child: _PriceBlock(
+                            adultPrice: adultPrice, fares: result.fares)),
                     const SizedBox(width: AppSpacing.lg),
                     Expanded(
                       flex: 5,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(metaLine, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(metaLine,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: cs.onSurfaceVariant),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis),
                           const SizedBox(height: AppSpacing.sm),
-                          Text(updatedLine, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(updatedLine,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: cs.onSurfaceVariant),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ],
                       ),
                     ),
@@ -136,8 +165,10 @@ class _SourceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
     return switch (source) {
-      FareSource.mock => TffBadge(label: l10n.sourceMock, icon: Icons.science_rounded),
-      FareSource.cache => TffBadge(label: l10n.sourceCached, icon: Icons.wifi_off_rounded),
+      FareSource.mock =>
+        TffBadge(label: l10n.sourceMock, icon: Icons.science_rounded),
+      FareSource.cache =>
+        TffBadge(label: l10n.sourceCached, icon: Icons.wifi_off_rounded),
     };
   }
 }
@@ -158,11 +189,18 @@ class _PriceBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adult, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
+        Text(l10n.adult,
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(color: cs.onSurfaceVariant)),
         const SizedBox(height: AppSpacing.xs),
         Text(
           adultPrice,
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6),
+          style: Theme.of(context)
+              .textTheme
+              .displaySmall
+              ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -178,9 +216,18 @@ class _PriceBlock extends StatelessWidget {
               crossAxisSpacing: AppSpacing.sm,
               childAspectRatio: cross == 3 ? 2.8 : 2.6,
               children: [
-                _TierTile(label: l10n.student, value: 'NT\$${moneyFmt.format(fares.student)}', icon: Icons.school_rounded),
-                _TierTile(label: l10n.child, value: 'NT\$${moneyFmt.format(fares.child)}', icon: Icons.child_care_rounded),
-                _TierTile(label: l10n.senior, value: 'NT\$${moneyFmt.format(fares.senior)}', icon: Icons.elderly_rounded),
+                _TierTile(
+                    label: l10n.student,
+                    value: 'NT\$${moneyFmt.format(fares.student)}',
+                    icon: Icons.school_rounded),
+                _TierTile(
+                    label: l10n.child,
+                    value: 'NT\$${moneyFmt.format(fares.child)}',
+                    icon: Icons.child_care_rounded),
+                _TierTile(
+                    label: l10n.senior,
+                    value: 'NT\$${moneyFmt.format(fares.senior)}',
+                    icon: Icons.elderly_rounded),
               ],
             );
           },
@@ -191,7 +238,8 @@ class _PriceBlock extends StatelessWidget {
 }
 
 class _TierTile extends StatelessWidget {
-  const _TierTile({required this.label, required this.value, required this.icon});
+  const _TierTile(
+      {required this.label, required this.value, required this.icon});
 
   final String label;
   final String value;
@@ -201,23 +249,36 @@ class _TierTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: cs.onSurfaceVariant),
+          Icon(icon, size: 16, color: cs.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 2),
-                Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(label,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                Text(value,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               ],
             ),
           ),

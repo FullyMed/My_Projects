@@ -1,9 +1,13 @@
 import 'dart:math';
 
 class IdGenerator {
-  IdGenerator._();
+  static final Random _rng = Random();
 
-  static final Random _rnd = Random();
-
-  static String next() => "${DateTime.now().microsecondsSinceEpoch}_${_rnd.nextInt(1 << 32)}";
+  static String next() {
+    // Always > 0 and safe on web.
+    final ts = DateTime.now().microsecondsSinceEpoch;
+    // Fixed positive upper bound (never 0).
+    final r = _rng.nextInt(1 << 20); // 0..1,048,575
+    return '${ts}_$r';
+  }
 }
