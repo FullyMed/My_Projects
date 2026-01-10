@@ -1,3 +1,0 @@
-PXMartFinder : npm run dev
-
-Taiwan_Fare_Finder : npx expo start

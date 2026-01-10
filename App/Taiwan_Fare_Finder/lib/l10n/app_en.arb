@@ -1,0 +1,118 @@
+{
+  "@@locale": "en",
+  "appTitle": "Taiwan Fare Finder",
+  "tabSearch": "Search",
+  "tabCompare": "Compare",
+  "tabSaved": "Saved routes",
+  "settings": "Settings",
+  "origin": "Origin",
+  "destination": "Destination",
+  "swap": "Swap",
+  "transportMode": "Mode",
+  "transportModes": "Modes",
+  "searchFares": "Search fares",
+  "compareFares": "Fare comparison",
+  "results": "Fare results",
+  "noResults": "No results yet",
+  "noResultsBody": "Select an origin, destination, and mode to see fares.",
+  "searchEmptyPickTitle": "Select a route",
+  "searchEmptyPickBody": "Select an origin, destination, and mode to continue.",
+  "searchEmptyReadyTitle": "Ready to search",
+  "searchEmptyReadyBody": "Select Search fares to see prices and travel time.",
+  "searchEmptyNoResultsTitle": "No results found",
+  "searchEmptyNoResultsBody": "Try a different route or review your selections.",
+  "offlineNoCache": "No saved results yet. Search while online to make results available offline.",
+  "offlineDataBadge": "Saved offline",
+  "showingCachedResults": "Showing saved results.",
+  "manageOfflineData": "Manage offline data",
+  "manageOfflineDataBody": "Review what\u2019s saved for offline use and clear it anytime.",
+  "cachedQueries": "Saved routes",
+  "cachedResults": "Saved results",
+  "clearOfflineData": "Clear offline data",
+  "duration": "Duration",
+  "transfers": "Transfers",
+  "fareByCategory": "Fare breakdown",
+  "adult": "Adult",
+  "student": "Student",
+  "child": "Child",
+  "senior": "Senior",
+  "minutesShort": "min",
+  "kmShort": "km",
+  "favorite": "Save",
+  "unfavorite": "Remove",
+  "favorites": "Saved routes",
+  "history": "History",
+  "emptyFavorites": "No favorites yet",
+  "emptyFavoritesBody": "Save a route to access it quickly.",
+  "emptyHistory": "No history yet",
+  "emptyHistoryBody": "No history yet. Your searches will appear here.",
+  "rerun": "Search again",
+  "delete": "Delete",
+  "clear": "Clear",
+  "clearAll": "Clear all",
+  "language": "Language",
+  "theme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "dataMode": "Data source",
+  "dataModeBody": "Mock data is stable and offline-friendly. API mode will be added in a future update.",
+  "dataModeMock": "Mock",
+  "dataModeApi": "API (soon)",
+  "offlineMode": "Offline mode",
+  "offlineModeBody": "Show saved results only. New searches won\u2019t generate mock results.",
+  "dataManagement": "Data management",
+  "clearCache": "Clear cached fares",
+  "clearHistory": "Clear history",
+  "clearFavorites": "Clear favorites",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "confirmDialogBody": "Are you sure? This can’t be undone.",
+  "cleared": "Cleared",
+
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageChineseHant": "繁體中文",
+  "settingsLanguageIndonesian": "Bahasa Indonesia",
+  "modesHSR": "HSR",
+  "modesTRA": "TRA",
+  "modesMRT": "MRT",
+  "modesBus": "Bus",
+  "modesYouBike": "YouBike",
+  "compareHint": "Select multiple modes to compare price and time side-by-side.",
+  "selectAtLeastOneMode": "Select at least one mode",
+  "pickRouteFirst": "Select a route first"
+  ,"searchDisabledHelper": "Select an origin, destination, and mode to search."
+  ,"compareDisabledHelper": "Select an origin, destination, and at least one mode to compare."
+  ,"locationPickerSearchTitle": "Find locations"
+  ,"locationPickerCtaChoose": "Select a location"
+  ,"locationPickerRecentTitle": "Recent"
+  ,"locationPickerPopularTitle": "Popular"
+  ,"locationPickerBrowseByCity": "Browse by city"
+  ,"locationPickerNoResultsTitle": "No locations found"
+  ,"locationPickerNoResultsBody": "Try a different name or city."
+  ,"lastUpdated": "Last updated"
+  ,"sourceMock": "Mock data"
+  ,"sourceCached": "Saved"
+
+  ,"transferDirect": "Direct"
+  ,"transferOne": "1 transfer"
+  ,"transferOneToTwo": "1–2 transfers"
+  ,"transferDockSwap": "Dock swap recommended"
+  ,"errorTitle": "Something went wrong"
+  ,"errorSearchFailed": "We couldn’t load fares right now. Please try again."
+  ,"errorApiNotReady": "API mode isn’t available yet. Switch back to Mock in Settings."
+  ,"retry": "Retry"
+  ,"compareSelectedCountLabel": "Selected: {count}"
+  ,"selectAll": "Select all"
+  ,"compareSortLabel": "Sort by"
+  ,"compareSortCheapest": "Cheapest"
+  ,"compareSortFastest": "Fastest"
+  ,"compareSortFewestTransfers": "Fewest transfers"
+
+  ,"privacy": "Privacy"
+  ,"privacyBody": "Your searches, saved routes, history, and offline data are stored locally on your device. No account required. No tracking by default."
+  ,"privacyReadMore": "Read more"
+  ,"about": "About"
+  ,"aboutVersion": "Version"
+  ,"aboutDataSource": "Data source"
+}
