@@ -1,0 +1,258 @@
+[
+  {
+    "id": "f1",
+    "product_name_en": "Taiwan Banana",
+    "product_name_zh": "台灣香蕉",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1571771896612-61871f0c2a8e?w=400&q=80",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
+    "id": "f2",
+    "product_name_en": "Fuji Apple",
+    "product_name_zh": "富士蘋果",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "f3",
+    "product_name_en": "Fresh Strawberries",
+    "product_name_zh": "新鮮草莓",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "v1",
+    "product_name_en": "Organic Spinach",
+    "product_name_zh": "有機菠菜",
+    "brand": "PX Organic",
+    "category_en": "Fresh Vegetables",
+    "category_zh": "嚴選蔬菜",
+    "sub_category_en": "Leaf & Flower Crops",
+    "sub_category_zh": "葉菜花菜",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&q=80",
+    "keywords": ["spinach", "vegetable", "organic", "菠菜", "蔬菜", "有機"]
+  },
+  {
+    "id": "v2",
+    "product_name_en": "Carrots",
+    "product_name_zh": "胡蘿蔔",
+    "brand": "PX Fresh",
+    "category_en": "Fresh Vegetables",
+    "category_zh": "嚴選蔬菜",
+    "sub_category_en": "Root & Stem Vegetables",
+    "sub_category_zh": "根莖類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "2", "shelf": "2", "section_en": "Vegetables", "section_zh": "蔬菜區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&q=80",
+    "keywords": ["carrot", "vegetable", "root", "胡蘿蔔", "蔬菜", "紅蘿蔔"]
+  },
+  {
+    "id": "m1",
+    "product_name_en": "US Beef Short Ribs",
+    "product_name_zh": "美國牛小排",
+    "brand": "PX Choice",
+    "category_en": "Meat & Seafood",
+    "category_zh": "肉品海鮮",
+    "sub_category_en": "Frozen Beef & Lamb",
+    "sub_category_zh": "冷凍牛羊",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "9", "shelf": "Freezer 1", "section_en": "Meat", "section_zh": "肉品區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1603048297172-c92544798d5e?w=400&q=80",
+    "keywords": ["beef", "meat", "ribs", "steak", "牛肉", "肉類", "牛小排"]
+  },
+  {
+    "id": "m2",
+    "product_name_en": "Fresh Salmon Fillet",
+    "product_name_zh": "新鮮鮭魚切片",
+    "brand": "Ocean Catch",
+    "category_en": "Meat & Seafood",
+    "category_zh": "肉品海鮮",
+    "sub_category_en": "Fish",
+    "sub_category_zh": "魚類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "9", "shelf": "Refrigerated", "section_en": "Seafood", "section_zh": "海鮮區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1599084993091-1a820b2e6b95?w=400&q=80",
+    "keywords": ["salmon", "fish", "seafood", "鮭魚", "海鮮", "魚類"]
+  },
+  {
+    "id": "d1",
+    "product_name_en": "Fresh Milk 2L",
+    "product_name_zh": "全脂鮮乳 2L",
+    "brand": "Dr. Milker",
+    "category_en": "Dairy & Eggs",
+    "category_zh": "乳品豆製品蛋",
+    "sub_category_en": "Milk",
+    "sub_category_zh": "牛奶",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "10", "shelf": "Refrigerated", "section_en": "Dairy", "section_zh": "乳品區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+    "keywords": ["milk", "dairy", "fresh milk", "牛奶", "鮮奶", "乳品"]
+  },
+  {
+    "id": "d2",
+    "product_name_en": "Organic Eggs (10pcs)",
+    "product_name_zh": "有機雞蛋 (10入)",
+    "brand": "Happy Farm",
+    "category_en": "Dairy & Eggs",
+    "category_zh": "乳品豆製品蛋",
+    "sub_category_en": "Eggs",
+    "sub_category_zh": "蛋",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "10", "shelf": "1", "section_en": "Dairy", "section_zh": "乳品區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1582722878654-0246bbc2998c?w=400&q=80",
+    "keywords": ["egg", "eggs", "organic", "雞蛋", "蛋", "有機"]
+  },
+  {
+    "id": "b1",
+    "product_name_en": "Coca Cola 330ml",
+    "product_name_zh": "可口可樂 330ml",
+    "brand": "Coca Cola",
+    "category_en": "Beverages",
+    "category_zh": "飲品大賞",
+    "sub_category_en": "Soda",
+    "sub_category_zh": "碳酸飲品",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "4", "shelf": "1", "section_en": "Drinks", "section_zh": "飲料區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80",
+    "keywords": ["coke", "soda", "cola", "beverage", "可樂", "汽水", "飲料"]
+  },
+  {
+    "id": "b2",
+    "product_name_en": "Green Tea No Sugar",
+    "product_name_zh": "無糖綠茶",
+    "brand": "Chai Li Won",
+    "category_en": "Beverages",
+    "category_zh": "飲品大賞",
+    "sub_category_en": "Unsweetened Pure Tea",
+    "sub_category_zh": "無糖茶",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "4", "shelf": "2", "section_en": "Drinks", "section_zh": "飲料區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80",
+    "keywords": ["tea", "green tea", "no sugar", "beverage", "茶", "綠茶", "無糖", "飲料"]
+  },
+  {
+    "id": "r1",
+    "product_name_en": "Thai Jasmine Rice 5kg",
+    "product_name_zh": "泰國茉莉香米 5kg",
+    "brand": "Royal Umbrella",
+    "category_en": "Rice, Noodles & Grains",
+    "category_zh": "米麵雜糧",
+    "sub_category_en": "White Rice",
+    "sub_category_zh": "白米",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "8", "shelf": "1", "section_en": "Grains", "section_zh": "米糧區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80",
+    "keywords": ["rice", "grain", "jasmine rice", "米", "白米", "米糧"]
+  },
+  {
+    "id": "r2",
+    "product_name_en": "Instant Noodles Beef Flavor",
+    "product_name_zh": "牛肉麵泡麵",
+    "brand": "Uni-President",
+    "category_en": "Rice, Noodles & Grains",
+    "category_zh": "米麵雜糧",
+    "sub_category_en": "Taiwanese Instant Noodles Packs",
+    "sub_category_zh": "台灣袋裝泡麵",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "8", "shelf": "3", "section_en": "Instant Noodles", "section_zh": "泡麵區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400&q=80",
+    "keywords": ["noodles", "instant noodles", "beef", "ramen", "泡麵", "麵條", "牛肉麵"]
+  },
+  {
+    "id": "fr1",
+    "product_name_en": "Pork Dumplings",
+    "product_name_zh": "豬肉水餃",
+    "brand": "Chi Mei",
+    "category_en": "Frozen",
+    "category_zh": "冷凍冷藏",
+    "sub_category_en": "Frozen Dumplings & Wontons",
+    "sub_category_zh": "餃子餛飩",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "11", "shelf": "Freezer 2", "section_en": "Frozen Food", "section_zh": "冷凍區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1541696490-8744a5dc0228?w=400&q=80",
+    "keywords": ["dumplings", "pork", "frozen", "wonton", "水餃", "豬肉", "冷凍", "餛飩"]
+  },
+  {
+    "id": "fr2",
+    "product_name_en": "Vanilla Ice Cream",
+    "product_name_zh": "香草冰淇淋",
+    "brand": "Haagen-Dazs",
+    "category_en": "Frozen",
+    "category_zh": "冷凍冷藏",
+    "sub_category_en": "Ice Cream",
+    "sub_category_zh": "冰品",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "11", "shelf": "Freezer 3", "section_en": "Frozen Food", "section_zh": "冷凍區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80",
+    "keywords": ["ice cream", "dessert", "vanilla", "frozen", "冰淇淋", "甜點", "香草", "冷凍"]
+  },
+  {
+    "id": "s1",
+    "product_name_en": "Potato Chips Salted",
+    "product_name_zh": "經典原味洋芋片",
+    "brand": "Lay's",
+    "category_en": "Snacks & Candies",
+    "category_zh": "零食餅乾",
+    "sub_category_en": "Chips",
+    "sub_category_zh": "洋芋片",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "5", "shelf": "1", "section_en": "Snacks", "section_zh": "零食區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1566478433242-fdf33565bea6?w=400&q=80",
+    "keywords": ["chips", "snacks", "potato chips", "lays", "洋芋片", "零食", "餅乾"]
+  },
+  {
+    "id": "s2",
+    "product_name_en": "Milk Chocolate Bar",
+    "product_name_zh": "牛奶巧克力",
+    "brand": "Meiji",
+    "category_en": "Snacks & Candies",
+    "category_zh": "零食餅乾",
+    "sub_category_en": "Chocolates",
+    "sub_category_zh": "巧克力",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "5", "shelf": "3", "section_en": "Snacks", "section_zh": "零食區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&q=80",
+    "keywords": ["chocolate", "snacks", "candy", "milk chocolate", "巧克力", "零食", "糖果"]
+  }
+]
