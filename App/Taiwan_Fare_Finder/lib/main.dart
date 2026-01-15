@@ -49,16 +49,20 @@ class TffApp extends StatelessWidget {
           create: (c) =>
               SettingsController(settingsService: c.read<SettingsService>()),
           update: (c, session, service, controller) {
-            final next =
-                controller ?? SettingsController(settingsService: service);
-            // IMPORTANT: avoid notifyListeners() during Provider update/build.
-            // On Flutter Web, hot reload can be picky about calling newly-added methods.
-            // Keep this logic self-contained here by scheduling `bindUser` directly.
-            Future.microtask(() async {
-              try {
-                await next.bindUser(session.user?.id);
-              } catch (_) {}
-            });
+            final next = controller ?? SettingsController(settingsService: service);
+
+            final userId = session.user?.id;
+            if (next.boundUserId != userId) {
+              Future.microtask(() async {
+                try {
+                  await next.bindUser(userId);
+                } catch (e, st) {
+                  debugPrint('bindUser failed: $e');
+                  debugPrintStack(stackTrace: st);
+                }
+              });
+            }
+
             return next;
           },
         ),
@@ -73,7 +77,10 @@ class TffApp extends StatelessWidget {
               Future.microtask(() async {
                 try {
                   await next.bindUser(userId);
-                } catch (_) {}
+                } catch (e, st) {
+                  debugPrint('bindUser failed: $e');
+                  debugPrintStack(stackTrace: st);
+                }
               });
             }
 
@@ -92,7 +99,10 @@ class TffApp extends StatelessWidget {
               Future.microtask(() async {
                 try {
                   await next.bindUser(userId);
-                } catch (_) {}
+                } catch (e, st) {
+                  debugPrint('bindUser failed: $e');
+                  debugPrintStack(stackTrace: st);
+                }
               });
             }
 
@@ -111,7 +121,10 @@ class TffApp extends StatelessWidget {
               Future.microtask(() async {
                 try {
                   await next.bindUser(userId);
-                } catch (_) {}
+                } catch (e, st) {
+                  debugPrint('bindUser failed: $e');
+                  debugPrintStack(stackTrace: st);
+                }
               });
             }
 

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/services/settings_service.dart';
@@ -11,13 +10,16 @@ class SettingsController extends ChangeNotifier {
   AppSettings? _settings;
   bool _loading = true;
   String? _userId;
+  String? _boundUserId;
+  String? get boundUserId => _boundUserId;
 
   bool _bindQueued = false;
   String? _queuedUserId;
 
   static const String _localUserId = 'local';
 
-  String _resolveUserId(String? userId) => (userId == null || userId.isEmpty) ? _localUserId : userId;
+  String _resolveUserId(String? userId) =>
+      (userId == null || userId.isEmpty) ? _localUserId : userId;
 
   bool get isLoading => _loading;
   AppSettings? get settings => _settings;
@@ -27,7 +29,8 @@ class SettingsController extends ChangeNotifier {
 
   Locale? get locale {
     final tag = _settings?.localeTag ?? 'en';
-    if (tag == 'zh_Hant' || tag == 'zh-Hant') return const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
+    if (tag == 'zh_Hant' || tag == 'zh-Hant')
+      return const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
     if (tag == 'zh') return const Locale('zh');
     if (tag == 'id') return const Locale('id');
     return const Locale('en');
@@ -47,7 +50,7 @@ class SettingsController extends ChangeNotifier {
     Future.microtask(() async {
       _bindQueued = false;
       try {
-        await bindUser(userId);
+        await bindUser(resolved);
       } catch (e) {
         debugPrint('SettingsController: bindUser (scheduled) failed: $e');
       }
@@ -56,8 +59,13 @@ class SettingsController extends ChangeNotifier {
 
   Future<void> bindUser(String? userId) async {
     final resolved = _resolveUserId(userId);
+
+    if (_boundUserId == resolved) return;
+    _boundUserId = resolved;
+
     if (_userId == resolved && _settings != null) return;
     _userId = resolved;
+
     await _load();
   }
 
@@ -65,7 +73,8 @@ class SettingsController extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final loaded = await settingsService.load(userId: _userId ?? _localUserId);
+      final loaded =
+          await settingsService.load(userId: _userId ?? _localUserId);
       _settings = loaded;
     } catch (e) {
       debugPrint('SettingsController: load failed: $e');

@@ -10,6 +10,7 @@ class FavoritesController extends ChangeNotifier {
 
   String? _boundUserId;
   String? get boundUserId => _boundUserId;
+
   String? _userId;
   bool _loading = true;
   List<FavoriteRoute> _favorites = const [];
@@ -17,41 +18,57 @@ class FavoritesController extends ChangeNotifier {
   bool get isLoading => _loading;
   List<FavoriteRoute> get favorites => _favorites;
 
+  String _resolveUserId(String? userId) {
+    if (userId == null || userId.isEmpty) return 'local';
+    return userId;
+  }
+
   Future<void> bindUser(String? userId) async {
-    if (_boundUserId == userId) return;
-    _boundUserId = userId;
-    if (userId == null || userId.isEmpty) return;
-    if (_userId == userId && !_loading) return;
-    _userId = userId;
+    final resolved = _resolveUserId(userId);
+
+    if (_boundUserId == resolved) return;
+    _boundUserId = resolved;
+
+    // If already loaded for this user, skip.
+    if (_userId == resolved && !_loading) return;
+
+    _userId = resolved;
     await reload();
   }
 
   Future<void> reload() async {
     if (_userId == null) return;
+
     _loading = true;
     notifyListeners();
+
     try {
       _favorites = await favoritesService.load(userId: _userId!);
+    } catch (e) {
+      debugPrint('FavoritesController: load failed: $e');
+      _favorites = const [];
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  bool isFavorite(
-      {required String origin,
-      required String destination,
-      required List<TransportMode> modes}) {
+  bool isFavorite({
+    required String origin,
+    required String destination,
+    required List<TransportMode> modes,
+  }) {
     return _favorites.any((f) =>
         f.origin == origin &&
         f.destination == destination &&
         _sameModes(f.modes, modes));
   }
 
-  String? favoriteIdFor(
-      {required String origin,
-      required String destination,
-      required List<TransportMode> modes}) {
+  String? favoriteIdFor({
+    required String origin,
+    required String destination,
+    required List<TransportMode> modes,
+  }) {
     final found = _favorites.where((f) =>
         f.origin == origin &&
         f.destination == destination &&
@@ -59,30 +76,50 @@ class FavoritesController extends ChangeNotifier {
     return found.isEmpty ? null : found.first.id;
   }
 
-  Future<void> toggleFavorite(
-      {required String origin,
-      required String destination,
-      required List<TransportMode> modes}) async {
+  Future<void> toggleFavorite({
+    required String origin,
+    required String destination,
+    required List<TransportMode> modes,
+  }) async {
     if (_userId == null) return;
+
     final existingId =
         favoriteIdFor(origin: origin, destination: destination, modes: modes);
-    if (existingId != null) {
-      _favorites = await favoritesService.remove(
-          userId: _userId!, favoriteId: existingId);
-    } else {
-      _favorites = await favoritesService.add(
+
+    try {
+      if (existingId != null) {
+        _favorites = await favoritesService.remove(
+          userId: _userId!,
+          favoriteId: existingId,
+        );
+      } else {
+        _favorites = await favoritesService.add(
           userId: _userId!,
           origin: origin,
           destination: destination,
-          modes: modes);
+          modes: modes,
+        );
+      }
+    } catch (e) {
+      debugPrint('FavoritesController: toggle failed: $e');
+      // Keep current list if operation failed.
     }
+
     notifyListeners();
   }
 
   Future<void> remove(String favoriteId) async {
     if (_userId == null) return;
-    _favorites =
-        await favoritesService.remove(userId: _userId!, favoriteId: favoriteId);
+
+    try {
+      _favorites = await favoritesService.remove(
+        userId: _userId!,
+        favoriteId: favoriteId,
+      );
+    } catch (e) {
+      debugPrint('FavoritesController: remove failed: $e');
+    }
+
     notifyListeners();
   }
 

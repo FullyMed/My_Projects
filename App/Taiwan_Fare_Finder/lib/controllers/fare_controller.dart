@@ -13,6 +13,7 @@ class FareController extends ChangeNotifier {
 
   String? _boundUserId;
   String? get boundUserId => _boundUserId;
+
   String? _userId;
   bool _loading = false;
   bool _hasSearched = false;
@@ -35,30 +36,50 @@ class FareController extends ChangeNotifier {
   /// - `search_failed`
   /// - `api_not_ready`
   String? get errorMessage => _error;
+
+  /// Snack message key (localized in UI).
   String? get snackMessage => _snackMessage;
+
   int get cachedQueries => _cachedQueries;
   int get cachedResults => _cachedResults;
 
+  String _resolveUserId(String? userId) {
+    if (userId == null || userId.isEmpty) return 'local';
+    return userId;
+  }
+
   Future<void> bindUser(String? userId) async {
-    if (_boundUserId == userId) return;
-    _boundUserId = userId;
-    if (userId == null || userId.isEmpty) return;
-    if (_userId == userId) return;
-    _userId = userId;
+    final resolved = _resolveUserId(userId);
+
+    // Guard to avoid repeated rebinds on rebuilds.
+    if (_boundUserId == resolved) return;
+    _boundUserId = resolved;
+
+    // If already bound internally, nothing to do.
+    if (_userId == resolved) return;
+
+    _userId = resolved;
+
+    // Reset state for the new user context.
     _hasSearched = false;
+    _lastQuery = null;
     _results = const [];
     _error = null;
     _snackMessage = null;
+
     await refreshCacheStats();
+    notifyListeners(); // optional but useful so UI updates immediately (stats reset)
   }
 
-  Future<void> search(
-      {required String origin,
-      required String destination,
-      required List<TransportMode> modes,
-      required bool offline,
-      required DataMode dataMode}) async {
-    if (_userId == null) return;
+  Future<void> search({
+    required String origin,
+    required String destination,
+    required List<TransportMode> modes,
+    required bool offline,
+    required DataMode dataMode,
+  }) async {
+    if (_userId == null) return; // should never happen now, but keep safe.
+
     _hasSearched = true;
     _loading = true;
     _error = null;
@@ -68,17 +89,25 @@ class FareController extends ChangeNotifier {
     try {
       final now = DateTime.now();
       final query = RouteQuery(
-          id: IdGenerator.next(),
-          userId: _userId!,
-          origin: origin,
-          destination: destination,
-          modes: modes,
-          createdAt: now,
-          updatedAt: now);
+        id: IdGenerator.next(),
+        userId: _userId!,
+        origin: origin,
+        destination: destination,
+        modes: modes,
+        createdAt: now,
+        updatedAt: now,
+      );
+
       _lastQuery = query;
+
       final res = await fareService.search(
-          query: query, offline: offline, dataMode: dataMode);
+        query: query,
+        offline: offline,
+        dataMode: dataMode,
+      );
+
       _results = res.results;
+
       if (offline && res.results.isEmpty) {
         _error = 'offline_no_cache';
       }
@@ -101,16 +130,20 @@ class FareController extends ChangeNotifier {
 
   bool get canRetry => _lastQuery != null && !_loading;
 
-  Future<void> retryLast(
-      {required bool offline, required DataMode dataMode}) async {
+  Future<void> retryLast({
+    required bool offline,
+    required DataMode dataMode,
+  }) async {
     final q = _lastQuery;
     if (q == null) return;
+
     await search(
-        origin: q.origin,
-        destination: q.destination,
-        modes: q.modes,
-        offline: offline,
-        dataMode: dataMode);
+      origin: q.origin,
+      destination: q.destination,
+      modes: q.modes,
+      offline: offline,
+      dataMode: dataMode,
+    );
   }
 
   Future<void> refreshCacheStats() async {
@@ -129,6 +162,7 @@ class FareController extends ChangeNotifier {
     await fareService.clearCache();
     _results = const [];
     _hasSearched = false;
+    _lastQuery = null;
     await refreshCacheStats();
     notifyListeners();
   }
