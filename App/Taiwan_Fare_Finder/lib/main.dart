@@ -67,7 +67,16 @@ class TffApp extends StatelessWidget {
           create: (c) => FareController(fareService: c.read<FareService>()),
           update: (c, session, service, controller) {
             final next = controller ?? FareController(fareService: service);
-            next.bindUser(session.user?.id);
+
+            final userId = session.user?.id;
+            if (next.boundUserId != userId) {
+              Future.microtask(() async {
+                try {
+                  await next.bindUser(userId);
+                } catch (_) {}
+              });
+            }
+
             return next;
           },
         ),
@@ -76,9 +85,17 @@ class TffApp extends StatelessWidget {
           create: (c) =>
               FavoritesController(favoritesService: c.read<FavoritesService>()),
           update: (c, session, service, controller) {
-            final next =
-                controller ?? FavoritesController(favoritesService: service);
-            next.bindUser(session.user?.id);
+            final next = controller ?? FavoritesController(favoritesService: service);
+
+            final userId = session.user?.id;
+            if (next.boundUserId != userId) {
+              Future.microtask(() async {
+                try {
+                  await next.bindUser(userId);
+                } catch (_) {}
+              });
+            }
+
             return next;
           },
         ),
@@ -87,9 +104,17 @@ class TffApp extends StatelessWidget {
           create: (c) =>
               HistoryController(historyService: c.read<HistoryService>()),
           update: (c, session, service, controller) {
-            final next =
-                controller ?? HistoryController(historyService: service);
-            next.bindUser(session.user?.id);
+            final next = controller ?? HistoryController(historyService: service);
+
+            final userId = session.user?.id;
+            if (next.boundUserId != userId) {
+              Future.microtask(() async {
+                try {
+                  await next.bindUser(userId);
+                } catch (_) {}
+              });
+            }
+
             return next;
           },
         ),

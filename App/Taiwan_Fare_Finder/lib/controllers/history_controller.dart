@@ -8,6 +8,8 @@ class HistoryController extends ChangeNotifier {
 
   final HistoryService historyService;
 
+  String? _boundUserId;
+  String? get boundUserId => _boundUserId;
   String? _userId;
   bool _loading = true;
   List<SearchHistoryEntry> _history = const [];
@@ -16,6 +18,8 @@ class HistoryController extends ChangeNotifier {
   List<SearchHistoryEntry> get history => _history;
 
   Future<void> bindUser(String? userId) async {
+    if (_boundUserId == userId) return;
+    _boundUserId = userId;
     if (userId == null || userId.isEmpty) return;
     if (_userId == userId && !_loading) return;
     _userId = userId;
@@ -34,9 +38,16 @@ class HistoryController extends ChangeNotifier {
     }
   }
 
-  Future<void> add({required String origin, required String destination, required List<TransportMode> modes}) async {
+  Future<void> add(
+      {required String origin,
+      required String destination,
+      required List<TransportMode> modes}) async {
     if (_userId == null) return;
-    _history = await historyService.add(userId: _userId!, origin: origin, destination: destination, modes: modes);
+    _history = await historyService.add(
+        userId: _userId!,
+        origin: origin,
+        destination: destination,
+        modes: modes);
     notifyListeners();
   }
 

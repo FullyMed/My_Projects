@@ -8,6 +8,8 @@ class FavoritesController extends ChangeNotifier {
 
   final FavoritesService favoritesService;
 
+  String? _boundUserId;
+  String? get boundUserId => _boundUserId;
   String? _userId;
   bool _loading = true;
   List<FavoriteRoute> _favorites = const [];
@@ -16,6 +18,8 @@ class FavoritesController extends ChangeNotifier {
   List<FavoriteRoute> get favorites => _favorites;
 
   Future<void> bindUser(String? userId) async {
+    if (_boundUserId == userId) return;
+    _boundUserId = userId;
     if (userId == null || userId.isEmpty) return;
     if (_userId == userId && !_loading) return;
     _userId = userId;
@@ -34,29 +38,51 @@ class FavoritesController extends ChangeNotifier {
     }
   }
 
-  bool isFavorite({required String origin, required String destination, required List<TransportMode> modes}) {
-    return _favorites.any((f) => f.origin == origin && f.destination == destination && _sameModes(f.modes, modes));
+  bool isFavorite(
+      {required String origin,
+      required String destination,
+      required List<TransportMode> modes}) {
+    return _favorites.any((f) =>
+        f.origin == origin &&
+        f.destination == destination &&
+        _sameModes(f.modes, modes));
   }
 
-  String? favoriteIdFor({required String origin, required String destination, required List<TransportMode> modes}) {
-    final found = _favorites.where((f) => f.origin == origin && f.destination == destination && _sameModes(f.modes, modes));
+  String? favoriteIdFor(
+      {required String origin,
+      required String destination,
+      required List<TransportMode> modes}) {
+    final found = _favorites.where((f) =>
+        f.origin == origin &&
+        f.destination == destination &&
+        _sameModes(f.modes, modes));
     return found.isEmpty ? null : found.first.id;
   }
 
-  Future<void> toggleFavorite({required String origin, required String destination, required List<TransportMode> modes}) async {
+  Future<void> toggleFavorite(
+      {required String origin,
+      required String destination,
+      required List<TransportMode> modes}) async {
     if (_userId == null) return;
-    final existingId = favoriteIdFor(origin: origin, destination: destination, modes: modes);
+    final existingId =
+        favoriteIdFor(origin: origin, destination: destination, modes: modes);
     if (existingId != null) {
-      _favorites = await favoritesService.remove(userId: _userId!, favoriteId: existingId);
+      _favorites = await favoritesService.remove(
+          userId: _userId!, favoriteId: existingId);
     } else {
-      _favorites = await favoritesService.add(userId: _userId!, origin: origin, destination: destination, modes: modes);
+      _favorites = await favoritesService.add(
+          userId: _userId!,
+          origin: origin,
+          destination: destination,
+          modes: modes);
     }
     notifyListeners();
   }
 
   Future<void> remove(String favoriteId) async {
     if (_userId == null) return;
-    _favorites = await favoritesService.remove(userId: _userId!, favoriteId: favoriteId);
+    _favorites =
+        await favoritesService.remove(userId: _userId!, favoriteId: favoriteId);
     notifyListeners();
   }
 
