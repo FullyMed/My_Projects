@@ -28,16 +28,29 @@ class TffApp extends StatelessWidget {
       providers: [
         Provider(create: (_) => const LocalStorageService()),
         Provider(create: (_) => const AnalyticsService()),
-        Provider(create: (c) => UserService(storage: c.read<LocalStorageService>())),
-        Provider(create: (c) => SettingsService(storage: c.read<LocalStorageService>())),
-        Provider(create: (c) => FareService(storage: c.read<LocalStorageService>())),
-        Provider(create: (c) => FavoritesService(storage: c.read<LocalStorageService>())),
-        Provider(create: (c) => HistoryService(storage: c.read<LocalStorageService>())),
-        ChangeNotifierProvider(create: (c) => SessionController(userService: c.read<UserService>())),
-        ChangeNotifierProxyProvider2<SessionController, SettingsService, SettingsController>(
-          create: (c) => SettingsController(settingsService: c.read<SettingsService>()),
+        Provider(
+            create: (c) => UserService(storage: c.read<LocalStorageService>())),
+        Provider(
+            create: (c) =>
+                SettingsService(storage: c.read<LocalStorageService>())),
+        Provider(
+            create: (c) => FareService(storage: c.read<LocalStorageService>())),
+        Provider(
+            create: (c) =>
+                FavoritesService(storage: c.read<LocalStorageService>())),
+        Provider(
+            create: (c) =>
+                HistoryService(storage: c.read<LocalStorageService>())),
+        ChangeNotifierProvider(
+            create: (c) =>
+                SessionController(userService: c.read<UserService>())),
+        ChangeNotifierProxyProvider2<SessionController, SettingsService,
+            SettingsController>(
+          create: (c) =>
+              SettingsController(settingsService: c.read<SettingsService>()),
           update: (c, session, service, controller) {
-            final next = controller ?? SettingsController(settingsService: service);
+            final next =
+                controller ?? SettingsController(settingsService: service);
             // IMPORTANT: avoid notifyListeners() during Provider update/build.
             // On Flutter Web, hot reload can be picky about calling newly-added methods.
             // Keep this logic self-contained here by scheduling `bindUser` directly.
@@ -49,7 +62,8 @@ class TffApp extends StatelessWidget {
             return next;
           },
         ),
-        ChangeNotifierProxyProvider2<SessionController, FareService, FareController>(
+        ChangeNotifierProxyProvider2<SessionController, FareService,
+            FareController>(
           create: (c) => FareController(fareService: c.read<FareService>()),
           update: (c, session, service, controller) {
             final next = controller ?? FareController(fareService: service);
@@ -57,18 +71,24 @@ class TffApp extends StatelessWidget {
             return next;
           },
         ),
-        ChangeNotifierProxyProvider2<SessionController, FavoritesService, FavoritesController>(
-          create: (c) => FavoritesController(favoritesService: c.read<FavoritesService>()),
+        ChangeNotifierProxyProvider2<SessionController, FavoritesService,
+            FavoritesController>(
+          create: (c) =>
+              FavoritesController(favoritesService: c.read<FavoritesService>()),
           update: (c, session, service, controller) {
-            final next = controller ?? FavoritesController(favoritesService: service);
+            final next =
+                controller ?? FavoritesController(favoritesService: service);
             next.bindUser(session.user?.id);
             return next;
           },
         ),
-        ChangeNotifierProxyProvider2<SessionController, HistoryService, HistoryController>(
-          create: (c) => HistoryController(historyService: c.read<HistoryService>()),
+        ChangeNotifierProxyProvider2<SessionController, HistoryService,
+            HistoryController>(
+          create: (c) =>
+              HistoryController(historyService: c.read<HistoryService>()),
           update: (c, session, service, controller) {
-            final next = controller ?? HistoryController(historyService: service);
+            final next =
+                controller ?? HistoryController(historyService: service);
             next.bindUser(session.user?.id);
             return next;
           },
