@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -33,145 +32,300 @@ class SettingsPage extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
       ],
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
-        child: Column(
-          children: [
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.language, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: AppSpacing.md),
-                  _SegmentRow(
-                    value: settings.settings?.localeTag ?? 'en',
-                    enabled: !settings.isLoading,
-                    onChanged: (v) => context.read<SettingsController>().setLocaleTag(v),
-                    items: [
-                      _SegmentItem(value: 'en', label: l10n.settingsLanguageEnglish),
-                      _SegmentItem(value: 'zh_Hant', label: l10n.settingsLanguageChineseHant),
-                      _SegmentItem(value: 'id', label: l10n.settingsLanguageIndonesian),
-                    ],
-                  ),
-                ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const maxContentWidth = 720.0; // tablet/desktop sweet spot
+
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth < maxContentWidth
+                    ? constraints.maxWidth
+                    : maxContentWidth,
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.theme, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: AppSpacing.md),
-                  _SegmentRow(
-                    value: settings.themeMode.name,
-                    enabled: !settings.isLoading,
-                    onChanged: (v) {
-                      final mode = switch (v) { 'light' => ThemeMode.light, 'dark' => ThemeMode.dark, _ => ThemeMode.system };
-                      context.read<SettingsController>().setThemeMode(mode);
-                    },
-                    items: [
-                      _SegmentItem(value: ThemeMode.system.name, label: l10n.themeSystem),
-                      _SegmentItem(value: ThemeMode.light.name, label: l10n.themeLight),
-                      _SegmentItem(value: ThemeMode.dark.name, label: l10n.themeDark),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: Text(l10n.offlineMode, style: Theme.of(context).textTheme.titleLarge)),
-                      Switch.adaptive(
-                        value: settings.offlineMode,
-                        onChanged: (v) => context.read<SettingsController>().setOfflineMode(v),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.xxl,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // =========================
+                    // Language
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.language,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _SegmentRow(
+                            value: settings.settings?.localeTag ?? 'en',
+                            enabled: !settings.isLoading,
+                            onChanged: (v) => context
+                                .read<SettingsController>()
+                                .setLocaleTag(v),
+                            items: [
+                              _SegmentItem(
+                                value: 'en',
+                                label: l10n.settingsLanguageEnglish,
+                              ),
+                              _SegmentItem(
+                                value: 'zh_Hant',
+                                label: l10n.settingsLanguageChineseHant,
+                              ),
+                              _SegmentItem(
+                                value: 'id',
+                                label: l10n.settingsLanguageIndonesian,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(l10n.offlineModeBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 3, overflow: TextOverflow.ellipsis),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.dataMode, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: AppSpacing.md),
-                  _SegmentRow(
-                    value: settings.dataMode.name,
-                    enabled: !settings.isLoading,
-                    onChanged: (v) {
-                      final mode = switch (v) { 'api' => DataMode.api, _ => DataMode.mock };
-                      context.read<SettingsController>().setDataMode(mode);
-                    },
-                    items: [
-                      _SegmentItem(value: DataMode.mock.name, label: l10n.dataModeMock),
-                      _SegmentItem(value: DataMode.api.name, label: l10n.dataModeApi),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(l10n.dataModeBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 4, overflow: TextOverflow.ellipsis),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.manageOfflineData, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(l10n.manageOfflineDataBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 3, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: AppSpacing.lg),
-                  _InfoRow(icon: Icons.route_rounded, label: l10n.cachedQueries, value: '${fare.cachedQueries}'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _InfoRow(icon: Icons.layers_rounded, label: l10n.cachedResults, value: '${fare.cachedResults}'),
-                  const SizedBox(height: AppSpacing.lg),
-                  _DangerAction(
-                    icon: Icons.delete_outline_rounded,
-                    title: l10n.clearOfflineData,
-                    onTap: () => _confirm(context, title: l10n.clearOfflineData, onConfirm: () => context.read<FareController>().clearCache()),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            TffCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.dataManagement, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: AppSpacing.md),
-                  _DangerAction(
-                    icon: Icons.history_rounded,
-                    title: l10n.clearHistory,
-                    onTap: () => _confirm(context, title: l10n.clearHistory, onConfirm: () => context.read<HistoryController>().clear()),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _DangerAction(
-                    icon: Icons.bookmark_remove_rounded,
-                    title: l10n.clearFavorites,
-                    onTap: () => _confirm(context, title: l10n.clearFavorites, onConfirm: () => context.read<FavoritesController>().clear()),
-                  ),
-                ],
-              ),
-            ),
+                    ),
 
-            const SizedBox(height: AppSpacing.lg),
-            PrivacyCard(onReadMore: () => _showPrivacySheet(context)),
+                    const SizedBox(height: AppSpacing.lg),
 
-            const SizedBox(height: AppSpacing.lg),
-            AboutCard(dataMode: settings.dataMode),
-          ],
-        ),
+                    // =========================
+                    // Theme
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.theme,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _SegmentRow(
+                            value: settings.themeMode.name,
+                            enabled: !settings.isLoading,
+                            onChanged: (v) {
+                              final mode = switch (v) {
+                                'light' => ThemeMode.light,
+                                'dark' => ThemeMode.dark,
+                                _ => ThemeMode.system,
+                              };
+                              context
+                                  .read<SettingsController>()
+                                  .setThemeMode(mode);
+                            },
+                            items: [
+                              _SegmentItem(
+                                value: ThemeMode.system.name,
+                                label: l10n.themeSystem,
+                              ),
+                              _SegmentItem(
+                                value: ThemeMode.light.name,
+                                label: l10n.themeLight,
+                              ),
+                              _SegmentItem(
+                                value: ThemeMode.dark.name,
+                                label: l10n.themeDark,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // =========================
+                    // Offline mode
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.offlineMode,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              Switch.adaptive(
+                                value: settings.offlineMode,
+                                onChanged: (v) => context
+                                    .read<SettingsController>()
+                                    .setOfflineMode(v),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            l10n.offlineModeBody,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // =========================
+                    // Data source
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.dataMode,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _SegmentRow(
+                            value: settings.dataMode.name,
+                            enabled: !settings.isLoading,
+                            onChanged: (v) {
+                              final mode = switch (v) {
+                                'api' => DataMode.api,
+                                _ => DataMode.mock,
+                              };
+                              context
+                                  .read<SettingsController>()
+                                  .setDataMode(mode);
+                            },
+                            items: [
+                              _SegmentItem(
+                                value: DataMode.mock.name,
+                                label: l10n.dataModeMock,
+                              ),
+                              _SegmentItem(
+                                value: DataMode.api.name,
+                                label: l10n.dataModeApi,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            l10n.dataModeBody,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // =========================
+                    // Manage offline data
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.manageOfflineData,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            l10n.manageOfflineDataBody,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          _InfoRow(
+                            icon: Icons.route_rounded,
+                            label: l10n.cachedQueries,
+                            value: '${fare.cachedQueries}',
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _InfoRow(
+                            icon: Icons.layers_rounded,
+                            label: l10n.cachedResults,
+                            value: '${fare.cachedResults}',
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          _DangerAction(
+                            icon: Icons.delete_outline_rounded,
+                            title: l10n.clearOfflineData,
+                            onTap: () => _confirm(
+                              context,
+                              title: l10n.clearOfflineData,
+                              onConfirm: () =>
+                                  context.read<FareController>().clearCache(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // =========================
+                    // Data management
+                    // =========================
+                    TffCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.dataManagement,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _DangerAction(
+                            icon: Icons.history_rounded,
+                            title: l10n.clearHistory,
+                            onTap: () => _confirm(
+                              context,
+                              title: l10n.clearHistory,
+                              onConfirm: () =>
+                                  context.read<HistoryController>().clear(),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          _DangerAction(
+                            icon: Icons.bookmark_remove_rounded,
+                            title: l10n.clearFavorites,
+                            onTap: () => _confirm(
+                              context,
+                              title: l10n.clearFavorites,
+                              onConfirm: () =>
+                                  context.read<FavoritesController>().clear(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.lg),
+                    PrivacyCard(onReadMore: () => _showPrivacySheet(context)),
+                    const SizedBox(height: AppSpacing.lg),
+                    AboutCard(dataMode: settings.dataMode),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -188,16 +342,39 @@ class SettingsPage extends StatelessWidget {
       builder: (context) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.privacy, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                Text(
+                  l10n.privacy,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w800),
+                ),
                 const SizedBox(height: AppSpacing.md),
-                Text(l10n.privacyBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.5)),
+                Text(
+                  l10n.privacyBody,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
+                ),
                 const SizedBox(height: AppSpacing.lg),
-                Text(l10n.dataModeBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.5)),
+                Text(
+                  l10n.dataModeBody,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
+                ),
               ],
             ),
           ),
@@ -206,7 +383,11 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _confirm(BuildContext context, {required String title, required Future<void> Function() onConfirm}) async {
+  Future<void> _confirm(
+    BuildContext context, {
+    required String title,
+    required Future<void> Function() onConfirm,
+  }) async {
     final l10n = TffLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
@@ -215,10 +396,22 @@ class SettingsPage extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
-          content: Text(l10n.confirmDialogBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+          content: Text(
+            l10n.confirmDialogBody,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: cs.onSurfaceVariant),
+          ),
           actions: [
-            TextButton(onPressed: () => context.pop(false), child: Text(l10n.cancel)),
-            FilledButton(onPressed: () => context.pop(true), child: Text(l10n.confirm)),
+            TextButton(
+              onPressed: () => context.pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => context.pop(true),
+              child: Text(l10n.confirm),
+            ),
           ],
         );
       },
@@ -231,7 +424,8 @@ class SettingsPage extends StatelessWidget {
         debugPrint('SettingsPage confirm action failed ($title): $e');
       }
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cleared)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.cleared)));
     }
   }
 }
@@ -252,12 +446,28 @@ class PrivacyCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(l10n.privacy, style: Theme.of(context).textTheme.titleLarge)),
-              TextButton(onPressed: onReadMore, child: Text(l10n.privacyReadMore))
+              Expanded(
+                child: Text(
+                  l10n.privacy,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              TextButton(
+                onPressed: onReadMore,
+                child: Text(l10n.privacyReadMore),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(l10n.privacyBody, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant, height: 1.5), maxLines: 4, overflow: TextOverflow.ellipsis),
+          Text(
+            l10n.privacyBody,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -287,16 +497,25 @@ class _AboutCardState extends State<AboutCard> {
       return await PackageInfo.fromPlatform();
     } catch (e) {
       debugPrint('AboutCard: failed to read package info: $e');
-      return PackageInfo(appName: 'Taiwan Fare Finder', packageName: 'taiwan_fare_finder', version: '-', buildNumber: '-');
+      return PackageInfo(
+        appName: 'Taiwan Fare Finder',
+        packageName: 'taiwan_fare_finder',
+        version: '-',
+        buildNumber: '-',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
 
-    final dataModeLabel = switch (widget.dataMode) { DataMode.api => l10n.dataModeApi, _ => l10n.dataModeMock };
+    final dataModeLabel = switch (widget.dataMode) {
+      DataMode.api => l10n.dataModeApi,
+      _ => l10n.dataModeMock,
+    };
+
+    final cs = Theme.of(context).colorScheme;
 
     return TffCard(
       child: Column(
@@ -307,12 +526,22 @@ class _AboutCardState extends State<AboutCard> {
           FutureBuilder<PackageInfo>(
             future: _infoFuture,
             builder: (context, snap) {
-              final versionText = (snap.data == null) ? '—' : '${snap.data!.version} (${snap.data!.buildNumber})';
+              final versionText = (snap.data == null)
+                  ? '—'
+                  : '${snap.data!.version} (${snap.data!.buildNumber})';
               return Column(
                 children: [
-                  _InfoRow(icon: Icons.info_outline_rounded, label: l10n.aboutVersion, value: versionText),
+                  _InfoRow(
+                    icon: Icons.info_outline_rounded,
+                    label: l10n.aboutVersion,
+                    value: versionText,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  _InfoRow(icon: Icons.storage_rounded, label: l10n.aboutDataSource, value: dataModeLabel),
+                  _InfoRow(
+                    icon: Icons.storage_rounded,
+                    label: l10n.aboutDataSource,
+                    value: dataModeLabel,
+                  ),
                 ],
               );
             },
@@ -320,7 +549,10 @@ class _AboutCardState extends State<AboutCard> {
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.dataModeBody,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.45),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: cs.onSurfaceVariant, height: 1.45),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -331,7 +563,11 @@ class _AboutCardState extends State<AboutCard> {
 }
 
 class _DangerAction extends StatelessWidget {
-  const _DangerAction({required this.icon, required this.title, required this.onTap});
+  const _DangerAction({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String title;
@@ -340,16 +576,30 @@ class _DangerAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         child: Row(
           children: [
             Icon(icon, color: cs.error),
             const SizedBox(width: AppSpacing.md),
-            Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
             Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
           ],
         ),
@@ -359,7 +609,11 @@ class _DangerAction extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   final IconData icon;
   final String label;
@@ -368,13 +622,30 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         Icon(icon, size: 18, color: cs.onSurfaceVariant),
         const SizedBox(width: AppSpacing.sm),
-        Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis)),
+        Expanded(
+          child: Text(
+            label,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: cs.onSurfaceVariant),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         const SizedBox(width: AppSpacing.sm),
-        Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(
+          value,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
       ],
     );
   }
@@ -388,7 +659,12 @@ class _SegmentItem {
 }
 
 class _SegmentRow extends StatelessWidget {
-  const _SegmentRow({required this.value, required this.onChanged, required this.items, this.enabled = true});
+  const _SegmentRow({
+    required this.value,
+    required this.onChanged,
+    required this.items,
+    this.enabled = true,
+  });
 
   final String value;
   final ValueChanged<String> onChanged;
@@ -398,6 +674,7 @@ class _SegmentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -412,14 +689,25 @@ class _SegmentRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                color: item.value == value ? cs.primary : cs.surfaceContainerHighest.withValues(alpha: enabled ? 0.55 : 0.35),
-                border: Border.all(color: item.value == value ? cs.primary.withValues(alpha: 0.25) : cs.outline.withValues(alpha: 0.18)),
+                color: item.value == value
+                    ? cs.primary
+                    : cs.surfaceContainerHighest
+                        .withValues(alpha: enabled ? 0.55 : 0.35),
+                border: Border.all(
+                  color: item.value == value
+                      ? cs.primary.withValues(alpha: 0.25)
+                      : cs.outline.withValues(alpha: 0.18),
+                ),
               ),
               child: Text(
                 item.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: item.value == value ? cs.onPrimary : cs.onSurface.withValues(alpha: enabled ? 1 : 0.55)),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: item.value == value
+                          ? cs.onPrimary
+                          : cs.onSurface.withValues(alpha: enabled ? 1 : 0.55),
+                    ),
               ),
             ),
           ),
