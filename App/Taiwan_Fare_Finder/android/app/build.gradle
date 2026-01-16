@@ -26,8 +26,6 @@ android {
         jvmTarget = "17"
     }
 
-    kotlin { jvmToolchain(17) }
-
     signingConfigs {
        release {
            keyAlias keystoreProperties['keyAlias']
