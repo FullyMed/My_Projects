@@ -1,7 +1,7 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { NextFunction, type Request, Response } from "express";
+import { createServer } from "http";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
-import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
@@ -88,7 +88,7 @@ app.use((req, res, next) => {
   httpServer.listen(
     {
       port,
-      host: "0.0.0.0",
+      host: "127.0.0.1",
       reusePort: true,
     },
     () => {
