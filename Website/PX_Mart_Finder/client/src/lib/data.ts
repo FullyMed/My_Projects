@@ -5,27 +5,23 @@ export type Store = {
   id: string;
   nameEn: string;
   nameZh: string;
-  aisleMapUrl?: string;
 };
 
 export const STORE_LIST: Store[] = [
   { 
     id: "px_wufeng_01", 
     nameEn: "PX Mart Wufeng (Taichung)", 
-    nameZh: "全聯福利中心 霧峰門市（台中）",
-    aisleMapUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
+    nameZh: "全聯福利中心 霧峰門市（台中）"
   },
   { 
     id: "demo_taipei_01", 
     nameEn: "Demo Store — Taipei", 
-    nameZh: "示意門市 — 台北",
-    aisleMapUrl: "https://images.unsplash.com/photo-1516594798947-e65505dbb29d?q=80&w=2070&auto=format&fit=crop"
+    nameZh: "示意門市 — 台北"
   },
   { 
     id: "demo_kaohsiung_01", 
     nameEn: "Demo Store — Kaohsiung", 
-    nameZh: "示意門市 — 高雄",
-    aisleMapUrl: "https://images.unsplash.com/photo-1601599561096-f87c95fff1e9?q=80&w=2070&auto=format&fit=crop"
+    nameZh: "示意門市 — 高雄"
   },
 ];
 

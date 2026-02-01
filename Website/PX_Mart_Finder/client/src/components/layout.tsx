@@ -2,13 +2,20 @@ import { Link, useLocation } from "wouter";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { useLanguage, useStore } from "@/lib/i18n";
-import { Search, ShoppingCart, ArrowLeft, MapPin } from "lucide-react";
+import { Search, ShoppingCart, ArrowLeft, MapPin, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { STORE_LIST } from "@/lib/data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import generatedImage from '@assets/generated_images/modern_minimalist_supermarket_logo_icon_with_a_magnifying_glass_and_a_shopping_cart.png';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { t, language } = useLanguage();
-  const { selectedStore } = useStore();
+  const { selectedStore, setStore } = useStore();
   const [location] = useLocation();
   const isHome = location === '/';
 
@@ -38,18 +45,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="sm:hidden flex items-center px-2 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-semibold max-w-[7rem]">
-               <MapPin className="w-3 h-3 mr-1 opacity-80 shrink-0" />
-               <span className="truncate">
-                 {language === "en" ? selectedStore.nameEn : selectedStore.nameZh}
-               </span>
-            </div>
-            <div className="hidden sm:flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-bold uppercase tracking-wider">
-               <MapPin className="w-3 h-3 mr-1.5 opacity-80 shrink-0" />
-               <span>
-                 {language === "en" ? selectedStore.nameEn : selectedStore.nameZh}
-               </span>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center px-2 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-semibold max-w-[8rem] transition-colors hover:bg-white/20 outline-none">
+                  <MapPin className="w-3 h-3 mr-1 opacity-80 shrink-0" />
+                  <span className="truncate mr-1">
+                    {language === "en" ? selectedStore.nameEn : selectedStore.nameZh}
+                  </span>
+                  <ChevronDown className="w-3 h-3 opacity-50 shrink-0" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {STORE_LIST.map((store) => (
+                  <DropdownMenuItem 
+                    key={store.id} 
+                    onClick={() => setStore(store)}
+                    className={selectedStore.id === store.id ? "bg-muted font-bold" : ""}
+                  >
+                    {language === 'en' ? store.nameEn : store.nameZh}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ThemeToggle />
             <LanguageToggle />
           </div>

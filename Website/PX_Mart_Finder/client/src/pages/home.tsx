@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
-import { useLanguage, useStore } from "@/lib/i18n";
-import { CATEGORIES, STORE_LIST } from "@/lib/data";
+import { useLanguage } from "@/lib/i18n";
+import { CATEGORIES } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -29,19 +29,10 @@ import {
   Armchair, 
   Shirt, 
   Gift,
-  MapPin,
-  ChevronDown,
   Heart,
-  History,
   Clock
 } from "lucide-react";
 import { motion } from "framer-motion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useRecentSearches } from "@/lib/storage";
 
 const iconMap: Record<string, any> = {
@@ -72,7 +63,6 @@ const iconMap: Record<string, any> = {
 
 export default function Home() {
   const { t, language } = useLanguage();
-  const { selectedStore, setStore } = useStore();
   const { recent, addSearch } = useRecentSearches();
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
@@ -92,31 +82,8 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
         
-        {/* Top bar with store and favorites */}
-        <div className="relative z-10 flex justify-between items-center mb-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="bg-white/10 hover:bg-white/20 text-white rounded-full px-4 h-9 gap-2 border border-white/20">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {language === 'en' ? selectedStore.nameEn : selectedStore.nameZh}
-                </span>
-                <ChevronDown className="w-4 h-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {STORE_LIST.map((store) => (
-                <DropdownMenuItem 
-                  key={store.id} 
-                  onClick={() => setStore(store)}
-                  className={selectedStore.id === store.id ? "bg-muted font-bold" : ""}
-                >
-                  {language === 'en' ? store.nameEn : store.nameZh}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+        {/* Top bar with favorites */}
+        <div className="relative z-10 flex justify-end items-center mb-4">
           <Link href="/favorites">
             <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20 text-white rounded-full w-9 h-9 border border-white/20">
               <Heart className="w-5 h-5" />

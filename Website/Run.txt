@@ -1,3 +1,6 @@
 JourneySet : npm run dev
 
 PX_Mart_Finder : npm run dev + http://localhost:5000
+
+
+*Every change new folder : npm install + npm i -D cross-env*

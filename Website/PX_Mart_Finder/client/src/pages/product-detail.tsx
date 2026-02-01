@@ -4,10 +4,11 @@ import { PRODUCTS } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/product-card";
-import { ArrowLeft, MapPin, Share2, Info, Heart, Map as MapIcon } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, Info, Heart, Map as MapIcon, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/lib/storage";
 import { cn } from "@/lib/utils";
+import { useState, useRef } from "react";
 
 export default function ProductDetail() {
   const { t, language } = useLanguage();
@@ -15,6 +16,8 @@ export default function ProductDetail() {
   const { toggleFavorite, isFavorite } = useFavorites();
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/product/:id");
+  const [showOnlyWithLocation, setShowOnlyWithLocation] = useState(false);
+  const similarSectionRef = useRef<HTMLDivElement>(null);
   
   const product = PRODUCTS.find(p => p.id === params?.id);
 
@@ -32,9 +35,17 @@ export default function ProductDetail() {
   const similarProducts = PRODUCTS
     .filter(p => 
         (p.category_en === product.category_en) && 
-        (p.id !== product.id)
+        (p.id !== product.id) &&
+        (!showOnlyWithLocation || p.locationsByStore[selectedStore.id])
     )
-    .slice(0, 2);
+    .slice(0, showOnlyWithLocation ? 10 : 2);
+
+  const handleShowSimilar = () => {
+    setShowOnlyWithLocation(true);
+    setTimeout(() => {
+      similarSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   return (
     <div className="flex flex-col flex-1 bg-background pb-8">
@@ -109,22 +120,38 @@ export default function ProductDetail() {
                   </Link>
                 </div>
             ) : (
-              <div className="bg-muted/30 rounded-2xl p-6 border border-dashed border-muted-foreground/30 flex flex-col items-center text-center gap-2">
-                  <Info className="w-8 h-8 text-muted-foreground/50" />
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {t("locationNotAvailable")}
-                  </p>
-                  <p className="text-xs text-muted-foreground/70">
-                    {language === 'en' ? 'Try selecting a different store branch' : '請嘗試選擇其他門店分店'}
-                  </p>
+              <div className="bg-destructive/5 rounded-2xl p-6 border border-destructive/20 flex flex-col items-center text-center gap-3">
+                  <AlertCircle className="w-10 h-10 text-destructive/60" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-foreground">
+                      {language === 'en' 
+                        ? `Location data for ${selectedStore.nameEn} is not available yet.` 
+                        : t("locationNotAvailable")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {language === 'en' ? 'Try selecting a different store branch' : '請嘗試選擇其他門市分店'}
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2 w-full border-primary/30 text-primary hover:bg-primary/5 font-bold"
+                    onClick={handleShowSimilar}
+                  >
+                    {t("showSimilarWithLocation")}
+                  </Button>
               </div>
             )}
         </div>
 
         {/* Similar Products */}
         {similarProducts.length > 0 && (
-            <div className="mt-8">
-                <h3 className="font-bold text-lg mb-4 px-1">{t("similarProducts")}</h3>
+            <div className="mt-8" ref={similarSectionRef}>
+                <h3 className="font-bold text-lg mb-4 px-1">
+                  {showOnlyWithLocation 
+                    ? (language === 'en' ? 'Available Similar Items' : '有位置資訊的相似商品')
+                    : t("similarProducts")}
+                </h3>
                 <div className="space-y-4">
                     {similarProducts.map(p => (
                         <ProductCard key={p.id} product={p} />

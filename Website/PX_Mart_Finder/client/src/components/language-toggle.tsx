@@ -31,7 +31,7 @@ export function LanguageToggle() {
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        中文 🇨🇳
+        繁中 🇹🇼
       </Button>
     </div>
   );

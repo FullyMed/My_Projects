@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { useLocation } from "wouter";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { PRODUCTS, CATEGORIES, SYNONYMS } from "@/lib/data";
@@ -26,6 +26,22 @@ import {
 import Fuse from "fuse.js";
 import { useDebounce } from "use-debounce";
 import { normalizeAisle } from "@/lib/normalize";
+// Use a more robust import for react-window to handle various bundling environments
+import * as reactWindow from "react-window";
+const List = (reactWindow as any).FixedSizeList || (reactWindow as any).default?.FixedSizeList;
+import { useRef } from "react";
+
+// Memoized row renderer for performance
+const ProductRow = memo(({ data, index, style }: { data: any[], index: number, style: React.CSSProperties }) => {
+  const product = data[index];
+  return (
+    <div style={{ ...style, padding: '0 16px', boxSizing: 'border-box' }} className="pb-3">
+      <ProductCard product={product} />
+    </div>
+  );
+});
+
+ProductRow.displayName = "ProductRow";
 
 export default function SearchResults() {
   const { t, language } = useLanguage();
@@ -124,7 +140,7 @@ export default function SearchResults() {
       if (sortBy === "name") {
         const nameA = language === 'en' ? a.product_name_en : a.product_name_zh;
         const nameB = language === 'en' ? b.product_name_en : b.product_name_zh;
-        return nameA.localeCompare(nameB, language === 'zh' ? 'zh-Hans' : 'en');
+        return nameA.localeCompare(nameB, language === 'zh' ? 'zh-Hant' : 'en');
       }
       if (sortBy === "aisle") {
         const locA = a.locationsByStore[selectedStore.id];
@@ -136,7 +152,7 @@ export default function SearchResults() {
         if (aisleA === null && aisleB === null) {
           const nameA = language === 'en' ? a.product_name_en : a.product_name_zh;
           const nameB = language === 'en' ? b.product_name_en : b.product_name_zh;
-          return nameA.localeCompare(nameB, language === 'zh' ? 'zh-Hans' : 'en');
+          return nameA.localeCompare(nameB, language === 'zh' ? 'zh-Hant' : 'en');
         }
         if (aisleA === null) return 1;
         if (aisleB === null) return -1;
@@ -220,7 +236,7 @@ export default function SearchResults() {
 
   return (
     <div className="flex flex-col flex-1 bg-muted/30 min-h-screen">
-      <div className="bg-white dark:bg-card p-4 sticky top-[72px] z-40 shadow-sm border-b border-border/40 transition-colors">
+      <div className="bg-white dark:bg-card p-4 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40 transition-colors">
          <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input 
@@ -318,23 +334,24 @@ export default function SearchResults() {
          </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3">
+      <div className="flex-1 min-h-0">
         {results.length > 0 ? (
-          <>
-            <div className="flex justify-between items-center px-1">
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between items-center px-5 py-3 shrink-0">
                  <h2 className="font-semibold text-sm text-muted-foreground">
                     {results.length} {t("results")}
                  </h2>
             </div>
             
-            <div className="space-y-3">
-              {results.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+            <div className="flex-1 overflow-hidden">
+              {/* Use a simple container that fills remaining space */}
+              <div className="h-full w-full">
+                <AutoSizerList data={results} />
+              </div>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="py-12 px-4 flex flex-col items-center text-center">
+          <div className="py-12 px-4 flex flex-col items-center text-center overflow-y-auto h-full">
              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                 <Search className="w-8 h-8 text-muted-foreground/40" />
              </div>
@@ -395,3 +412,41 @@ export default function SearchResults() {
     </div>
   );
 }
+
+// Simple AutoSizer component to handle list height
+function AutoSizerList({ data }: { data: any[] }) {
+  const [height, setHeight] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const updateHeight = () => {
+      if (containerRef.current) {
+        setHeight(containerRef.current.offsetHeight);
+      }
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="h-full w-full">
+      {height > 0 && (
+        <List
+          height={height}
+          itemCount={data.length}
+          itemSize={150}
+          width="100%"
+          itemData={data}
+          className="no-scrollbar"
+        >
+          {ProductRow}
+        </List>
+      )}
+    </div>
+  );
+}
+
