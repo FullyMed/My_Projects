@@ -1,8 +1,8 @@
 [
   {
-    "id": "f1",
-    "product_name_en": "Taiwan Banana",
-    "product_name_zh": "台灣香蕉",
+    "id": "a1",
+    "product_name_en": "Netted Cantaloupe 1200g",
+    "product_name_zh": "網狀哈蜜瓜 1200g",
     "brand": "PX Select",
     "category_en": "Fresh Fruits",
     "category_zh": "嚴選水果",
@@ -16,9 +16,41 @@
     "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {
-    "id": "f2",
-    "product_name_en": "Fuji Apple",
-    "product_name_zh": "富士蘋果",
+    "id": "a2",
+    "product_name_en": "British Watermelon 4.8kg",
+    "product_name_zh": "英倫西瓜 4.8kg",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "Website\\PX_Mart_Finder\\client\\public\\Images\\Fresh_Fruits\\Tropical Fruits\\Netted Cantaloupe.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
+    "id": "a3",
+    "product_name_en": "Mini Watermelon 3kg",
+    "product_name_zh": "小玉西瓜 3kg",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "Website\\PX_Mart_Finder\\client\\public\\Images\\Fresh_Fruits\\Tropical Fruits\\Netted Cantaloupe.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
+    "id": "b1",
+    "product_name_en": "USA Fuji Apples (Bag) 700g",
+    "product_name_zh": "美國富士蘋果(袋) 700g",
     "brand": "Imported",
     "category_en": "Fresh Fruits",
     "category_zh": "嚴選水果",
@@ -31,8 +63,143 @@
     "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
   },
   {
-    "id": "f3",
-    "product_name_en": "Fresh Strawberries",
+    "id": "b2",
+    "product_name_en": "USA Washington Fuji Apple #125 140g",
+    "product_name_zh": "美國華盛頓富士蘋果#125 140g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b3",
+    "product_name_en": "USA Washington Fuji Apple #88 200g",
+    "product_name_zh": "美國華盛頓富士蘋果#88 200g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b4",
+    "product_name_en": "U.S. Yellow Lemon #140 100g",
+    "product_name_zh": "美國黃檸檬#140 100g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b5",
+    "product_name_en": "USA ENVY Apple #64 250g",
+    "product_name_zh": "美國ENVY蘋果 #64 250g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b6",
+    "product_name_en": "Japan Aomori Honey Fuji Apple #40 220g",
+    "product_name_zh": "日本青森蜜富士蘋果 #40 220g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b7",
+    "product_name_en": "USA Fuji Apples (Box) 600g",
+    "product_name_zh": "美國富士蘋果(盒) 600g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b8",
+    "product_name_en": "Japanese Aomori Orin Apple #46 190g",
+    "product_name_zh": "日本青森王林蘋果#46 190g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b9",
+    "product_name_en": "USA Imported Fuji Apples #100 180g",
+    "product_name_zh": "美國進口富士蘋果#100 180g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "b10",
+    "product_name_en": "New Zealand Gala Apple #120 135g",
+    "product_name_zh": "紐西蘭加拉蘋果#120 135g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
+    "id": "c1",
+    "product_name_en": "Peruvian Premium Blueberries 125g",
     "product_name_zh": "新鮮草莓",
     "brand": "Local Farm",
     "category_en": "Fresh Fruits",
@@ -46,7 +213,7 @@
     "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
-    "id": "v1",
+    "id": "d1",
     "product_name_en": "Organic Spinach",
     "product_name_zh": "有機菠菜",
     "brand": "PX Organic",
@@ -61,7 +228,7 @@
     "keywords": ["spinach", "vegetable", "organic", "菠菜", "蔬菜", "有機"]
   },
   {
-    "id": "v2",
+    "id": "e1",
     "product_name_en": "Carrots",
     "product_name_zh": "胡蘿蔔",
     "brand": "PX Fresh",
@@ -76,7 +243,7 @@
     "keywords": ["carrot", "vegetable", "root", "胡蘿蔔", "蔬菜", "紅蘿蔔"]
   },
   {
-    "id": "m1",
+    "id": "f1",
     "product_name_en": "US Beef Short Ribs",
     "product_name_zh": "美國牛小排",
     "brand": "PX Choice",
@@ -91,7 +258,7 @@
     "keywords": ["beef", "meat", "ribs", "steak", "牛肉", "肉類", "牛小排"]
   },
   {
-    "id": "m2",
+    "id": "g1",
     "product_name_en": "Fresh Salmon Fillet",
     "product_name_zh": "新鮮鮭魚切片",
     "brand": "Ocean Catch",
@@ -106,7 +273,7 @@
     "keywords": ["salmon", "fish", "seafood", "鮭魚", "海鮮", "魚類"]
   },
   {
-    "id": "d1",
+    "id": "h1",
     "product_name_en": "Fresh Milk 2L",
     "product_name_zh": "全脂鮮乳 2L",
     "brand": "Dr. Milker",
@@ -121,7 +288,7 @@
     "keywords": ["milk", "dairy", "fresh milk", "牛奶", "鮮奶", "乳品"]
   },
   {
-    "id": "d2",
+    "id": "i1",
     "product_name_en": "Organic Eggs (10pcs)",
     "product_name_zh": "有機雞蛋 (10入)",
     "brand": "Happy Farm",
@@ -136,7 +303,7 @@
     "keywords": ["egg", "eggs", "organic", "雞蛋", "蛋", "有機"]
   },
   {
-    "id": "b1",
+    "id": "j1",
     "product_name_en": "Coca Cola 330ml",
     "product_name_zh": "可口可樂 330ml",
     "brand": "Coca Cola",
@@ -151,7 +318,7 @@
     "keywords": ["coke", "soda", "cola", "beverage", "可樂", "汽水", "飲料"]
   },
   {
-    "id": "b2",
+    "id": "k1",
     "product_name_en": "Green Tea No Sugar",
     "product_name_zh": "無糖綠茶",
     "brand": "Chai Li Won",
@@ -166,7 +333,7 @@
     "keywords": ["tea", "green tea", "no sugar", "beverage", "茶", "綠茶", "無糖", "飲料"]
   },
   {
-    "id": "r1",
+    "id": "l1",
     "product_name_en": "Thai Jasmine Rice 5kg",
     "product_name_zh": "泰國茉莉香米 5kg",
     "brand": "Royal Umbrella",
@@ -181,7 +348,7 @@
     "keywords": ["rice", "grain", "jasmine rice", "米", "白米", "米糧"]
   },
   {
-    "id": "r2",
+    "id": "m1",
     "product_name_en": "Instant Noodles Beef Flavor",
     "product_name_zh": "牛肉麵泡麵",
     "brand": "Uni-President",
@@ -196,7 +363,7 @@
     "keywords": ["noodles", "instant noodles", "beef", "ramen", "泡麵", "麵條", "牛肉麵"]
   },
   {
-    "id": "fr1",
+    "id": "n1",
     "product_name_en": "Pork Dumplings",
     "product_name_zh": "豬肉水餃",
     "brand": "Chi Mei",
@@ -211,7 +378,7 @@
     "keywords": ["dumplings", "pork", "frozen", "wonton", "水餃", "豬肉", "冷凍", "餛飩"]
   },
   {
-    "id": "fr2",
+    "id": "o1",
     "product_name_en": "Vanilla Ice Cream",
     "product_name_zh": "香草冰淇淋",
     "brand": "Haagen-Dazs",
@@ -226,7 +393,7 @@
     "keywords": ["ice cream", "dessert", "vanilla", "frozen", "冰淇淋", "甜點", "香草", "冷凍"]
   },
   {
-    "id": "s1",
+    "id": "p1",
     "product_name_en": "Potato Chips Salted",
     "product_name_zh": "經典原味洋芋片",
     "brand": "Lay's",
@@ -241,7 +408,7 @@
     "keywords": ["chips", "snacks", "potato chips", "lays", "洋芋片", "零食", "餅乾"]
   },
   {
-    "id": "s2",
+    "id": "q1",
     "product_name_en": "Milk Chocolate Bar",
     "product_name_zh": "牛奶巧克力",
     "brand": "Meiji",
