@@ -13,7 +13,7 @@
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
     "image_url": "/Images/Fresh_Fruits/Tropical Fruits/Netted Cantaloupe.png",
-    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+    "keywords": ["netted", "fruit", "tropical", "香蕉", "水果"]
   },
   {
     "id": "a2",
@@ -256,8 +256,8 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh_Fruits/Berries & Grapes/Peruvian Premium BlueberrieS.png",
-    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+    "image_url": "/Images/Fresh_Fruits/Berries & Grapes/Peruvian Premium Blueberries.png",
+    "keywords": ["blueberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
     "id": "c2",
@@ -272,7 +272,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
     "image_url": "/Images/Fresh_Fruits/Berries & Grapes/Cherry Tomatoes.png",
-    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+    "keywords": ["cherry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
     "id": "c3",
