@@ -1,12 +1,12 @@
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Info, Heart } from "lucide-react";
-import { Link } from "wouter";
 import { useFavorites } from "@/lib/storage";
-import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { Heart, Info, MapPin } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "./ui/button";
 
 interface ProductCardProps {
   product: Product;
