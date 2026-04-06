@@ -12,7 +12,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "https://images.unsplash.com/photo-1571771896612-61871f0c2a8e?w=400&q=80",
+    "image_url": "Website\\PX_Mart_Finder\\client\\public\\Images\\Fresh_Fruits\\Tropical Fruits\\Netted Cantaloupe.png",
     "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {

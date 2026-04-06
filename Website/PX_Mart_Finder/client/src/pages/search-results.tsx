@@ -1,21 +1,7 @@
-import { useEffect, useMemo, useState, useCallback, memo } from "react";
-import { useLocation } from "wouter";
-import { useLanguage, useStore } from "@/lib/i18n";
-import { PRODUCTS, CATEGORIES, SYNONYMS } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { 
-  Search, 
-  ArrowLeft, 
-  X, 
-  Filter, 
-  ArrowUpDown,
-  Tag,
-  Map as MapIcon,
-  Sparkles
-} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,13 +9,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Fuse from "fuse.js";
-import { useDebounce } from "use-debounce";
+import { CATEGORIES, PRODUCTS, SYNONYMS } from "@/lib/data";
+import { useLanguage, useStore } from "@/lib/i18n";
 import { normalizeAisle } from "@/lib/normalize";
+import Fuse from "fuse.js";
+import {
+  ArrowUpDown,
+  Filter,
+  Search,
+  Sparkles,
+  X
+} from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
+import { useLocation } from "wouter";
 // Use a more robust import for react-window to handle various bundling environments
+import { useRef } from "react";
 import * as reactWindow from "react-window";
 const List = (reactWindow as any).FixedSizeList || (reactWindow as any).default?.FixedSizeList;
-import { useRef } from "react";
 
 // Memoized row renderer for performance
 const ProductRow = memo(({ data, index, style }: { data: any[], index: number, style: React.CSSProperties }) => {
@@ -449,4 +446,3 @@ function AutoSizerList({ data }: { data: any[] }) {
     </div>
   );
 }
-

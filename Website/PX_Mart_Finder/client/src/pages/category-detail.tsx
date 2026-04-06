@@ -1,9 +1,9 @@
-import { useLocation, useRoute } from "wouter";
-import { useLanguage } from "@/lib/i18n";
-import { CATEGORIES } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Search } from "lucide-react";
+import { CATEGORIES } from "@/lib/data";
+import { useLanguage } from "@/lib/i18n";
 import { motion } from "framer-motion";
+import { ArrowLeft, Search } from "lucide-react";
+import { useLocation, useRoute } from "wouter";
 
 export default function CategoryDetail() {
   const { t, language } = useLanguage();

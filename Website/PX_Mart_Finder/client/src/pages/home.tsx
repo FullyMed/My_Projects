@@ -1,39 +1,39 @@
-import { useState } from "react";
-import { useLocation, Link } from "wouter";
-import { useLanguage } from "@/lib/i18n";
-import { CATEGORIES } from "@/lib/data";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Search, 
-  Cookie, 
-  CupSoda, 
-  Coffee, 
-  Croissant, 
-  Utensils, 
-  Beef, 
-  Apple, 
-  Carrot, 
-  Egg, 
-  Snowflake, 
-  FlaskConical, 
-  ScrollText, 
-  Container, 
-  SprayCan, 
-  Sparkles, 
-  Dog, 
-  ChefHat, 
-  UtensilsCrossed, 
-  Stethoscope, 
-  Baby, 
-  Armchair, 
-  Shirt, 
+import { Input } from "@/components/ui/input";
+import { CATEGORIES } from "@/lib/data";
+import { useLanguage } from "@/lib/i18n";
+import { useRecentSearches } from "@/lib/storage";
+import { motion } from "framer-motion";
+import {
+  Apple,
+  Armchair,
+  Baby,
+  Beef,
+  Carrot,
+  ChefHat,
+  Clock,
+  Coffee,
+  Container,
+  Cookie,
+  Croissant,
+  CupSoda,
+  Dog,
+  Egg,
+  FlaskConical,
   Gift,
   Heart,
-  Clock
+  ScrollText,
+  Search,
+  Shirt,
+  Snowflake,
+  Sparkles,
+  SprayCan,
+  Stethoscope,
+  Utensils,
+  UtensilsCrossed
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useRecentSearches } from "@/lib/storage";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 
 const iconMap: Record<string, any> = {
   Cookie,
