@@ -1,17 +1,17 @@
-import { Link, useLocation } from "wouter";
-import { LanguageToggle } from "./language-toggle";
-import { ThemeToggle } from "./theme-toggle";
-import { useLanguage, useStore } from "@/lib/i18n";
-import { Search, ShoppingCart, ArrowLeft, MapPin, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { STORE_LIST } from "@/lib/data";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import generatedImage from '@assets/generated_images/modern_minimalist_supermarket_logo_icon_with_a_magnifying_glass_and_a_shopping_cart.png';
+import { STORE_LIST } from "@/lib/data";
+import { useLanguage, useStore } from "@/lib/i18n";
+import generatedImage from '@assets/Images/Logo.jpg';
+import { ArrowLeft, ChevronDown, MapPin } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { LanguageToggle } from "./language-toggle";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { t, language } = useLanguage();
