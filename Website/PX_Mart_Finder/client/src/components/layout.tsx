@@ -37,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <div className="flex items-center gap-2 cursor-pointer">
                 <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden p-1">
-                   <img src="/Assets/Images/Logo.jpg" alt="Logo" className="w-full h-full object-contain" />
+                   <img src="/Images/Logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="font-bold text-lg tracking-tight">PX Mart</h1>
               </div>
