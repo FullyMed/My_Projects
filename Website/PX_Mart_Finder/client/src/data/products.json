@@ -48,6 +48,38 @@
     "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {
+    "id": "a4",
+    "product_name_en": "Nantou Banana 600g",
+    "product_name_zh": "南投蕉 600g",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "Website\\PX_Mart_Finder\\client\\public\\Images\\Fresh_Fruits\\Tropical Fruits\\Netted Cantaloupe.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
+    "id": "a5",
+    "product_name_en": "Selected Pearl Guava 1kg",
+    "product_name_zh": "特選珍珠芭樂 1kg",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "Website\\PX_Mart_Finder\\client\\public\\Images\\Fresh_Fruits\\Tropical Fruits\\Netted Cantaloupe.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
     "id": "b1",
     "product_name_en": "USA Fuji Apples (Bag) 700g",
     "product_name_zh": "美國富士蘋果(袋) 700g",
@@ -198,6 +230,21 @@
     "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
   },
   {
+    "id": "b11",
+    "product_name_en": "New Zealand TARZI Apples (Bag) 700g",
+    "product_name_zh": "紐西蘭TARZI蘋果(袋) 700g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&q=80",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
     "id": "c1",
     "product_name_en": "Peruvian Premium Blueberries 125g",
     "product_name_zh": "新鮮草莓",
@@ -213,7 +260,202 @@
     "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
+    "id": "c2",
+    "product_name_en": "Cherry Tomatoes 550g",
+    "product_name_zh": "玉女小番茄 550g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c3",
+    "product_name_en": "Tainan Saline Tomato (Production and Sales Traceability) 550g",
+    "product_name_zh": "台南鹽地番茄(產銷履歷) 550g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c4",
+    "product_name_en": "Kyoho Grapes 450g",
+    "product_name_zh": "巨峰葡萄 450g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c5",
+    "product_name_en": "Cherry Tomatoes 550g",
+    "product_name_zh": "聖女番茄 550g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c6",
+    "product_name_en": "Rosy Red Tomatoes (Traceable) 450g",
+    "product_name_zh": "嫣紅番茄 (產銷履歷) 450g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c7",
+    "product_name_en": "Shengyun Tomatoes 550g",
+    "product_name_zh": "聖運番茄 550g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "c8",
+    "product_name_en": "Yu Nu Cherry Tomatoes 300g",
+    "product_name_zh": "玉女小蕃茄 300g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
     "id": "d1",
+    "product_name_en": "USA Air Flown Avocado #48 195g",
+    "product_name_zh": "美國空運酪梨 #48 195g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Citrus Fruits",
+    "sub_category_zh": "柑橘果類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "d2",
+    "product_name_en": "USA Sweet Orange #88 170g",
+    "product_name_zh": "美國甜橙 #88 170g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Citrus Fruits",
+    "sub_category_zh": "柑橘果類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "d3",
+    "product_name_en": "USA Sunkist Sweet Orange #72 250g",
+    "product_name_zh": "美國Sunkist甜橙 #72 250g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Citrus Fruits",
+    "sub_category_zh": "柑橘果類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "d4",
+    "product_name_en": "USA Bagged Mandarin Orange (Small Packet) 450g",
+    "product_name_zh": "美國袋裝砂糖橘(小包裝) 450g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Citrus Fruits",
+    "sub_category_zh": "柑橘果類",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "e1",
+    "product_name_en": "Frenature Canada A-Grade Frozen Blueberries 350g",
+    "product_name_zh": "Frenature富紐翠加拿大A級冷凍藍莓 350g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Frozen Fruits",
+    "sub_category_zh": "冷凍水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "f1",
+    "product_name_en": "Greenhouse Mini Cucumbers (Production and Sales Traceable) 300g",
+    "product_name_zh": "溫室小黃瓜(產銷履歷) 300g",
+    "brand": "PX Organic",
+    "category_en": "Fresh Vegetables",
+    "category_zh": "嚴選蔬菜",
+    "sub_category_en": "Legume & Melons",
+    "sub_category_zh": "豆菜瓜果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
+    },
+    "image_url": "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&q=80",
+    "keywords": ["spinach", "vegetable", "organic", "菠菜", "蔬菜", "有機"]
+  },
+  {
+    "id": "f1",
     "product_name_en": "Organic Spinach",
     "product_name_zh": "有機菠菜",
     "brand": "PX Organic",
@@ -228,7 +470,7 @@
     "keywords": ["spinach", "vegetable", "organic", "菠菜", "蔬菜", "有機"]
   },
   {
-    "id": "e1",
+    "id": "f2",
     "product_name_en": "Carrots",
     "product_name_zh": "胡蘿蔔",
     "brand": "PX Fresh",
@@ -243,7 +485,7 @@
     "keywords": ["carrot", "vegetable", "root", "胡蘿蔔", "蔬菜", "紅蘿蔔"]
   },
   {
-    "id": "f1",
+    "id": "g1",
     "product_name_en": "US Beef Short Ribs",
     "product_name_zh": "美國牛小排",
     "brand": "PX Choice",
