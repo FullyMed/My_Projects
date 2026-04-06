@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { STORE_LIST } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
-import generatedImage from '@assets/Images/Logo.jpg';
 import { ArrowLeft, ChevronDown, MapPin } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { LanguageToggle } from "./language-toggle";
@@ -38,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <div className="flex items-center gap-2 cursor-pointer">
                 <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden p-1">
-                   <img src={generatedImage} alt="Logo" className="w-full h-full object-contain" />
+                   <img src="/Assets/Images/Logo.jpg" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="font-bold text-lg tracking-tight">PX Mart</h1>
               </div>
