@@ -80,6 +80,22 @@
     "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {
+    "id": "a6",
+    "product_name_en": "Golden Diamond Pineapple (Traceable Produce) 1200g",
+    "product_name_zh": "金鑽鳳梨(產銷履歷) 1200g",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "/Images/Fresh_Fruits/Tropical Fruits/Golden Diamond Pineapple.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
     "id": "b1",
     "product_name_en": "USA Fuji Apples (Bag) 700g",
     "product_name_zh": "美國富士蘋果(袋) 700g",
