@@ -96,6 +96,22 @@
     "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {
+    "id": "a7",
+    "product_name_en": "Domestic Papaya 600g",
+    "product_name_zh": "國產木瓜 600g",
+    "brand": "PX Select",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Tropical Fruits",
+    "sub_category_zh": "熱帶水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
+      "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
+    },
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Domestic Papaya.png",
+    "keywords": ["banana", "fruit", "tropical", "香蕉", "水果"]
+  },
+  {
     "id": "b1",
     "product_name_en": "USA Fuji Apples (Bag) 700g",
     "product_name_zh": "美國富士蘋果(袋) 700g",
@@ -261,6 +277,21 @@
     "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
   },
   {
+    "id": "b12",
+    "product_name_en": "New Zealand Gala Apples (Bag) About 700g",
+    "product_name_zh": "紐西蘭加拉蘋果(袋) 約 700g",
+    "brand": "Imported",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Apples & Pears",
+    "sub_category_zh": "蘋果與梨",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand Gala Apples.png",
+    "keywords": ["apple", "fruit", "fuji", "蘋果", "水果"]
+  },
+  {
     "id": "c1",
     "product_name_en": "Peruvian Premium Blueberries 125g",
     "product_name_zh": "新鮮草莓",
@@ -381,6 +412,21 @@
     "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
+    "id": "c9",
+    "product_name_en": "Australia Green Seedless Grapes (Box) 450g",
+    "product_name_zh": "澳洲綠無籽葡萄(盒) 450g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Berries & Grapes",
+    "sub_category_zh": "莓果與葡萄",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Australia Green Seedless Grapes.png",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
     "id": "d1",
     "product_name_en": "USA Air Flown Avocado #48 195g",
     "product_name_zh": "美國空運酪梨 #48 195g",
@@ -453,6 +499,21 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
     "image_url": "/Images/Fresh Fruits/Frozen Fruits/Frenature Canada A-Grade Frozen Blueberries.png",
+    "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
+  },
+  {
+    "id": "e2",
+    "product_name_en": "Tian Shi Berry Grade A Frozen Blueberries 227g",
+    "product_name_zh": "天時莓果A級冷凍藍莓 227 g",
+    "brand": "Local Farm",
+    "category_en": "Fresh Fruits",
+    "category_zh": "嚴選水果",
+    "sub_category_en": "Frozen Fruits",
+    "sub_category_zh": "冷凍水果",
+    "locationsByStore": {
+      "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
+    },
+    "image_url": "/Images/Fresh Fruits/Frozen Fruits/Tian Shi Berry Grade A Frozen Blueberries.png",
     "keywords": ["strawberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
