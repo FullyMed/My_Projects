@@ -1,0 +1,76 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+
+\title{An Explainable Hybrid Board Game Recommendation System Using Content Similarity, Sentiment Analysis, and Popularity Signals}
+
+\author{
+\IEEEauthorblockN{Maximilliano Felix Gunawan Polandouw}
+\IEEEauthorblockA{
+Department of Computer Science and Information Engineering\\
+Asia University, Taiwan\\
+Email: maxfelix05@gmail.com
+}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Board game recommendation systems face challenges such as sparse user ratings, cold-start problems, and limited explainability. Traditional collaborative filtering methods often struggle when user interaction data is insufficient, while pure content-based systems may fail to capture user sentiment and preference quality. This paper proposes an explainable hybrid board game recommendation system that integrates content similarity, sentiment analysis, and popularity signals into a unified recommendation framework. The system supports title-based, trait-based, and combined recommendation modes to improve flexibility and recommendation relevance. Evaluation was conducted using Recall@K and NDCG@K metrics under different recommendation scenarios. Experimental results show that the hybrid approach improves ranking quality and recommendation relevance while maintaining interpretability for end users. The proposed system demonstrates the effectiveness of combining multiple recommendation signals for board game discovery tasks.
+\end{abstract}
+
+\section{Introduction}
+
+Board games have experienced significant growth in popularity over the past decade, resulting in increasingly large and complex game catalogs on online platforms such as BoardGameGeek (BGG). As the number of available games continues to expand, users often face difficulties in discovering games that match their preferences, gameplay styles, and thematic interests. This creates a recommendation challenge in which systems must balance personalization, relevance, diversity, and explainability.
+
+Traditional recommendation systems commonly rely on collaborative filtering techniques, which generate recommendations based on user interaction patterns and rating similarities. Although collaborative filtering has shown strong performance in many domains, it suffers from several important limitations. One major issue is the cold-start problem, where newly added games or users with limited interaction history cannot be effectively recommended. In addition, sparse rating distributions may reduce recommendation quality and system reliability.
+
+Content-based recommendation approaches attempt to address some of these limitations by utilizing item attributes such as descriptions, mechanics, categories, and themes. However, content-only systems often fail to capture qualitative user opinions and emotional responses toward games. Meanwhile, popularity-based approaches may over-recommend highly popular games while ignoring niche preferences and personalized interests.
+
+To address these challenges, this paper proposes an explainable hybrid board game recommendation system that combines multiple recommendation signals into a unified framework. The proposed system integrates content similarity, sentiment analysis derived from user reviews, and popularity information to generate more relevant and interpretable recommendations. Furthermore, the system supports multiple recommendation modes, including title-based recommendations, trait-based recommendations, and combined hybrid recommendations.
+
+The primary contributions of this paper are as follows:
+
+\begin{itemize}
+    \item Development of a hybrid recommendation framework combining content similarity, sentiment signals, and popularity metrics.
+    
+    \item Implementation of explainable recommendation outputs that provide interpretable recommendation reasoning.
+    
+    \item Support for multiple recommendation modes, including title-based, trait-based, and combined recommendations.
+    
+    \item Evaluation of recommendation performance using Recall@K and NDCG@K metrics under different recommendation scenarios.
+\end{itemize}
+
+The remainder of this paper is organized as follows. Section II reviews related work in recommendation systems and sentiment-aware recommendation approaches. Section III describes the proposed methodology and recommendation architecture. Section IV presents the experimental evaluation and performance analysis. Section V discusses the findings, limitations, and implications of the proposed system. Finally, Section VI concludes the paper and suggests directions for future work.
+
+\section{Related Work}
+
+% Write later
+
+\section{Methodology}
+
+% Write later
+
+\section{Evaluation}
+
+% Write later
+
+\section{Discussion}
+
+% Write later
+
+\section{Conclusion}
+
+% Write later
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
