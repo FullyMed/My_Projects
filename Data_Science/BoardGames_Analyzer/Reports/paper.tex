@@ -223,6 +223,13 @@ The content-based baseline generates recommendations using textual similarity an
 
 \subsection{Experimental Results}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{images/performance_chart.png}
+\caption{Performance Comparison of Recommendation Modes}
+\label{fig:performance}
+\end{figure}
+
 \begin{table}[h]
 \centering
 \caption{Recommendation Performance Comparison}
@@ -252,11 +259,31 @@ However, several limitations remain. Sparse review information may reduce sentim
 
 \section{Discussion}
 
-% Write later
+\section{Discussion}
+
+The experimental results demonstrate that title-based recommendation achieved the strongest ranking performance among the evaluated recommendation modes. This suggests that providing a specific board game title as a recommendation seed offers strong contextual information for similarity matching. Because board games often contain highly descriptive metadata related to mechanics, themes, complexity, and player interaction, title-based similarity can effectively identify closely related games.
+
+The combined recommendation mode also demonstrated competitive performance across Recall@K and NDCG@K metrics. Although its ranking accuracy was slightly lower than the pure title-based approach, the combined model provides greater recommendation flexibility by integrating both similarity-based recommendation and gameplay preference filtering. This makes the combined approach particularly useful in practical recommendation scenarios where users may simultaneously consider known favorite games and desired gameplay traits.
+
+The trait-based recommendation mode produced lower recommendation performance compared to the other approaches. One possible explanation is that gameplay traits and category preferences are inherently broader and less specific than title-based similarity. Trait-based recommendation may therefore produce a larger and more diverse candidate space, making accurate ranking more difficult. However, this recommendation mode remains valuable for users who may not know specific board game titles and instead prefer discovering games through mechanics, themes, or gameplay styles.
+
+The integration of sentiment information contributed additional qualitative recommendation signals derived from user reviews. Unlike pure metadata similarity, sentiment-aware recommendation incorporates subjective user opinions related to enjoyment, replayability, and overall player experience. This improves explainability and allows the recommendation system to incorporate community perception beyond numerical ratings alone.
+
+Despite these strengths, several limitations remain. First, sentiment reliability depends on the availability and quality of user reviews, which may vary significantly across games. Less popular games often contain limited review information, reducing the effectiveness of sentiment-based recommendation signals. Second, popularity features may introduce bias toward highly rated mainstream games while underrepresenting niche or newly released games. Third, the current system does not incorporate collaborative filtering or personalized user interaction modeling, which may further improve recommendation quality in future work.
+
+Future research may explore the integration of collaborative filtering, embedding-based semantic similarity, and large language model (LLM)-based explanation generation. Additional evaluation with real user studies and interactive feedback collection may also improve recommendation personalization and practical deployment readiness.
 
 \section{Conclusion}
 
-% Write later
+\section{Conclusion}
+
+This paper proposed an explainable hybrid board game recommendation system that integrates content similarity, sentiment analysis, and popularity signals into a unified recommendation framework. The system supports title-based, trait-based, and combined recommendation modes to improve recommendation flexibility and usability in board game discovery scenarios.
+
+Experimental evaluation using Recall@K and NDCG@K metrics demonstrated that the title-based recommendation mode achieved the strongest ranking performance, while the combined recommendation mode provided a balanced trade-off between recommendation accuracy and gameplay preference flexibility. The results also showed that integrating multiple recommendation signals can improve explainability and recommendation robustness compared to relying on a single recommendation strategy.
+
+The proposed system contributes an interpretable and flexible recommendation framework for board game discovery tasks while demonstrating the practical value of hybrid recommendation architectures. Although several limitations remain, including sparse review coverage and the absence of personalized collaborative filtering, the overall framework provides a strong foundation for future recommendation research and practical deployment.
+
+Future work may explore embedding-based semantic recommendation, collaborative filtering integration, real-time user interaction modeling, and large language model (LLM)-based recommendation explanations to further improve recommendation quality and personalization.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
