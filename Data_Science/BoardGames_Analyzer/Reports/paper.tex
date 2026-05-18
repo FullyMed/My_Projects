@@ -259,8 +259,6 @@ However, several limitations remain. Sparse review information may reduce sentim
 
 \section{Discussion}
 
-\section{Discussion}
-
 The experimental results demonstrate that title-based recommendation achieved the strongest ranking performance among the evaluated recommendation modes. This suggests that providing a specific board game title as a recommendation seed offers strong contextual information for similarity matching. Because board games often contain highly descriptive metadata related to mechanics, themes, complexity, and player interaction, title-based similarity can effectively identify closely related games.
 
 The combined recommendation mode also demonstrated competitive performance across Recall@K and NDCG@K metrics. Although its ranking accuracy was slightly lower than the pure title-based approach, the combined model provides greater recommendation flexibility by integrating both similarity-based recommendation and gameplay preference filtering. This makes the combined approach particularly useful in practical recommendation scenarios where users may simultaneously consider known favorite games and desired gameplay traits.
@@ -272,8 +270,6 @@ The integration of sentiment information contributed additional qualitative reco
 Despite these strengths, several limitations remain. First, sentiment reliability depends on the availability and quality of user reviews, which may vary significantly across games. Less popular games often contain limited review information, reducing the effectiveness of sentiment-based recommendation signals. Second, popularity features may introduce bias toward highly rated mainstream games while underrepresenting niche or newly released games. Third, the current system does not incorporate collaborative filtering or personalized user interaction modeling, which may further improve recommendation quality in future work.
 
 Future research may explore the integration of collaborative filtering, embedding-based semantic similarity, and large language model (LLM)-based explanation generation. Additional evaluation with real user studies and interactive feedback collection may also improve recommendation personalization and practical deployment readiness.
-
-\section{Conclusion}
 
 \section{Conclusion}
 
