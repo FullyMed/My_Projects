@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  20 MAY 2026 16:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  20 MAY 2026 23:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -375,24 +375,24 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
 
 -- Lines per column: 56 (exact).
 (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
@@ -414,76 +414,114 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
  (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring OFF on input line 23.
+Package hyperref Info: Link coloring OFF on input line 24.
  (paper.out) (paper.out)
 \@outlinefile=\write3
 \openout3 = `paper.out'.
 
 
-Underfull \hbox (badness 1629) in paragraph at lines 45--46
+Underfull \hbox (badness 10000) in paragraph at lines 26--28
+[]\OT1/ptm/b/it/9 Index Terms\OT1/ptm/b/n/9 ---Recommender Sys-tems, Board Game
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 26--28
+\OT1/ptm/b/n/9 Rec-om-men-da-tion, Ex-plain-able Rec-om-men-da-tion, Content-
+ []
+
+[1
+
+{C:/Users/felix/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
+
+]
+Underfull \hbox (badness 1629) in paragraph at lines 50--51
 \OT1/ptm/m/n/10 popularity-based ap-proaches may over-recommend highly
  []
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 52.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 57.
 (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 52.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 57.
  (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1{C:/Users/felix/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
-
+) [2
 
 ]
-<images/architecture.png, id=123, 2695.06876pt x 4230.80624pt>
+<images/architecture.png, id=139, 2695.06876pt x 4230.80624pt>
 File: images/architecture.png Graphic file (type png)
 <use images/architecture.png>
-Package pdftex.def Info: images/architecture.png  used on input line 85.
+Package pdftex.def Info: images/architecture.png  used on input line 90.
 (pdftex.def)             Requested size: 258.0pt x 404.96495pt.
 
-Overfull \hbox (6.0pt too wide) in paragraph at lines 85--86
+Overfull \hbox (6.0pt too wide) in paragraph at lines 90--91
  [][] 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [2]
-Underfull \hbox (badness 3989) in paragraph at lines 92--93
-[]\OT1/ptm/m/n/10 The pro-posed rec-om-men-da-tion sys-tem uti-lizes board
+ [3]
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 113.
+ (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
+File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
+)
+Underfull \hbox (badness 3291) in paragraph at lines 113--114
+[]\OT1/ptm/m/n/10 TF-IDF vec-tor-iza-tion was used to cap-ture keyword-
  []
 
-[3
+[4
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.148 \subsubsection
-                    {Title-Based Recommendation} <./images/architecture.png>]
-Underfull \hbox (badness 3536) in paragraph at lines 162--163
+l.136 
+       <./images/architecture.png>]
+Underfull \hbox (badness 1642) in paragraph at lines 175--176
+ \OT1/ptm/m/it/10 1) Title-Based Rec-om-men-da-tion: [][][] \OT1/ptm/m/n/10 The title-based mode
+ []
+
+
+Underfull \hbox (badness 3536) in paragraph at lines 197--198
 []\OT1/ptm/m/n/10 The rec-om-men-da-tion sys-tem was im-ple-mented us-ing
  []
 
-<images/performance_chart.png, id=152, 578.16pt x 361.35pt>
+[5]
+<images/performance_chart.png, id=172, 578.16pt x 361.35pt>
 File: images/performance_chart.png Graphic file (type png)
 <use images/performance_chart.png>
-Package pdftex.def Info: images/performance_chart.png  used on input line 236.
+Package pdftex.def Info: images/performance_chart.png  used on input line 271.
 (pdftex.def)             Requested size: 283.80157pt x 177.37181pt.
 
-Overfull \hbox (31.80157pt too wide) in paragraph at lines 236--237
+Overfull \hbox (31.80157pt too wide) in paragraph at lines 271--272
  [][] 
  []
 
-[4] [5
+[6
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.283 
+l.304 
       
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.283 
-       <./images/performance_chart.png>] (paper.bbl
+l.304 
+       <./images/performance_chart.png>]
+Underfull \hbox (badness 3364) in paragraph at lines 309--310
+\OT1/ptm/m/n/10 er-ately strong per-for-mance across both Re-call@K and
+ []
+
+
+Underfull \hbox (badness 1565) in paragraph at lines 311--312
+\OT1/ptm/m/n/10 other eval-u-ated ap-proaches. One pos-si-ble ex-pla-na-tion is
+ []
+
+
+Underfull \hbox (badness 2626) in paragraph at lines 323--324
+\OT1/ptm/m/n/10 demon-strated that the title-based rec-om-men-da-tion mode
+ []
+
+(paper.bbl [7]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 62.
  (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
@@ -499,26 +537,28 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[6] (paper.aux)
+[8
+
+] (paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: BAA46AC936D368F7936341EEC055D813;3774.
+(rerunfilecheck)             Checksum: 11E875F426AB208FEEB4BEE3A93072D9;4240.
  ) 
 Here is how much of TeX's memory you used:
- 11943 strings out of 467871
- 190376 string characters out of 5418376
- 615898 words of memory out of 5000000
- 40609 multiletter control sequences out of 15000+600000
- 665080 words of font info for 112 fonts, out of 8000000 for 9000
+ 11989 strings out of 467871
+ 191079 string characters out of 5418376
+ 610902 words of memory out of 5000000
+ 40645 multiletter control sequences out of 15000+600000
+ 665595 words of font info for 114 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,822b,443s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (6 pages, 487635 bytes).
+ 75i,9n,79p,822b,587s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (8 pages, 497543 bytes).
 PDF statistics:
- 234 PDF objects out of 1000 (max. 8388607)
- 50 named destinations out of 1000 (max. 500000)
- 211 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 257 PDF objects out of 1000 (max. 8388607)
+ 55 named destinations out of 1000 (max. 500000)
+ 235 words of extra memory for PDF output out of 10000 (max. 10000000)
 

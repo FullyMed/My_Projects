@@ -9,7 +9,7 @@
 \usepackage{float}
 \usepackage{adjustbox}
 
-\title{An Explainable Hybrid Board Game Recommendation System Using Content Similarity, Sentiment Analysis, and Popularity Signals}
+\title{An Explainable Multi-Mode Board Game Recommendation System Using Content Similarity, Sentiment Analysis, and Popularity Signals}
 
 \author{
 \IEEEauthorblockN{Maximilliano Felix Gunawan}
@@ -20,7 +20,12 @@ Email: maxfelix05@gmail.com
 }
 }
 
+
 \begin{document}
+
+\begin{IEEEkeywords}
+Recommender Systems, Board Game Recommendation, Explainable Recommendation, Content-Based Filtering, Sentiment Analysis, Hybrid Recommendation, BoardGameGeek
+\end{IEEEkeywords}
 
 \maketitle
 
@@ -89,11 +94,13 @@ This section describes the dataset, feature engineering process, recommendation 
 
 \subsection{Dataset Description}
 
-The proposed recommendation system utilizes board game metadata and review information collected from the BoardGameGeek (BGG) platform. The dataset contains information related to board game titles, descriptions, mechanics, categories, user ratings, and review-based sentiment signals. These features provide both structured and unstructured information for recommendation generation.
+This study utilized publicly available board game data collected from the BoardGameGeek (BGG) platform. The dataset contains board game metadata, user ratings, and textual user reviews. After preprocessing and filtering, the final dataset included over 21,000 board games and millions of user rating interactions.
 
-The dataset includes textual descriptions and metadata attributes that are useful for content-based similarity analysis. In addition, user review information is incorporated to capture subjective user opinions regarding gameplay experience, enjoyment, replayability, and game quality. Popularity-related information such as average ratings and rating counts is also included to provide additional recommendation signals.
+The dataset preprocessing stage involved removing incomplete records, filtering games with insufficient metadata, and cleaning textual review content. Board game attributes such as categories, mechanics, themes, descriptions, complexity ratings, and user rating statistics were retained for recommendation modeling.
 
-Before model construction, data preprocessing was performed to handle missing values, normalize textual features, and standardize metadata representations. Text cleaning procedures included lowercase conversion, punctuation removal, and token normalization.
+User rating data was additionally filtered to reduce sparsity and improve evaluation consistency. The final processed interaction dataset contained approximately 18.7 million valid user ratings after preprocessing.
+
+Textual review data was used for sentiment analysis, while game descriptions, categories, and mechanics were used for content-based similarity modeling. The processed dataset was then used to support title-based, trait-based, and combined recommendation experiments.
 
 \subsection{Feature Engineering}
 
@@ -101,61 +108,89 @@ Feature engineering was performed to extract meaningful recommendation signals f
 
 \subsubsection{Content Representation}
 
-Content-based features were extracted from game descriptions, mechanics, and category metadata. Textual descriptions were transformed using Term Frequency-Inverse Document Frequency (TF-IDF) vectorization to represent important descriptive terms while reducing the influence of common words.
+Content-based similarity was computed using both TF-IDF vectorization and sentence-transformer embeddings derived from board game descriptions and metadata. Textual attributes including game descriptions, mechanics, and categories were combined into a unified textual representation for each game.
 
-Metadata attributes such as game mechanics and categories were also utilized to improve similarity matching between games. These features allow the system to identify games with related gameplay styles, themes, and player experiences.
+TF-IDF vectorization was used to capture keyword-level similarity, while semantic embeddings generated using the \texttt{all-MiniLM-L6-v2} sentence-transformer model were used to capture higher-level semantic relationships between games. Cosine similarity was then applied to compute pairwise similarity scores between board games.
 
-\subsubsection{Sentiment Features}
+\subsubsection{Trait Extraction}
 
-Sentiment information was derived from user review data. Review-based sentiment signals were aggregated at the game level to estimate overall user perception toward each game. Positive sentiment may indicate strong player satisfaction and recommendation reliability, while negative sentiment may reflect gameplay issues or low user engagement.
+Trait-based recommendation utilized structured board game attributes such as mechanics, categories, player count, complexity level, and thematic tags. Trait overlap between games was computed using shared attribute matching, allowing the system to support exploratory recommendation scenarios based on user-selected gameplay preferences.
 
-The sentiment component was integrated into the recommendation pipeline to supplement content similarity with qualitative user opinion information.
+Trait matching was implemented as a soft overlap mechanism rather than a strict binary filter. Games sharing a larger proportion of relevant gameplay traits received higher trait similarity scores.
 
-\subsubsection{Popularity Features}
+\subsubsection{Sentiment Analysis}
 
-Popularity indicators were incorporated to improve recommendation robustness and reduce weak recommendations from sparse similarity matches. Features such as average rating and rating count were used as popularity signals. Popular games with consistently strong ratings may provide reliable fallback recommendations when similarity-based evidence is limited.
+User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using a transformer-based sentiment analysis pipeline applied to textual user reviews collected from BoardGameGeek.
 
-\subsection{Recommendation Architecture}
+Individual review sentiment predictions were aggregated at the game level by averaging review sentiment scores associated with each board game. The resulting sentiment values were normalized before integration into the hybrid recommendation framework.
 
-The proposed recommendation system utilizes a hybrid recommendation architecture that combines multiple recommendation signals into a unified recommendation score. The system integrates content similarity, trait matching, sentiment signals, and popularity information.
+\subsubsection{Popularity Signal}
 
-The final recommendation score is computed as follows:
+Popularity-based information was incorporated using aggregate user rating statistics. Popularity scores were derived from a combination of average user rating and rating count, allowing highly rated and widely played games to receive stronger popularity signals.
+
+To prevent popularity values from dominating the hybrid recommendation score, popularity features were normalized prior to score combination.
+
+\subsection{Score Normalization}
+
+The recommendation framework combines multiple heterogeneous signals, including content similarity, trait overlap, sentiment scores, and popularity statistics. Because these components operate on different numerical scales, normalization was applied before score aggregation to ensure balanced contribution within the hybrid recommendation framework.
+
+Content similarity scores computed using cosine similarity naturally fall within the range of [0,1] and therefore required no additional normalization. Trait overlap scores were similarly scaled to the [0,1] range based on proportional shared attribute matching.
+
+Popularity scores derived from rating counts and average ratings were normalized using min-max normalization to prevent highly popular games from dominating the recommendation score. Aggregated sentiment scores were also normalized prior to integration into the final recommendation formula.
+
+\subsection{Hybrid Recommendation Formula}
+
+The final recommendation score was computed using a weighted combination of content similarity, trait similarity, sentiment score, and popularity score:
 
 \begin{equation}
-\begin{aligned}
-\text{Final Score} =\;&
-w_1 \cdot \text{Content Similarity} \\
-&+ w_2 \cdot \text{Trait Matching} \\
-&+ w_3 \cdot \text{Sentiment Score} \\
-&+ w_4 \cdot \text{Popularity Score}
-\end{aligned}
+Score = w_1 C + w_2 T + w_3 S + w_4 P
 \end{equation}
 
 where:
+
 \begin{itemize}
-    \item $w_1$ represents the weight for content similarity,
-    \item $w_2$ represents the weight for trait matching,
-    \item $w_3$ represents the weight for sentiment information,
-    \item $w_4$ represents the weight for popularity information.
+    \item $C$ represents content similarity,
+    \item $T$ represents trait overlap similarity,
+    \item $S$ represents normalized sentiment score,
+    \item $P$ represents normalized popularity score.
 \end{itemize}
 
-The hybrid structure allows the system to combine complementary recommendation signals rather than relying on a single recommendation strategy.
+The weighting configuration used in this study was manually tuned to prioritize semantic similarity while still incorporating supporting sentiment and popularity signals. The weights used throughout the experiments were:
+
+\begin{itemize}
+    \item $w_1 = 0.50$ (Content Similarity)
+    \item $w_2 = 0.20$ (Trait Similarity)
+    \item $w_3 = 0.15$ (Sentiment Score)
+    \item $w_4 = 0.15$ (Popularity Score)
+\end{itemize}
+
+Content similarity received the highest weight because semantic similarity between games was considered the primary recommendation objective within the proposed discovery-oriented recommendation framework.
 
 \subsection{Recommendation Modes}
 
-The proposed system supports three recommendation modes to improve flexibility and user interaction.
+The proposed framework supports three recommendation modes designed for different board game discovery scenarios.
 
 \subsubsection{Title-Based Recommendation}
 
-In title-based recommendation mode, users provide a board game title as input. The system then identifies games with high similarity based on content features, metadata similarity, sentiment alignment, and popularity information.
+The title-based mode generates recommendations using similarity relationships derived from a selected seed board game. This mode primarily emphasizes semantic content similarity and achieved the strongest quantitative performance during evaluation.
 
 \subsubsection{Trait-Based Recommendation}
 
-Trait-based recommendation mode allows users to search for games using gameplay characteristics such as mechanics, categories, themes, or difficulty preferences. This mode is useful for users who may not have a specific game title in mind but understand their preferred gameplay style.
+The trait-based mode allows users to explore games using gameplay-related characteristics such as mechanics, themes, complexity level, and player configuration. This mode was designed to support exploratory discovery scenarios where users may not have a specific seed game in mind.
 
 \subsubsection{Combined Recommendation}
 
-The combined recommendation mode integrates both title-based similarity and trait-based filtering into a unified recommendation process. This approach allows the system to balance similarity-based recommendations with user preference constraints, improving recommendation relevance and flexibility.
+The combined recommendation mode integrates both seed-game similarity and trait-based filtering to provide guided discovery recommendations. This mode was intended to balance semantic similarity with user-selected gameplay preferences, enabling more flexible exploration of the board game catalog.
+
+\subsection{Evaluation Strategy}
+
+The recommendation framework was evaluated using a holdout-based recommendation protocol constructed from filtered BoardGameGeek user interaction data.
+
+A subset of 300 users was sampled from the processed rating dataset. For each user, three positively rated board games were selected as seed games, while an additional three positively rated games were withheld as ground-truth relevance targets for evaluation.
+
+Recommendation quality was evaluated using Recall@K and NDCG@K metrics at multiple cutoff levels. A recommendation was considered relevant if a recommended game matched one of the user's held-out positively rated games.
+
+Recall@K was used to measure the proportion of relevant games successfully retrieved within the top-K recommendations, while NDCG@K was used to evaluate ranking quality by assigning higher importance to correctly ranked recommendations appearing earlier in the recommendation list.
 
 \subsection{System Implementation}
 
@@ -271,9 +306,9 @@ However, several limitations remain. Sparse review information may reduce sentim
 
 The experimental results demonstrate that title-based recommendation achieved the strongest ranking performance among the evaluated recommendation modes. This suggests that providing a specific board game title as a recommendation seed offers strong contextual information for similarity matching. Because board games often contain highly descriptive metadata related to mechanics, themes, complexity, and player interaction, title-based similarity can effectively identify closely related games.
 
-The combined recommendation mode also demonstrated competitive performance across Recall@K and NDCG@K metrics. Although its ranking accuracy was slightly lower than the pure title-based approach, the combined model provides greater recommendation flexibility by integrating both similarity-based recommendation and gameplay preference filtering. This makes the combined approach particularly useful in practical recommendation scenarios where users may simultaneously consider known favorite games and desired gameplay traits.
+The combined recommendation mode demonstrated moderately strong performance across both Recall@K and NDCG@K metrics while offering greater recommendation flexibility than the purely title-based approach. By integrating seed-game similarity with gameplay preference filtering, the combined framework supports guided discovery scenarios where users may simultaneously consider known favorite games and preferred mechanics, themes, or gameplay styles. Although its quantitative retrieval performance was slightly lower than the title-based mode, the combined approach may provide stronger practical usability for exploratory recommendation tasks.
 
-The trait-based recommendation mode produced lower recommendation performance compared to the other approaches. One possible explanation is that gameplay traits and category preferences are inherently broader and less specific than title-based similarity. Trait-based recommendation may therefore produce a larger and more diverse candidate space, making accurate ranking more difficult. However, this recommendation mode remains valuable for users who may not know specific board game titles and instead prefer discovering games through mechanics, themes, or gameplay styles.
+The trait-based recommendation mode produced substantially lower recommendation performance compared to the other evaluated approaches. One possible explanation is that gameplay traits and category preferences are inherently broader and less semantically specific than title-based similarity representations. As a result, trait-based recommendation generates a larger and more diverse candidate space, increasing ranking difficulty and reducing retrieval precision. Despite these limitations, the trait-based mode remains useful for exploratory recommendation scenarios in which users may not know specific board game titles and instead prefer discovering games through mechanics, themes, complexity levels, or gameplay styles.
 
 The integration of sentiment information contributed additional qualitative recommendation signals derived from user reviews. Unlike pure metadata similarity, sentiment-aware recommendation incorporates subjective user opinions related to enjoyment, replayability, and overall player experience. This improves explainability and allows the recommendation system to incorporate community perception beyond numerical ratings alone.
 
@@ -283,13 +318,13 @@ Future research may explore the integration of collaborative filtering, embeddin
 
 \section{Conclusion}
 
-This paper proposed an explainable hybrid board game recommendation system that integrates content similarity, sentiment analysis, and popularity signals into a unified recommendation framework. The system supports title-based, trait-based, and combined recommendation modes to improve recommendation flexibility and usability in board game discovery scenarios.
+This study proposed an explainable hybrid board game recommendation framework that integrates content similarity, gameplay trait matching, sentiment analysis, and popularity-based signals to support multiple recommendation modes for board game discovery. The proposed system was designed as a lightweight and interpretable alternative to recommendation approaches that rely heavily on collaborative filtering and large-scale user interaction history.
 
-Experimental evaluation using Recall@K and NDCG@K metrics demonstrated that the title-based recommendation mode achieved the strongest ranking performance, while the combined recommendation mode provided a balanced trade-off between recommendation accuracy and gameplay preference flexibility. The results also showed that integrating multiple recommendation signals can improve explainability and recommendation robustness compared to relying on a single recommendation strategy.
+Experimental evaluation using Recall@K and NDCG@K demonstrated that the title-based recommendation mode achieved the strongest overall retrieval effectiveness across the evaluated metrics. The combined recommendation mode provided greater flexibility for guided discovery by integrating seed-game similarity with gameplay preference filtering, while the trait-based mode supported exploratory recommendation scenarios despite weaker quantitative performance.
 
-The proposed system contributes an interpretable and flexible recommendation framework for board game discovery tasks while demonstrating the practical value of hybrid recommendation architectures. Although several limitations remain, including sparse review coverage and the absence of personalized collaborative filtering, the overall framework provides a strong foundation for future recommendation research and practical deployment.
+The findings suggest that semantic content similarity remains the most reliable recommendation signal within the proposed framework, while additional signals such as sentiment and gameplay traits contribute useful contextual and explainability-oriented information. The study also highlights the challenges of trait-only recommendation approaches, particularly when semantic contextual information is limited.
 
-Future work may explore embedding-based semantic recommendation, collaborative filtering integration, real-time user interaction modeling, and large language model (LLM)-based recommendation explanations to further improve recommendation quality and personalization.
+Overall, the proposed framework demonstrates that explainable and discovery-oriented recommendation systems can provide practical support for hobby-domain recommendation tasks without requiring fully personalized collaborative filtering architectures. Future work may explore the integration of collaborative filtering, embedding-based semantic retrieval, interactive user feedback, and large language model (LLM)-based explanation generation to further improve recommendation quality and personalization.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
