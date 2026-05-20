@@ -25,7 +25,15 @@ Email: maxfelix05@gmail.com
 \maketitle
 
 \begin{abstract}
-Board game recommendation systems face challenges such as sparse user ratings, cold-start problems, and limited explainability. Traditional collaborative filtering methods often struggle when user interaction data is insufficient, while pure content-based systems may fail to capture user sentiment and preference quality. This paper proposes an explainable hybrid board game recommendation system that integrates content similarity, sentiment analysis, and popularity signals into a unified recommendation framework. The system supports title-based, trait-based, and combined recommendation modes to improve flexibility and recommendation relevance. Evaluation was conducted using Recall@K and NDCG@K metrics under different recommendation scenarios. Experimental results show that the hybrid approach improves ranking quality and recommendation relevance while maintaining interpretability for end users. The proposed hybrid framework provides effective recommendation performance while maintaining interpretability and flexible recommendation support for board game discovery tasks.
+
+Board games have experienced significant growth in popularity, resulting in increasingly large and complex game catalogs that make game discovery difficult for players. Traditional recommendation approaches often rely heavily on collaborative filtering, which suffers from sparsity and cold-start limitations when user interaction data is limited. To address these challenges, this study proposes an explainable hybrid board game recommendation system that combines content similarity, sentiment analysis, and popularity signals to support multiple recommendation modes.
+
+The proposed system integrates textual game descriptions, gameplay traits, user review sentiment, and popularity-based information to generate recommendations through title-based, trait-based, and combined recommendation modes. Content representations were generated using TF-IDF and sentence-transformer embeddings, while sentiment scores were derived from transformer-based review analysis. The system was evaluated using a filtered subset of the BoardGameGeek dataset containing over 21,000 board games and millions of user ratings and reviews.
+
+Experimental evaluation was conducted using Recall@K and NDCG@K metrics under a holdout-based recommendation setting. Results show that the title-based recommendation mode achieved the strongest quantitative performance, particularly in Recall@10 and NDCG@10, while the combined mode provided more flexible discovery capabilities by incorporating both seed-game similarity and user-selected gameplay traits. In contrast, the trait-based mode demonstrated substantially weaker retrieval effectiveness, highlighting the limitations of sparse trait-only recommendation strategies.
+
+The findings suggest that explainable content-oriented recommendation systems can provide practical and effective support for board game discovery without relying exclusively on collaborative filtering. The proposed framework offers a lightweight and interpretable alternative for hobby-domain recommendation systems while also identifying important limitations and opportunities for future improvement.
+
 \end{abstract}
 
 \section{Introduction}
@@ -79,7 +87,7 @@ This section describes the dataset, feature engineering process, recommendation 
 \label{fig:architecture}
 \end{figure}
 
-\subsection{Dataset}
+\subsection{Dataset Description}
 
 The proposed recommendation system utilizes board game metadata and review information collected from the BoardGameGeek (BGG) platform. The dataset contains information related to board game titles, descriptions, mechanics, categories, user ratings, and review-based sentiment signals. These features provide both structured and unstructured information for recommendation generation.
 
@@ -91,7 +99,7 @@ Before model construction, data preprocessing was performed to handle missing va
 
 Feature engineering was performed to extract meaningful recommendation signals from board game metadata and review information. The proposed system combines content similarity features, sentiment features, and popularity indicators.
 
-\subsubsection{Content Features}
+\subsubsection{Content Representation}
 
 Content-based features were extracted from game descriptions, mechanics, and category metadata. Textual descriptions were transformed using Term Frequency-Inverse Document Frequency (TF-IDF) vectorization to represent important descriptive terms while reducing the influence of common words.
 
