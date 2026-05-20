@@ -23,24 +23,24 @@ Email: maxfelix05@gmail.com
 
 \begin{document}
 
-\begin{IEEEkeywords}
-Recommender Systems, Board Game Recommendation, Explainable Recommendation, Content-Based Filtering, Sentiment Analysis, Hybrid Recommendation, BoardGameGeek
-\end{IEEEkeywords}
 
 \maketitle
 
 \begin{abstract}
-
-Board games have experienced significant growth in popularity, resulting in increasingly large and complex game catalogs that make game discovery difficult for players. Traditional recommendation approaches often rely heavily on collaborative filtering, which suffers from sparsity and cold-start limitations when user interaction data is limited. To address these challenges, this study proposes an explainable hybrid board game recommendation system that combines content similarity, sentiment analysis, and popularity signals to support multiple recommendation modes.
-
-The proposed system integrates textual game descriptions, gameplay traits, user review sentiment, and popularity-based information to generate recommendations through title-based, trait-based, and combined recommendation modes. Content representations were generated using TF-IDF and sentence-transformer embeddings, while sentiment scores were derived from transformer-based review analysis. The system was evaluated using a filtered subset of the BoardGameGeek dataset containing over 21,000 board games and millions of user ratings and reviews.
-
-Experimental evaluation was conducted using Recall@K and NDCG@K metrics under a holdout-based recommendation setting. Results show that the title-based recommendation mode achieved the strongest quantitative performance, particularly in Recall@10 and NDCG@10, while the combined mode provided more flexible discovery capabilities by incorporating both seed-game similarity and user-selected gameplay traits. In contrast, the trait-based mode demonstrated substantially weaker retrieval effectiveness, highlighting the limitations of sparse trait-only recommendation strategies.
-
-The findings suggest that explainable content-oriented recommendation systems can provide practical and effective support for board game discovery without relying exclusively on collaborative filtering. The proposed framework offers a lightweight and interpretable alternative for hobby-domain recommendation systems while also identifying important limitations and opportunities for future improvement.
-
+    
+    Board games have experienced significant growth in popularity, resulting in increasingly large and complex game catalogs that make game discovery difficult for players. Traditional recommendation approaches often rely heavily on collaborative filtering, which suffers from sparsity and cold-start limitations when user interaction data is limited. To address these challenges, this study proposes an explainable hybrid board game recommendation system that combines content similarity, sentiment analysis, and popularity signals to support multiple recommendation modes.
+    
+    The proposed system integrates textual game descriptions, gameplay traits, user review sentiment, and popularity-based information to generate recommendations through title-based, trait-based, and combined recommendation modes. Content representations were generated using TF-IDF and sentence-transformer embeddings, while sentiment scores were derived from transformer-based review analysis. The system was evaluated using a filtered subset of the BoardGameGeek dataset containing over 21,000 board games and millions of user ratings and reviews.
+    
+    Experimental evaluation was conducted using Recall@K and NDCG@K metrics under a holdout-based recommendation setting. Results show that the title-based recommendation mode achieved the strongest quantitative performance, particularly in Recall@10 and NDCG@10, while the combined mode provided more flexible discovery capabilities by incorporating both seed-game similarity and user-selected gameplay traits. In contrast, the trait-based mode demonstrated substantially weaker retrieval effectiveness, highlighting the limitations of sparse trait-only recommendation strategies.
+    
+    The findings suggest that explainable content-oriented recommendation systems can provide practical and effective support for board game discovery without relying exclusively on collaborative filtering. The proposed framework offers a lightweight and interpretable alternative for hobby-domain recommendation systems while also identifying important limitations and opportunities for future improvement.
+    
 \end{abstract}
 
+\begin{IEEEkeywords}
+Recommender Systems, Board Game Recommendation, Explainable Recommendation, Content-Based Filtering, Sentiment Analysis, Hybrid Recommendation, BoardGameGeek
+\end{IEEEkeywords}
 \section{Introduction}
 
 Board games have experienced significant growth in popularity over the past decade, resulting in increasingly large and complex game catalogs on online platforms such as BoardGameGeek (BGG). As the number of available games continues to expand, users often face difficulties in discovering games that match their preferences, gameplay styles, and thematic interests. This creates a recommendation challenge in which systems must balance personalization, relevance, diversity, and explainability.
