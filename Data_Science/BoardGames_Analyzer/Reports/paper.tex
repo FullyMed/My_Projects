@@ -100,6 +100,8 @@ The dataset preprocessing stage involved removing incomplete records, filtering 
 
 User rating data was additionally filtered to reduce sparsity and improve evaluation consistency. The final processed interaction dataset contained approximately 18.7 million valid user ratings after preprocessing.
 
+The evaluation subset was constructed using a random holdout strategy applied to filtered user interaction data. Users with insufficient rating activity were excluded to improve evaluation consistency. For each sampled user, positively rated games were randomly divided into seed-game inputs and held-out relevance targets used during evaluation.
+
 Textual review data was used for sentiment analysis, while game descriptions, categories, and mechanics were used for content-based similarity modeling. The processed dataset was then used to support title-based, trait-based, and combined recommendation experiments.
 
 \subsection{Feature Engineering}
@@ -120,7 +122,7 @@ Trait matching was implemented as a soft overlap mechanism rather than a strict 
 
 \subsubsection{Sentiment Analysis}
 
-User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using a transformer-based sentiment analysis pipeline applied to textual user reviews collected from BoardGameGeek.
+User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using the HuggingFace transformer pipeline with the DistilBERT SST-2 sentiment classification model (\texttt{distilbert-base-uncased-finetuned-sst-2-english}) applied to textual user reviews collected from BoardGameGeek.
 
 Individual review sentiment predictions were aggregated at the game level by averaging review sentiment scores associated with each board game. The resulting sentiment values were normalized before integration into the hybrid recommendation framework.
 
@@ -202,6 +204,28 @@ The system architecture was designed to support modular recommendation experimen
 
 This section presents the experimental setup, evaluation metrics, baseline methods, and performance analysis used to evaluate the proposed hybrid board game recommendation system.
 
+\subsection{Explainability Example}
+
+To improve recommendation transparency, the proposed system provides lightweight explanation outputs describing why individual board games were recommended. Recommendation explanations are generated using the dominant contributing recommendation signals, including semantic similarity, shared gameplay mechanics, sentiment information, and popularity indicators.
+
+An example recommendation explanation is shown in Table II.
+
+\begin{table}[h]
+\centering
+\caption{Example Explainable Recommendation Output}
+\begin{tabular}{|l|p{5.5cm}|}
+\hline
+Recommended Game & Explanation \\
+\hline
+Wingspan & Shared engine-building mechanics, high semantic similarity, and strong positive community sentiment. \\
+\hline
+Azul & Similar abstract strategy gameplay and comparable player complexity level. \\
+\hline
+Terraforming Mars & High thematic similarity and strong popularity among strategy game players. \\
+\hline
+\end{tabular}
+\end{table}
+
 \subsection{Evaluation Metrics}
 
 To evaluate recommendation quality, this study utilizes ranking-based evaluation metrics commonly used in recommender systems research, namely Recall@K and Normalized Discounted Cumulative Gain (NDCG@K).
@@ -248,13 +272,9 @@ Several recommendation scenarios were evaluated, including:
     \item Combined hybrid recommendation.
 \end{itemize}
 
-The experiments also considered recommendation quality under sparse interaction conditions to analyze robustness in cold-start-like situations.
+The experiments focused primarily on evaluating recommendation ranking quality under sparse user interaction conditions commonly observed in hobby-domain recommendation environments.
 
 Recommendation results were generated using the hybrid scoring framework described in Section III. Different recommendation signals, including content similarity, sentiment information, and popularity indicators, contributed to the final ranking score.
-
-\subsection{Baseline Comparison}
-
-To evaluate the effectiveness of the proposed hybrid recommendation system, the system was compared against simpler recommendation strategies.
 
 \subsubsection{Popularity-Based Baseline}
 
@@ -265,6 +285,8 @@ The popularity-based baseline recommends games primarily using popularity indica
 The content-based baseline generates recommendations using textual similarity and metadata similarity without sentiment or popularity integration. This baseline evaluates the contribution of hybrid recommendation components beyond pure content similarity.
 
 \subsection{Experimental Results}
+
+The experimental evaluation focused on comparing the effectiveness of the three proposed recommendation modes under a consistent holdout-based recommendation setting. Recommendation quality was analyzed using Recall@K and NDCG@K metrics across multiple ranking cutoffs.
 
 \begin{figure}[H]
 \centering
