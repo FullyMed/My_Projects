@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  23 MAY 2026 20:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  23 MAY 2026 20:30
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -455,59 +455,12 @@ Overfull \hbox (6.0pt too wide) in paragraph at lines 90--91
  [][] 
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [2]
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 115.
- (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1pcr.fd
-File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-)
-Underfull \hbox (badness 3291) in paragraph at lines 115--116
-[]\OT1/ptm/m/n/10 TF-IDF vec-tor-iza-tion was used to cap-ture keyword-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
- \OT1/ptm/m/it/10 3) Sen-ti-ment Anal-y-sis: [][][] \OT1/ptm/m/n/10 User re-view sen-ti-ment
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 was in-cor-po-rated as an ad-di-tional rec-om-men-da-tion
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 sig-nal. Sen-ti-ment scores were gen-er-ated us-ing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 the Hug-ging-Face trans-former pipeline with the
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 Dis-til-BERT SST-2 sen-ti-ment clas-si-fi-ca-tion model
- []
-
-
-Overfull \hbox (36.65991pt too wide) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 (\OT1/pcr/m/n/10 distilbert-base-uncased-finetuned-sst-2-english\OT1/ptm/m/n/10 )
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-\OT1/ptm/m/n/10 ap-plied to tex-tual user re-views col-lected from
- []
-
-[3
+[2] [3
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.133 T
-       o prevent popularity values from dominating the hybrid recommendation... <./images/architecture.png>]
+l.142 
+       <./images/architecture.png>]
 Underfull \hbox (badness 1642) in paragraph at lines 177--178
  \OT1/ptm/m/it/10 1) Title-Based Rec-om-men-da-tion: [][][] \OT1/ptm/m/n/10 The title-based mode
  []
@@ -517,7 +470,12 @@ Underfull \hbox (badness 3536) in paragraph at lines 199--200
 []\OT1/ptm/m/n/10 The rec-om-men-da-tion sys-tem was im-ple-mented us-ing
  []
 
-[4]
+[4
+pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.234 
+      ]
 <images/performance_chart.png, id=168, 578.16pt x 361.35pt>
 File: images/performance_chart.png Graphic file (type png)
 <use images/performance_chart.png>
@@ -529,20 +487,15 @@ Overfull \hbox (31.80157pt too wide) in paragraph at lines 293--294
  []
 
 [5
-pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.316 
-      
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.316 
+l.320 
       
 pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.316 
+l.320 
        <./images/performance_chart.png>]
 Underfull \hbox (badness 3364) in paragraph at lines 331--332
 \OT1/ptm/m/n/10 er-ately strong per-for-mance across both Re-call@K and
@@ -558,7 +511,7 @@ Underfull \hbox (badness 2626) in paragraph at lines 345--346
 \OT1/ptm/m/n/10 demon-strated that the title-based rec-om-men-da-tion mode
  []
 
-[6] (paper.bbl
+(paper.bbl [6]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 62.
  (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
@@ -585,17 +538,17 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: A94880B0FA00567E6FE9AC1698BA8830;4255.
  ) 
 Here is how much of TeX's memory you used:
- 11989 strings out of 467871
- 191080 string characters out of 5418376
+ 11951 strings out of 467871
+ 190499 string characters out of 5418376
  615903 words of memory out of 5000000
- 40645 multiletter control sequences out of 15000+600000
- 665595 words of font info for 114 fonts, out of 8000000 for 9000
+ 40612 multiletter control sequences out of 15000+600000
+ 665080 words of font info for 112 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,10n,79p,822b,442s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (7 pages, 500409 bytes).
+ 75i,10n,79p,822b,447s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (7 pages, 489029 bytes).
 PDF statistics:
- 254 PDF objects out of 1000 (max. 8388607)
+ 249 PDF objects out of 1000 (max. 8388607)
  55 named destinations out of 1000 (max. 500000)
  235 words of extra memory for PDF output out of 10000 (max. 10000000)
 

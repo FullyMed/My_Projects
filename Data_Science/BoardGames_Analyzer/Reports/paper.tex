@@ -85,7 +85,7 @@ Based on the reviewed literature, several gaps remain relevant to board game rec
 
 This section describes the dataset, feature engineering process, recommendation architecture, and evaluation pipeline used in the proposed hybrid board game recommendation system.
 
-\begin{figure}[H]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=0.50\textwidth]{images/architecture.png}
 \caption{Proposed Hybrid Board Game Recommendation Framework}
@@ -112,7 +112,7 @@ Feature engineering was performed to extract meaningful recommendation signals f
 
 Content-based similarity was computed using both TF-IDF vectorization and sentence-transformer embeddings derived from board game descriptions and metadata. Textual attributes including game descriptions, mechanics, and categories were combined into a unified textual representation for each game.
 
-TF-IDF vectorization was used to capture keyword-level similarity, while semantic embeddings generated using the \texttt{all-MiniLM-L6-v2} sentence-transformer model were used to capture higher-level semantic relationships between games. Cosine similarity was then applied to compute pairwise similarity scores between board games.
+TF-IDF vectorization was used to capture keyword-level similarity, while semantic embeddings generated using the MiniLM-L6 sentence-transformer embedding model were used to capture higher-level semantic relationships between games. Cosine similarity was then applied to compute pairwise similarity scores between board games.
 
 \subsubsection{Trait Extraction}
 
@@ -122,7 +122,7 @@ Trait matching was implemented as a soft overlap mechanism rather than a strict 
 
 \subsubsection{Sentiment Analysis}
 
-User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using the HuggingFace transformer pipeline with the DistilBERT SST-2 sentiment classification model (\texttt{distilbert-base-uncased-finetuned-sst-2-english}) applied to textual user reviews collected from BoardGameGeek.
+User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using the HuggingFace transformer pipeline with the DistilBERT SST-2 sentiment classification model applied to textual user reviews collected from BoardGameGeek.
 
 Individual review sentiment predictions were aggregated at the game level by averaging review sentiment scores associated with each board game. The resulting sentiment values were normalized before integration into the hybrid recommendation framework.
 
