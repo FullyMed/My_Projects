@@ -1,372 +1,94 @@
 # CLAUDE.md
 
-## 1. Project Overview
-
-### Project Name
-**Taiwan Fare Finder**
-
-### Project Description
-Taiwan Fare Finder is a multilingual mobile application built with Flutter that helps users estimate and compare transportation fares across Taiwan.
-
-The app supports:
-- TRA
-- HSR
-- MRT
-- Bus
-- YouBike
-
-The current version is a polished offline-first mock/demo system with production-quality UI/UX and stable architecture.
-
-The architecture is intentionally designed for future TDX API integration.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ---
 
-## Purpose & Goals
+## Commands
 
-### Current Goals (v1)
-- Portfolio-ready transportation app
-- Strong Flutter engineering showcase
-- Multilingual UX
-- Offline-first architecture
-- Final Project usage
-- API-ready structure
-
-### Future Goals (v1.1+)
-- TDX API integration
-- Real fare retrieval
-- Expanded transport coverage
-- Investor/startup demonstration
+```bash
+flutter pub get          # install dependencies
+flutter run              # run on connected device/emulator
+flutter analyze          # lint (uses flutter_lints)
+dart format .            # format all Dart files
+flutter test             # run tests
+flutter gen-l10n         # regenerate ARB-based localization stubs (rarely needed)
+flutter build apk        # build Android
+flutter build ios        # build iOS
+```
 
 ---
 
-## Target Audience
-- Taiwan commuters
-- Tourists
-- International students
-- Portfolio reviewers
-- Final Project evaluators
+## Architecture
+
+### Dependency graph
+
+```
+UI (pages, ui/) → Controllers (ChangeNotifier) → Services → LocalStorageService
+                                                           → FareService (mock + cache)
+```
+
+- **Services** are stateless `const`-constructible classes injected via `Provider`.
+- **Controllers** extend `ChangeNotifier` and are exposed via `ChangeNotifierProvider` / `ChangeNotifierProxyProvider2`.
+- **Pages** consume controllers with `context.watch<T>()` / `context.read<T>()`.
+
+### User binding pattern
+
+Every user-scoped controller (`FareController`, `FavoritesController`, `HistoryController`, `SettingsController`) implements `bindUser(String? userId)`. In `main.dart`, each is wired as a `ChangeNotifierProxyProvider2<SessionController, XService, XController>`. When `SessionController` emits a new user, the `update` callback calls `Future.microtask(() => controller.bindUser(userId))` to avoid calling `notifyListeners` mid-build. Any new controller that needs per-user data must follow this same pattern.
+
+### Localization — two systems, one in use
+
+The app ships two localization mechanisms:
+
+1. **`TffLocalizations`** (`lib/localization/tff_localizations.dart`) — the system actually used by the app. It loads ARB files from `lib/l10n/app_<tag>.arb` at runtime via `rootBundle`. All UI code calls `TffLocalizations.of(context).someKey`. **This is the source of truth.**
+2. **gen-l10n stubs** (`lib/l10n/app_localizations*.dart`) — generated from `l10n.yaml` but not consumed at runtime. Do not mix: never call `AppLocalizations.of(context)` in UI code.
+
+When adding a new string, add it to every ARB file (`app_en.arb`, `app_zh.arb`, `app_zh_Hant.arb`, `app_id.arb`) and add a getter to `TffLocalizations`.
+
+Supported locale tags: `en`, `zh`, `zh_Hant`, `id`.
+
+### Fare data flow
+
+`SearchPage` → `FareController.search(origin, destination, modes, offline, dataMode)` → `FareService.search(...)`:
+
+- **Offline = true**: returns from `shared_preferences` cache only; empty results surface `'offline_no_cache'` error key.
+- **DataMode.mock**: calls `_searchMock` which uses a deterministic FNV-1a seed `(queryKey | mode)` so the same route always produces the same fares and duration.
+- **DataMode.api**: throws `UnimplementedError` (the stub for future TDX integration); the controller maps this to the `'api_not_ready'` error key.
+- **Cache**: up to 100 queries, LRU-evicted by `updatedAt`. Cache is per-`userId`.
+
+Error and snack keys (e.g. `'offline_no_cache'`, `'api_not_ready'`) are raw string keys looked up by the UI via `TffLocalizations`.
+
+### Routes
+
+Defined in `lib/nav.dart` via `go_router`:
+
+| Path | Widget |
+|---|---|
+| `/search` | `SearchPage` (initial) |
+| `/compare` | `ComparePage` |
+| `/saved` | `SavedPage` |
+| `/settings` | `SettingsPage` (pushed, not in shell) |
+
+`/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`.
+
+### Theme & design tokens
+
+`lib/theme.dart` defines:
+- `lightTheme` / `darkTheme` (Material 3, Google Fonts Inter)
+- `AppSpacing` — spacing scale (`xs` 4 → `xxl` 48)
+- `AppRadius` — border radius scale (`sm` 8 → `xl` 24)
+- `TextStyleExtensions` — `.bold`, `.semiBold`, `.medium`, etc. on `TextStyle`
+
+### Responsive layout
+
+Tablet breakpoint: `>= 840 dp`. Always preserve `LayoutBuilder` → `ConstrainedBox` → `crossAxisAlignment.stretch` patterns, especially in `settings_page.dart`.
 
 ---
 
-# 2. Tech Stack
-
-## Languages
-- Dart
-- JSON
-
-## Framework
-- Flutter
-
-## State Management
-- Provider
-
-## Navigation
-- go_router
-
-## Main Dependencies
-- provider
-- go_router
-- package_info_plus
-
-## Planned APIs
-- Taiwan TDX API Platform
-- TRA API
-- MRT API
-- HSR API
-- Bus API
-- YouBike API
-
-IMPORTANT:
-Current version does NOT yet use official live API data.
-
----
-
-# 3. Project Structure
-
-## Main Architecture
-The app separates:
-- UI
-- Controllers
-- Services
-- Models
-- Localization
-- Shared UI Components
-
----
-
-## Folder Structure
-
-### /lib/controllers
-Business logic and state management.
-
-Examples:
-- fare_controller.dart
-- settings_controller.dart
-- favorites_controller.dart
-- history_controller.dart
-
----
-
-### /lib/pages
-Application screens/pages.
-
-Examples:
-- search_page.dart
-- compare_page.dart
-- settings_page.dart
-- saved_page.dart
-
----
-
-### /lib/models
-Data models and enums.
-
-Examples:
-- app_settings.dart
-- route models
-- fare models
-
----
-
-### /lib/services
-Data services and repositories.
-
-Planned:
-- Mock service layer
-- Future API service layer
-
----
-
-### /lib/ui
-Reusable UI widgets.
-
-Examples:
-- tff_card.dart
-- tff_page_scaffold.dart
-
----
-
-### /lib/localization
-Localization system.
-
-Current system:
-- Custom TffLocalizations
-
-Supported languages:
-- English
-- Traditional Chinese
-- Indonesian
-
----
-
-# 4. Coding Style & Conventions
-
-## Naming Conventions
-
-### Files
-Use snake_case.dart
-
-Examples:
-- settings_page.dart
-- fare_controller.dart
-
----
-
-### Classes
-Use PascalCase
-
-Examples:
-- SettingsPage
-- FareController
-
----
-
-### Variables & Functions
-Use camelCase
-
-Examples:
-- offlineMode
-- clearCache()
-
----
-
-### Private Classes
-Use underscore prefix.
-
-Example:
-class _SegmentRow
-
----
-
-## Formatting Rules
-- Use dart format
-- Keep widget trees clean
-- Avoid broken bracket structures
-- Preserve responsive layouts
-
----
-
-## Layout Rules
-Always preserve:
-- LayoutBuilder
-- ConstrainedBox
-- crossAxisAlignment.stretch
-
-Especially in Settings page.
-
----
-
-# 5. Key Features
-
-## Core Features
-- Fare comparison
-- Offline-first behavior
-- Multilingual support
-- Favorites
-- Search history
-- Theme switching
-- Data source switching
-- Responsive UI
-- Mock fare simulation
-
----
-
-## Transportation Modes
-Current/planned:
-- TRA
-- MRT
-- HSR
-- Bus
-- YouBike
-
----
-
-# 6. Current Progress
-
-## Completed
-- Stable Provider architecture
-- Responsive layouts
-- Desktop/tablet/mobile support
-- Settings page polish
-- Stable dark mode
-- Empty/error states
-- Offline cache system
-- Multilingual support
-- Favorites/history system
-- API-ready architecture
-
----
-
-## Pending
-### API Integration
-Recommended order:
-1. TRA
-2. MRT
-3. HSR
-4. Bus
-5. YouBike
-
-IMPORTANT:
-Do NOT attempt all APIs simultaneously.
-
----
-
-### Store Release
-Pending:
-- App screenshots
-- Store metadata
-- Final app icons
-- Native app-name localization
-
----
-
-# 7. Important Rules for Claude Code
-
-## Claude MUST ALWAYS
-- Preserve existing architecture
-- Preserve responsive layouts
-- Keep offline fallback working
-- Maintain production-quality UI
-- Keep widget nesting clean
-- Validate brackets carefully
-- Avoid quick hacks
-
----
-
-## Claude MUST NEVER
-- Break localization
-- Remove offline support
-- Hardcode random fake fares
-- Add unnecessary dependencies
-- Over-engineer the project
-- Attempt all transport APIs at once
-
----
-
-## API Integration Rules
-- Start with TRA only
-- Keep mock fallback
-- Use service abstraction
-- Preserve DataMode switching
-
----
-
-## Product Philosophy
-This app is:
-A polished transportation fare comparison product
-
-NOT:
-A full navigation ecosystem
-
-Avoid feature creep.
-
----
-
-# 8. Known Issues / Notes
-
-## Current Fare System
-Current fares are:
-- estimated
-- rule-based
-- simulated
-
-They are NOT official live fares yet.
-
----
-
-## Future API Complexity
-TDX integration will introduce:
-- authentication
-- token refresh
-- network failures
-- station mapping issues
-- data inconsistency
-
----
-
-## Localization Note
-Project currently uses:
-- custom localization system
-
-Avoid mixing localization systems.
-
----
-
-# Final Notes
-
-This project prioritizes:
-- stability
-- clean UX
-- scalable architecture
-- professional presentation
-
-over:
-- excessive features
-- rushed API integrations
-- unnecessary complexity
-
-Current version:
-Production-quality portfolio/demo release (v1)
-
-Future API integration:
-v1.1 production expansion
+## Key constraints
+
+- **Never break localization**: every new user-facing string needs entries in all four ARB files and a getter in `TffLocalizations`.
+- **Never hardcode fare values**: all fares go through the deterministic mock in `FareService._mock` or the future API path.
+- **Keep mock fallback**: `DataMode.api` must still fall back to cache on failure; the cache path in `FareService.search` handles this.
+- **One API at a time**: when implementing TDX, wire only TRA first (`FareService._searchApi`), keep mock for all other modes.
+- **Offline always works**: the cache + offline-toggle path must remain functional regardless of API state.
