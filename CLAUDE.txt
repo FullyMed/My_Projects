@@ -1,0 +1,5 @@
+/init : No CLAUDE.md + first time using Claude Code in that project
+
+cd /mnt/c/CSIE/My\ Projects/??/??
+
+Run claude
