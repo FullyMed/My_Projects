@@ -89,7 +89,8 @@ class HistoryController extends ChangeNotifier {
   }
 
   Future<void> clear() async {
-    await historyService.clear();
+    if (_userId == null) return;
+    await historyService.clear(userId: _userId!);
     _history = const [];
     notifyListeners();
   }

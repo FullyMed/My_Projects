@@ -124,7 +124,8 @@ class FavoritesController extends ChangeNotifier {
   }
 
   Future<void> clear() async {
-    await favoritesService.clear();
+    if (_userId == null) return;
+    await favoritesService.clear(userId: _userId!);
     _favorites = const [];
     notifyListeners();
   }

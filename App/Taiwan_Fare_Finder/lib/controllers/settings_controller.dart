@@ -13,9 +13,6 @@ class SettingsController extends ChangeNotifier {
   String? _boundUserId;
   String? get boundUserId => _boundUserId;
 
-  bool _bindQueued = false;
-  String? _queuedUserId;
-
   static const String _localUserId = 'local';
 
   String _resolveUserId(String? userId) =>
@@ -34,27 +31,6 @@ class SettingsController extends ChangeNotifier {
     if (tag == 'zh') return const Locale('zh');
     if (tag == 'id') return const Locale('id');
     return const Locale('en');
-  }
-
-  /// Schedules binding/loading settings **after** the current build frame.
-  ///
-  /// This avoids calling `notifyListeners()` from within Provider's `update`.
-  void scheduleBindUser(String? userId) {
-    final resolved = _resolveUserId(userId);
-    if (_userId == resolved && _settings != null) return;
-    if (_bindQueued && _queuedUserId == resolved) return;
-
-    _bindQueued = true;
-    _queuedUserId = resolved;
-
-    Future.microtask(() async {
-      _bindQueued = false;
-      try {
-        await bindUser(resolved);
-      } catch (e) {
-        debugPrint('SettingsController: bindUser (scheduled) failed: $e');
-      }
-    });
   }
 
   Future<void> bindUser(String? userId) async {

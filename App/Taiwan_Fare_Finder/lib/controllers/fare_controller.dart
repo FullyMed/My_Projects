@@ -159,7 +159,8 @@ class FareController extends ChangeNotifier {
   }
 
   Future<void> clearCache() async {
-    await fareService.clearCache();
+    if (_userId == null) return;
+    await fareService.clearCache(userId: _userId!);
     _results = const [];
     _hasSearched = false;
     _lastQuery = null;

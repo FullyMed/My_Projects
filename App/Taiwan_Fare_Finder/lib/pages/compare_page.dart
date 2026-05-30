@@ -457,7 +457,7 @@ int _transferCount(String summary) {
   if (s.isEmpty) return 99;
   if (s == 'transfer_direct') return 0;
   if (s == 'transfer_one') return 1;
-  if (s == 'transfer_one_to_two') return 1;
+  if (s == 'transfer_one_to_two') return 2;
   if (s == 'transfer_dock_swap') return 0;
   if (s.contains('direct')) return 0;
   final m = RegExp(r'\d+').firstMatch(s);

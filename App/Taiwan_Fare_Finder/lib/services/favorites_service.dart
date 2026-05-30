@@ -52,5 +52,13 @@ class FavoritesService {
     return next;
   }
 
-  Future<void> clear() => storage.remove(_key);
+  Future<void> clear({required String userId}) async {
+    final all = await storage.readList(_key);
+    final kept = <Map<String, dynamic>>[];
+    for (final item in all) {
+      final fav = FavoriteRoute.fromJson(item);
+      if (fav == null || fav.userId != userId) kept.add(item);
+    }
+    await storage.writeList(_key, kept);
+  }
 }

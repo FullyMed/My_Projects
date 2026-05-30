@@ -77,7 +77,7 @@ class LocationField extends StatelessWidget {
                     ),
             ),
             const SizedBox(width: AppSpacing.md),
-            Icon(Icons.expand_less_rounded, color: cs.onSurfaceVariant),
+            Icon(Icons.expand_more_rounded, color: cs.onSurfaceVariant),
           ],
             ),
           ),

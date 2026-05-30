@@ -1,5 +1,7 @@
 /init : No CLAUDE.md + first time using Claude Code in that project
 
-cd /mnt/c/CSIE/My\ Projects/??/??
+cd /mnt/c/CSIE/My\ Projects/"Folder Name"/"Project Name"
 
 Run claude
+
+/model : To change model / agent. (Sonnet is normal and Opus is more advanced)

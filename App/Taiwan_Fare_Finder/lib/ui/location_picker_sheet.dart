@@ -88,7 +88,6 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
-    final locale = l10n.locale;
     final cs = Theme.of(context).colorScheme;
 
     final q = _query.trim();

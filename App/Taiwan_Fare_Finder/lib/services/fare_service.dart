@@ -44,6 +44,7 @@ class FareService {
   static const Map<String, int> _cityKm = {
     'Keelung': 0,
     'Taipei': 20,
+    'New Taipei': 25,
     'Banqiao': 25,
     'Taoyuan': 45,
     'Hsinchu': 80,
@@ -199,7 +200,15 @@ class FareService {
     }
   }
 
-  Future<void> clearCache() => storage.remove(_cacheKey);
+  Future<void> clearCache({required String userId}) async {
+    final all = await storage.readList(_cacheKey);
+    final kept = <Map<String, dynamic>>[];
+    for (final item in all) {
+      final r = FareResult.fromJson(item);
+      if (r == null || r.userId != userId) kept.add(item);
+    }
+    await storage.writeList(_cacheKey, kept);
+  }
 
   Future<List<FareResult>> _readAll({required String userId}) async {
     final list = await storage.readList(_cacheKey);
