@@ -25,7 +25,13 @@ flutter build ios        # build iOS
 
 ```
 UI (pages, ui/) → Controllers (ChangeNotifier) → Services → LocalStorageService
-                                                           → FareService (mock + cache)
+                                                           → FareService (mock + TDX cache)
+                                                           → FavoritesService
+                                                           → HistoryService
+                                                           → SettingsService
+                                                           → TdxAuthService → TdxFareService
+                                                           → AnalyticsService (stub)
+                                                           → LocationService (static)
 ```
 
 - **Services** are stateless `const`-constructible classes injected via `Provider`.
@@ -53,10 +59,52 @@ Supported locale tags: `en`, `zh`, `zh_Hant`, `id`.
 
 - **Offline = true**: returns from `shared_preferences` cache only; empty results surface `'offline_no_cache'` error key.
 - **DataMode.mock**: calls `_searchMock` which uses a deterministic FNV-1a seed `(queryKey | mode)` so the same route always produces the same fares and duration.
-- **DataMode.api**: throws `UnimplementedError` (the stub for future TDX integration); the controller maps this to the `'api_not_ready'` error key.
+- **DataMode.api**: calls `_searchApi` which delegates HSR and TRA to `TdxFareService`; all other modes fall back to mock. On any failure, the controller falls back to cache and surfaces `'showing_cached_results'` as a snack key (or `'search_failed'` if cache is also empty).
 - **Cache**: up to 100 queries, LRU-evicted by `updatedAt`. Cache is per-`userId`.
 
-Error and snack keys (e.g. `'offline_no_cache'`, `'api_not_ready'`) are raw string keys looked up by the UI via `TffLocalizations`.
+Error and snack keys (e.g. `'offline_no_cache'`, `'search_failed'`, `'showing_cached_results'`) are raw string keys looked up by the UI via `TffLocalizations`.
+
+### TDX API integration
+
+`TdxAuthService` (`lib/services/tdx_auth_service.dart`) manages OAuth2 `client_credentials` tokens. It caches the token in memory and refreshes 60 s before expiry. Credentials are stored in `lib/config/tdx_credentials.dart` (`tdxClientId` / `tdxClientSecret`).
+
+`TdxFareService` (`lib/services/tdx_fare_service.dart`) fetches real fares from TDX:
+
+- **HSR**: calls `THSR/ODFare` for fare breakdown and `THSR/GeneralTimetable` (cached 12 h in memory) for the minimum direct-service duration. Falls back to the speed-estimate formula if no direct trains are found.
+- **TRA**: calls `TRA/ODFare`; parses adult (成自) and child (孩自) Ziqiang fares. Duration uses the speed-estimate formula (TRA train types are too fragmented for reliable timetable parsing).
+- All other modes are not supported and throw `ArgumentError`; `FareService._searchApi` handles this by falling back to mock for those modes.
+
+Station name → TDX ID mappings live in `lib/config/tdx_station_map.dart` (`hsrStationId`, `traStationId`).
+
+### Location model
+
+`Location` (`lib/models/location.dart`) is the canonical pickable origin/destination. It carries a stable `id`, localized names (`nameEn`, `nameZhHant`, `nameId`) and city names. `queryToken` returns the English name used as the key into `FareService._cityKm` and `TdxStationMap`.
+
+`LocationService` (`lib/services/location_service.dart`) is a static-only service that provides:
+- `starterLocations` — the complete list of 13 supported cities.
+- `popular()` — a curated short list shown before the user has history.
+- `filter(query)` — case-insensitive search across all name fields.
+- `findByAnyName(raw)` — exact-match lookup by any localized name.
+
+### Shared UI components (`lib/ui/`)
+
+A design-system layer of reusable widgets:
+
+| Widget | Purpose |
+|---|---|
+| `TffPageScaffold` | Standard page wrapper (safe area, consistent padding) |
+| `TffCard` | Elevated card with consistent radius and theme |
+| `TffButton` | Primary / secondary / text button variants |
+| `TffBadge` | Small label chip (e.g. "MOCK", "CACHED") |
+| `TffModeChip` | Selectable transport-mode chip |
+| `TffFareTable` | Fare breakdown table (adult / student / child / senior) |
+| `TffErrorCard` | Inline error display with optional retry action |
+| `TffEmptyState` | Full-page or inline empty-state illustration + copy |
+| `TffSkeleton` | Shimmer placeholder for loading states |
+| `TffSwapButton` | Animated origin ↔ destination swap button |
+| `TffAdaptive` | Adaptive layout helper (phone vs. tablet) |
+| `LocationField` | Text field for origin/destination input |
+| `LocationPickerSheet` | Bottom sheet for picking a `Location` |
 
 ### Routes
 
@@ -67,9 +115,9 @@ Defined in `lib/nav.dart` via `go_router`:
 | `/search` | `SearchPage` (initial) |
 | `/compare` | `ComparePage` |
 | `/saved` | `SavedPage` |
-| `/settings` | `SettingsPage` (pushed, not in shell) |
+| `/settings` | `SettingsPage` (pushed with fade+slide, not in shell) |
 
-`/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`.
+`/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`. `AppRoutes` holds the path constants.
 
 ### Theme & design tokens
 
@@ -83,12 +131,18 @@ Defined in `lib/nav.dart` via `go_router`:
 
 Tablet breakpoint: `>= 840 dp`. Always preserve `LayoutBuilder` → `ConstrainedBox` → `crossAxisAlignment.stretch` patterns, especially in `settings_page.dart`.
 
+### Utilities
+
+`IdGenerator` (`lib/utils/id_generator.dart`) generates microsecond-timestamp + random-suffix IDs for `RouteQuery` and similar models. Never use `DateTime.now()` alone for IDs.
+
 ---
 
 ## Key constraints
 
 - **Never break localization**: every new user-facing string needs entries in all four ARB files and a getter in `TffLocalizations`.
-- **Never hardcode fare values**: all fares go through the deterministic mock in `FareService._mock` or the future API path.
-- **Keep mock fallback**: `DataMode.api` must still fall back to cache on failure; the cache path in `FareService.search` handles this.
-- **One API at a time**: when implementing TDX, wire only TRA first (`FareService._searchApi`), keep mock for all other modes.
+- **Never hardcode fare values**: all fares go through the deterministic mock in `FareService._mock` or the TDX API path.
+- **Keep mock fallback**: `DataMode.api` falls back to mock for non-HSR/TRA modes; `FareService.search` falls back to cache on any failure. Both paths must remain intact.
+- **HSR + TRA are live via TDX**: do not revert them to `UnimplementedError`. Adding a new mode to the API path means adding it to `TdxFareService.fetch` and its station map.
 - **Offline always works**: the cache + offline-toggle path must remain functional regardless of API state.
+- **Use `Location` for UI inputs**: never pass raw city-name strings from UI to controllers — always resolve through `LocationService` and pass `location.queryToken` for cache keys and station lookups.
+- **`AnalyticsService` is a stub**: it only `debugPrint`s. Do not add real tracking without also wiring a consent UI.
