@@ -16,6 +16,7 @@ class TffPrimaryButton extends StatelessWidget {
       duration: const Duration(milliseconds: 160),
       scale: onPressed == null ? 0.98 : 1,
       child: SizedBox(
+        width: double.infinity,
         height: 52,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(

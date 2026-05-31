@@ -164,11 +164,20 @@ class _SourceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
     return switch (source) {
-      FareSource.mock =>
-        TffBadge(label: l10n.sourceMock, icon: Icons.science_rounded),
-      FareSource.cache =>
-        TffBadge(label: l10n.sourceCached, icon: Icons.wifi_off_rounded),
+      FareSource.mock => TffBadge(
+          label: l10n.sourceMock,
+          icon: Icons.science_rounded,
+          iconColor: cs.primary,
+          labelColor: cs.onPrimaryContainer,
+          backgroundColor: cs.primaryContainer.withValues(alpha: 0.55),
+          borderColor: cs.primary.withValues(alpha: 0.2),
+        ),
+      FareSource.cache => TffBadge(
+          label: l10n.sourceCached,
+          icon: Icons.cloud_done_rounded,
+        ),
     };
   }
 }

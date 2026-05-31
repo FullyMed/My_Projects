@@ -60,10 +60,7 @@ class TdxFareService {
     int duration;
     try {
       duration = await _fetchHsrDuration(
-          token: token,
-          originId: originId,
-          destId: destId,
-          distanceKm: distanceKm);
+          token: token, originId: originId, destId: destId);
     } catch (e) {
       debugPrint('TdxFareService: HSR duration fetch failed, using mock: $e');
       duration = _durationFallback(mode: TransportMode.hsr, distanceKm: distanceKm);
@@ -132,7 +129,6 @@ class TdxFareService {
     required String token,
     required String originId,
     required String destId,
-    required int distanceKm,
   }) async {
     await _ensureTimetable(token);
 
@@ -165,7 +161,6 @@ class TdxFareService {
 
       var minutes = arr.inMinutes - dep.inMinutes;
       if (minutes <= 0) minutes += 24 * 60; // crosses midnight
-      if (minutes <= 0) continue;
 
       if (minMinutes == null || minutes < minMinutes) minMinutes = minutes;
     }

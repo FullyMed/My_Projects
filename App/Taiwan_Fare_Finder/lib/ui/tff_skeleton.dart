@@ -45,6 +45,9 @@ class _TffSkeletonBoxState extends State<TffSkeletonBox> with SingleTickerProvid
 }
 
 /// Skeleton placeholder sized like a single fare result card.
+///
+/// Structure mirrors [FareResultCard]: header row → adult label → big price →
+/// three tier tiles → meta line → updated line.
 class FareResultSkeletonCard extends StatelessWidget {
   const FareResultSkeletonCard({super.key, this.showTitleLine = true});
 
@@ -56,30 +59,34 @@ class FareResultSkeletonCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showTitleLine) ...[const TffSkeletonBox(height: 18, width: 140), const SizedBox(height: AppSpacing.lg)],
-          const TffSkeletonBox(height: 12),
-          const SizedBox(height: AppSpacing.sm),
-          const TffSkeletonBox(height: 12),
-          const SizedBox(height: AppSpacing.lg),
-          const TffSkeletonBox(height: 22, width: 160),
+          if (showTitleLine) ...[
+            Row(children: const [
+              TffSkeletonBox(height: 20, width: 120, radius: 8),
+              Spacer(),
+              TffSkeletonBox(height: 22, width: 60, radius: 999),
+            ]),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          // "Adult" label
+          const TffSkeletonBox(height: 12, width: 44, radius: 6),
+          const SizedBox(height: AppSpacing.xs),
+          // Big NT$ price (mirrors displaySmall ~36px + padding)
+          const TffSkeletonBox(height: 44, width: 140, radius: 8),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: const [
-              Expanded(child: TffSkeletonBox(height: 14)),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(child: TffSkeletonBox(height: 14)),
-            ],
-          ),
+          // Three tier tiles (student / child / senior)
+          Row(children: const [
+            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
+          ]),
+          const SizedBox(height: AppSpacing.md),
+          // Meta line (distance · duration · transfers)
+          const TffSkeletonBox(height: 14, radius: 6),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: const [
-              Expanded(child: TffSkeletonBox(height: 14)),
-              SizedBox(width: AppSpacing.sm),
-              Expanded(child: TffSkeletonBox(height: 14)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          const TffSkeletonBox(height: 12, width: 180),
+          // "Last updated" line
+          const TffSkeletonBox(height: 11, width: 170, radius: 6),
         ],
       ),
     );

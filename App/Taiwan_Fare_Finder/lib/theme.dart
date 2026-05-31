@@ -87,9 +87,11 @@ class LightModeColors {
   static const lightPrimaryContainer = Color(0xFFCFF7F2);
   static const lightOnPrimaryContainer = Color(0xFF064E48);
 
-  // Secondary: Complementary gray-blue
-  static const lightSecondary = Color(0xFF6D28D9);
+  // Secondary: Sky blue — complements teal without clashing
+  static const lightSecondary = Color(0xFF0284C7);
   static const lightOnSecondary = Color(0xFFFFFFFF);
+  static const lightSecondaryContainer = Color(0xFFE0F2FE);
+  static const lightOnSecondaryContainer = Color(0xFF0C4A6E);
 
   // Tertiary: Subtle accent color
   static const lightTertiary = Color(0xFFEA580C);
@@ -122,9 +124,11 @@ class DarkModeColors {
   static const darkPrimaryContainer = Color(0xFF115E59);
   static const darkOnPrimaryContainer = Color(0xFFCFF7F2);
 
-  // Secondary
-  static const darkSecondary = Color(0xFFC4B5FD);
-  static const darkOnSecondary = Color(0xFF2E1065);
+  // Secondary: Sky blue tonal — lighter for dark backgrounds
+  static const darkSecondary = Color(0xFF38BDF8);
+  static const darkOnSecondary = Color(0xFF082F49);
+  static const darkSecondaryContainer = Color(0xFF0369A1);
+  static const darkOnSecondaryContainer = Color(0xFFE0F2FE);
 
   // Tertiary
   static const darkTertiary = Color(0xFFFDBA74);
@@ -181,6 +185,8 @@ ThemeData get lightTheme => ThemeData(
     onPrimaryContainer: LightModeColors.lightOnPrimaryContainer,
     secondary: LightModeColors.lightSecondary,
     onSecondary: LightModeColors.lightOnSecondary,
+    secondaryContainer: LightModeColors.lightSecondaryContainer,
+    onSecondaryContainer: LightModeColors.lightOnSecondaryContainer,
     tertiary: LightModeColors.lightTertiary,
     onTertiary: LightModeColors.lightOnTertiary,
     error: LightModeColors.lightError,
@@ -226,6 +232,8 @@ ThemeData get darkTheme => ThemeData(
     onPrimaryContainer: DarkModeColors.darkOnPrimaryContainer,
     secondary: DarkModeColors.darkSecondary,
     onSecondary: DarkModeColors.darkOnSecondary,
+    secondaryContainer: DarkModeColors.darkSecondaryContainer,
+    onSecondaryContainer: DarkModeColors.darkOnSecondaryContainer,
     tertiary: DarkModeColors.darkTertiary,
     onTertiary: DarkModeColors.darkOnTertiary,
     error: DarkModeColors.darkError,
@@ -261,73 +269,73 @@ ThemeData get darkTheme => ThemeData(
   textTheme: _buildTextTheme(Brightness.dark),
 );
 
-/// Build text theme using Inter font family
+/// Build text theme using Plus Jakarta Sans font family
 TextTheme _buildTextTheme(Brightness brightness) {
   return TextTheme(
-    displayLarge: GoogleFonts.inter(
+    displayLarge: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.displayLarge,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.25,
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.displayMedium,
       fontWeight: FontWeight.w400,
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.displaySmall,
       fontWeight: FontWeight.w400,
     ),
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.headlineLarge,
       fontWeight: FontWeight.w600,
       letterSpacing: -0.5,
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.headlineMedium,
       fontWeight: FontWeight.w600,
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.headlineSmall,
       fontWeight: FontWeight.w600,
     ),
-    titleLarge: GoogleFonts.inter(
+    titleLarge: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.titleLarge,
       fontWeight: FontWeight.w600,
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.titleMedium,
       fontWeight: FontWeight.w500,
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.titleSmall,
       fontWeight: FontWeight.w500,
     ),
-    labelLarge: GoogleFonts.inter(
+    labelLarge: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.labelLarge,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),
-    labelMedium: GoogleFonts.inter(
+    labelMedium: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.labelMedium,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.labelSmall,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.bodyLarge,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.15,
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.bodyMedium,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.25,
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: GoogleFonts.plusJakartaSans(
       fontSize: FontSizes.bodySmall,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.4,

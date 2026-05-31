@@ -129,7 +129,6 @@ class FareService {
 
   Future<List<FareResult>> _searchApi({required RouteQuery query}) async {
     final distanceKm = _estimateDistanceKm(query.origin, query.destination);
-    final now = DateTime.now();
     final results = <FareResult>[];
 
     for (final mode in query.modes) {
@@ -141,7 +140,7 @@ class FareService {
             queryKey: query.cacheKey,
             mode: mode,
             distanceKm: distanceKm,
-            now: now,
+            now: DateTime.now(),
           ),
       };
       results.add(result);
