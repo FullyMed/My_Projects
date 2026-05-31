@@ -14,6 +14,7 @@ import 'package:taiwan_fare_finder/services/favorites_service.dart';
 import 'package:taiwan_fare_finder/services/history_service.dart';
 import 'package:taiwan_fare_finder/services/local_storage_service.dart';
 import 'package:taiwan_fare_finder/services/settings_service.dart';
+import 'package:taiwan_fare_finder/services/tdx_auth_service.dart';
 import 'package:taiwan_fare_finder/services/user_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 
@@ -28,13 +29,17 @@ class TffApp extends StatelessWidget {
       providers: [
         Provider(create: (_) => const LocalStorageService()),
         Provider(create: (_) => const AnalyticsService()),
+        Provider(create: (_) => TdxAuthService()),
         Provider(
             create: (c) => UserService(storage: c.read<LocalStorageService>())),
         Provider(
             create: (c) =>
                 SettingsService(storage: c.read<LocalStorageService>())),
         Provider(
-            create: (c) => FareService(storage: c.read<LocalStorageService>())),
+            create: (c) => FareService(
+                  storage: c.read<LocalStorageService>(),
+                  authService: c.read<TdxAuthService>(),
+                )),
         Provider(
             create: (c) =>
                 FavoritesService(storage: c.read<LocalStorageService>())),

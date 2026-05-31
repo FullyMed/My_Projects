@@ -7,6 +7,8 @@ import 'package:taiwan_fare_finder/models/fare_result.dart';
 import 'package:taiwan_fare_finder/models/route_query.dart';
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/local_storage_service.dart';
+import 'package:taiwan_fare_finder/services/tdx_auth_service.dart';
+import 'package:taiwan_fare_finder/services/tdx_fare_service.dart';
 
 class FareSearchResponse {
   const FareSearchResponse({required this.results, required this.usedCache, this.warningCode});
@@ -26,9 +28,11 @@ class FareCacheStats {
 }
 
 class FareService {
-  FareService({required this.storage});
+  FareService({required this.storage, required TdxAuthService authService})
+      : _tdx = TdxFareService(authService: authService);
 
   final LocalStorageService storage;
+  final TdxFareService _tdx;
 
   static const _cacheKey = 'tff_fare_cache';
   static const int _maxCachedQueries = 100;
@@ -124,11 +128,25 @@ class FareService {
   }
 
   Future<List<FareResult>> _searchApi({required RouteQuery query}) async {
-    // TODO: Replace with real API integration.
-    // Architecture note:
-    // - This method should return the same FareResult schema as mock/cache.
-    // - On failure, the caller already has a cache fallback path.
-    throw UnimplementedError('API mode is not implemented yet');
+    final distanceKm = _estimateDistanceKm(query.origin, query.destination);
+    final now = DateTime.now();
+    final results = <FareResult>[];
+
+    for (final mode in query.modes) {
+      final result = switch (mode) {
+        TransportMode.hsr || TransportMode.tra =>
+          await _tdx.fetch(query: query, mode: mode, distanceKm: distanceKm),
+        _ => _mock(
+            userId: query.userId,
+            queryKey: query.cacheKey,
+            mode: mode,
+            distanceKm: distanceKm,
+            now: now,
+          ),
+      };
+      results.add(result);
+    }
+    return results;
   }
 
   Future<FareCacheStats> getCacheStats({required String userId}) async {
