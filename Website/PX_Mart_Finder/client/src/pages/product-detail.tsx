@@ -22,7 +22,7 @@ export default function ProductDetail() {
   const product = PRODUCTS.find(p => p.id === params?.id);
 
   if (!product) {
-    return <div className="p-8 text-center">Product not found</div>;
+    return <div className="p-8 text-center">{t("productNotFound")}</div>;
   }
 
   const name = language === "en" ? product.product_name_en : product.product_name_zh;
@@ -33,8 +33,8 @@ export default function ProductDetail() {
   const section = location ? (language === "en" ? location.section_en : location.section_zh) : null;
 
   const similarProducts = PRODUCTS
-    .filter(p => 
-        (p.category_en === product.category_en) && 
+    .filter(p =>
+        (p.category_en === product.category_en || p.category_zh === product.category_zh) &&
         (p.id !== product.id) &&
         (!showOnlyWithLocation || p.locationsByStore[selectedStore.id])
     )
@@ -48,19 +48,19 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-background pb-8">
-      {/* Hero Image */}
-      <div className="w-full aspect-square bg-muted relative">
-        <img 
-          src={product.image_url} 
+    <div className="flex flex-col flex-1 bg-background pb-8 lg:flex-row lg:pb-0 lg:items-start">
+      {/* Hero Image — square on mobile, sticky tall column on desktop */}
+      <div className="w-full aspect-square bg-muted relative lg:w-2/5 lg:shrink-0 lg:aspect-auto lg:h-[calc(100vh-72px)] lg:sticky lg:top-[72px] lg:self-start">
+        <img
+          src={product.image_url}
           alt={name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent lg:hidden" />
       </div>
 
       {/* Content */}
-      <div className="px-6 -mt-6 relative z-10">
+      <div className="px-6 -mt-6 relative z-10 lg:mt-0 lg:flex-1 lg:px-8 lg:pt-8 lg:pb-12 lg:z-auto lg:overflow-y-auto">
         <div className="bg-card rounded-3xl shadow-lg border border-border/50 p-6 mb-6">
             <div className="flex justify-between items-start mb-2">
                 <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 px-3 py-1">
@@ -148,9 +148,7 @@ export default function ProductDetail() {
         {similarProducts.length > 0 && (
             <div className="mt-8" ref={similarSectionRef}>
                 <h3 className="font-bold text-lg mb-4 px-1">
-                  {showOnlyWithLocation 
-                    ? (language === 'en' ? 'Available Similar Items' : '有位置資訊的相似商品')
-                    : t("similarProducts")}
+                  {showOnlyWithLocation ? t("availableSimilarItems") : t("similarProducts")}
                 </h3>
                 <div className="space-y-4">
                     {similarProducts.map(p => (

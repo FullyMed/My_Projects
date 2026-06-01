@@ -13,7 +13,7 @@ export default function CategoryDetail() {
   const category = CATEGORIES.find(c => c.id === params?.id);
 
   if (!category) {
-    return <div className="p-8 text-center">Category not found</div>;
+    return <div className="p-8 text-center">{t("categoryNotFound")}</div>;
   }
 
   return (
@@ -44,28 +44,34 @@ export default function CategoryDetail() {
       </div>
 
       {/* Subcategories List */}
-      <div className="flex-1 p-6 -mt-4 relative z-20">
-        <div className="grid gap-3">
+      <div className="flex-1 p-6 lg:p-8 -mt-4 relative z-20">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {category.subCategories.map((sub, index) => (
-             <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{
+                delay: index * 0.04,
+                type: "spring",
+                stiffness: 300,
+                damping: 26,
+              }}
+            >
+              <Button
+                variant="outline"
+                className="w-full justify-between h-14 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-2xl transition-colors duration-200"
+                onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
               >
-                <Button
-                    variant="outline"
-                    className="w-full justify-between h-14 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-xl"
-                    onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
-                >
-                    <span className="font-medium">
-                        {language === "en" ? sub.en : sub.zh}
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                         <Search className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                </Button>
-             </motion.div>
+                <span className="font-medium">
+                  {language === "en" ? sub.en : sub.zh}
+                </span>
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <Search className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </Button>
+            </motion.div>
           ))}
         </div>
       </div>

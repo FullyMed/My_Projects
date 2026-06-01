@@ -29,7 +29,7 @@ export default function StoreMap() {
       {/* Demo Banner */}
       <div className="bg-amber-100 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800/50 py-1.5 px-4 sticky top-[var(--px-header-h)] z-20 text-center">
         <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200/80">
-          {language === 'en' ? 'Demo Aisle Map (Placeholder)' : '示意走道地圖（佔位用）'}
+          {t("demoAisleMap")}
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export default function StoreMap() {
         <h1 className="text-xl font-bold">{t("storeMap")}</h1>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 lg:p-8 space-y-6 max-w-4xl">
         <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 mb-6">
           <div className="flex items-center gap-3 mb-2">
             <MapPin className="w-5 h-5 text-primary" />
@@ -56,14 +56,14 @@ export default function StoreMap() {
         </div>
 
         {highlightedAisle && (
-          <motion.div 
-            initial={ { scale: 0.9, opacity: 0 } }
-            animate={ { scale: 1, opacity: 1 } }
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             className="bg-primary text-primary-foreground p-6 rounded-3xl shadow-xl flex items-center justify-between"
           >
             <div>
               <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">
-                {language === 'en' ? `You are going to Aisle` : `前往走道`}
+                {t("goingToAisle")}
               </p>
               <p className="text-4xl font-black">{highlightedAisle}</p>
             </div>
@@ -73,7 +73,7 @@ export default function StoreMap() {
           </motion.div>
         )}
 
-        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-secondary bg-muted min-h-[400px] flex flex-col items-center justify-center p-12 text-center">
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-secondary bg-muted min-h-[400px] lg:min-h-[560px] flex flex-col items-center justify-center p-12 text-center">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="grid grid-cols-6 h-full w-full border-primary/20">
               {Array.from({ length: 24 }).map((_, i) => (
@@ -84,21 +84,19 @@ export default function StoreMap() {
           
           <MapIcon className="w-20 h-20 text-primary/20 mb-4" />
           <h3 className="text-lg font-bold text-foreground/40">
-            {language === 'en' ? 'Store Layout Visual' : '門市佈局示意圖'}
+            {t("storeLayoutVisual")}
           </h3>
           <p className="text-sm text-muted-foreground/50 max-w-[200px] mt-2 italic">
-            {language === 'en' 
-              ? 'This is a visualization of the branch layout.' 
-              : '此為門市空間佈局示意。'}
+            {t("storeLayoutVisualization")}
           </p>
 
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6 pointer-events-none">
             <div className="flex flex-col">
               <p className="text-white text-sm font-bold">
-                 {language === 'en' ? 'Floor Plan (Demo Placeholder)' : '平面圖（示意）'}
+                 {t("floorPlanDemo")}
               </p>
               <p className="text-white/70 text-[10px] uppercase tracking-wider">
-                 {language === 'en' ? 'Store Layout View' : '門店佈局視圖'}
+                 {t("storeLayoutView")}
               </p>
             </div>
           </div>

@@ -10,9 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CATEGORIES, PRODUCTS, SYNONYMS } from "@/lib/data";
+import type { Product } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { normalizeAisle } from "@/lib/normalize";
 import Fuse from "fuse.js";
+import { motion } from "framer-motion";
 import {
   ArrowUpDown,
   Filter,
@@ -24,7 +26,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useLocation } from "wouter";
 
-type Product = typeof PRODUCTS[number];
 
 export default function SearchResults() {
   const { t, language } = useLanguage();
@@ -262,7 +263,7 @@ export default function SearchResults() {
 
   return (
     <div className="flex flex-col flex-1 bg-muted/30 min-h-screen">
-      <div className="bg-white dark:bg-card p-4 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40 transition-colors">
+      <div className="bg-white dark:bg-card p-4 lg:px-6 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40 transition-colors">
         <form onSubmit={handleSearch} className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
@@ -395,16 +396,36 @@ export default function SearchResults() {
               </h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4">
-              <div className="grid grid-cols-1 gap-3">
-                {results.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+            <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-4">
+              <motion.div
+                key={debouncedQuery + sortBy + (brandFilter ?? "")}
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
+              >
+                {results.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(index, 8) * 0.045,
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 28,
+                    }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
         ) : (
-          <div className="py-12 px-4 flex flex-col items-center text-center overflow-y-auto h-full">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="py-12 px-4 flex flex-col items-center text-center overflow-y-auto h-full"
+          >
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <Search className="w-8 h-8 text-muted-foreground/40" />
             </div>
@@ -462,7 +483,7 @@ export default function SearchResults() {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
