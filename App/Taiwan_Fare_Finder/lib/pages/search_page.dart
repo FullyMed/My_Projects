@@ -14,6 +14,7 @@ import 'package:taiwan_fare_finder/services/location_service.dart';
 import 'package:taiwan_fare_finder/services/analytics_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/location_field.dart';
+import 'package:taiwan_fare_finder/ui/tff_adaptive.dart';
 import 'package:taiwan_fare_finder/ui/tff_button.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
 import 'package:taiwan_fare_finder/ui/tff_empty_state.dart';
@@ -105,7 +106,7 @@ class _SearchPageState extends State<SearchPage> {
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 840;
+          final isWide = TffAdaptive.isWide(context);
           final form = _SearchFormCard(
             origin: _origin,
             destination: _destination,

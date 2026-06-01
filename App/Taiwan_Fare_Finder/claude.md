@@ -102,7 +102,7 @@ A design-system layer of reusable widgets:
 | `TffEmptyState` | Full-page or inline empty-state illustration + copy |
 | `TffSkeleton` | Shimmer placeholder for loading states |
 | `TffSwapButton` | Animated origin ↔ destination swap button |
-| `TffAdaptive` | Adaptive layout helper (phone vs. tablet) |
+| `TffAdaptive` | Adaptive layout helper — 3-tier breakpoints (phone / tablet / desktop) and navigation helpers (`useNavRail`, `isWide`, etc.) |
 | `LocationField` | Text field for origin/destination input |
 | `LocationPickerSheet` | Bottom sheet for picking a `Location` |
 
@@ -122,14 +122,31 @@ Defined in `lib/nav.dart` via `go_router`:
 ### Theme & design tokens
 
 `lib/theme.dart` defines:
-- `lightTheme` / `darkTheme` (Material 3, Google Fonts Inter)
+- `lightTheme` / `darkTheme` (Material 3, Google Fonts Plus Jakarta Sans)
 - `AppSpacing` — spacing scale (`xs` 4 → `xxl` 48)
 - `AppRadius` — border radius scale (`sm` 8 → `xl` 24)
 - `TextStyleExtensions` — `.bold`, `.semiBold`, `.medium`, etc. on `TextStyle`
 
 ### Responsive layout
 
-Tablet breakpoint: `>= 840 dp`. Always preserve `LayoutBuilder` → `ConstrainedBox` → `crossAxisAlignment.stretch` patterns, especially in `settings_page.dart`.
+`TffAdaptive` (`lib/ui/tff_adaptive.dart`) is the single source of truth for all breakpoints:
+
+| Helper | Condition | Use for |
+|---|---|---|
+| `isPhone` | `< 600 dp` | Compact-only styling |
+| `isMedium` | `600–840 dp` | Large phone / small tablet |
+| `isExpanded` | `840–1200 dp` | Tablet / small laptop |
+| `isLarge` | `>= 1200 dp` | Laptop / desktop |
+| `useBottomNav` | `< 840 dp` | Show `BottomNavigationBar` |
+| `useNavRail` | `>= 840 dp` | Show `NavigationRail` |
+| `useExtendedNavRail` | `>= 1200 dp` | Show extended (labelled) `NavigationRail` |
+| `isWide` | `>= 840 dp` | Switch to two-column content layout |
+
+**Navigation shell** (`ShellPage`): `< 840 dp` → `BottomNavigationBar`; `840–1200 dp` → compact `NavigationRail`; `>= 1200 dp` → extended `NavigationRail` (always-visible labels).
+
+**Content pages** use `TffAdaptive.isWide(context)` (not raw `constraints.maxWidth`) so the content breakpoint stays in sync with the navigation breakpoint. Always preserve `LayoutBuilder` → `ConstrainedBox` → `crossAxisAlignment.stretch` patterns, especially in `settings_page.dart`.
+
+**SavedPage** (`/saved`): `< 840 dp` → tabbed (Favorites / History tabs); `>= 840 dp` → two-column side-by-side panels.
 
 ### Utilities
 

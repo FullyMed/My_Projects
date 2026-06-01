@@ -12,6 +12,7 @@ import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/analytics_service.dart';
 import 'package:taiwan_fare_finder/services/location_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
+import 'package:taiwan_fare_finder/ui/tff_adaptive.dart';
 import 'package:taiwan_fare_finder/ui/fare_result_card.dart';
 import 'package:taiwan_fare_finder/ui/location_field.dart';
 import 'package:taiwan_fare_finder/ui/tff_button.dart';
@@ -101,7 +102,7 @@ class _ComparePageState extends State<ComparePage> {
       ],
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 840;
+          final isWide = TffAdaptive.isWide(context);
 
           final form = TffCard(
             child: Column(
