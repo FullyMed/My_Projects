@@ -2,12 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const resultBox = document.getElementById("loginResult");
   const errorMessage = document.getElementById("errorMessage");
-  const forgotPrompt = document.getElementById("viewMorePrompt");
-
-  if (forgotPrompt) {
-    forgotPrompt.style.display = "block";
-  }
-
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();

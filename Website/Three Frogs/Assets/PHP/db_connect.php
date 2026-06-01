@@ -1,9 +1,4 @@
 <?php
-$host = "localhost";
-$user = "u181047418_threefrogs";
-$password = "Threefr0gs*";
-$database = "u181047418_threefrogs";
-
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 define("DB_HOST", "localhost");

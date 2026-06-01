@@ -24,16 +24,21 @@
         <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
         <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
 
-        <!-- Stylesheet -->
+        <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Stylesheet -->
         <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
 
     </head>
 
-    <body>
+    <body class="page-collection">
 
         <header>
             <nav class="navbar">
                 <div class="logo">🐸 Three Frogs</div>
+                <button class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button>
                 <ul class="nav-links" id="navLinks"></ul>
             </nav>
         </header>

@@ -2029,7 +2029,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ================= Boardgame Page =================
   if (window.location.pathname === "/" || window.location.pathname.includes("index.html")) {
       const maxToShow = 10;
-      const shuffled = boardgames.sort(() => 0.5 - Math.random());
+      const shuffled = [...boardgames].sort(() => 0.5 - Math.random());
       const toDisplay = shuffled.slice(0, maxToShow);
       renderBoardgames(toDisplay);
       
