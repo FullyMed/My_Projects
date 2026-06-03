@@ -2,42 +2,48 @@
 
 ## Project Description
 
-PX Mart Finder is a smart product discovery and store navigation platform designed to improve the shopping experience within PX Mart stores. The project helps customers quickly locate products, discover similar alternatives, and browse store inventories through a fast and user-friendly search interface.
+PX Mart Finder is a retail product discovery and in-store navigation prototype designed for PX Mart (全聯福利中心) stores in Taiwan. It helps shoppers quickly locate products by aisle and shelf, browse by category, and save favorites — all through a fast, responsive interface.
 
-The system was developed as a proof-of-concept focused on a single PX Mart branch, demonstrating how modern search technologies can be applied to retail environments. By combining fuzzy search, virtualized rendering, and intuitive filtering mechanisms, the platform allows users to find products efficiently even when exact product names are unknown.
-
-The project emphasizes performance, scalability, and usability while providing a foundation for future expansion into multi-store inventory systems.
+The project is built as a single-branch proof-of-concept focused on **PX Mart Wufeng (Taichung)**. It demonstrates how modern frontend technologies can be applied to retail search UX, and is intended as a portfolio and prototype demo.
 
 ### Key Features
 
-* Fast product search
-* Fuzzy search and typo tolerance
-* Similar product recommendations
-* Store-specific inventory browsing
-* Virtualized search results for performance
-* Responsive user interface
-* Traditional Chinese localization
-* Store selection support
+- Fast product search with fuzzy matching and typo tolerance
+- Synonym expansion (e.g. searching "tissue" also finds 衛生紙, 面紙)
+- Aisle and shelf location per product, per store
+- Category and subcategory browsing
+- Brand filtering and multi-sort (relevance, name, aisle order)
+- "Did you mean?" suggestions when no results are found
+- Favorites with localStorage persistence
+- Store selection (Wufeng branch + demo placeholders)
+- Store map placeholder with aisle highlighting
+- Full bilingual support — English and Traditional Chinese (繁體中文)
+- Light and dark mode
+- Fully responsive — mobile, tablet, and desktop layouts
 
 ### Technologies Used
 
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* shadcn/ui
-* Fuse.js
-* react-window
+- **React** + **TypeScript**
+- **Vite**
+- **Tailwind CSS v4**
+- **shadcn/ui**
+- **Fuse.js** — fuzzy search
+- **framer-motion** — spring animations and entrance transitions
+- **wouter** — client-side routing
+- **use-debounce** — debounced search input
+- **Lucide React** — icons
+- **Google Fonts** — Rubik (Latin) + Noto Sans TC (Traditional Chinese)
 
 ### Purpose
 
-The purpose of PX Mart Finder is to demonstrate how intelligent search systems can improve retail shopping experiences by helping customers locate products more efficiently while reducing search time inside physical stores.
+PX Mart Finder demonstrates how intelligent search and clear location data can reduce the time customers spend finding products inside a physical supermarket. It is designed as a portfolio piece and prototype pitch — not a production system.
 
 ### Future Enhancements
 
-* Multi-branch support
-* Real-time inventory synchronization
-* Indoor navigation integration
-* Product recommendation engine
-* Mobile application version
-* AI-powered shopping assistant
+- More products and richer category coverage
+- Real branch location data for additional stores
+- Multi-branch support
+- Real-time inventory synchronization
+- Indoor navigation integration
+- Backend API and admin dashboard
+- Mobile application version

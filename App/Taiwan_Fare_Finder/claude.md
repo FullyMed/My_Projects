@@ -25,11 +25,12 @@ flutter build ios        # build iOS
 
 ```
 UI (pages, ui/) → Controllers (ChangeNotifier) → Services → LocalStorageService
+                  SessionController             → UserService
                                                            → FareService (mock + TDX cache)
+                                                                └─ TdxFareService (internal) → TdxAuthService
                                                            → FavoritesService
                                                            → HistoryService
                                                            → SettingsService
-                                                           → TdxAuthService → TdxFareService
                                                            → AnalyticsService (stub)
                                                            → LocationService (static)
 ```
@@ -40,7 +41,7 @@ UI (pages, ui/) → Controllers (ChangeNotifier) → Services → LocalStorageSe
 
 ### User binding pattern
 
-Every user-scoped controller (`FareController`, `FavoritesController`, `HistoryController`, `SettingsController`) implements `bindUser(String? userId)`. In `main.dart`, each is wired as a `ChangeNotifierProxyProvider2<SessionController, XService, XController>`. When `SessionController` emits a new user, the `update` callback calls `Future.microtask(() => controller.bindUser(userId))` to avoid calling `notifyListeners` mid-build. Any new controller that needs per-user data must follow this same pattern.
+Every user-scoped controller (`FareController`, `FavoritesController`, `HistoryController`, `SettingsController`) implements `bindUser(String? userId)` and exposes a `boundUserId` getter. In `main.dart`, each is wired as a `ChangeNotifierProxyProvider2<SessionController, XService, XController>`. When `SessionController` emits a new user, the `update` callback checks `if (next.boundUserId != userId)` then calls `Future.microtask(() => controller.bindUser(userId))` to avoid calling `notifyListeners` mid-build. Any new controller that needs per-user data must follow this same pattern, including the `boundUserId` guard to prevent redundant re-binds.
 
 ### Localization — two systems, one in use
 
@@ -85,6 +86,7 @@ Station name → TDX ID mappings live in `lib/config/tdx_station_map.dart` (`hsr
 - `popular()` — a curated short list shown before the user has history.
 - `filter(query)` — case-insensitive search across all name fields.
 - `findByAnyName(raw)` — exact-match lookup by any localized name.
+- `groupByCityEn(locations)` — groups a location list into a `Map<String, List<Location>>` keyed by English city name; used by `LocationPickerSheet` to render grouped sections.
 
 ### Shared UI components (`lib/ui/`)
 
