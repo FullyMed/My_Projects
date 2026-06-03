@@ -12,8 +12,8 @@ import {
   X,
   Trash2
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 import { storage } from '../utils/storage';
 import WeeklyPlanner from './WeeklyPlanner';
 import GoalTracker from './GoalTracker';

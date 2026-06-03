@@ -1,40 +1,131 @@
 # JourneySet
 
-## Project Description
+A personal productivity planner built with React, TypeScript, and Supabase. Plan your week, track goals, and manage events — all in one elegant workspace.
 
-JourneySet is a travel planning and trip management platform designed to help users organize, track, and optimize their travel experiences. The application serves as a centralized workspace where travelers can plan itineraries, manage destinations, monitor travel schedules, and store important trip information.
+## Features
 
-The platform focuses on simplifying travel preparation while improving organization before, during, and after a journey. By consolidating travel-related information into a single interface, JourneySet aims to reduce planning complexity and enhance overall travel experiences.
+- **Weekly Planner** — schedule tasks by day with optional time slots; weekly-recurring tasks carry forward automatically
+- **Goal Tracker** — set numeric targets with any unit, track progress with gradient bars, lock or allow exceeding the target
+- **Event Calendar** — full monthly calendar with category colour-coding and time-conflict detection
+- **Export & Print** — generate print-ready views of the planner, goals, or calendar
+- **Dark / Light mode** — persisted per-device, respects `prefers-color-scheme` on first visit
+- **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
+- **Offline-resilient** — all reads fall back to a localStorage cache when Supabase is unreachable
 
-The project combines modern user experience principles with practical travel management functionality, making it suitable for both casual travelers and frequent explorers.
+## Tech stack
 
-### Key Features
+| Layer | Technology |
+|---|---|
+| Framework | React 18 + TypeScript |
+| Build | Vite 5 |
+| Styling | Tailwind CSS 3 (Plus Jakarta Sans, indigo/violet palette) |
+| Backend | Supabase (PostgreSQL + Auth + Row Level Security) |
+| Routing | react-router-dom v7 |
+| Icons | lucide-react |
+| Dates | date-fns |
 
-* Trip planning and management
-* Destination organization
-* Travel itinerary creation
-* Activity scheduling
-* Travel information tracking
-* User-friendly dashboard
-* Mobile-responsive design
-* Future travel recommendations
+## Getting started
 
-### Technologies Used
+### 1. Prerequisites
 
-* Modern Web Technologies
-* Responsive UI Frameworks
-* Frontend State Management
-* API Integration Architecture
+- Node.js 18+
+- A [Supabase](https://supabase.com) project
 
-### Purpose
+### 2. Clone and install
 
-The goal of JourneySet is to provide travelers with an organized and efficient platform for managing travel plans while reducing the stress associated with trip preparation and itinerary coordination.
+```bash
+git clone <repo-url>
+cd JourneySet
+npm install
+```
 
-### Future Enhancements
+### 3. Configure environment
 
-* AI-assisted itinerary generation
-* Budget planning tools
-* Hotel and transportation integration
-* Collaborative trip planning
-* Offline travel mode
-* Personalized destination recommendations
+Create `.env` at the project root:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 4. Apply database migrations
+
+Run the SQL files in order against your Supabase project (via the Supabase Dashboard → SQL editor, or the Supabase CLI):
+
+```
+supabase/migrations/
+  20260404061233_create_profiles_table.sql
+  20260405053918_create_planner_tasks_table.sql
+  20260405053928_create_goals_table.sql
+  20260405053937_create_events_table.sql
+```
+
+All tables have Row Level Security enabled — users can only read and write their own data.
+
+### 5. Run locally
+
+```bash
+npm run dev        # http://localhost:5173
+npm run build      # production build
+npm run preview    # preview production build
+npm run lint       # ESLint
+```
+
+> **WSL users**: if Vite errors with `Cannot find module @rollup/rollup-linux-x64-gnu`, run `npm install @rollup/rollup-linux-x64-gnu --no-save` once.
+
+## Project structure
+
+```
+src/
+├── api/              # Supabase CRUD + localStorage cache fallback
+│   ├── plannerApi.ts
+│   ├── goalsApi.ts
+│   └── eventsApi.ts
+├── components/       # Shared UI components
+│   ├── AppLayout.tsx         # Sidebar + header shell
+│   ├── WeeklyPlanner.tsx     # Planner feature
+│   ├── GoalTracker.tsx       # Goals feature
+│   ├── EventCalendar.tsx     # Calendar feature
+│   ├── AuthModal.tsx         # Login / register
+│   ├── LandingPage.tsx       # Marketing page
+│   └── PrintView.tsx         # Print-ready layout
+├── contexts/         # React contexts (Auth, Theme, CompactMode)
+├── pages/            # Route-level wrappers (thin, delegate to components)
+├── hooks/            # useModalFocus (trap + Escape handling)
+├── constants/        # EVENT_CATEGORIES colour/label config
+├── data/             # Static quotes array
+├── types/            # Shared TypeScript interfaces
+└── utils/            # storage.ts (localStorage), supabaseClient.ts
+supabase/
+└── migrations/       # SQL schema files
+```
+
+## Responsive design
+
+The app is designed to work across all device sizes:
+
+| Breakpoint | Target |
+|---|---|
+| < 475px | Small Android phones, iPhone SE |
+| 475px (`xs`) | iPhone 14 / Pixel 8 |
+| 640px (`sm`) | Landscape phone, small tablet |
+| 768px (`md`) | iPad mini / iPad Air |
+| 1024px (`lg`) | iPad Pro / laptop |
+| 1280px+ | Desktop |
+
+On mobile, modals render as **bottom sheets** with a drag handle. All interactive elements meet the 44 × 44 pt minimum touch target. `viewport-fit=cover` and `env(safe-area-inset-*)` utilities handle notch / Dynamic Island / home indicator on iOS and modern Android devices.
+
+## Database schema overview
+
+```
+profiles          — user display name, linked to auth.users
+planner_tasks     — day_key (YYYY-MM-DD), week_key (YYYY-Www), recurring
+goals             — target_value, current_value, unit, allow_exceed_target
+events            — date_iso (YYYY-MM-DD), time (HH:MM), category, title
+```
+
+Every table enforces `auth.uid() = user_id` through RLS policies.
+
+## License
+
+MIT

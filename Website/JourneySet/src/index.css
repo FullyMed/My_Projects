@@ -57,49 +57,103 @@
 }
 
 @media print {
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Apply color-accurate printing only to elements with intentional backgrounds.
+     Keeping this off the universal selector prevents dark-mode Tailwind classes
+     (e.g. dark:bg-slate-950 on the PrintView wrapper) from bleeding into print. */
+  .print-table th,
+  .day-cell,
+  .goal-status,
+  .task-badge,
+  .event-category,
+  .progress-bar-container,
+  .progress-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4;
+    margin: 0.6in 0.7in;
+  }
+
   body {
     margin: 0;
     padding: 0;
     background: white;
-    color: black;
+    color: #111;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
+  /* ── Document header ── */
   .print-content {
-    font-family: system-ui, -apple-system, sans-serif;
     max-width: 100%;
   }
 
-  .print-title {
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0 0 8px 0;
+  .print-header {
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
     page-break-after: avoid;
   }
 
-  .print-date {
+  .print-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: #111;
+    letter-spacing: -0.5px;
+  }
+
+  .print-subtitle {
     font-size: 12px;
     color: #666;
-    margin: 0 0 24px 0;
-    page-break-after: avoid;
+    margin: 0;
   }
 
+  .print-summary {
+    margin-top: 16px;
+    font-size: 12px;
+    color: #666;
+    border-top: 1px solid #e5e5e5;
+    padding-top: 12px;
+  }
+
+  .no-content {
+    color: #999;
+    font-style: italic;
+  }
+
+  /* ── Planner table ── */
   .print-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 24px;
-  }
-
-  .print-table th,
-  .print-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
+    margin-bottom: 8px;
   }
 
   .print-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
+    background-color: #f3f4ff;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #4f46e5;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid #e0e0f0;
     page-break-after: avoid;
+  }
+
+  .print-table td {
+    border: 1px solid #e5e5e5;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
   }
 
   .print-table tr {
@@ -107,11 +161,21 @@
   }
 
   .day-cell {
-    width: 100px;
-    font-weight: bold;
-    background-color: #f9f9f9;
+    width: 90px;
+    font-weight: 700;
+    background-color: #fafafa;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
+  .day-cell div {
+    font-weight: 400;
+    color: #666;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* ── Task list ── */
   .task-list {
     list-style: none;
     padding: 0;
@@ -119,64 +183,102 @@
   }
 
   .task-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
     padding: 4px 0;
     border-bottom: 1px dotted #eee;
+    font-size: 12px;
   }
 
   .task-list li:last-child {
     border-bottom: none;
   }
 
-  .task-list li.completed {
+  .task-list li.completed .task-title {
     text-decoration: line-through;
-    color: #999;
+    color: #aaa;
+  }
+
+  .task-check {
+    flex-shrink: 0;
+    color: #4f46e5;
+    font-size: 11px;
+  }
+
+  .task-list li.completed .task-check {
+    color: #10b981;
   }
 
   .task-time {
-    font-weight: bold;
-    margin-right: 8px;
-    color: #0066cc;
+    font-weight: 600;
+    color: #4f46e5;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
+  .task-title {
+    flex: 1;
+  }
+
+  .task-badge {
+    font-size: 10px;
+    color: #7c3aed;
+    background: #f3e8ff;
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ── Goals ── */
   .goals-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
   }
 
   .goal-item {
     page-break-inside: avoid;
-    padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 14px 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    border-left: 4px solid #4f46e5;
   }
 
   .goal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     page-break-after: avoid;
   }
 
   .goal-header h3 {
     margin: 0;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .goal-status {
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 11px;
+    font-weight: 600;
     padding: 2px 8px;
     background-color: #f0f0f0;
-    border-radius: 2px;
+    border-radius: 20px;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .goal-status.status-complete {
+    background-color: #d1fae5;
+    color: #065f46;
   }
 
   .goal-description {
-    margin: 0 0 12px 0;
-    font-size: 13px;
-    color: #555;
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    color: #666;
   }
 
   .progress-section {
@@ -186,39 +288,44 @@
   .progress-info {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 6px;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #555;
   }
 
   .progress-percent {
-    font-weight: bold;
+    font-weight: 700;
+    color: #4f46e5;
   }
 
   .progress-bar-container {
     width: 100%;
-    height: 12px;
+    height: 8px;
     background-color: #e5e5e5;
-    border-radius: 2px;
+    border-radius: 4px;
     overflow: hidden;
   }
 
   .progress-bar {
     height: 100%;
-    background-color: #0066cc;
+    background-color: #4f46e5;
+    border-radius: 4px;
   }
 
+  /* ── Calendar events ── */
   .events-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
   }
 
   .event-item {
     page-break-inside: avoid;
     display: flex;
     gap: 16px;
-    padding: 12px 0;
+    padding: 11px 0;
     border-bottom: 1px solid #eee;
+    align-items: flex-start;
   }
 
   .event-item:last-child {
@@ -226,55 +333,52 @@
   }
 
   .event-date {
-    min-width: 80px;
+    min-width: 100px;
     page-break-after: avoid;
+    flex-shrink: 0;
   }
 
   .event-date strong {
     display: block;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .event-time {
     display: block;
-    font-size: 12px;
-    color: #666;
+    font-size: 11px;
+    color: #4f46e5;
+    font-weight: 600;
     margin-top: 2px;
   }
 
   .event-details {
     flex: 1;
+    min-width: 0;
   }
 
   .event-details h4 {
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    font-weight: bold;
+    margin: 0 0 3px 0;
+    font-size: 13px;
+    font-weight: 700;
   }
 
   .event-category {
     display: inline-block;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
     background-color: #f0f0f0;
-    border-radius: 2px;
-    margin-bottom: 4px;
-  }
-
-  .event-details p {
-    margin: 4px 0 0 0;
-    font-size: 12px;
+    border-radius: 3px;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
     color: #555;
   }
 
-  @page {
-    size: A4;
-    margin: 0.5in;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  .event-details p {
+    margin: 3px 0 0 0;
+    font-size: 12px;
+    color: #666;
   }
 }

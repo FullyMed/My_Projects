@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Clock, Check, Trash2, CreditCard as Edit3, Download, Copy, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { PlannerTask } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { useCompactMode } from '../contexts/CompactModeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useCompactMode } from '../hooks/useCompactMode';
 import { format, startOfWeek, addDays, isToday, subWeeks, addWeeks, getISOWeek, getISOWeekYear } from 'date-fns';
 import EditTaskModal from './EditTaskModal';
 import { getPlannerTasks, createPlannerTask, updatePlannerTask, deletePlannerTask } from '../api/plannerApi';
 
-const WeeklyPlanner: React.FC = () => {
+interface WeeklyPlannerProps {
+  onWeekChange?: (weekKey: string) => void;
+}
+
+const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
   const [tasks, setTasks] = useState<PlannerTask[]>([]);
   const [newTask, setNewTask] = useState('');
   const [selectedDay, setSelectedDay] = useState('');
@@ -118,7 +122,11 @@ const WeeklyPlanner: React.FC = () => {
         return 0;
       });
 
-  const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
+  const handlePreviousWeek = () => {
+    const prevWeek = subWeeks(currentWeek, 1);
+    setCurrentWeek(prevWeek);
+    onWeekChange?.(getWeekKey(prevWeek));
+  };
 
   const handleNextWeek = async () => {
     const nextWeek = addWeeks(currentWeek, 1);
@@ -143,6 +151,7 @@ const WeeklyPlanner: React.FC = () => {
     }
 
     setCurrentWeek(nextWeek);
+    onWeekChange?.(nextWeekKey);
   };
 
   const exportTasks = () => {

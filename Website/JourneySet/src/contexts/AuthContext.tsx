@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { supabase } from '../utils/supabaseClient';
 
@@ -11,15 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -30,99 +22,83 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
+    let settled = false;
 
-        if (session?.user) {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-
-          if (!error && profile) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: profile.name || 'User',
-              createdAt: session.user.created_at
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Auth init error:', err);
-      } finally {
+    const resolve = () => {
+      if (!settled) {
+        settled = true;
         setLoading(false);
       }
     };
 
-    initAuth();
+    const timer = setTimeout(resolve, 5000);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          const tempName = session.user.email?.split('@')[0] ?? 'User';
+          setUser({
+            id: session.user.id,
+            email: session.user.email ?? '',
+            name: tempName,
+            createdAt: session.user.created_at,
+          });
 
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: profile?.name || 'User',
-          createdAt: session.user.created_at
-        });
-      } else {
-        setUser(null);
+          supabase
+            .from('profiles')
+            .select('name')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+            .then(({ data: profile }) => {
+              if (profile?.name) {
+                setUser(prev => (prev ? { ...prev, name: profile.name } : prev));
+              }
+            });
+        } else {
+          setUser(null);
+        }
+
+        if (event === 'INITIAL_SESSION') {
+          clearTimeout(timer);
+          resolve();
+        }
       }
-    });
+    );
 
     return () => {
-      subscription?.unsubscribe();
+      settled = true;
+      clearTimeout(timer);
+      subscription.unsubscribe();
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { success: false, error: error.message };
       return { success: true };
     } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
-  const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return { success: false, error: error.message };
 
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
-            user_id: data.user.id,
-            email,
-            name
-          });
-
-        if (profileError) {
-          return { success: false, error: 'Failed to create profile' };
-        }
+          .insert({ user_id: data.user.id, email, name });
+        if (profileError) return { success: false, error: 'Failed to create profile' };
       }
 
       return { success: true };
@@ -140,14 +116,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    loading,
-    isLoading: loading
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, loading, isLoading: loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

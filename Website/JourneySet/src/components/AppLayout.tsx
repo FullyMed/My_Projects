@@ -15,9 +15,9 @@ import {
   Maximize2,
   Minimize2,
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-import { useCompactMode } from '../contexts/CompactModeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
+import { useCompactMode } from '../hooks/useCompactMode';
 import QuoteDisplay from './QuoteDisplay';
 
 interface AppLayoutProps {

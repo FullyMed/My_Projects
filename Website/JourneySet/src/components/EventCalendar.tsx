@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X } from 'lucide-react';
 import { Event } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { useCompactMode } from '../contexts/CompactModeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useCompactMode } from '../hooks/useCompactMode';
 import {
   format,
   startOfMonth,

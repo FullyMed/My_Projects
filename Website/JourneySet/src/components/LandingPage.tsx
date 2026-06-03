@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, Target, CheckSquare, Moon, Sun, BarChart3, Download, Compass, ArrowRight, Zap, Globe } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 
 interface LandingPageProps {
   onShowAuth: (mode: 'login' | 'register') => void;

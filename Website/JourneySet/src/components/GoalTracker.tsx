@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Target, Check, Trash2, TrendingUp, RotateCcw, Unlock, Lock } from 'lucide-react';
 import { Goal, GoalStatus } from '../types';
-import { useAuth } from '../contexts/AuthContext';
-import { useCompactMode } from '../contexts/CompactModeContext';
+import { useAuth } from '../hooks/useAuth';
+import { useCompactMode } from '../hooks/useCompactMode';
 import { getGoals, createGoal, updateGoal, deleteGoal } from '../api/goalsApi';
 
 const GoalTracker: React.FC = () => {
