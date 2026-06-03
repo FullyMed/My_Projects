@@ -1,3 +1,8 @@
+# Activate virtual environment
 .\.venv\Scripts\activate
 
+# Run the original single-page app (project root)
 streamlit run app.py
+
+# Run the full multi-page App (recommended)
+streamlit run App/app.py
