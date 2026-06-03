@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
+import { supabase } from '../utils/supabaseClient';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   loading: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,67 +30,114 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('journeysetUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+
+          if (!error && profile) {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              name: profile.name || 'User',
+              createdAt: session.user.created_at
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Auth init error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          name: profile?.name || 'User',
+          createdAt: session.user.created_at
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in production, this would call your API
-    const users = JSON.parse(localStorage.getItem('journeysetUsers') || '[]');
-    const existingUser = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (existingUser) {
-      const user: User = {
-        id: existingUser.id,
-        email: existingUser.email,
-        name: existingUser.name,
-        createdAt: existingUser.createdAt
-      };
-      setUser(user);
-      localStorage.setItem('journeysetUser', JSON.stringify(user));
-      return true;
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: 'An unexpected error occurred' };
     }
-    return false;
   };
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
-    // Mock registration - in production, this would call your API
-    const users = JSON.parse(localStorage.getItem('journeysetUsers') || '[]');
-    const existingUser = users.find((u: any) => u.email === email);
-    
-    if (existingUser) {
-      return false; // User already exists
+  const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: data.user.id,
+            email,
+            name
+          });
+
+        if (profileError) {
+          return { success: false, error: 'Failed to create profile' };
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: 'An unexpected error occurred' };
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      password, // In production, this would be hashed
-      name,
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    localStorage.setItem('journeysetUsers', JSON.stringify(users));
-    
-    const user: User = {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      createdAt: newUser.createdAt
-    };
-    
-    setUser(user);
-    localStorage.setItem('journeysetUser', JSON.stringify(user));
-    return true;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('journeysetUser');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   };
 
   const value = {
@@ -96,7 +145,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
-    loading
+    loading,
+    isLoading: loading
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

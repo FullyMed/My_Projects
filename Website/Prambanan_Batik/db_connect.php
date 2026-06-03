@@ -1,17 +1,33 @@
 <?php
-$host     = 'localhost';
-$user     = 'u181047418_prambanan';
-$pass     = 'Pr4mbanan*';
-$dbname   = 'u181047418_prambanan';
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+require_once __DIR__ . '/config.php';
 
-if ($conn->connect_error) {
-    // Comment out the detailed error in production
-    die("Database connection failed. Please try again later !");
-    // Uncomment for development/debugging:
-    // die("Connection failed: " . $conn->connect_error);
+$pdo = null;
+
+try {
+    $dsn = sprintf(
+        'mysql:host=%s;dbname=%s;charset=utf8mb4',
+        DB_HOST,
+        DB_NAME
+    );
+
+    $pdo = new PDO(
+        $dsn,
+        DB_USER,
+        DB_PASSWORD,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]
+    );
+
+    if (DEBUG_MODE) {
+        error_log('Database connection successful');
+    }
+} catch (PDOException $e) {
+    error_log('Database connection failed: ' . $e->getMessage());
+    $pdo = null;
 }
 
-$conn->set_charset("utf8");
-?>
+return $pdo;

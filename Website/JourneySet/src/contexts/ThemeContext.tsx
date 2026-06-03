@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { storage } from '../utils/storage';
 
 interface ThemeContextType {
   isDark: boolean;
@@ -23,10 +24,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or default to system preference
-    const stored = localStorage.getItem('journeysetTheme');
+    const stored = storage.load<string>('journeyset:v1:theme', '');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (stored) {
       setIsDark(stored === 'dark');
     } else {
@@ -35,16 +35,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Apply theme to document
     const root = document.documentElement;
     if (isDark) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-    
-    // Save theme preference
-    localStorage.setItem('journeysetTheme', isDark ? 'dark' : 'light');
+
+    storage.save('journeyset:v1:theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   const toggleTheme = () => {

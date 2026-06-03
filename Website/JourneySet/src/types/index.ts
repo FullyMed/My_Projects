@@ -5,38 +5,47 @@ export interface User {
   createdAt: string;
 }
 
-export interface Task {
+export interface PlannerTask {
   id: string;
-  text: string;
-  day: string;
+  title: string;
+  dayKey: string;
+  weekKey: string;
   time?: string;
   completed: boolean;
-  userId: string;
+  recurring: 'none' | 'weekly';
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Goal {
   id: string;
   title: string;
-  description: string;
-  target: number;
-  current: number;
+  description?: string;
+  targetValue: number;
+  currentValue: number;
   unit: string;
-  completed: boolean;
-  userId: string;
-  weekStart: string;
+  allowExceedTarget: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Event {
+export type GoalStatus = 'Not Started' | 'In Progress' | 'Completed';
+
+export interface CalendarEvent {
   id: string;
+  dateISO: string;
+  time?: string;
   title: string;
-  description: string;
-  date: string;
+  description?: string;
   category: 'work' | 'personal' | 'health' | 'social' | 'other';
-  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Quote {
   text: string;
   author: string;
 }
+
+export type Task = PlannerTask;
+export type Event = CalendarEvent;

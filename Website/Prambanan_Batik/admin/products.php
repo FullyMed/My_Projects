@@ -1,0 +1,360 @@
+<?php
+
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/auth.php';
+
+requireAdminLogin();
+$admin = getAdminSession();
+
+$message = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
+    $id = trim($_POST['id'] ?? '');
+
+    if (empty($id)) {
+        $error = 'Product ID is required';
+    } else {
+        try {
+            $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
+            $stmt->execute([$id]);
+            $message = 'Product deleted successfully';
+        } catch (Exception $e) {
+            $error = 'Failed to delete product: ' . $e->getMessage();
+        }
+    }
+}
+
+$stmt = $pdo->prepare('SELECT p.id, p.name, p.sku, p.price_display, p.category_id, c.name as category_name, p.created_at FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC');
+$stmt->execute();
+$products = $stmt->fetchAll();
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #2d3436;
+            color: #ecf0f1;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 200ms ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav li a:hover {
+            background: #34495e;
+            color: #ecf0f1;
+            border-left-color: #8b6f47;
+        }
+
+        .sidebar-nav li a.active {
+            background: #34495e;
+            color: #8b6f47;
+            border-left-color: #8b6f47;
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topbar-user a {
+            color: #8b6f47;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 200ms ease-in-out;
+        }
+
+        .topbar-user a:hover {
+            color: #a0824d;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            color: #2d3436;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #8b6f47;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 200ms ease-in-out;
+        }
+
+        .btn:hover {
+            background: #a0824d;
+        }
+
+        .btn-danger {
+            background: #c53030;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .message.success {
+            background: #f0fdf4;
+            color: #166534;
+            border-color: #166534;
+        }
+
+        .message.error {
+            background: #fdeaea;
+            color: #c53030;
+            border-color: #c53030;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3436;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-buttons a,
+        .action-buttons button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #8b6f47;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #a0824d;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+            </div>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li><a href="/admin/index.php">Dashboard</a></li>
+                    <li><a href="/admin/categories.php">Categories</a></li>
+                    <li><a href="/admin/products.php" class="active">Products</a></li>
+                    <li><a href="/admin/reviews.php">Reviews</a></li>
+                    <li><a href="/admin/logout.php">Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <div class="topbar">
+                <h1>Products</h1>
+                <div class="topbar-user">
+                    <span><?php echo htmlspecialchars($admin['email']); ?></span>
+                    <a href="/admin/logout.php">Logout</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="page-header">
+                    <h2 class="page-title">Manage Products</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="/admin/product_edit.php" class="btn">Create Product</a>
+                        <a href="/admin/import_products.php" class="btn">Import CSV</a>
+                    </div>
+                </div>
+
+                <?php if ($message): ?>
+                    <div class="message success"><?php echo htmlspecialchars($message); ?></div>
+                <?php endif; ?>
+
+                <?php if ($error): ?>
+                    <div class="message error"><?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
+
+                <div class="table-section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($products as $product): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($product['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($product['sku']); ?></td>
+                                    <td><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></td>
+                                    <td>$<?php echo number_format($product['price_display'], 2); ?></td>
+                                    <td><?php echo date('M d, Y', strtotime($product['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/admin/product_edit.php?id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Edit</a>
+                                            <a href="/admin/product_images.php?product_id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Images</a>
+                                            <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?php echo htmlspecialchars($product['id']); ?>">
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

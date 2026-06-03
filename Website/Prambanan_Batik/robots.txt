@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /config.php
+Disallow: /db_connect.php
+Disallow: /functions.php
+
+Sitemap: https://example.com/sitemap.php
