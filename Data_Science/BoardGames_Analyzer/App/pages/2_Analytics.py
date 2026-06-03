@@ -166,7 +166,7 @@ df_rated = df[df["usersrated"].fillna(0) >= min_votes].copy()
 # ─────────────────────────────────────────────────────────────────
 # Header
 # ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="main-title">📊 Dataset Analytics</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">📊</span> Dataset Analytics</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">Explore the BoardGameGeek dataset powering the recommendation engine.</div>',
     unsafe_allow_html=True,

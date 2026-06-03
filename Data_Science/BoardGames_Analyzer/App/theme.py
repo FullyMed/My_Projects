@@ -180,6 +180,51 @@ _DARK_CSS = """
 .stApp { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); color: #f8fafc; }
 [data-testid="stSidebar"] { background: rgba(15,23,42,0.96); border-right: 1px solid rgba(148,163,184,0.15); }
 
+/* ── Header / top toolbar ── */
+[data-testid="stHeader"] {
+    background: rgba(15,23,42,0.96) !important;
+    border-bottom: 1px solid rgba(148,163,184,0.15) !important;
+    backdrop-filter: blur(8px) !important;
+}
+[data-testid="stHeader"] button svg { fill: #94a3b8 !important; }
+[data-testid="stHeader"] button:hover svg { fill: #f8fafc !important; }
+[data-testid="stDecoration"] {
+    background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+    height: 3px !important;
+}
+
+/* ── Sidebar nav links (multi-page) ── */
+[data-testid="stSidebarNav"] a span { color: #94a3b8 !important; }
+[data-testid="stSidebarNav"] a:hover { background: rgba(148,163,184,0.08) !important; }
+[data-testid="stSidebarNav"] a:hover span { color: #f8fafc !important; }
+[data-testid="stSidebarNav"] [aria-selected="true"],
+[data-testid="stSidebarNav"] [aria-current="page"] {
+    background: rgba(99,102,241,0.20) !important;
+}
+[data-testid="stSidebarNav"] [aria-selected="true"] span,
+[data-testid="stSidebarNav"] [aria-current="page"] span { color: #a5b4fc !important; }
+
+/* ── Radio buttons (sidebar + main area) ── */
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] label p { color: #cbd5e1 !important; }
+[role="radiogroup"] [role="radio"] > div { border-color: #6366f1 !important; }
+[role="radiogroup"] [role="radio"][aria-checked="true"] > div {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+[role="radiogroup"] [role="radio"][aria-checked="true"] > div > div {
+    background-color: #6366f1 !important;
+}
+
+/* ── Slider (sidebar + main area) ── */
+[role="slider"] {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+[data-baseweb="slider"] > div > div:nth-child(2) { background: #6366f1 !important; }
+[data-testid="stSliderTrackFill"],
+[data-testid="stSlider"] [data-baseweb="slider"] [data-testid="stSliderTrackFill"] { background: #6366f1 !important; }
+
 .main-title    { font-size: 3rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.25rem; }
 .subtitle      { font-size: 1.15rem; color: #cbd5e1; margin-bottom: 1.2rem; }
 .section-title { font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin-top: 0.8rem; margin-bottom: 0.6rem; }
@@ -248,6 +293,13 @@ _LIGHT_CSS = """
     background-clip: text;
     margin-bottom: 0.25rem;
     line-height: 1.15;
+}
+/* Emoji in the title must escape the transparent fill so it renders normally */
+.main-title .title-icon {
+    -webkit-text-fill-color: initial !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
 }
 
 .subtitle {
@@ -326,8 +378,30 @@ _LIGHT_CSS = """
 }
 .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; font-weight: 500; }
 
-/* ── Metric widget values: brand indigo ── */
+/* ── Metric widget ── */
 [data-testid="stMetricValue"] > div { color: #4338ca !important; font-weight: 700 !important; }
+[data-testid="stMetricLabel"],
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] div { color: #64748b !important; }
+[data-testid="stMetricDelta"] { color: #475569 !important; }
+
+/* ── Widget labels (main content area) ── */
+[data-testid="stWidgetLabel"] p,
+[data-testid="stWidgetLabel"] span,
+[data-testid="stWidgetLabel"] label,
+[data-testid="stTextInputRootElement"] label,
+[data-testid="stTextInputRootElement"] p,
+[data-baseweb="form-control-label"] span,
+[data-baseweb="form-control-label"],
+.stTextInput label, .stSelectbox label,
+.stSlider label, .stMultiSelect label,
+.stTextInput p, .stSelectbox p,
+.stSlider p, .stMultiSelect p { color: #1e293b !important; }
+
+/* ── Caption text (e.g. below Try Example button) ── */
+[data-testid="stCaptionContainer"] p,
+[data-testid="stCaptionContainer"] span { color: #64748b !important; }
 
 /* ── Inputs: indigo-tinted border ── */
 div[data-baseweb="input"] > div,
@@ -337,6 +411,46 @@ div[data-baseweb="select"] > div {
     border: 1.5px solid #c7d2fe !important;
 }
 input, textarea { color: #1e293b !important; }
+
+/* ── Placeholder text ── */
+input::placeholder,
+textarea::placeholder,
+[data-baseweb="input"] input::placeholder,
+[data-baseweb="textarea"] textarea::placeholder {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+/* ── Selectbox: value text + dropdown arrow ── */
+[data-baseweb="select"] span { color: #1e293b !important; }
+[data-baseweb="select"] svg,
+[data-testid="stSelectbox"] svg { fill: #4338ca !important; }
+
+/* ── Slider — single and range, track fill + thumbs ── */
+/* Thumb circle */
+[data-testid="stSlider"] [role="slider"] {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+/* Active track fill */
+[data-testid="stSlider"] [data-baseweb="slider"] > div > div:nth-child(2) {
+    background: #6366f1 !important;
+}
+[data-testid="stSlider"] [data-baseweb="slider"] [data-testid="stSliderTrackFill"] {
+    background: #6366f1 !important;
+}
+
+/* ── Radio buttons (main content area + sidebar) ── */
+[role="radiogroup"] [role="radio"] > div { border-color: #6366f1 !important; }
+[role="radiogroup"] [role="radio"][aria-checked="true"] > div {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+[role="radiogroup"] [role="radio"][aria-checked="true"] > div > div {
+    background-color: #6366f1 !important;
+}
+[role="radiogroup"] label p,
+[role="radiogroup"] label span { color: #1e293b !important; }
 
 /* ── Button: clean gradient, shadow-only (no visible border) ── */
 .stButton > button {
@@ -352,6 +466,102 @@ input, textarea { color: #1e293b !important; }
 }
 
 hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
+
+/* ── Header / top toolbar ── */
+[data-testid="stHeader"] {
+    background: rgba(238,242,255,0.95) !important;
+    border-bottom: 1.5px solid #e0e7ff !important;
+    backdrop-filter: blur(8px) !important;
+}
+[data-testid="stHeader"] button svg { fill: #4338ca !important; }
+[data-testid="stHeader"] button:hover svg { fill: #7c3aed !important; }
+/* "Deploy" text button */
+[data-testid="stHeader"] [data-testid="stDeployButton"],
+[data-testid="stHeader"] button[kind="header"] { color: #4338ca !important; }
+
+/* ── Colored decoration stripe at the very top ── */
+[data-testid="stDecoration"] {
+    background: linear-gradient(90deg, #4338ca 0%, #7c3aed 55%, #a855f7 100%) !important;
+    height: 3px !important;
+}
+
+/* ── Sidebar nav links (multi-page) ── */
+[data-testid="stSidebarNav"] a span { color: #475569 !important; }
+[data-testid="stSidebarNav"] a:hover {
+    background: rgba(99,102,241,0.08) !important;
+}
+[data-testid="stSidebarNav"] a:hover span { color: #4338ca !important; }
+[data-testid="stSidebarNav"] [aria-selected="true"],
+[data-testid="stSidebarNav"] [aria-current="page"] {
+    background: rgba(99,102,241,0.12) !important;
+}
+[data-testid="stSidebarNav"] [aria-selected="true"] span,
+[data-testid="stSidebarNav"] [aria-current="page"] span {
+    color: #4338ca !important;
+    font-weight: 600 !important;
+}
+
+/* ── Force all sidebar text to be visible on white background ── */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stMarkdown p,
+[data-testid="stSidebar"] .stMarkdown span,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] span,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+    color: #1e293b !important;
+}
+
+/* ── Sidebar info / alert boxes ── */
+[data-testid="stSidebar"] [data-testid="stAlertContainer"],
+[data-testid="stSidebar"] .stAlert {
+    background: rgba(238,242,255,0.85) !important;
+    border: 1px solid #c7d2fe !important;
+    color: #1e293b !important;
+    border-radius: 10px !important;
+}
+[data-testid="stSidebar"] .stAlert p,
+[data-testid="stSidebar"] .stAlert span { color: #1e293b !important; }
+[data-testid="stSidebar"] .stAlert svg { fill: #4338ca !important; }
+
+/* ── Radio buttons — multiple selectors to cover Streamlit/BaseWeb variants ── */
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stRadio"] label p,
+[data-testid="stSidebar"] [data-testid="stRadio"] label span { color: #1e293b !important; }
+
+[data-testid="stSidebar"] [role="radiogroup"] [role="radio"] > div { border-color: #6366f1 !important; }
+[data-testid="stSidebar"] [role="radiogroup"] [role="radio"] > div > div { border-color: #6366f1 !important; }
+[data-testid="stSidebar"] [role="radiogroup"] [role="radio"][aria-checked="true"] > div {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+[data-testid="stSidebar"] [role="radiogroup"] [role="radio"][aria-checked="true"] > div > div {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="radio"] [aria-checked="true"] div,
+[data-testid="stSidebar"] [data-baseweb="radio"] [aria-checked="true"] > div {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+}
+
+/* ── Slider ── */
+[data-testid="stSidebar"] [data-baseweb="slider"] div[role="slider"],
+[data-testid="stSidebar"] [data-baseweb="slider"] [data-testid="stThumbValue"] {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #1e293b !important;
+}
+[data-testid="stSidebar"] [data-baseweb="slider"] div[data-testid="stSliderTrackFill"] {
+    background-color: #6366f1 !important;
+}
 </style>
 """
 

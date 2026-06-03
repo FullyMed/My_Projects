@@ -20,7 +20,7 @@ selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 
 # Header
-st.markdown('<div class="main-title">🎲 Board Game Discovery Engine</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Board Game Discovery Engine</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">An explainable hybrid recommendation system for board game discovery.</div>',
     unsafe_allow_html=True,

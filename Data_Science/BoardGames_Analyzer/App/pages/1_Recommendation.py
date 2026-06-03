@@ -66,7 +66,7 @@ for key in ["title_input", "category_input", "mechanic_input", "family_input", "
         st.session_state[key] = ""
 
 # Header
-st.markdown('<div class="main-title">🎲 Recommendation Engine</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Recommendation Engine</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">Discover board games by title similarity, trait preferences, or both.</div>',
     unsafe_allow_html=True,
