@@ -75,7 +75,7 @@ export const createPlannerTask = async (userId: string, task: Omit<PlannerTask, 
 
 export const updatePlannerTask = async (userId: string, taskId: string, updates: Partial<PlannerTask>): Promise<PlannerTask | null> => {
   try {
-    const updateData: any = {};
+    const updateData: { title?: string; time?: string | null; completed?: boolean; recurring?: string } = {};
     if (updates.title) updateData.title = updates.title;
     if (updates.time !== undefined) updateData.time = updates.time;
     if (updates.completed !== undefined) updateData.completed = updates.completed;
@@ -134,7 +134,7 @@ const updateLocalCache = (userId: string, tasks: PlannerTask[], type: 'planner' 
   storage.save(key, tasks);
 };
 
-const getLocalCache = (userId: string, type: 'planner' | 'goals' | 'events'): any[] => {
+const getLocalCache = (userId: string, type: 'planner' | 'goals' | 'events'): unknown[] => {
   const key = storage.getUserKey(type, userId);
   return storage.load(key, []);
 };

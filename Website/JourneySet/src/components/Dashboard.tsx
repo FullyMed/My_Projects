@@ -7,7 +7,6 @@ import {
   LogOut,
   Moon,
   Sun,
-  Quote,
   Compass,
   Menu,
   X,

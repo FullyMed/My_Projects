@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Quote, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { getRandomQuote } from '../data/quotes';
 import { Quote as QuoteType } from '../types';
 import { storage } from '../utils/storage';
@@ -23,35 +23,36 @@ const QuoteDisplay: React.FC<QuoteDisplayProps> = ({ compact = false }) => {
   useEffect(() => {
     const lastQuoteDate = storage.load<string>('journeyset:v1:lastQuoteDate', '');
     const today = new Date().toDateString();
-
     if (lastQuoteDate !== today) {
       setQuote(getRandomQuote());
       storage.save('journeyset:v1:lastQuoteDate', today);
     }
   }, []);
 
-  return (
-    <div className={`flex items-center ${compact ? 'space-x-2' : 'space-x-4 max-w-md'}`}>
-      {!compact && (
-        <div className="flex items-center space-x-2">
-          <Quote className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-          <div className="text-sm hidden sm:block">
-            <p className="text-gray-700 dark:text-gray-300 italic line-clamp-1">"{quote.text}"</p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs">— {quote.author}</p>
-          </div>
-        </div>
-      )}
-      {compact && (
-        <Quote className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-      )}
+  if (compact) {
+    return (
       <button
         onClick={refreshQuote}
-        className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 ${
-          isRefreshing ? 'animate-spin' : ''
-        }`}
-        title="Get new quote"
+        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 cursor-pointer"
+        title="New quote"
       >
-        <RefreshCw className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 max-w-sm">
+      <div className="text-right hidden sm:block min-w-0">
+        <p className="text-xs text-slate-500 dark:text-slate-400 italic line-clamp-1">"{quote.text}"</p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">— {quote.author}</p>
+      </div>
+      <button
+        onClick={refreshQuote}
+        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex-shrink-0 cursor-pointer"
+        title="New quote"
+      >
+        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
       </button>
     </div>
   );

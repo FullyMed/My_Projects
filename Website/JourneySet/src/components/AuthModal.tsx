@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Eye, EyeOff, Compass } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useModalFocus } from '../hooks/useModalFocus';
@@ -45,124 +45,161 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
           onClose();
         }
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
+  const inputClass =
+    'w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors text-sm min-h-[48px]';
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" role="presentation">
+    /*
+     * On mobile   → items-end  = sheet slides up from bottom
+     * On sm+      → items-center = centred card
+     */
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
+      role="presentation"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-2xl p-8 w-full max-w-md relative shadow-2xl"
+        className={[
+          'bg-white dark:bg-slate-900 w-full xs:max-w-md relative',
+          'shadow-2xl shadow-black/20 border border-slate-200 dark:border-slate-800',
+          /* Mobile: full-width rounded top corners + sheet animation */
+          'rounded-t-2xl xs:rounded-2xl',
+          'sheet-enter xs:animate-none',
+          /* Let tall content scroll on small phones */
+          'max-h-[92dvh] overflow-y-auto',
+        ].join(' ')}
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
       >
-        <button
-          onClick={onClose}
-          aria-label="Close authentication modal"
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-        >
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
-
-        <div className="flex items-center justify-center mb-6">
-          <Compass className="h-8 w-8 text-blue-600 dark:text-blue-400 mr-2" />
-          <span className="text-2xl font-bold text-gray-900 dark:text-white">JourneySet</span>
+        {/* Drag handle on mobile */}
+        <div className="flex justify-center pt-3 pb-1 xs:hidden">
+          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
         </div>
 
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8" id="auth-modal-title">
-          {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-        </h2>
+        {/* Gradient accent strip — hidden on mobile (handle replaces it visually) */}
+        <div className="hidden xs:block h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-t-2xl" />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {mode === 'register' && (
+        <div className="px-6 xs:px-8 pt-4 xs:pt-8 pb-6 xs:pb-8">
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          <div className="flex items-center justify-center mb-5 xs:mb-6">
+            <div className="w-9 h-9 xs:w-10 xs:h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md mr-2.5">
+              <Compass className="h-4 w-4 xs:h-5 xs:w-5 text-white" />
+            </div>
+            <span className="text-lg xs:text-xl font-bold text-slate-900 dark:text-white tracking-tight">JourneySet</span>
+          </div>
+
+          <h2
+            className="text-xl xs:text-2xl font-bold text-center text-slate-900 dark:text-white mb-1"
+            id="auth-modal-title"
+          >
+            {mode === 'login' ? 'Welcome back' : 'Create account'}
+          </h2>
+          <p className="text-center text-xs xs:text-sm text-slate-500 dark:text-slate-400 mb-5 xs:mb-7">
+            {mode === 'login'
+              ? 'Sign in to continue your journey'
+              : 'Start your productivity journey today'}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === 'register' && (
+              <div>
+                <label htmlFor="name-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  Full name
+                </label>
+                <input
+                  id="name-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Enter your full name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
+            )}
+
             <div>
-              <label htmlFor="name-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Full Name
+              <label htmlFor="email-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                Email address
               </label>
               <input
-                id="name-input"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                placeholder="Enter your full name"
+                id="email-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="Enter your email"
                 required
-                aria-label="Full name"
+                autoComplete="email"
+                inputMode="email"
               />
             </div>
-          )}
 
-          <div>
-            <label htmlFor="email-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email-input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-              placeholder="Enter your email"
-              required
-              aria-label="Email address"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password-input"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                placeholder="Enter your password"
-                required
-                minLength={6}
-                aria-label="Password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
+            <div>
+              <label htmlFor="password-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password-input"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${inputClass} pr-12`}
+                  placeholder="Enter your password"
+                  required
+                  minLength={6}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-0 top-0 bottom-0 min-w-[48px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-              <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg px-4 py-3">
+                <p className="text-rose-600 dark:text-rose-400 text-sm">{error}</p>
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-            aria-busy={loading}
-          >
-            {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              aria-busy={loading}
+              className="w-full min-h-[52px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-white rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
+            >
+              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
+          <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
             <button
               onClick={onSwitchMode}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1"
-              aria-label={mode === 'login' ? 'Switch to sign up' : 'Switch to sign in'}
+              className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold focus:outline-none cursor-pointer"
             >
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>

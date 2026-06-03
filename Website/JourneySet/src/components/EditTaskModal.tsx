@@ -17,7 +17,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
     dayKey: task.dayKey,
     time: task.time || '',
     completed: task.completed,
-    recurring: task.recurring
+    recurring: task.recurring,
   });
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -31,57 +31,66 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
       dayKey: formData.dayKey,
       time: formData.time || undefined,
       completed: formData.completed,
-      recurring: formData.recurring as 'none' | 'weekly'
+      recurring: formData.recurring as 'none' | 'weekly',
     });
     onClose();
   };
 
+  const inputClass =
+    'w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors';
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" role="presentation">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe" role="presentation">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg max-w-md w-full"
+        className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter xs:animate-none max-h-[92dvh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-task-title"
       >
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="edit-task-title">Edit Task</h3>
+        {/* Mobile handle */}
+        <div className="flex justify-center pt-3 pb-1 xs:hidden">
+          <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+        </div>
+        <div className="hidden xs:block h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-t-2xl" />
+
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white" id="edit-task-title">
+            Edit task
+          </h3>
           <button
             onClick={onClose}
-            aria-label="Close edit task modal"
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            aria-label="Close"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="px-5 py-5 space-y-4">
           <div>
-            <label htmlFor="task-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="task-title" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
               Title
             </label>
             <input
               id="task-title"
               type="text"
               value={formData.title}
-              onChange={(e) => handleChange('title', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              onChange={e => handleChange('title', e.target.value)}
+              className={inputClass}
               required
-              aria-label="Task title"
             />
           </div>
 
           <div>
-            <label htmlFor="task-day" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="task-day" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
               Day
             </label>
             <select
               id="task-day"
               value={formData.dayKey}
-              onChange={(e) => handleChange('dayKey', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              aria-label="Task day"
+              onChange={e => handleChange('dayKey', e.target.value)}
+              className={inputClass}
             >
               {days.map(day => (
                 <option key={day} value={day}>{day}</option>
@@ -90,64 +99,57 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
           </div>
 
           <div>
-            <label htmlFor="task-time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Time (optional)
+            <label htmlFor="task-time" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+              Time <span className="font-normal text-slate-400 normal-case">(optional)</span>
             </label>
             <input
               id="task-time"
               type="time"
               value={formData.time}
-              onChange={(e) => handleChange('time', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              aria-label="Task time"
+              onChange={e => handleChange('time', e.target.value)}
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label htmlFor="task-recurring" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Recurring
+            <label htmlFor="task-recurring" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+              Repeat
             </label>
             <select
               id="task-recurring"
               value={formData.recurring}
-              onChange={(e) => handleChange('recurring', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              aria-label="Task recurring"
+              onChange={e => handleChange('recurring', e.target.value)}
+              className={inputClass}
             >
-              <option value="none">None</option>
+              <option value="none">No repeat</option>
               <option value="weekly">Weekly</option>
             </select>
           </div>
 
-          <div className="flex items-center space-x-3 pt-2">
+          <label className="flex items-center gap-3 cursor-pointer py-1">
             <input
               type="checkbox"
               id="completed"
               checked={formData.completed}
-              onChange={(e) => handleChange('completed', e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              aria-label="Mark task as completed"
+              onChange={e => handleChange('completed', e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
-            <label htmlFor="completed" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Completed
-            </label>
-          </div>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Mark as completed</span>
+          </label>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Cancel editing"
+              className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-              aria-label="Save task changes"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
-              Save
+              Save changes
             </button>
           </div>
         </form>

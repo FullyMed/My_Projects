@@ -70,7 +70,7 @@ export const createEvent = async (userId: string, event: Omit<CalendarEvent, 'id
 
 export const updateEvent = async (userId: string, eventId: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent | null> => {
   try {
-    const updateData: any = {};
+    const updateData: { title?: string; time?: string; description?: string; category?: string } = {};
     if (updates.title) updateData.title = updates.title;
     if (updates.time !== undefined) updateData.time = updates.time;
     if (updates.description !== undefined) updateData.description = updates.description;

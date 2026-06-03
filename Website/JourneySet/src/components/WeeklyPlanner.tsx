@@ -4,7 +4,6 @@ import { PlannerTask } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useCompactMode } from '../contexts/CompactModeContext';
 import { format, startOfWeek, addDays, isToday, subWeeks, addWeeks, getISOWeek, getISOWeekYear } from 'date-fns';
-import { storage } from '../utils/storage';
 import EditTaskModal from './EditTaskModal';
 import { getPlannerTasks, createPlannerTask, updatePlannerTask, deletePlannerTask } from '../api/plannerApi';
 
@@ -40,10 +39,6 @@ const WeeklyPlanner: React.FC = () => {
     }
   }, [user, currentWeekKey]);
 
-  const saveTasks = (updatedTasks: PlannerTask[]) => {
-    setTasks(updatedTasks);
-  };
-
   const addTask = async () => {
     if (!newTask.trim() || !selectedDay || !user) return;
 
@@ -53,7 +48,7 @@ const WeeklyPlanner: React.FC = () => {
       weekKey: currentWeekKey,
       time: selectedTime || undefined,
       completed: false,
-      recurring: selectedRecurring
+      recurring: selectedRecurring,
     });
 
     if (task) {
@@ -70,12 +65,9 @@ const WeeklyPlanner: React.FC = () => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    const updated = await updatePlannerTask(user.id, taskId, {
-      completed: !task.completed
-    });
-
+    const updated = await updatePlannerTask(user.id, taskId, { completed: !task.completed });
     if (updated) {
-      setTasks(tasks.map(t => t.id === taskId ? updated : t));
+      setTasks(tasks.map(t => (t.id === taskId ? updated : t)));
     }
   };
 
@@ -89,17 +81,16 @@ const WeeklyPlanner: React.FC = () => {
 
   const duplicateTask = async (task: PlannerTask) => {
     if (!user) return;
-    const newTask = await createPlannerTask(user.id, {
+    const dup = await createPlannerTask(user.id, {
       title: task.title,
       dayKey: task.dayKey,
       weekKey: task.weekKey,
       time: task.time,
       completed: false,
-      recurring: 'none'
+      recurring: 'none',
     });
-
-    if (newTask) {
-      setTasks([...tasks, newTask]);
+    if (dup) {
+      setTasks([...tasks, dup]);
     }
   };
 
@@ -107,80 +98,83 @@ const WeeklyPlanner: React.FC = () => {
     if (!user) return;
     const updated = await updatePlannerTask(user.id, taskId, updates);
     if (updated) {
-      setTasks(tasks.map(t => t.id === taskId ? updated : t));
+      setTasks(tasks.map(t => (t.id === taskId ? updated : t)));
       setEditingTaskData(null);
     }
   };
 
-  const getTasksForDay = (day: string) => {
-    return tasks.filter(task => {
-      if (task.dayKey !== day || task.weekKey !== currentWeekKey) return false;
+  const getTasksForDay = (day: string) =>
+    tasks
+      .filter(task => {
+        if (task.dayKey !== day || task.weekKey !== currentWeekKey) return false;
+        if (filter === 'completed') return task.completed;
+        if (filter === 'incomplete') return !task.completed;
+        return true;
+      })
+      .sort((a, b) => {
+        if (a.time && b.time) return a.time.localeCompare(b.time);
+        if (a.time) return -1;
+        if (b.time) return 1;
+        return 0;
+      });
 
-      if (filter === 'completed') return task.completed;
-      if (filter === 'incomplete') return !task.completed;
-      return true;
-    }).sort((a, b) => {
-      if (a.time && b.time) return a.time.localeCompare(b.time);
-      if (a.time) return -1;
-      if (b.time) return 1;
-      return 0;
-    });
-  };
+  const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
 
-  const handlePreviousWeek = () => {
-    setCurrentWeek(subWeeks(currentWeek, 1));
-  };
-
-  const handleNextWeek = () => {
+  const handleNextWeek = async () => {
     const nextWeek = addWeeks(currentWeek, 1);
     const nextWeekKey = getWeekKey(nextWeek);
-    const updatedTasks = [...tasks];
 
-    tasks.forEach(task => {
-      if (task.recurring === 'weekly' && task.weekKey === currentWeekKey) {
-        const now = new Date().toISOString();
-        const recurringTask: PlannerTask = {
-          ...task,
-          id: crypto.randomUUID(),
-          weekKey: nextWeekKey,
-          recurring: 'weekly',
-          completed: false,
-          createdAt: now,
-          updatedAt: now
-        };
-        updatedTasks.push(recurringTask);
-      }
-    });
-
-    if (updatedTasks.length > tasks.length) {
-      saveTasks(updatedTasks);
+    if (user) {
+      const recurringTasks = tasks.filter(
+        task => task.recurring === 'weekly' && task.weekKey === currentWeekKey
+      );
+      await Promise.all(
+        recurringTasks.map(task =>
+          createPlannerTask(user.id, {
+            title: task.title,
+            dayKey: task.dayKey,
+            weekKey: nextWeekKey,
+            time: task.time,
+            completed: false,
+            recurring: 'weekly',
+          })
+        )
+      );
     }
+
     setCurrentWeek(nextWeek);
   };
 
   const exportTasks = () => {
     const currentWeekTasks = tasks.filter(task => task.weekKey === currentWeekKey);
-
     const weekData = days.map(day => ({
       day,
-      tasks: currentWeekTasks.filter(task => task.dayKey === day).sort((a, b) => {
-        if (a.time && b.time) return a.time.localeCompare(b.time);
-        if (a.time) return -1;
-        if (b.time) return 1;
-        return 0;
-      })
+      tasks: currentWeekTasks
+        .filter(task => task.dayKey === day)
+        .sort((a, b) => {
+          if (a.time && b.time) return a.time.localeCompare(b.time);
+          if (a.time) return -1;
+          if (b.time) return 1;
+          return 0;
+        }),
     }));
 
-    const content = weekData.map(({ day, tasks }) => {
-      const taskList = tasks.map(task =>
-        `  ${task.completed ? '✓' : '○'} ${task.title}${task.time ? ` (${task.time})` : ''}${task.recurring === 'weekly' ? ' [weekly]' : ''}`
-      ).join('\n');
-      return `${day}:\n${taskList || '  No tasks'}`;
-    }).join('\n\n');
+    const content = weekData
+      .map(({ day, tasks }) => {
+        const taskList = tasks
+          .map(
+            task =>
+              `  ${task.completed ? '✓' : '○'} ${task.title}${task.time ? ` (${task.time})` : ''}${task.recurring === 'weekly' ? ' [weekly]' : ''}`
+          )
+          .join('\n');
+        return `${day}:\n${taskList || '  No tasks'}`;
+      })
+      .join('\n\n');
 
-    const blob = new Blob([`Weekly Plan - ${format(currentWeek, 'MMMM dd, yyyy')} (Week ${currentWeekKey.split('-')[1]})\n\n${content}`], {
-      type: 'text/plain'
-    });
+    const blob = new Blob(
+      [`Weekly Plan - ${format(currentWeek, 'MMMM dd, yyyy')} (Week ${currentWeekKey.split('-')[1]})\n\n${content}`],
+      { type: 'text/plain' }
+    );
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -190,85 +184,87 @@ const WeeklyPlanner: React.FC = () => {
   };
 
   const getDayDate = (dayIndex: number) => addDays(currentWeek, dayIndex);
-
   const weekTaskCount = tasks.filter(task => task.weekKey === currentWeekKey).length;
 
+  const inputClass =
+    'w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1 xs:gap-2 min-w-0">
           <button
             onClick={handlePreviousWeek}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
             aria-label="Previous week"
           >
-            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Week of {format(currentWeek, 'MMMM dd, yyyy')}
+          <div className="min-w-0">
+            <h2 className="text-base xs:text-lg font-bold text-slate-900 dark:text-white truncate">
+              {format(currentWeek, 'MMM d')}
+              <span className="hidden xs:inline">{format(currentWeek, ', yyyy')}</span>
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {currentWeekKey} • {weekTaskCount} task{weekTaskCount !== 1 ? 's' : ''}
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {currentWeekKey} · {weekTaskCount} task{weekTaskCount !== 1 ? 's' : ''}
             </p>
           </div>
           <button
             onClick={handleNextWeek}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
             aria-label="Next week"
           >
-            <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
         <button
           onClick={exportTasks}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-          aria-label="Export week as file"
+          className="inline-flex items-center gap-2 px-3 xs:px-4 min-h-[44px] text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors cursor-pointer flex-shrink-0"
         >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          <span>Export Week</span>
+          <Download className="h-4 w-4" />
+          <span className="hidden xs:inline">Export week</span>
+          <span className="xs:hidden">Export</span>
         </button>
       </div>
 
-      {/* Filter Buttons */}
-      <div className="flex gap-2">
+      {/* Filter Buttons — horizontal scroll on small screens */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {(['all', 'completed', 'incomplete'] as const).map(filterOption => (
           <button
             key={filterOption}
             onClick={() => setFilter(filterOption)}
-            className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors capitalize ${
+            className={`inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg text-xs font-medium transition-colors capitalize cursor-pointer whitespace-nowrap flex-shrink-0 ${
               filter === filterOption
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700'
             }`}
           >
-            <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">{filterOption}</span>
+            <Filter className="h-3 w-3" />
+            {filterOption}
           </button>
         ))}
       </div>
 
       {/* Add Task Form */}
-      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 ${isCompact ? 'p-4' : 'p-6'}`}>
-        <h3 className={`font-semibold text-gray-900 dark:text-white mb-4 ${isCompact ? 'text-base' : 'text-lg'}`}>Add New Task</h3>
-        <div className={`grid gap-4 ${isCompact ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 md:grid-cols-5'}`}>
-          <div className="md:col-span-2">
-            <input
-              type="text"
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              placeholder="Enter your task..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              onKeyPress={(e) => e.key === 'Enter' && addTask()}
-            />
-          </div>
+      <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card ${isCompact ? 'p-4' : 'p-5'}`}>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Add new task</h3>
+        {/* Mobile: stacked single column; md+: 5-column grid */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-5 gap-3">
+          <input
+            type="text"
+            value={newTask}
+            onChange={e => setNewTask(e.target.value)}
+            placeholder="Task title…"
+            className={`${inputClass} xs:col-span-2 md:col-span-2`}
+            onKeyDown={e => e.key === 'Enter' && addTask()}
+          />
           <select
             value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            onChange={e => setSelectedDay(e.target.value)}
+            className={inputClass}
           >
-            <option value="">Select Day</option>
+            <option value="">Select day</option>
             {days.map(day => (
               <option key={day} value={day}>{day}</option>
             ))}
@@ -276,29 +272,31 @@ const WeeklyPlanner: React.FC = () => {
           <input
             type="time"
             value={selectedTime}
-            onChange={(e) => setSelectedTime(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            onChange={e => setSelectedTime(e.target.value)}
+            className={inputClass}
           />
-          <select
-            value={selectedRecurring}
-            onChange={(e) => setSelectedRecurring(e.target.value as 'none' | 'weekly')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="none">No Repeat</option>
-            <option value="weekly">Weekly</option>
-          </select>
-          <button
-            onClick={addTask}
-            disabled={!newTask.trim() || !selectedDay}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          <div className="flex gap-2 xs:col-span-2 md:col-span-1">
+            <select
+              value={selectedRecurring}
+              onChange={e => setSelectedRecurring(e.target.value as 'none' | 'weekly')}
+              className={`${inputClass} flex-1`}
+            >
+              <option value="none">No repeat</option>
+              <option value="weekly">Weekly</option>
+            </select>
+            <button
+              onClick={addTask}
+              disabled={!newTask.trim() || !selectedDay}
+              className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Weekly Grid */}
-      <div className={`grid gap-4 ${isCompact ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6'}`}>
+      <div className={`grid gap-4 ${isCompact ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'}`}>
         {days.map((day, index) => {
           const dayTasks = getTasksForDay(day);
           const dayDate = getDayDate(index);
@@ -307,23 +305,27 @@ const WeeklyPlanner: React.FC = () => {
           return (
             <div
               key={day}
-              className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border transition-all ${
+              className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-200 ${
                 isCurrentDay
-                  ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/20'
-                  : 'border-gray-200 dark:border-gray-700'
-              } ${isCompact ? 'p-4' : 'p-6'}`}
+                  ? 'border-indigo-300 dark:border-indigo-700 shadow-card'
+                  : 'border-slate-200 dark:border-slate-800'
+              } ${isCompact ? 'p-4' : 'p-5'}`}
             >
               <div className={`flex items-center justify-between ${isCompact ? 'mb-3' : 'mb-4'}`}>
                 <div>
-                  <h3 className={`font-semibold ${isCurrentDay ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'} ${isCompact ? 'text-sm' : ''}`}>
+                  <h3 className={`font-semibold text-sm ${isCurrentDay ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'}`}>
                     {day}
                   </h3>
-                  <p className={`text-gray-500 dark:text-gray-400 ${isCompact ? 'text-xs' : 'text-sm'}`}>
-                    {format(dayDate, 'MMM dd')}
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                    {format(dayDate, 'MMM d')}
                   </p>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {dayTasks.length} task{dayTasks.length !== 1 ? 's' : ''}
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  isCurrentDay
+                    ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                }`}>
+                  {dayTasks.length}
                 </span>
               </div>
 
@@ -331,76 +333,74 @@ const WeeklyPlanner: React.FC = () => {
                 {dayTasks.map(task => (
                   <div
                     key={task.id}
-                    className={`p-3 rounded-lg border transition-all ${
+                    className={`p-3 rounded-xl border transition-all duration-150 ${
                       task.completed
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                        : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50'
+                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:border-indigo-200 dark:hover:border-indigo-800/50'
                     }`}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start gap-2.5">
                       <button
                         onClick={() => toggleTask(task.id)}
-                        className={`mt-0.5 p-1 rounded transition-colors ${
+                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 cursor-pointer ${
                           task.completed
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-gray-400 hover:text-green-600 dark:hover:text-green-400'
+                            ? 'bg-emerald-500 border-emerald-500'
+                            : 'border-slate-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500'
                         }`}
                       >
-                        <Check className="h-4 w-4" />
+                        {task.completed && <Check className="h-3 w-3 text-white" />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className={`text-sm ${
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className={`text-sm leading-snug ${
                             task.completed
-                              ? 'text-green-700 dark:text-green-300 line-through'
-                              : 'text-gray-900 dark:text-white'
+                              ? 'text-slate-400 dark:text-slate-500 line-through'
+                              : 'text-slate-800 dark:text-slate-200'
                           }`}>
                             {task.title}
                           </p>
                           {task.recurring === 'weekly' && (
-                            <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                            <span className="text-[10px] px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded font-medium">
                               weekly
                             </span>
                           )}
                         </div>
                         {task.time && (
-                          <div className="flex items-center space-x-1 mt-1">
-                            <Clock className="h-3 w-3 text-gray-400" />
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {task.time}
-                            </span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-slate-400" />
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500">{task.time}</span>
                           </div>
                         )}
                       </div>
-                      <div className="flex space-x-1">
+                      <div className="flex gap-0.5 flex-shrink-0">
                         <button
                           onClick={() => setEditingTaskData(task)}
-                          className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
                           title="Edit"
                         >
-                          <Edit3 className="h-3 w-3" />
+                          <Edit3 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => duplicateTask(task)}
-                          className="p-1 text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-sky-500 dark:hover:text-sky-400 transition-colors cursor-pointer"
                           title="Duplicate"
                         >
-                          <Copy className="h-3 w-3" />
+                          <Copy className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => deleteTask(task.id)}
-                          className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
                           title="Delete"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
                   </div>
                 ))}
                 {dayTasks.length === 0 && (
-                  <p className="text-center text-gray-500 dark:text-gray-400 text-sm py-8">
-                    No tasks planned
+                  <p className="text-center text-slate-400 dark:text-slate-600 text-xs py-6">
+                    No tasks
                   </p>
                 )}
               </div>
@@ -413,7 +413,7 @@ const WeeklyPlanner: React.FC = () => {
         <EditTaskModal
           task={editingTaskData}
           days={days}
-          onSave={(updates) => updateTask(editingTaskData.id, updates)}
+          onSave={updates => updateTask(editingTaskData.id, updates)}
           onClose={() => setEditingTaskData(null)}
         />
       )}

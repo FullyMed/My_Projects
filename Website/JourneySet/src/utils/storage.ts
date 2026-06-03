@@ -54,8 +54,7 @@ export const storage = {
     }
   },
 
-  // Helper to get user-specific key
-  getUserKey(baseKey: 'planner' | 'goals' | 'events', userId: string): string {
-    return `journeyset:v1:${baseKey}:${userId}`;
+  getUserKey(baseKey: 'planner' | 'goals' | 'events', userId: string): StorageKey {
+    return `journeyset:v1:${baseKey}:${userId}` as StorageKey;
   }
 };

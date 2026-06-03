@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, LogOut, Moon, Sun, Check, Clock, Maximize2, Minimize2 } from 'lucide-react';
+import { Trash2, LogOut, Moon, Sun, Check, Clock, Maximize2, Minimize2, User, Wifi } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCompactMode } from '../contexts/CompactModeContext';
@@ -16,20 +16,11 @@ const SettingsPage: React.FC = () => {
 
   const handleResetData = () => {
     if (user) {
-      const plannerKey = storage.getUserKey('planner', user.id);
-      const goalsKey = storage.getUserKey('goals', user.id);
-      const eventsKey = storage.getUserKey('events', user.id);
-
-      localStorage.removeItem(plannerKey);
-      localStorage.removeItem(goalsKey);
-      localStorage.removeItem(eventsKey);
-
+      localStorage.removeItem(storage.getUserKey('planner', user.id));
+      localStorage.removeItem(storage.getUserKey('goals', user.id));
+      localStorage.removeItem(storage.getUserKey('events', user.id));
       setShowResetModal(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await logout();
   };
 
   useEffect(() => {
@@ -40,150 +31,164 @@ const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Settings</h1>
-
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg max-w-2xl">
-        {/* User Info */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Account</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
-              <p className="text-gray-900 dark:text-white font-medium">{user?.email}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Name</label>
-              <p className="text-gray-900 dark:text-white font-medium">{user?.name}</p>
-            </div>
-          </div>
+      <div className="max-w-2xl space-y-6">
+        <div>
+          <h1 className="text-xl xs:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Settings</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your account and preferences.</p>
         </div>
 
+        {/* Account */}
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5">
+            <User className="h-4 w-4 text-indigo-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Account</h2>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <div>
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Email</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.email}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Name</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
+            </div>
+          </div>
+        </section>
+
         {/* Sync Status */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Data Sync</h2>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5">
+            <Wifi className="h-4 w-4 text-indigo-500" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Data sync</h2>
+          </div>
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-3">
               {lastSync ? (
                 <>
-                  <Check className="h-5 w-5 text-green-500" />
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center flex-shrink-0">
+                    <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Last synced</p>
-                    <p className="text-gray-900 dark:text-white font-medium">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Synced</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {formatDistanceToNow(new Date(lastSync), { addSuffix: true })}
                     </p>
                   </div>
                 </>
               ) : (
                 <>
-                  <Clock className="h-5 w-5 text-gray-400" />
+                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-4 w-4 text-slate-400" />
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Sync status</p>
-                    <p className="text-gray-900 dark:text-white font-medium">Awaiting first sync</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Awaiting first sync</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Changes sync automatically</p>
                   </div>
                 </>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Theme */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Appearance</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+        {/* Appearance */}
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Appearance</h2>
+          </div>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {/* Theme */}
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 {isDark ? (
-                  <Sun className="h-5 w-5 text-yellow-500" />
+                  <Sun className="h-4 w-4 text-amber-500" />
                 ) : (
-                  <Moon className="h-5 w-5 text-gray-600" />
+                  <Moon className="h-4 w-4 text-slate-500" />
                 )}
-                <span className="text-gray-700 dark:text-gray-300">
-                  {isDark ? 'Dark Mode' : 'Light Mode'}
-                </span>
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{isDark ? 'Dark mode' : 'Light mode'}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Switch colour theme</p>
+                </div>
               </div>
               <button
                 onClick={toggleTheme}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="px-4 min-h-[44px] text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
               >
                 Toggle
               </button>
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-3">
+
+            {/* Compact */}
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
                 {isCompact ? (
-                  <Maximize2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <Maximize2 className="h-4 w-4 text-indigo-500" />
                 ) : (
-                  <Minimize2 className="h-5 w-5 text-gray-600" />
+                  <Minimize2 className="h-4 w-4 text-slate-500" />
                 )}
-                <span className="text-gray-700 dark:text-gray-300">
-                  {isCompact ? 'Compact Mode' : 'Normal Mode'}
-                </span>
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{isCompact ? 'Compact mode' : 'Normal mode'}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Reduce sidebar and spacing</p>
+                </div>
               </div>
               <button
                 onClick={toggleCompact}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="px-4 min-h-[44px] text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
               >
                 Toggle
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Danger Zone */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Danger Zone</h2>
-          <button
-            onClick={() => setShowResetModal(true)}
-            className="w-full flex items-center space-x-3 px-4 py-3 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors border border-orange-200 dark:border-orange-900/50"
-          >
-            <Trash2 className="h-5 w-5" />
-            <span className="font-medium">Reset All Data</span>
-          </button>
-        </div>
-
-        {/* Logout */}
-        <div className="p-6">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-red-200 dark:border-red-900/50"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">Sign Out</span>
-          </button>
-        </div>
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-rose-100 dark:border-rose-900/40">
+            <h2 className="text-sm font-semibold text-rose-600 dark:text-rose-400">Danger zone</h2>
+          </div>
+          <div className="px-6 py-5 space-y-3">
+            <button
+              onClick={() => setShowResetModal(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors border border-rose-200 dark:border-rose-900/50 cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="text-sm font-medium">Reset all local data</span>
+            </button>
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors border border-rose-200 dark:border-rose-900/50 cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm font-medium">Sign out</span>
+            </button>
+          </div>
+        </section>
       </div>
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                <Trash2 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20">
+            <div className="w-12 h-12 bg-rose-100 dark:bg-rose-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
             </div>
-
-            <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
-              Reset All Data?
+            <h3 className="text-base font-bold text-center text-slate-900 dark:text-white mb-2">
+              Reset all data?
             </h3>
-
-            <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-              This will permanently delete all your tasks, goals, and events. This action cannot be undone.
+            <p className="text-sm text-center text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+              This will clear your local cache. Your data in the cloud remains safe.
             </p>
-
-            <div className="flex space-x-3">
+            <div className="flex gap-3">
               <button
                 onClick={() => setShowResetModal(false)}
-                className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
+                className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl text-sm font-medium transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleResetData}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
-                aria-label="Confirm data reset"
+                className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
-                Reset Data
+                Reset
               </button>
             </div>
           </div>

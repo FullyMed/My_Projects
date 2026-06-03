@@ -3,7 +3,7 @@ import { format, startOfWeek, addDays, startOfMonth, endOfMonth } from 'date-fns
 import { PlannerTask, Goal, Event } from '../types';
 import { storage } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import { getCategoryLabel, getCategoryColor } from '../constants/categories';
+import { getCategoryLabel } from '../constants/categories';
 
 interface PrintViewProps {
   view: 'planner' | 'goals' | 'calendar';
@@ -22,19 +22,19 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose }) => {
 
     if (view === 'planner' || view === 'calendar') {
       const plannerKey = storage.getUserKey('planner', user.id);
-      const storedTasks = storage.load<PlannerTask[]>(plannerKey as any, []);
+      const storedTasks = storage.load<PlannerTask[]>(plannerKey, []);
       setTasks(storedTasks);
     }
 
     if (view === 'goals') {
       const goalsKey = storage.getUserKey('goals', user.id);
-      const storedGoals = storage.load<Goal[]>(goalsKey as any, []);
+      const storedGoals = storage.load<Goal[]>(goalsKey, []);
       setGoals(storedGoals);
     }
 
     if (view === 'calendar') {
       const eventsKey = storage.getUserKey('events', user.id);
-      const storedEvents = storage.load<Event[]>(eventsKey as any, []);
+      const storedEvents = storage.load<Event[]>(eventsKey, []);
       setEvents(storedEvents);
     }
   }, [user, view]);

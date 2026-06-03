@@ -73,7 +73,7 @@ export const createGoal = async (userId: string, goal: Omit<Goal, 'id' | 'create
 
 export const updateGoal = async (userId: string, goalId: string, updates: Partial<Goal>): Promise<Goal | null> => {
   try {
-    const updateData: any = {};
+    const updateData: { title?: string; description?: string; target_value?: number; current_value?: number; unit?: string; allow_exceed_target?: boolean } = {};
     if (updates.title) updateData.title = updates.title;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.targetValue !== undefined) updateData.target_value = updates.targetValue;
