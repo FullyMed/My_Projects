@@ -476,7 +476,7 @@ export default function SearchResults() {
                         {language === "en" ? cat.en : cat.zh}
                       </span>
                       <span className="text-[10px] opacity-60">
-                        {cat.subCategories.length} items
+                        {cat.subCategories.length} {language === "en" ? "subcategories" : "個子分類"}
                       </span>
                     </div>
                   </Button>

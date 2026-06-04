@@ -1,6 +1,6 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 header("Content-Type: application/json");
@@ -53,13 +53,20 @@ if (!DateTime::createFromFormat('Y-m-d', $date)) {
     respond(false, "Invalid date format.");
 }
 
+if ($date < date('Y-m-d')) {
+    respond(false, "Booking date cannot be in the past.");
+}
+
+if ($start < "12:00" || $end > "22:00") {
+    respond(false, "Booking hours are between 12:00 and 22:00.");
+}
+
 $checkStmt = $conn->prepare("
-    SELECT COUNT(*) FROM bookings 
-    WHERE date = ? 
-      AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?)) 
+    SELECT COUNT(*) FROM bookings
+    WHERE date = ? AND start_time < ? AND end_time > ?
       AND status = 'active'
 ");
-$checkStmt->bind_param("sssss", $date, $end, $start, $start, $end);
+$checkStmt->bind_param("sss", $date, $end, $start);
 $checkStmt->execute();
 $checkStmt->bind_result($count);
 $checkStmt->fetch();

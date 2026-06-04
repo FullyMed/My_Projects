@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 if (!session_start()) {
@@ -29,18 +29,14 @@ try {
     }
 
     http_response_code(200);
-    echo json_encode([
-        "success" => true,
-        "debug" => "Session destroyed and cookie cleared."
-    ]);
+    echo json_encode(["success" => true]);
 } catch (Exception $e) {
     error_log("Logout error: " . $e->getMessage());
 
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "Server error: " . $e->getMessage(),
-        "debug" => "Exception caught during logout"
+        "error"   => "Server error during logout."
     ]);
 }
 ?>

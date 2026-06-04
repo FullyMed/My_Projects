@@ -152,7 +152,8 @@ Core app logic and shared frontend utilities.
 Static mock data files (JSON):
 - products
 - categories
-- stores
+
+Store list (`STORE_LIST`) is defined directly in `data.ts`, not as a separate JSON file.
 
 This project currently relies entirely on local mock/static data.
 
@@ -357,15 +358,16 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Duplicate local `type Product` removed from `search-results.tsx`
 - `{ { } }` JSX spacing inconsistency in `store-map.tsx` fixed
 - Google Fonts `@import` moved to top of `index.css`
+- 7 missing local images (f2–f8, Fresh Vegetables) replaced with Unsplash placeholder URLs
+- Hardcoded English `"items"` string in `search-results.tsx` fixed with inline ternary
+- Dark mode classes in `not-found.tsx` changed from `gray-*` to theme-aware (`bg-background`, `text-foreground`, `text-muted-foreground`)
+- Unused `location`/`setLocation` variables removed from `store-map.tsx`
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors
 Runtime: serving on port 5000 with no CSS/PostCSS errors
 
 ## Pending / Future Improvements
-
-### README.md
-A proper public-facing README still needs to be written.
 
 ### Data Expansion
 - More products

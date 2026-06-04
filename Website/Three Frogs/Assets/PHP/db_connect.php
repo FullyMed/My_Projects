@@ -1,10 +1,7 @@
 <?php
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-define("DB_HOST", "localhost");
-define("DB_USER", "u181047418_threefrogs");
-define("DB_PASS", "Threefr0gs*");
-define("DB_NAME", "u181047418_threefrogs");
+require_once(__DIR__ . "/db_config.php");
 
 try {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);

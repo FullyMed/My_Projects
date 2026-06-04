@@ -543,7 +543,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Organic Mung Bean Sprouts.png",
+    "image_url": "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=400&q=80",
     "keywords": ["mung bean sprouts", "vegetable", "organic", "菠菜", "蔬菜", "有機"]
   },
   {
@@ -558,7 +558,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Zucchini.png",
+    "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&q=80",
     "keywords": ["zucchini", "vegetable", "melon", "櫛瓜", "蔬菜", "瓜果"]
   },
   {
@@ -573,7 +573,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Cucumbers 2pcs.png",
+    "image_url": "https://images.unsplash.com/photo-1568204815454-c20c05c7dc43?w=400&q=80",
     "keywords": ["cucumber", "vegetable", "melon", "小黃瓜", "蔬菜", "瓜果"]
   },
   {
@@ -588,7 +588,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Beefsteak Tomato.png",
+    "image_url": "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&q=80",
     "keywords": ["tomato", "vegetable", "beefsteak", "番茄", "蔬菜", "牛番茄"]
   },
   {
@@ -603,7 +603,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Beibei Pumpkin.png",
+    "image_url": "https://images.unsplash.com/photo-1570586437263-ab629fccc818?w=400&q=80",
     "keywords": ["pumpkin", "vegetable", "japanese", "南瓜", "蔬菜", "貝貝南瓜"]
   },
   {
@@ -618,7 +618,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Eggplant.png",
+    "image_url": "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=400&q=80",
     "keywords": ["eggplant", "vegetable", "茄子", "蔬菜"]
   },
   {
@@ -633,7 +633,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Large Pumpkin.png",
+    "image_url": "https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=400&q=80",
     "keywords": ["pumpkin", "vegetable", "traceable", "南瓜", "蔬菜", "產銷履歷"]
   },
   {

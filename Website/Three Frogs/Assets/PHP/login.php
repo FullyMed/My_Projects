@@ -1,7 +1,7 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 require_once("db_connect.php");
@@ -10,13 +10,6 @@ function respond($status, $data) {
     http_response_code($status);
     echo json_encode($data);
     exit;
-}
-
-if (!$conn) {
-    respond(500, [
-        "success" => false,
-        "error" => "Database connection failed: " . mysqli_connect_error()
-    ]);
 }
 
 $email = trim($_POST['email'] ?? '');
@@ -58,7 +51,4 @@ respond(401, [
     "success" => false,
     "error" => "Invalid email or password."
 ]);
-
-$stmt->close();
-$conn->close();
 ?>

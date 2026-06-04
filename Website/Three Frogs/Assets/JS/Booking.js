@@ -89,6 +89,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             <p>We've sent a confirmation to <strong>${currentUser.email}</strong>.</p>
           `;
           bookingForm.reset();
+          // Re-populate the locked email field that reset() clears
+          const emailField = document.getElementById("email");
+          if (emailField) {
+            emailField.value = currentUser.email;
+            emailField.readOnly = true;
+          }
         } else {
           bookingResult.innerHTML = `<p style="color:red;">${result.error}</p>`;
         }

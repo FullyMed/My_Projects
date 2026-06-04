@@ -2042,8 +2042,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return res.json();
           })
           .then(data => {
-            console.log("check_session response in Boardgame.js:", data);
-            seeMoreBox.classList.remove("hidden");
+              seeMoreBox.classList.remove("hidden");
             seeMoreBox.innerHTML = data.loggedIn
             ? `<a href="Collection.html" class="see-more-button">See Other Boardgames</a>`
             : `<p style="margin-top: 20px;">Please <a href="Login.html" style="color: #2563eb; font-weight: bold;">Login</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">Sign Up</a> to see the full collection.</p>`;

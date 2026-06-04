@@ -1,7 +1,7 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 require_once("db_connect.php");
@@ -12,17 +12,29 @@ function respond($status, $data) {
     exit;
 }
 
-if (!$conn || $conn->connect_error) {
-    respond(500, [
-        "success" => false,
-        "error" => "Database connection failed: " . ($conn ? $conn->connect_error : "no connection object")
-    ]);
-}
-
 $name = trim($_POST['name'] ?? '');
 $email = strtolower(filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL));
 $password = trim($_POST['password'] ?? '');
-$avatar = trim($_POST['avatar'] ?? 'Assets/Images/Avatars/Clam.jpg');
+$avatar = trim($_POST['avatar'] ?? '');
+
+$allowedAvatars = [
+    "Assets/Images/Avatars/Clam.jpg",
+    "Assets/Images/Avatars/Cow.jpg",
+    "Assets/Images/Avatars/Crab.jpg",
+    "Assets/Images/Avatars/Dolphin.jpg",
+    "Assets/Images/Avatars/Nemo.jpg",
+    "Assets/Images/Avatars/Puffer.jpg",
+    "Assets/Images/Avatars/Seahorse.jpg",
+    "Assets/Images/Avatars/Sealion.jpg",
+    "Assets/Images/Avatars/Shark.jpg",
+    "Assets/Images/Avatars/Squid.jpg",
+    "Assets/Images/Avatars/Stingray.jpg",
+    "Assets/Images/Avatars/Turtle.jpg",
+    "Assets/Images/Avatars/Whale.jpg"
+];
+if (!in_array($avatar, $allowedAvatars)) {
+    $avatar = "Assets/Images/Avatars/Clam.jpg";
+}
 
 if (!$name || !$email || !$password) {
     respond(400, [
@@ -97,7 +109,4 @@ if ($stmt->execute()) {
         "error" => "Signup failed: " . $stmt->error
     ]);
 }
-
-$stmt->close();
-$conn->close();
 ?>

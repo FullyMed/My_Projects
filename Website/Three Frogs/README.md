@@ -12,7 +12,7 @@ Website for **Three Frogs**, a boardgame café in Surabaya, Indonesia. Visitors 
 |---|---|
 | Frontend | Vanilla HTML, CSS, JavaScript + jQuery (CDN) |
 | Backend | PHP 8 with MySQLi (OOP style) |
-| Database | MySQL (`u181047418_threefrogs` on Hostinger) |
+| Database | MySQL (Hostinger) |
 | Hosting | Hostinger shared hosting |
 | Deployment | Manual file upload (no CI/CD) |
 
@@ -25,11 +25,11 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 **Requirements:** PHP 8+, MySQL, a local server (XAMPP / Laragon / Herd).
 
 1. Clone the repo and serve the project root from your local server's `htdocs` (or equivalent).
-2. Create a MySQL database and import your schema.
-3. Update `Assets/PHP/db_connect.php` with your local credentials — **do not commit real credentials to source control**.
+2. Create a MySQL database and import the schema (see below).
+3. Copy `Assets/PHP/db_config.example.php` → `Assets/PHP/db_config.php` and fill in your local credentials. This file is gitignored and must never be committed.
 4. Open `http://localhost/` in your browser.
 
-> There is no `.env` support or environment-switching logic. The connection file is the single source of DB config.
+> `db_config.php` is the single source of DB credentials. `db_connect.php` requires it at runtime — do not hardcode credentials anywhere else.
 
 ---
 
@@ -37,42 +37,46 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 
 ```
 /
-├── index.html                  Home — 10 random games, login prompt for full list
-├── Collection.html             Full A–Z game catalogue (login-gated)
-├── Booking.html                Table booking form (login-gated)
-├── Dashboard.html              User account & booking history (login-gated)
+├── .gitignore                      Excludes db_config.php
+├── index.html                      Home — 10 random games, login prompt for full list
+├── Collection.html                 Full A–Z game catalogue (login-gated)
+├── Booking.html                    Table booking form (login-gated)
+├── Dashboard.html                  User account & booking history (login-gated)
 ├── Login.html
 ├── Signup.html
-├── Forgot-password.html
+├── Forgot-password.html            Two-step password reset (email → token link → new password)
 ├── About.html
 │
 ├── Assets/
 │   ├── CSS/
-│   │   └── Boardgame.css       Single shared stylesheet
+│   │   └── Boardgame.css           Single shared stylesheet
 │   ├── JS/
-│   │   ├── Navbar.js           Shared navbar — injected dynamically on every page
-│   │   ├── Boardgame.js        Game data array + index & collection page logic
+│   │   ├── Navbar.js               Shared navbar — injected dynamically on every page
+│   │   ├── Boardgame.js            Game data array (~218 games) + index & collection page logic
 │   │   ├── Booking.js
 │   │   ├── Dashboard.js
 │   │   ├── Login.js
 │   │   ├── Signup.js
 │   │   └── Forgot-password.js
 │   ├── PHP/
-│   │   ├── db_connect.php      Shared DB connection (include with require_once)
-│   │   ├── check_session.php   Returns { loggedIn, user } — called on every page load
+│   │   ├── db_config.php           GITIGNORED — holds DB credentials (copy from example)
+│   │   ├── db_config.example.php   Credential template (safe to commit)
+│   │   ├── db_connect.php          Opens MySQLi connection via db_config.php
+│   │   ├── check_session.php       Returns { loggedIn, user } — called on every page load
 │   │   ├── login.php
 │   │   ├── logout.php
 │   │   ├── signup.php
-│   │   ├── forgot_password.php
+│   │   ├── request_reset.php       Step 1 of password reset: generates token, sends email
+│   │   ├── forgot_password.php     Step 2 of password reset: validates token, updates password
 │   │   ├── booking.php
 │   │   ├── get_bookings.php
 │   │   ├── cancel_booking.php
 │   │   └── update_avatar.php
-│   └── Images/                 Game covers (jpg/png/webp/avif) + UI assets
-│       └── Avatars/            13 selectable user avatars
+│   └── Images/                     Game covers (jpg/png/webp/avif) + UI assets
+│       └── Avatars/                13 selectable user avatars
 │
 └── Data/
-    └── Three Frogs.xlsx        Offline reference spreadsheet for the game catalogue
+    └── Three Frogs.xlsx            Offline reference spreadsheet for the game catalogue
 ```
 
 ---
@@ -81,7 +85,7 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 
 ### Authentication
 
-Every page fetches `Assets/PHP/check_session.php` on load. It returns:
+Every page POSTs to `Assets/PHP/check_session.php` on load. It returns:
 
 ```json
 { "loggedIn": true, "user": { "name": "...", "email": "...", "avatar": "..." } }
@@ -98,16 +102,23 @@ The navbar is injected by `Navbar.js` after this response — HTML pages ship wi
 | `Booking.html` | Hides the form; shows `#authPopup` |
 | `Dashboard.html` | Redirects to `Login.html` |
 
+### Password Reset Flow
+
+Two-step, token-based — no unauthenticated password changes:
+
+1. User enters email → `request_reset.php` generates a 64-char random token, stores it in `password_reset_tokens` with a 1-hour expiry, and emails a link (`Forgot-password.html?token=...`).
+2. User clicks the link → JS reads `?token=` from the URL and shows the "set new password" form → `forgot_password.php` validates the token, resets the password, and deletes the used token.
+
 ### Game Catalogue
 
-All ~180 boardgame entries are a **hardcoded JavaScript array** in `Boardgame.js` — they are not stored in the database. `Boardgame.js` branches on `window.location.pathname` to run either the index (10 random games, shuffled with a spread copy) or the Collection (full A–Z grouping) logic.
+All ~218 boardgame entries are a **hardcoded JavaScript array** in `Boardgame.js` — they are not stored in the database. `Boardgame.js` branches on `window.location.pathname` to run either the index (10 random games, shuffled with a spread copy) or the Collection (full A–Z grouping) logic.
 
 To add a game: append an object to the `boardgames` array and drop the cover image in `Assets/Images/`.
 
 ```js
 {
   name: "Game Name",
-  category: "Strategy",
+  category: "Strategy",       // must match a value in the Collection.html filter dropdown
   players: "2–4",
   duration: "60–120 min",
   image: "Assets/Images/Game Name.jpg",
@@ -128,7 +139,7 @@ To add a game: append an object to the `boardgames` array and drop the cover ima
 | name | VARCHAR | Letters and spaces only |
 | email | VARCHAR UNIQUE | Lowercased on insert |
 | password | VARCHAR | bcrypt via `password_hash` |
-| avatar | VARCHAR | Relative path, e.g. `Assets/Images/Avatars/Clam.jpg` |
+| avatar | VARCHAR | Relative path, e.g. `Assets/Images/Avatars/Clam.jpg`; validated against a server-side whitelist |
 
 ### `bookings`
 
@@ -136,13 +147,13 @@ To add a game: append an object to the `boardgames` array and drop the cover ima
 |---|---|---|
 | name | VARCHAR | |
 | email | VARCHAR | |
-| date | DATE | |
+| date | DATE | Must not be in the past |
 | start_time | TIME | Must be ≥ 12:00 |
 | end_time | TIME | Must be ≤ 22:00, after start_time |
 | people | INT | |
 | status | VARCHAR | `'active'` |
 
-Overlap is checked server-side before every insert.
+Overlap is checked server-side before every insert. Date and time rules are enforced both client- and server-side.
 
 ### `cancellations`
 
@@ -156,23 +167,46 @@ Overlap is checked server-side before every insert.
 
 Cancellations are capped at **2 per user per calendar month**, enforced in both `get_bookings.php` and `cancel_booking.php`.
 
+### `password_reset_tokens`
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INT PK AUTO_INCREMENT | |
+| email | VARCHAR | |
+| token | VARCHAR(64) UNIQUE | 64-char hex string from `random_bytes` |
+| expires_at | DATETIME | 1 hour from creation; stale tokens are rejected and deleted |
+
+Create this table before the forgot-password flow will work:
+
+```sql
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  email      VARCHAR(255) NOT NULL,
+  token      VARCHAR(64)  NOT NULL UNIQUE,
+  expires_at DATETIME     NOT NULL,
+  INDEX idx_token (token),
+  INDEX idx_email (email)
+);
+```
+
 ---
 
 ## PHP API Endpoints
 
-All endpoints call `session_start()`, set `Content-Type: application/json`, and use a local `respond($status, $data)` helper that echoes JSON and exits.
+All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0)`, and use a local `respond($status, $data)` helper that echoes JSON and exits. Auth-gated endpoints call `session_start()`.
 
 | Endpoint | Method | Auth required | Description |
 |---|---|---|---|
-| `check_session.php` | GET | — | Returns current session state |
+| `check_session.php` | POST | — | Returns current session state |
 | `login.php` | POST (form) | — | Validates credentials, sets `$_SESSION['user']` |
-| `logout.php` | POST | — | Destroys session |
-| `signup.php` | POST (form) | — | Creates user, sets session; 409 if email taken |
-| `forgot_password.php` | POST (form) | — | Password reset flow |
-| `booking.php` | POST (JSON body) | Yes | Creates booking; checks slot overlap |
-| `get_bookings.php` | GET | Yes | Returns user's active bookings + cancel count |
+| `logout.php` | POST | — | Destroys session and clears cookie |
+| `signup.php` | POST (form) | — | Creates user, validates avatar against whitelist, sets session; 409 if email taken |
+| `request_reset.php` | POST (form) | — | Generates password-reset token and emails link; always returns 200 to prevent email enumeration |
+| `forgot_password.php` | POST (form) | — | Validates token from DB, resets password, deletes token |
+| `booking.php` | POST (JSON body) | Yes | Creates booking; enforces date/time rules and slot overlap |
+| `get_bookings.php` | POST (JSON body) | Yes | Returns user's active upcoming bookings + remaining cancel count |
 | `cancel_booking.php` | POST (JSON body) | Yes | Cancels booking; enforces monthly limit |
-| `update_avatar.php` | POST (JSON body) | Yes | Updates avatar; validates against allowed set |
+| `update_avatar.php` | POST (form) | Yes | Updates avatar; validates against allowed set |
 
 ---
 
@@ -223,6 +257,6 @@ All endpoints call `session_start()`, set `Content-Type: application/json`, and 
 
 ## Deployment
 
-Upload changed files directly to Hostinger via FTP or the Hostinger File Manager. There is no build or compilation step — what's in the repo is what runs in production.
-
-> Make sure `Assets/PHP/db_connect.php` on the server contains the **production** credentials, not local ones.
+1. Upload changed files to Hostinger via FTP or the File Manager.
+2. There is no build or compilation step — what's in the repo is what runs.
+3. `Assets/PHP/db_config.php` must exist on the server with production credentials. It is gitignored and is **not** uploaded from the repo — create or edit it directly on the server.

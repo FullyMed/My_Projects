@@ -6,6 +6,19 @@ PX Mart Finder is a retail product discovery and in-store navigation prototype d
 
 The project is built as a single-branch proof-of-concept focused on **PX Mart Wufeng (Taichung)**. It demonstrates how modern frontend technologies can be applied to retail search UX, and is intended as a portfolio and prototype demo.
 
+### Getting Started
+
+```bash
+# Install dependencies (run inside WSL2 / Linux if on Windows)
+npm ci
+
+# Start the development server
+npm run dev:client
+# → http://localhost:5000
+```
+
+> **Windows / WSL2 note:** Always run `npm ci` from within WSL2. Installing `node_modules` on Windows and then running in WSL2 will cause native binary errors (esbuild, rollup).
+
 ### Key Features
 
 - Fast product search with fuzzy matching and typo tolerance

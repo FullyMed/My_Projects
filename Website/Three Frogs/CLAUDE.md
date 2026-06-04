@@ -15,18 +15,21 @@ Three Frogs is a static HTML + PHP website for a boardgame café in Surabaya, In
 - **Database:** MySQL on Hostinger (`u181047418_threefrogs`)
 - **Deployment:** Upload files directly to Hostinger; no CI/CD pipeline
 
-There is no local dev server configuration in this repo. To test PHP endpoints locally you need a PHP + MySQL environment (XAMPP/Laragon/etc.) and update `db_connect.php` with local credentials.
+There is no local dev server configuration in this repo. To test PHP endpoints locally you need a PHP + MySQL environment (XAMPP/Laragon/etc.) and a local `db_config.php` (see setup below).
 
 ## File Layout
 
 | Path | Purpose |
 |---|---|
 | `*.html` | One file per page (index, Booking, Collection, Dashboard, Login, Signup, About, Forgot-password) |
+| `.gitignore` | Excludes `Assets/PHP/db_config.php` from version control |
 | `Assets/CSS/Boardgame.css` | Single stylesheet shared across all pages |
 | `Assets/JS/Navbar.js` | Shared navbar + hamburger toggle; included on every page |
 | `Assets/JS/Boardgame.js` | Handles **both** `index.html` and `Collection.html` by branching on `window.location.pathname` |
 | `Assets/JS/<Page>.js` | Per-page JS for Booking, Dashboard, Login, Signup, Forgot-password |
-| `Assets/PHP/db_connect.php` | Shared DB connection; include with `require_once` |
+| `Assets/PHP/db_config.php` | **Gitignored** — holds DB credentials; copy from `db_config.example.php` to create |
+| `Assets/PHP/db_config.example.php` | Template with placeholder credentials; safe to commit |
+| `Assets/PHP/db_connect.php` | Shared DB connection; `require_once`s `db_config.php` then opens MySQLi |
 | `Assets/PHP/*.php` | JSON API endpoints (all respond with `Content-Type: application/json`) |
 | `Assets/Images/` | Game cover images (mixed formats: jpg/png/webp/avif) |
 | `Data/Three Frogs.xlsx` | Offline reference spreadsheet for the game catalogue |
@@ -35,7 +38,7 @@ There is no local dev server configuration in this repo. To test PHP endpoints l
 
 ### Authentication flow
 
-Every page calls `Assets/PHP/check_session.php` (GET or POST) before rendering auth-sensitive content. It returns `{ loggedIn: bool, user: { name, email, avatar } }`. The navbar is always injected by `Navbar.js` after this fetch; HTML pages ship with only a hamburger `<button>` and an empty `<ul id="navLinks"></ul>` — never static `<li>` items.
+Every page calls `Assets/PHP/check_session.php` (POST) before rendering auth-sensitive content. It returns `{ loggedIn: bool, user: { name, email, avatar } }`. The navbar is always injected by `Navbar.js` after this fetch; HTML pages ship with only a hamburger `<button>` and an empty `<ul id="navLinks"></ul>` — never static `<li>` items.
 
 ### Session-gating pattern
 
@@ -44,27 +47,53 @@ Every page calls `Assets/PHP/check_session.php` (GET or POST) before rendering a
 - `Booking.html` — hides the form and shows `#authPopup` if not logged in
 - `Dashboard.html` — redirects to `Login.html` if not logged in
 
-### Database tables (inferred from PHP)
+### Database tables
 
 | Table | Key columns |
 |---|---|
 | `users` | id, name, email, password (bcrypt), avatar |
 | `bookings` | name, email, date, start_time, end_time, people, status ('active') |
 | `cancellations` | email, date, start, end, cancel_time |
+| `password_reset_tokens` | id, email, token (64-char hex, unique), expires_at (1-hour TTL) |
 
-Cancellations are capped at **2 per user per calendar month** (checked in both `get_bookings.php` and `cancel_booking.php`). Booking hours are enforced client- and server-side as **12:00–22:00**.
+Cancellations are capped at **2 per user per calendar month** (checked in both `get_bookings.php` and `cancel_booking.php`). Booking hours are enforced client- and server-side as **12:00–22:00**. Booking dates cannot be in the past (also enforced both sides).
+
+The `password_reset_tokens` table must be created manually before the forgot-password flow will work:
+```sql
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  email      VARCHAR(255) NOT NULL,
+  token      VARCHAR(64)  NOT NULL UNIQUE,
+  expires_at DATETIME     NOT NULL,
+  INDEX idx_token (token),
+  INDEX idx_email (email)
+);
+```
+
+### Forgot-password flow
+
+Two-step, token-based:
+1. User submits email → `request_reset.php` generates a 64-char token, stores it with a 1-hour expiry, and emails a reset link (`Forgot-password.html?token=...`).
+2. User clicks the link → JS reads `?token=` from the URL, shows the "set new password" form → `forgot_password.php` validates the token against the DB, resets the password, and deletes the token.
+
+This flow is entirely in `Forgot-password.html` / `Forgot-password.js` / `request_reset.php` / `forgot_password.php`.
 
 ### Boardgame catalogue
 
-All game data is a hardcoded JavaScript array in `Assets/JS/Boardgame.js` (not stored in the database). Adding a game means appending an object with `{ name, category, players, duration, image, description, tags[] }` to that array and placing the image in `Assets/Images/`.
+All game data is a hardcoded JavaScript array in `Assets/JS/Boardgame.js` (~218 games — not stored in the database). Adding a game means appending an object with `{ name, category, players, duration, image, description, tags[] }` to that array and placing the image in `Assets/Images/`.
+
+Valid categories (must match the filter dropdown in `Collection.html`): Party, Family, Abstract, Strategy, Dexterity, Thematic, Word Game, Cooperative, Card Game, Bluffing, Deduction, Social Deduction, Puzzle, Kids, Horror (and several minor ones with 1 game each).
 
 ### PHP endpoint conventions
 
-- Every endpoint begins with `session_start()` and sets `Content-Type: application/json`
+- Every endpoint sets `ini_set('display_errors', 0)` and `error_reporting(E_ALL)` — errors go to the server log, never to the browser
+- Every endpoint sets `Content-Type: application/json`
+- Auth endpoints use `session_start()`
 - All use `require_once("db_connect.php")`
 - A local `respond($status, $data)` helper echoes JSON and calls `exit`
 - Booking/cancellation endpoints accept JSON body (`php://input`); auth endpoints accept form POST
 - Passwords use `password_hash` / `password_verify` (bcrypt)
+- Avatar values are validated against a hardcoded whitelist in both `signup.php` and `update_avatar.php`
 
 ## Design System
 
@@ -110,5 +139,7 @@ All game data is a hardcoded JavaScript array in `Assets/JS/Boardgame.js` (not s
 - **Touch targets** — all interactive elements use `min-height: 44px` and `touch-action: manipulation`. Maintain this when adding new controls.
 - **Hover vs touch** — card `.details` and hover lifts use `@media (hover: hover)` so they only apply to pointer devices. Touch devices show details statically via `@media (hover: none)`. Follow this pattern for any new hover effects.
 - **Safe-area insets** — navbar, footer, popups, and the scroll-to-top button use `env(safe-area-inset-*)` to respect notch / Dynamic Island / home bar. Keep these on any new fixed/sticky elements.
-- **Avatar values** — stored as relative file paths (e.g. `Assets/Images/Avatars/Clam.jpg`). The allowed set is validated server-side in `update_avatar.php`.
+- **Avatar values** — stored as relative file paths (e.g. `Assets/Images/Avatars/Clam.jpg`). The allowed set is validated server-side in both `signup.php` and `update_avatar.php`.
 - **`[...]boardgames` shuffle** — index page uses `[...boardgames].sort(...)` (spread to avoid mutating the source array). Collection page re-sorts with `localeCompare`. Both branches read from the same module-level array.
+- **Booking email field** — set server-side from session on page load (`readOnly = true`). After a successful booking `bookingForm.reset()` is called, followed immediately by re-populating the email field so back-to-back bookings work.
+- **`db_config.php` is gitignored** — never commit real credentials. The file must exist on the server (and locally for dev) but is excluded from version control. Use `db_config.example.php` as the template.

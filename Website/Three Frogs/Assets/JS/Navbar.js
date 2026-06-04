@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const userName = data.loggedIn && data.user?.name ? data.user.name : "User";
 
       navLinks.innerHTML = `
-        <li><a href="/">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="Booking.html">Booking</a></li>
         <li><a href="About.html">About</a></li>
         ${

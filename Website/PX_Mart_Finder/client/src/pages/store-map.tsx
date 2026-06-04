@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useLocation } from "wouter";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Map as MapIcon } from "lucide-react";
@@ -9,8 +8,7 @@ import { STORE_LIST } from "@/lib/data";
 export default function StoreMap() {
   const { t, language } = useLanguage();
   const { selectedStore, setStore } = useStore();
-  const [location, setLocation] = useLocation();
-  
+
   const searchParams = new URLSearchParams(window.location.search);
   const highlightedAisle = searchParams.get("aisle");
   const storeId = searchParams.get("store");

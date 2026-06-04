@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  // Function to check session via backend
   async function checkSession() {
     try {
       const response = await fetch("Assets/PHP/check_session.php", {
@@ -14,80 +13,104 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Check if user is already logged in
   const currentUser = await checkSession();
   if (currentUser) {
     window.location.href = "Dashboard.html";
     return;
   }
 
-  // Handle forgot password form submission
-  const forgotForm = document.getElementById("forgotForm");
-  const resultBox = document.getElementById("forgotResult");
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get("token");
 
-  function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+  if (token) {
+    document.getElementById("requestStep").classList.add("hidden");
+    document.getElementById("resetStep").classList.remove("hidden");
   }
 
-  if (forgotForm) {
-    forgotForm.addEventListener("submit", async (e) => {
+  // ── Step 1: request reset link ──
+  const requestForm   = document.getElementById("requestForm");
+  const requestResult = document.getElementById("requestResult");
+
+  if (requestForm) {
+    requestForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const email     = document.getElementById("resetEmail").value.trim();
+      const submitBtn = requestForm.querySelector("button[type='submit']");
 
-      const email = document.getElementById("forgotEmail").value;
-      const newPassword = document.getElementById("newPassword").value;
-
-      if (!validateEmail(email)) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Invalid email format.</strong></p>`;
-        return;
-      }
-
-      if (newPassword.length < 8) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Password must be at least 8 characters long.</strong></p>`;
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", newPassword);
+      submitBtn.disabled    = true;
+      submitBtn.textContent = "Sending...";
 
       try {
-        const response = await fetch("Assets/PHP/forgot_password.php", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          resultBox.innerHTML = `
-            <h3>Password Reset Successful!</h3>
-            <p>Password for <strong>${email}</strong> has been updated.</p>
-            <p>Redirecting to login page...</p>
-          `;
-          setTimeout(() => {
-            forgotForm.reset();
-            window.location.href = "Login.html";
-          }, 1500);
-        } else {
-          resultBox.innerHTML = `<p style="color:red;">${result.error}</p>`;
-        }
+        const formData = new FormData();
+        formData.append("email", email);
+        await fetch("Assets/PHP/request_reset.php", { method: "POST", body: formData });
+        requestResult.innerHTML = `<p style="color:green;"><strong>If that email is registered, a reset link has been sent. Check your inbox.</strong></p>`;
+        requestForm.reset();
       } catch (err) {
-        resultBox.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
-        console.error("Reset password error:", err);
+        requestResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
+        console.error("Request reset error:", err);
+      } finally {
+        submitBtn.disabled    = false;
+        submitBtn.textContent = "Send Reset Link";
       }
     });
   }
 
-  // Toggle Show/Hide Password
-  const toggleForgotPassword = document.getElementById("toggleForgotPassword");
-  const forgotPasswordInput = document.getElementById("newPassword");
+  // ── Step 2: execute reset ──
+  const forgotForm   = document.getElementById("forgotForm");
+  const forgotResult = document.getElementById("forgotResult");
 
-  if (toggleForgotPassword && forgotPasswordInput) {
-    toggleForgotPassword.addEventListener("click", () => {
-      const type = forgotPasswordInput.getAttribute("type") === "password" ? "text" : "password";
-      forgotPasswordInput.setAttribute("type", type);
-      toggleForgotPassword.textContent = type === "password" ? "👁️" : "🙈";
+  if (forgotForm) {
+    forgotForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password  = document.getElementById("newPassword").value;
+      const submitBtn = forgotForm.querySelector("button[type='submit']");
+
+      if (password.length < 8) {
+        forgotResult.innerHTML = `<p style="color:red;"><strong>Password must be at least 8 characters long.</strong></p>`;
+        return;
+      }
+
+      submitBtn.disabled    = true;
+      submitBtn.textContent = "Resetting...";
+
+      const formData = new FormData();
+      formData.append("token", token);
+      formData.append("password", password);
+
+      try {
+        const response = await fetch("Assets/PHP/forgot_password.php", { method: "POST", body: formData });
+        const result   = await response.json();
+
+        if (result.success) {
+          forgotResult.innerHTML = `
+            <h3>Password Reset Successful!</h3>
+            <p>Your password has been updated. Redirecting to login...</p>
+          `;
+          setTimeout(() => { window.location.href = "Login.html"; }, 1500);
+        } else {
+          forgotResult.innerHTML    = `<p style="color:red;">${result.error}</p>`;
+          submitBtn.disabled        = false;
+          submitBtn.textContent     = "Reset Password";
+        }
+      } catch (err) {
+        forgotResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
+        console.error("Reset password error:", err);
+        submitBtn.disabled    = false;
+        submitBtn.textContent = "Reset Password";
+      }
+    });
+  }
+
+  // ── Toggle password visibility ──
+  const toggleBtn   = document.getElementById("toggleForgotPassword");
+  const passwordInput = document.getElementById("newPassword");
+
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener("click", () => {
+      const isPassword = passwordInput.getAttribute("type") === "password";
+      passwordInput.setAttribute("type", isPassword ? "text" : "password");
+      toggleBtn.textContent = isPassword ? "🙈" : "👁️";
     });
   }
 });
