@@ -310,11 +310,11 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
             <p className="text-sm text-slate-500 dark:text-slate-400">Loading data…</p>
           </div>
         ) : (
-          <>
+          <div className="print:contents bg-white text-slate-900 rounded-xl shadow-lg p-6 xs:p-10">
             {view === 'planner' && renderPlannerView()}
             {view === 'goals' && renderGoalsView()}
             {view === 'calendar' && renderCalendarView()}
-          </>
+          </div>
         )}
       </div>
     </div>
