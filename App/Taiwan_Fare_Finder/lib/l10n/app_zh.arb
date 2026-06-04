@@ -69,7 +69,6 @@
   "confirm": "確認",
   "confirmDialogBody": "確定要執行此操作嗎？此動作無法復原。",
   "cleared": "已清除",
-
   "settingsLanguageEnglish": "English",
   "settingsLanguageChineseHant": "繁體中文",
   "settingsLanguageIndonesian": "Bahasa Indonesia",
@@ -80,39 +79,38 @@
   "modesYouBike": "YouBike",
   "compareHint": "可選多種交通方式，並排比較票價與時間。",
   "selectAtLeastOneMode": "至少選擇一種方式",
-  "pickRouteFirst": "請先選擇路線"
-  ,"searchDisabledHelper": "請先選擇起點、終點與交通方式後再查詢。"
-  ,"compareDisabledHelper": "請先選擇起點、終點並至少選一種交通方式後再比較。"
-  ,"locationPickerSearchTitle": "搜尋地點"
-  ,"locationPickerCtaChoose": "選擇地點"
-  ,"locationPickerRecentTitle": "最近地點"
-  ,"locationPickerPopularTitle": "熱門地點"
-  ,"locationPickerBrowseByCity": "依城市瀏覽"
-  ,"locationPickerNoResultsTitle": "找不到地點"
-  ,"locationPickerNoResultsBody": "請嘗試以名稱或城市搜尋"
-  ,"lastUpdated": "更新時間"
-  ,"sourceMock": "模擬"
-  ,"sourceCached": "快取"
-
-  ,"transferDirect": "直達"
-  ,"transferOne": "1 次轉乘"
-  ,"transferOneToTwo": "1–2 次轉乘"
-  ,"transferDockSwap": "建議更換停靠站"
-  ,"errorTitle": "發生錯誤"
-  ,"errorSearchFailed": "目前無法載入票價，請稍後再試。"
-  ,"errorApiNotReady": "目前尚未提供 API 模式，請到設定切回「模擬」。"
-  ,"retry": "重試"
-  ,"compareSelectedCountLabel": "已選擇：{count}"
-  ,"selectAll": "全選"
-  ,"compareSortLabel": "排序依據"
-  ,"compareSortCheapest": "最便宜"
-  ,"compareSortFastest": "最快"
-  ,"compareSortFewestTransfers": "最少轉乘"
-
-  ,"privacy": "隱私"
-  ,"privacyBody": "你的搜尋、收藏、紀錄與快取結果只會儲存在本機裝置。不需要帳號。預設不進行追蹤。"
-  ,"privacyReadMore": "查看更多"
-  ,"about": "關於"
-  ,"aboutVersion": "版本"
-  ,"aboutDataSource": "資料來源"
+  "pickRouteFirst": "請先選擇路線",
+  "searchDisabledHelper": "請先選擇起點、終點與交通方式後再查詢。",
+  "compareDisabledHelper": "請先選擇起點、終點並至少選一種交通方式後再比較。",
+  "locationPickerSearchTitle": "搜尋地點",
+  "locationPickerCtaChoose": "選擇地點",
+  "locationPickerRecentTitle": "最近地點",
+  "locationPickerPopularTitle": "熱門地點",
+  "locationPickerBrowseByCity": "依城市瀏覽",
+  "locationPickerNoResultsTitle": "找不到地點",
+  "locationPickerNoResultsBody": "請嘗試以名稱或城市搜尋",
+  "lastUpdated": "更新時間",
+  "sourceMock": "模擬",
+  "sourceCached": "快取",
+  "sourceLive": "即時",
+  "transferDirect": "直達",
+  "transferOne": "1 次轉乘",
+  "transferOneToTwo": "1–2 次轉乘",
+  "transferDockSwap": "建議更換停靠站",
+  "errorTitle": "發生錯誤",
+  "errorSearchFailed": "目前無法載入票價，請稍後再試。",
+  "errorApiNotReady": "目前尚未提供 API 模式，請到設定切回「模擬」。",
+  "retry": "重試",
+  "compareSelectedCountLabel": "已選擇：{count}",
+  "selectAll": "全選",
+  "compareSortLabel": "排序依據",
+  "compareSortCheapest": "最便宜",
+  "compareSortFastest": "最快",
+  "compareSortFewestTransfers": "最少轉乘",
+  "privacy": "隱私",
+  "privacyBody": "你的搜尋、收藏、紀錄與快取結果只會儲存在本機裝置。不需要帳號。預設不進行追蹤。",
+  "privacyReadMore": "查看更多",
+  "about": "關於",
+  "aboutVersion": "版本",
+  "aboutDataSource": "資料來源"
 }

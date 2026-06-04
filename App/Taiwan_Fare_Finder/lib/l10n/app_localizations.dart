@@ -653,6 +653,12 @@ abstract class AppLocalizations {
   /// **'Saved'**
   String get sourceCached;
 
+  /// No description provided for @sourceLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get sourceLive;
+
   /// No description provided for @transferDirect.
   ///
   /// In en, this message translates to:

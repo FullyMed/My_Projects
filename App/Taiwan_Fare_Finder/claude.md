@@ -62,6 +62,7 @@ Supported locale tags: `en`, `zh`, `zh_Hant`, `id`.
 - **DataMode.mock**: calls `_searchMock` which uses a deterministic FNV-1a seed `(queryKey | mode)` so the same route always produces the same fares and duration.
 - **DataMode.api**: calls `_searchApi` which delegates HSR and TRA to `TdxFareService`; all other modes fall back to mock. On any failure, the controller falls back to cache and surfaces `'showing_cached_results'` as a snack key (or `'search_failed'` if cache is also empty).
 - **Cache**: up to 100 queries, LRU-evicted by `updatedAt`. Cache is per-`userId`.
+- **`FareSource` enum**: `mock` (deterministic fake), `live` (fresh from TDX API — shown with a teal "Live" badge), `cache` (loaded from local storage — shown with a grey "Saved" badge). `upsertCache` always downgrades `live` results to `cache` when storing them.
 
 Error and snack keys (e.g. `'offline_no_cache'`, `'search_failed'`, `'showing_cached_results'`) are raw string keys looked up by the UI via `TffLocalizations`.
 
@@ -80,6 +81,8 @@ Station name → TDX ID mappings live in `lib/config/tdx_station_map.dart` (`hsr
 ### Location model
 
 `Location` (`lib/models/location.dart`) is the canonical pickable origin/destination. It carries a stable `id`, localized names (`nameEn`, `nameZhHant`, `nameId`) and city names. `queryToken` returns the English name used as the key into `FareService._cityKm` and `TdxStationMap`.
+
+`Location.fromRaw(String raw)` is a static factory that wraps an unresolved city-name string as a `Location` — used when history/favorites reference a name that `LocationService.findByAnyName` can no longer resolve (e.g. after a rename). The resulting `Location` is display-only; its `queryToken` equals the raw string.
 
 `LocationService` (`lib/services/location_service.dart`) is a static-only service that provides:
 - `starterLocations` — the complete list of 13 supported cities.
@@ -153,6 +156,8 @@ Defined in `lib/nav.dart` via `go_router`:
 ### Utilities
 
 `IdGenerator` (`lib/utils/id_generator.dart`) generates microsecond-timestamp + random-suffix IDs for `RouteQuery` and similar models. Never use `DateTime.now()` alone for IDs.
+
+`estimateTravelMinutes` (`lib/utils/travel_duration.dart`) is the single source of truth for the speed + boarding-time duration formula. Both `FareService._durationByMode` (mock path) and `TdxFareService._durationFallback` (API fallback) delegate to it. Tune values only here.
 
 ---
 

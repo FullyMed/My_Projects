@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:taiwan_fare_finder/models/search_history_entry.dart';
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/local_storage_service.dart';

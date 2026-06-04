@@ -300,6 +300,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get sourceCached => 'Tersimpan';
 
   @override
+  String get sourceLive => 'Langsung';
+
+  @override
   String get transferDirect => 'Langsung';
 
   @override

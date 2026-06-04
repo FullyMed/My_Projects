@@ -107,7 +107,7 @@ def _hbar_chart(labels, values, title, color, n):
                 va="center", color=colors["text"], fontsize=8,
             )
     plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width='stretch')
     plt.close()
 
 
@@ -133,7 +133,7 @@ def _rating_hbar(names, ratings, title, n, min_votes):
             va="center", color=colors["text"], fontsize=8,
         )
     plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width='stretch')
     plt.close()
 
 
@@ -205,7 +205,7 @@ with d1:
     ax.set_ylabel("Games", fontsize=9)
     ax.tick_params(labelsize=8)
     plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width='stretch')
     plt.close()
 
 with d2:
@@ -217,7 +217,7 @@ with d2:
     ax.set_ylabel("Games", fontsize=9)
     ax.tick_params(labelsize=8)
     plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width='stretch')
     plt.close()
 
 st.markdown("---")
@@ -267,7 +267,7 @@ for bar, val in zip(bars, top_reviewed["usersrated"].iloc[::-1].values):
         va="center", color=colors["text"], fontsize=8,
     )
 plt.tight_layout()
-st.pyplot(fig, use_container_width=True)
+st.pyplot(fig, width='stretch')
 plt.close()
 
 st.markdown("---")
@@ -322,7 +322,7 @@ ax.set_xlabel("Year Published", fontsize=9)
 ax.set_ylabel("Games Released", fontsize=9)
 ax.tick_params(labelsize=8)
 plt.tight_layout()
-st.pyplot(fig, use_container_width=True)
+st.pyplot(fig, width='stretch')
 plt.close()
 
 st.markdown("---")
@@ -349,7 +349,7 @@ if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
         )
         ax.legend(facecolor=colors["bg"], edgecolor=colors["grid"], labelcolor=colors["text"], fontsize=8)
         plt.tight_layout()
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width='stretch')
         plt.close()
 
     with s2:

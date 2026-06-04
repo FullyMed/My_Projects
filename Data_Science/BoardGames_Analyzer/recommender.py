@@ -625,12 +625,13 @@ class BoardGameDiscoveryEngine:
         )
 
         has_title = len(query_titles) > 0
+        # difficulty_label is intentionally excluded — it is applied as a
+        # post-processing filter on every path so it works in title-only mode.
         has_trait = any([
             len(wanted_categories) > 0,
             len(wanted_mechanics) > 0,
             len(wanted_families) > 0,
             len(wanted_publishers) > 0,
-            difficulty_label is not None
         ])
 
         if not has_title and not has_trait:
@@ -670,6 +671,7 @@ class BoardGameDiscoveryEngine:
         if has_title and not has_trait:
             out = title_df.copy()
             out = out.merge(self.games[meta_cols].drop_duplicates("id"), on=["id", "name"], how="left")
+            out = self._apply_difficulty_filter(out, difficulty_label)
             out["score_trait"] = 0.0
             out["final_score"] = out["score_like"]
             out["reason"] = out.apply(self.make_reason, axis=1)
@@ -700,7 +702,7 @@ class BoardGameDiscoveryEngine:
                 ascending=[False, False, False, False]
             ).head(top_n).reset_index(drop=True)
 
-        out = title_df.merge(
+        out = title_df.merge(  # combined path
             trait_df,
             on=["id", "name"],
             how="outer",
@@ -745,11 +747,26 @@ class BoardGameDiscoveryEngine:
         )
 
         out["reason"] = out.apply(self.make_reason, axis=1)
+        out = self._apply_difficulty_filter(out, difficulty_label)
 
         return out.sort_values(
             ["final_score", "score_like", "score_trait", "avg_rating", "num_votes"],
             ascending=[False, False, False, False, False]
         ).head(top_n).reset_index(drop=True)
+
+    def _apply_difficulty_filter(self, df: pd.DataFrame, difficulty_label) -> pd.DataFrame:
+        """Post-processing difficulty filter applied to any result path."""
+        if difficulty_label is None or "complexity" not in df.columns:
+            return df
+        diff = str(difficulty_label).strip().lower()
+        comp = pd.to_numeric(df["complexity"], errors="coerce")
+        if diff == "low":
+            return df[comp.fillna(99) <= 2.0].copy()
+        if diff == "medium":
+            return df[(comp.fillna(99) > 2.0) & (comp.fillna(99) <= 3.0)].copy()
+        if diff == "high":
+            return df[comp.fillna(0) > 3.0].copy()
+        return df
 
     # -----------------------------
     # Convenience helpers

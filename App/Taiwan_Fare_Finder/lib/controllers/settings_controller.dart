@@ -26,8 +26,9 @@ class SettingsController extends ChangeNotifier {
 
   Locale? get locale {
     final tag = _settings?.localeTag ?? 'en';
-    if (tag == 'zh_Hant' || tag == 'zh-Hant')
+    if (tag == 'zh_Hant' || tag == 'zh-Hant') {
       return const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
+    }
     if (tag == 'zh') return const Locale('zh');
     if (tag == 'id') return const Locale('id');
     return const Locale('en');

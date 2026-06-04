@@ -144,7 +144,7 @@ wanted_families = parse_csv_input(family_input)
 wanted_publishers = parse_csv_input(publisher_input)
 
 st.markdown("---")
-run_btn = st.button("Get Recommendations", use_container_width=True)
+run_btn = st.button("Get Recommendations", width='stretch')
 
 # Run
 if run_btn:
@@ -233,7 +233,7 @@ if run_btn:
             # Full table
             st.markdown("---")
             st.markdown('<div class="section-title">Recommendation Table</div>', unsafe_allow_html=True)
-            st.dataframe(formatted, use_container_width=True, height=min(400, max(120, 40 + 35 * len(formatted))))
+            st.dataframe(formatted, width='stretch', height=min(400, max(120, 40 + 35 * len(formatted))))
 
             # Top-5 cards
             st.markdown("---")

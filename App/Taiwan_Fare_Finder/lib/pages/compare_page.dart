@@ -41,18 +41,6 @@ class _ComparePageState extends State<ComparePage> {
   };
   CompareSort _sort = CompareSort.cheapest;
 
-  Location _fallbackLocation(String raw) {
-    final trimmed = raw.trim();
-    return Location(
-        id: 'legacy_${trimmed.toLowerCase()}',
-        nameEn: trimmed,
-        nameZhHant: trimmed,
-        nameId: trimmed,
-        cityEn: trimmed,
-        cityZhHant: trimmed,
-        cityId: trimmed);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
@@ -268,19 +256,21 @@ class _ComparePageState extends State<ComparePage> {
                   onPressed: canCompare
                       ? () async {
                           final modes = _modes.toList();
+                          final fareCtrl = context.read<FareController>();
+                          final histCtrl = context.read<HistoryController>();
                           context
                               .read<AnalyticsService>()
                               .logEvent('search_run', params: {
                             'type': 'compare',
                             'modes': modes.map((e) => e.storageKey).join(',')
                           });
-                          await context.read<FareController>().search(
+                          await fareCtrl.search(
                               origin: _origin!.queryToken,
                               destination: _destination!.queryToken,
                               modes: modes,
                               offline: settings.offlineMode,
                               dataMode: settings.dataMode);
-                          await context.read<HistoryController>().add(
+                          await histCtrl.add(
                               origin: _origin!.queryToken,
                               destination: _destination!.queryToken,
                               modes: modes);

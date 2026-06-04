@@ -8,6 +8,7 @@ import 'package:taiwan_fare_finder/models/fare_result.dart';
 import 'package:taiwan_fare_finder/models/route_query.dart';
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/tdx_auth_service.dart';
+import 'package:taiwan_fare_finder/utils/travel_duration.dart';
 
 class TdxFareService {
   TdxFareService({required this.authService});
@@ -76,7 +77,7 @@ class TdxFareService {
       durationMinutes: duration,
       transferSummary: 'transfer_direct',
       fares: fares,
-      source: FareSource.cache,
+      source: FareSource.live,
       createdAt: now,
       updatedAt: now,
     );
@@ -239,7 +240,7 @@ class TdxFareService {
       durationMinutes: duration,
       transferSummary: 'transfer_direct',
       fares: fares,
-      source: FareSource.cache,
+      source: FareSource.live,
       createdAt: now,
       updatedAt: now,
     );
@@ -306,23 +307,6 @@ class TdxFareService {
   // Shared helpers
   // ---------------------------------------------------------------------------
 
-  /// Speed + boarding estimate used as fallback when timetable data is
-  /// unavailable. Mirrors FareService._durationByMode exactly.
-  int _durationFallback({required TransportMode mode, required int distanceKm}) {
-    final speedKmh = switch (mode) {
-      TransportMode.hsr => 235,
-      TransportMode.tra => 105,
-      TransportMode.mrt => 36,
-      TransportMode.bus => 22,
-      TransportMode.youBike => 14,
-    };
-    final boardingMin = switch (mode) {
-      TransportMode.hsr => 18,
-      TransportMode.tra => 14,
-      TransportMode.mrt => 10,
-      TransportMode.bus => 8,
-      TransportMode.youBike => 4,
-    };
-    return max(6, max(1, (distanceKm / speedKmh * 60).round()) + boardingMin);
-  }
+  int _durationFallback({required TransportMode mode, required int distanceKm}) =>
+      estimateTravelMinutes(mode: mode, distanceKm: distanceKm);
 }

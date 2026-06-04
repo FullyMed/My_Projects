@@ -38,11 +38,6 @@ class _SearchPageState extends State<SearchPage> {
   TransportMode? _mode = TransportMode.hsr;
   bool _hydratedFromLastQuery = false;
 
-  Location _fallbackLocation(String raw) {
-    final trimmed = raw.trim();
-    return Location(id: 'legacy_${trimmed.toLowerCase()}', nameEn: trimmed, nameZhHant: trimmed, nameId: trimmed, cityEn: trimmed, cityZhHant: trimmed, cityId: trimmed);
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -50,8 +45,8 @@ class _SearchPageState extends State<SearchPage> {
     if (_hydratedFromLastQuery) return;
     final last = fare.lastQuery;
     if (last != null && last.modes.length == 1) {
-      _origin = LocationService.findByAnyName(last.origin) ?? _fallbackLocation(last.origin);
-      _destination = LocationService.findByAnyName(last.destination) ?? _fallbackLocation(last.destination);
+      _origin = LocationService.findByAnyName(last.origin) ?? Location.fromRaw(last.origin);
+      _destination = LocationService.findByAnyName(last.destination) ?? Location.fromRaw(last.destination);
       _mode = last.modes.first;
       _hydratedFromLastQuery = true;
       setState(() {});
@@ -128,9 +123,11 @@ class _SearchPageState extends State<SearchPage> {
                 ? () async {
                     final mode = _mode;
                     if (mode == null) return;
+                    final fareCtrl = context.read<FareController>();
+                    final histCtrl = context.read<HistoryController>();
                     context.read<AnalyticsService>().logEvent('search_run', params: {'type': 'single', 'mode': mode.storageKey});
-                    await context.read<FareController>().search(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [mode], offline: settings.offlineMode, dataMode: settings.dataMode);
-                    await context.read<HistoryController>().add(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [mode]);
+                    await fareCtrl.search(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [mode], offline: settings.offlineMode, dataMode: settings.dataMode);
+                    await histCtrl.add(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [mode]);
                   }
                 : null,
             isLoading: fare.isLoading,

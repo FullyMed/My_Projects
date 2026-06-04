@@ -54,14 +54,14 @@ flutter run
 
 ### TDX credentials
 
-Live HSR and TRA fares require a TDX client ID and secret. Add them to `lib/config/tdx_credentials.dart`:
+Live HSR and TRA fares require a TDX client ID and secret. Copy the template and fill in your values:
 
-```dart
-const String tdxClientId = 'YOUR_CLIENT_ID';
-const String tdxClientSecret = 'YOUR_CLIENT_SECRET';
+```bash
+cp lib/config/tdx_credentials.dart.example lib/config/tdx_credentials.dart
+# edit tdx_credentials.dart with your client_id and client_secret
 ```
 
-Without credentials the app falls back to mock data for all modes.
+`lib/config/tdx_credentials.dart` is gitignored — never commit real credentials. Without credentials the app falls back to mock data for all modes.
 
 ---
 
@@ -79,7 +79,7 @@ lib/
 ├── services/        # Business logic (FareService, TdxFareService, TdxAuthService, …)
 ├── theme.dart       # Material 3 theme, AppSpacing, AppRadius tokens
 ├── ui/              # Reusable design-system widgets (TffCard, TffButton, TffSkeleton, …)
-└── utils/           # IdGenerator and other helpers
+└── utils/           # IdGenerator, travel_duration (shared speed/boarding estimate)
 ```
 
 ---

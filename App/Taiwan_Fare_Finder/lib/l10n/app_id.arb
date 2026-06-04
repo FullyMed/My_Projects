@@ -69,7 +69,6 @@
   "confirm": "Konfirmasi",
   "confirmDialogBody": "Apakah Anda yakin? Tindakan ini tidak bisa dibatalkan.",
   "cleared": "Sudah dibersihkan",
-
   "settingsLanguageEnglish": "English",
   "settingsLanguageChineseHant": "繁體中文",
   "settingsLanguageIndonesian": "Bahasa Indonesia",
@@ -80,39 +79,38 @@
   "modesYouBike": "YouBike",
   "compareHint": "Pilih beberapa moda untuk membandingkan harga dan waktu berdampingan.",
   "selectAtLeastOneMode": "Pilih minimal satu moda",
-  "pickRouteFirst": "Pilih rute terlebih dahulu"
-  ,"searchDisabledHelper": "Pilih asal, tujuan, dan satu moda untuk mencari."
-  ,"compareDisabledHelper": "Pilih asal, tujuan, dan minimal satu moda untuk membandingkan."
-  ,"locationPickerSearchTitle": "Cari lokasi"
-  ,"locationPickerCtaChoose": "Pilih lokasi"
-  ,"locationPickerRecentTitle": "Lokasi terbaru"
-  ,"locationPickerPopularTitle": "Lokasi populer"
-  ,"locationPickerBrowseByCity": "Telusuri berdasarkan kota"
-  ,"locationPickerNoResultsTitle": "Lokasi tidak ditemukan"
-  ,"locationPickerNoResultsBody": "Coba cari berdasarkan nama atau kota"
-  ,"lastUpdated": "Terakhir diperbarui"
-  ,"sourceMock": "Simulasi"
-  ,"sourceCached": "Tersimpan"
-
-  ,"transferDirect": "Langsung"
-  ,"transferOne": "1 kali transit"
-  ,"transferOneToTwo": "1–2 kali transit"
-  ,"transferDockSwap": "Disarankan ganti docking"
-  ,"errorTitle": "Terjadi kesalahan"
-  ,"errorSearchFailed": "Tarif tidak dapat dimuat saat ini. Silakan coba lagi."
-  ,"errorApiNotReady": "Mode API belum tersedia. Silakan kembali ke Simulasi di Pengaturan."
-  ,"retry": "Coba lagi"
-  ,"compareSelectedCountLabel": "Dipilih: {count}"
-  ,"selectAll": "Pilih semua"
-  ,"compareSortLabel": "Urutkan berdasarkan"
-  ,"compareSortCheapest": "Termurah"
-  ,"compareSortFastest": "Tercepat"
-  ,"compareSortFewestTransfers": "Paling sedikit transit"
-
-  ,"privacy": "Privasi"
-  ,"privacyBody": "Pencarian, favorit, riwayat, dan hasil cache disimpan secara lokal di perangkat Anda. Tidak perlu akun. Tanpa pelacakan secara default."
-  ,"privacyReadMore": "Baca selengkapnya"
-  ,"about": "Tentang"
-  ,"aboutVersion": "Versi aplikasi"
-  ,"aboutDataSource": "Sumber data"
+  "pickRouteFirst": "Pilih rute terlebih dahulu",
+  "searchDisabledHelper": "Pilih asal, tujuan, dan satu moda untuk mencari.",
+  "compareDisabledHelper": "Pilih asal, tujuan, dan minimal satu moda untuk membandingkan.",
+  "locationPickerSearchTitle": "Cari lokasi",
+  "locationPickerCtaChoose": "Pilih lokasi",
+  "locationPickerRecentTitle": "Lokasi terbaru",
+  "locationPickerPopularTitle": "Lokasi populer",
+  "locationPickerBrowseByCity": "Telusuri berdasarkan kota",
+  "locationPickerNoResultsTitle": "Lokasi tidak ditemukan",
+  "locationPickerNoResultsBody": "Coba cari berdasarkan nama atau kota",
+  "lastUpdated": "Terakhir diperbarui",
+  "sourceMock": "Simulasi",
+  "sourceCached": "Tersimpan",
+  "sourceLive": "Langsung",
+  "transferDirect": "Langsung",
+  "transferOne": "1 kali transit",
+  "transferOneToTwo": "1–2 kali transit",
+  "transferDockSwap": "Disarankan ganti docking",
+  "errorTitle": "Terjadi kesalahan",
+  "errorSearchFailed": "Tarif tidak dapat dimuat saat ini. Silakan coba lagi.",
+  "errorApiNotReady": "Mode API belum tersedia. Silakan kembali ke Simulasi di Pengaturan.",
+  "retry": "Coba lagi",
+  "compareSelectedCountLabel": "Dipilih: {count}",
+  "selectAll": "Pilih semua",
+  "compareSortLabel": "Urutkan berdasarkan",
+  "compareSortCheapest": "Termurah",
+  "compareSortFastest": "Tercepat",
+  "compareSortFewestTransfers": "Paling sedikit transit",
+  "privacy": "Privasi",
+  "privacyBody": "Pencarian, favorit, riwayat, dan hasil cache disimpan secara lokal di perangkat Anda. Tidak perlu akun. Tanpa pelacakan secara default.",
+  "privacyReadMore": "Baca selengkapnya",
+  "about": "Tentang",
+  "aboutVersion": "Versi aplikasi",
+  "aboutDataSource": "Sumber data"
 }

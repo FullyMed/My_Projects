@@ -174,6 +174,14 @@ class _SourceBadge extends StatelessWidget {
           backgroundColor: cs.primaryContainer.withValues(alpha: 0.55),
           borderColor: cs.primary.withValues(alpha: 0.2),
         ),
+      FareSource.live => TffBadge(
+          label: l10n.sourceLive,
+          icon: Icons.bolt_rounded,
+          iconColor: cs.tertiary,
+          labelColor: cs.onTertiaryContainer,
+          backgroundColor: cs.tertiaryContainer.withValues(alpha: 0.55),
+          borderColor: cs.tertiary.withValues(alpha: 0.2),
+        ),
       FareSource.cache => TffBadge(
           label: l10n.sourceCached,
           icon: Icons.cloud_done_rounded,

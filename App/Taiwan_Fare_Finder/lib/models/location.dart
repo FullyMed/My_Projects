@@ -44,4 +44,18 @@ class Location {
   /// Today this maps to English city/stop names (to match the mock dataset).
   /// In the future, this can be replaced with an API id.
   String get queryToken => nameEn;
+
+  /// Wraps a raw, unresolved name string so the UI can still render it.
+  static Location fromRaw(String raw) {
+    final trimmed = raw.trim();
+    return Location(
+      id: 'legacy_${trimmed.toLowerCase()}',
+      nameEn: trimmed,
+      nameZhHant: trimmed,
+      nameId: trimmed,
+      cityEn: trimmed,
+      cityZhHant: trimmed,
+      cityId: trimmed,
+    );
+  }
 }

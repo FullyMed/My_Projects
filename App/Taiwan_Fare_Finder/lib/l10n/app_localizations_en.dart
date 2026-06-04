@@ -297,6 +297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceCached => 'Saved';
 
   @override
+  String get sourceLive => 'Live';
+
+  @override
   String get transferDirect => 'Direct';
 
   @override

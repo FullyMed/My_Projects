@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/services/local_storage_service.dart';

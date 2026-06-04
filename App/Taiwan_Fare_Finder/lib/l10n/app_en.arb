@@ -25,7 +25,7 @@
   "offlineDataBadge": "Saved offline",
   "showingCachedResults": "Showing saved results.",
   "manageOfflineData": "Manage offline data",
-  "manageOfflineDataBody": "Review what\u2019s saved for offline use and clear it anytime.",
+  "manageOfflineDataBody": "Review what’s saved for offline use and clear it anytime.",
   "cachedQueries": "Saved routes",
   "cachedResults": "Saved results",
   "clearOfflineData": "Clear offline data",
@@ -60,7 +60,7 @@
   "dataModeMock": "Mock",
   "dataModeApi": "API (soon)",
   "offlineMode": "Offline mode",
-  "offlineModeBody": "Show saved results only. New searches won\u2019t generate mock results.",
+  "offlineModeBody": "Show saved results only. New searches won’t generate mock results.",
   "dataManagement": "Data management",
   "clearCache": "Clear cached fares",
   "clearHistory": "Clear history",
@@ -69,7 +69,6 @@
   "confirm": "Confirm",
   "confirmDialogBody": "Are you sure? This can’t be undone.",
   "cleared": "Cleared",
-
   "settingsLanguageEnglish": "English",
   "settingsLanguageChineseHant": "繁體中文",
   "settingsLanguageIndonesian": "Bahasa Indonesia",
@@ -80,39 +79,38 @@
   "modesYouBike": "YouBike",
   "compareHint": "Select multiple modes to compare price and time side-by-side.",
   "selectAtLeastOneMode": "Select at least one mode",
-  "pickRouteFirst": "Select a route first"
-  ,"searchDisabledHelper": "Select an origin, destination, and mode to search."
-  ,"compareDisabledHelper": "Select an origin, destination, and at least one mode to compare."
-  ,"locationPickerSearchTitle": "Find locations"
-  ,"locationPickerCtaChoose": "Select a location"
-  ,"locationPickerRecentTitle": "Recent"
-  ,"locationPickerPopularTitle": "Popular"
-  ,"locationPickerBrowseByCity": "Browse by city"
-  ,"locationPickerNoResultsTitle": "No locations found"
-  ,"locationPickerNoResultsBody": "Try a different name or city."
-  ,"lastUpdated": "Last updated"
-  ,"sourceMock": "Mock data"
-  ,"sourceCached": "Saved"
-
-  ,"transferDirect": "Direct"
-  ,"transferOne": "1 transfer"
-  ,"transferOneToTwo": "1–2 transfers"
-  ,"transferDockSwap": "Dock swap recommended"
-  ,"errorTitle": "Something went wrong"
-  ,"errorSearchFailed": "We couldn’t load fares right now. Please try again."
-  ,"errorApiNotReady": "API mode isn’t available yet. Switch back to Mock in Settings."
-  ,"retry": "Retry"
-  ,"compareSelectedCountLabel": "Selected: {count}"
-  ,"selectAll": "Select all"
-  ,"compareSortLabel": "Sort by"
-  ,"compareSortCheapest": "Cheapest"
-  ,"compareSortFastest": "Fastest"
-  ,"compareSortFewestTransfers": "Fewest transfers"
-
-  ,"privacy": "Privacy"
-  ,"privacyBody": "Your searches, saved routes, history, and offline data are stored locally on your device. No account required. No tracking by default."
-  ,"privacyReadMore": "Read more"
-  ,"about": "About"
-  ,"aboutVersion": "Version"
-  ,"aboutDataSource": "Data source"
+  "pickRouteFirst": "Select a route first",
+  "searchDisabledHelper": "Select an origin, destination, and mode to search.",
+  "compareDisabledHelper": "Select an origin, destination, and at least one mode to compare.",
+  "locationPickerSearchTitle": "Find locations",
+  "locationPickerCtaChoose": "Select a location",
+  "locationPickerRecentTitle": "Recent",
+  "locationPickerPopularTitle": "Popular",
+  "locationPickerBrowseByCity": "Browse by city",
+  "locationPickerNoResultsTitle": "No locations found",
+  "locationPickerNoResultsBody": "Try a different name or city.",
+  "lastUpdated": "Last updated",
+  "sourceMock": "Mock data",
+  "sourceCached": "Saved",
+  "sourceLive": "Live",
+  "transferDirect": "Direct",
+  "transferOne": "1 transfer",
+  "transferOneToTwo": "1–2 transfers",
+  "transferDockSwap": "Dock swap recommended",
+  "errorTitle": "Something went wrong",
+  "errorSearchFailed": "We couldn’t load fares right now. Please try again.",
+  "errorApiNotReady": "API mode isn’t available yet. Switch back to Mock in Settings.",
+  "retry": "Retry",
+  "compareSelectedCountLabel": "Selected: {count}",
+  "selectAll": "Select all",
+  "compareSortLabel": "Sort by",
+  "compareSortCheapest": "Cheapest",
+  "compareSortFastest": "Fastest",
+  "compareSortFewestTransfers": "Fewest transfers",
+  "privacy": "Privacy",
+  "privacyBody": "Your searches, saved routes, history, and offline data are stored locally on your device. No account required. No tracking by default.",
+  "privacyReadMore": "Read more",
+  "about": "About",
+  "aboutVersion": "Version",
+  "aboutDataSource": "Data source"
 }

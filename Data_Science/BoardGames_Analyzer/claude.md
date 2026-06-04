@@ -139,7 +139,7 @@ BoardGames_Analyzer/
 │       └── performance_chart.png
 │
 ├── app.py                          ← Original single-page Streamlit app (root)
-├── recommender.py                  ← Original engine (root)
+├── recommender.py                  ← Synced copy of engine (kept in sync with App/recommender.py)
 ├── Requirements.txt
 ├── Run.txt
 └── README.md
@@ -200,7 +200,7 @@ Six chart sections:
 6. Games published per year (line chart with area fill)
 7. Community sentiment distribution (if sentiment data exists)
 
-All charts use `use_container_width=True` and are responsive to the container width.
+All charts use `width='stretch'` and are responsive to the container width.
 
 ### `Notebooks/08_Discovery_Engine.ipynb`
 Main recommendation system notebook.
@@ -396,6 +396,16 @@ Table II shows polished natural-language explanations (e.g. "Shared engine-build
 **What was wrong:** `height = min(400, 40 + 35 * len(formatted))` gave 75px for a 1-row result — too small to read.
 
 **Fix:** `height = min(400, max(120, 40 + 35 * len(formatted)))` — enforces a 120px floor.
+
+## Bug 5 — Root `recommender.py` out of sync with `App/recommender.py`
+**What was wrong:** The root `recommender.py` still had `difficulty_label is not None` inside `has_trait` (Bug 1) and was missing the `_apply_difficulty_filter()` method entirely — 18 lines behind the fixed App copy.
+
+**Fix:** Replaced root `recommender.py` with the canonical `App/recommender.py`. Both files are now identical. The rule in Section 10 (Keep App/ Self-Contained) still applies going forward.
+
+## Bug 6 — Deprecated `use_container_width` parameter across all app files
+**What was wrong:** Streamlit 1.52 deprecated `use_container_width=True` in favour of `width='stretch'`, with removal set for after 2025-12-31. All 9 call sites across `App/pages/1_Recommendation.py`, `App/pages/2_Analytics.py`, and root `app.py` used the old parameter.
+
+**Fix:** Replaced all `use_container_width=True` with `width='stretch'` across all three files.
 
 ---
 

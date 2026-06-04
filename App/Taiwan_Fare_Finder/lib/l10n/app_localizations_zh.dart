@@ -285,6 +285,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sourceCached => '快取';
 
   @override
+  String get sourceLive => '即時';
+
+  @override
   String get transferDirect => '直達';
 
   @override
@@ -626,6 +629,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get sourceCached => '快取';
+
+  @override
+  String get sourceLive => '即時';
 
   @override
   String get transferDirect => '直達';

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +14,7 @@ class TffLocalizations {
   static const LocalizationsDelegate<TffLocalizations> delegate = _TffLocalizationsDelegate();
 
   String _t(String key) {
-    final v = _strings[key] ?? _strings['$key'] ?? key;
+    final v = _strings[key] ?? key;
     assert(() {
       final looksLikeKey = v == key || v.startsWith('compare') || v.startsWith('search') || v.startsWith('locationPicker') || v.startsWith('settings');
       if (looksLikeKey) {
@@ -128,6 +127,7 @@ class TffLocalizations {
   String get lastUpdated => _t('lastUpdated');
   String get sourceMock => _t('sourceMock');
   String get sourceCached => _t('sourceCached');
+  String get sourceLive => _t('sourceLive');
 
   // Transfers
   String get transferDirect => _t('transferDirect');
@@ -169,7 +169,7 @@ class _TffLocalizationsDelegate extends LocalizationsDelegate<TffLocalizations> 
   @override
   Future<TffLocalizations> load(Locale locale) async {
     final tag = _tag(locale);
-    final asset = 'lib/l10n/app_${tag}.arb';
+    final asset = 'lib/l10n/app_$tag.arb';
     final fallback = 'lib/l10n/app.arb';
 
     Map<String, dynamic> decoded;

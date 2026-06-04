@@ -1,13 +1,13 @@
-/// Maps Location.queryToken → TDX station ID strings.
-///
-/// HSR IDs confirmed via GET /api/basic/v2/Rail/THSR/Station.
-/// Note: the THSR station IDs differ from the 4-digit scheme (0100, 0200…)
-/// sometimes cited in external docs — the actual TDX values are used here.
-/// Kaohsiung maps to Zuoying (左營), the THSR terminus in Kaohsiung City.
-/// Keelung and New Taipei have no THSR service and are omitted.
-///
-/// TRA IDs confirmed via GET /api/basic/v2/Rail/TRA/Station.
-/// Yunlin maps to Douliu (斗六), the prefectural-seat station of Yunlin County.
+// Maps Location.queryToken → TDX station ID strings.
+//
+// HSR IDs confirmed via GET /api/basic/v2/Rail/THSR/Station.
+// Note: the THSR station IDs differ from the 4-digit scheme (0100, 0200…)
+// sometimes cited in external docs — the actual TDX values are used here.
+// Kaohsiung maps to Zuoying (左營), the THSR terminus in Kaohsiung City.
+// Keelung and New Taipei have no THSR service and are omitted.
+//
+// TRA IDs confirmed via GET /api/basic/v2/Rail/TRA/Station.
+// Yunlin maps to Douliu (斗六), the prefectural-seat station of Yunlin County.
 
 const Map<String, String> hsrStationId = {
   'Taipei': '1000',

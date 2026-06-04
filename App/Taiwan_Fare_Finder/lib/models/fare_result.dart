@@ -21,7 +21,7 @@ class FareBreakdown {
   }
 }
 
-enum FareSource { mock, cache }
+enum FareSource { mock, cache, live }
 
 class FareResult {
   const FareResult({required this.id, required this.userId, required this.queryKey, required this.mode, required this.distanceKm, required this.durationMinutes, required this.transferSummary, required this.fares, required this.source, required this.createdAt, required this.updatedAt});
@@ -80,7 +80,7 @@ class FareResult {
     );
   }
 
-  static FareSource _source(String v) => switch (v) { "mock" => FareSource.mock, _ => FareSource.cache };
+  static FareSource _source(String v) => switch (v) { "mock" => FareSource.mock, "live" => FareSource.live, _ => FareSource.cache };
 
   static int? _i(dynamic v) {
     if (v == null) return null;

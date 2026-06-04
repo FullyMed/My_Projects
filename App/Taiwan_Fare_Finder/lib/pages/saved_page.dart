@@ -45,7 +45,7 @@ class _SavedPageState extends State<SavedPage>
     final isWide = TffAdaptive.isWide(context);
 
     final favContent = _buildFavoritesContent(context, l10n, fav, settings);
-    final histContent = _buildHistoryContent(context, l10n, hist, settings);
+    final histContent = _buildHistoryContent(context, l10n, hist, settings, showHeader: !isWide);
 
     return TffPageScaffold(
       title: l10n.tabSaved,
@@ -66,10 +66,10 @@ class _SavedPageState extends State<SavedPage>
               onClearHistory: hist.history.isEmpty
                   ? null
                   : () async {
-                      final confirmed =
-                          await _confirmClearHistory(context);
+                      final histCtrl = context.read<HistoryController>();
+                      final confirmed = await _confirmClearHistory(context);
                       if (confirmed != true) return;
-                      await context.read<HistoryController>().clear();
+                      await histCtrl.clear();
                     },
             )
           : _NarrowLayout(
@@ -105,8 +105,9 @@ class _SavedPageState extends State<SavedPage>
     BuildContext context,
     TffLocalizations l10n,
     HistoryController hist,
-    SettingsController settings,
-  ) {
+    SettingsController settings, {
+    bool showHeader = true,
+  }) {
     if (hist.isLoading) return const Center(child: CircularProgressIndicator());
     if (hist.history.isEmpty) {
       return TffEmptyState(
@@ -119,6 +120,7 @@ class _SavedPageState extends State<SavedPage>
       items: hist.history,
       offline: settings.offlineMode,
       dataMode: settings.dataMode,
+      showHeader: showHeader,
     );
   }
 }
@@ -348,18 +350,19 @@ class _FavoritesList extends StatelessWidget {
             title: f.label,
             subtitle: _modesLabel(context, f.modes),
             onRun: () async {
+              final fareCtrl = context.read<FareController>();
               context.read<AnalyticsService>().logEvent('saved_rerun',
                   params: {
                     'type': 'favorite',
                     'modes': f.modes.map((e) => e.storageKey).join(',')
                   });
-              await context.read<FareController>().search(
+              await fareCtrl.search(
                   origin: f.origin,
                   destination: f.destination,
                   modes: f.modes,
                   offline: offline,
                   dataMode: dataMode);
-              context.go('/search');
+              if (context.mounted) context.go('/search');
             },
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -403,11 +406,13 @@ class _HistoryList extends StatelessWidget {
     required this.items,
     required this.offline,
     required this.dataMode,
+    this.showHeader = true,
   });
 
   final List<SearchHistoryEntry> items;
   final bool offline;
   final DataMode dataMode;
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -417,32 +422,33 @@ class _HistoryList extends StatelessWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.history,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+        if (showHeader)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.history,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
                 ),
-              ),
-              TffTextButton(
-                label: l10n.clearAll,
-                icon: Icons.delete_sweep_rounded,
-                onPressed: () async {
-                  final confirmed = await _confirmClearHistory(context);
-                  if (confirmed != true) return;
-                  await histController.clear();
-                },
-              ),
-            ],
+                TffTextButton(
+                  label: l10n.clearAll,
+                  icon: Icons.delete_sweep_rounded,
+                  onPressed: () async {
+                    final confirmed = await _confirmClearHistory(context);
+                    if (confirmed != true) return;
+                    await histController.clear();
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(
@@ -460,19 +466,20 @@ class _HistoryList extends StatelessWidget {
                   title: '${h.origin} → ${h.destination}',
                   subtitle: _modesLabel(context, h.modes),
                   onRun: () async {
+                    final fareCtrl = context.read<FareController>();
                     context.read<AnalyticsService>().logEvent('saved_rerun',
                         params: {
                           'type': 'history',
                           'modes':
                               h.modes.map((e) => e.storageKey).join(',')
                         });
-                    await context.read<FareController>().search(
+                    await fareCtrl.search(
                         origin: h.origin,
                         destination: h.destination,
                         modes: h.modes,
                         offline: offline,
                         dataMode: dataMode);
-                    context.go(h.modes.length == 1 ? '/search' : '/compare');
+                    if (context.mounted) context.go(h.modes.length == 1 ? '/search' : '/compare');
                   },
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

@@ -9,6 +9,7 @@ import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/local_storage_service.dart';
 import 'package:taiwan_fare_finder/services/tdx_auth_service.dart';
 import 'package:taiwan_fare_finder/services/tdx_fare_service.dart';
+import 'package:taiwan_fare_finder/utils/travel_duration.dart';
 
 class FareSearchResponse {
   const FareSearchResponse({required this.results, required this.usedCache, this.warningCode});
@@ -314,25 +315,8 @@ class FareService {
     };
   }
 
-  int _durationByMode({required TransportMode mode, required int distanceKm}) {
-    final speedKmh = switch (mode) {
-      TransportMode.hsr => 235,
-      TransportMode.tra => 105,
-      TransportMode.mrt => 36,
-      TransportMode.bus => 22,
-      TransportMode.youBike => 14,
-    };
-    // Light padding for boarding/wait time per mode (still deterministic).
-    final boardingMin = switch (mode) {
-      TransportMode.hsr => 18,
-      TransportMode.tra => 14,
-      TransportMode.mrt => 10,
-      TransportMode.bus => 8,
-      TransportMode.youBike => 4,
-    };
-    final ride = max(1, (distanceKm / speedKmh * 60).round());
-    return max(6, ride + boardingMin);
-  }
+  int _durationByMode({required TransportMode mode, required int distanceKm}) =>
+      estimateTravelMinutes(mode: mode, distanceKm: distanceKm);
 
   int _adultFareByBand({required TransportMode mode, required int distanceKm}) {
     final band = _distanceBand(distanceKm);
