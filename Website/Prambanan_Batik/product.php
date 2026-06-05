@@ -25,7 +25,7 @@ try {
             SELECT p.id, p.name, p.slug, p.rating_avg, p.rating_count, p.price_display, p.description,
                    p.buy_link_shopee, p.buy_link_tokopedia, p.buy_link_other,
                    (SELECT image_url FROM product_images WHERE product_id = p.id ORDER BY sort_order LIMIT 1) as image_url,
-                   c.name as category
+                   c.name as category, c.slug as category_slug
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.id = ?
@@ -70,6 +70,11 @@ if ($preview_mode || !$product) {
         $product = $sample_products[0];
     }
 
+    // Sample data uses category name as slug (slugified)
+    if (!isset($product['category_slug'])) {
+        $product['category_slug'] = strtolower(str_replace(' ', '-', $product['category'] ?? ''));
+    }
+
     $reviews = [
         [
             'id' => 1,
@@ -108,7 +113,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                 <span>/</span>
                 <a href="/products.php">Products</a>
                 <span>/</span>
-                <a href="/products.php?category=<?php echo urlencode($product['category']); ?>"><?php echo escape($product['category']); ?></a>
+                <a href="/products.php?category=<?php echo urlencode($product['category_slug'] ?? ''); ?>"><?php echo escape($product['category']); ?></a>
                 <span>/</span>
                 <span><?php echo escape($product['name']); ?></span>
             </div>
@@ -138,7 +143,18 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                     </div>
 
                     <div class="action-buttons">
-                        <a href="https://shopee.co.id/search?keyword=prambanan%20batik" class="btn btn-primary btn-large" target="_blank">Buy on Shopee</a>
+                        <?php if (!empty($product['buy_link_shopee'])): ?>
+                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank">Buy on Shopee</a>
+                        <?php endif; ?>
+                        <?php if (!empty($product['buy_link_tokopedia'])): ?>
+                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank">Buy on Tokopedia</a>
+                        <?php endif; ?>
+                        <?php if (!empty($product['buy_link_other'])): ?>
+                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank">Buy Now</a>
+                        <?php endif; ?>
+                        <?php if (empty($product['buy_link_shopee']) && empty($product['buy_link_tokopedia']) && empty($product['buy_link_other'])): ?>
+                            <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank">Search on Shopee</a>
+                        <?php endif; ?>
                         <a href="/products.php" class="btn btn-secondary btn-large">Back to Products</a>
                     </div>
                 </div>
@@ -146,14 +162,17 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
             <?php if (!empty($reviews)): ?>
                 <div class="reviews-section">
-                    <h2>Customer Reviews</h2>
+                    <h2 class="reveal">Customer Reviews</h2>
                     <div class="reviews-list">
                         <?php foreach ($reviews as $review): ?>
-                            <article class="review-item">
+                            <article class="review-item reveal">
                                 <div class="review-header">
                                     <div class="review-info">
-                                        <strong><?php echo escape($review['reviewer_name']); ?></strong>
-                                        <span class="review-rating"><?php echo get_star_rating($review['rating']); ?></span>
+                                        <div class="reviewer-avatar" data-name="<?php echo escape($review['reviewer_name'] ?? ''); ?>"></div>
+                                        <div>
+                                            <strong><?php echo escape($review['reviewer_name'] ?? 'Anonymous'); ?></strong>
+                                            <div class="review-rating"><?php echo get_star_rating($review['rating']); ?></div>
+                                        </div>
                                     </div>
                                     <span class="review-date"><?php echo time_ago($review['created_at']); ?></span>
                                 </div>

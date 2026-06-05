@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
 import { LanguageContext, translations, Language, StoreContext } from "@/lib/i18n";
+import { FavoritesProvider } from "@/lib/favorites-provider";
 import { useState, useEffect } from "react";
 import { STORE_LIST, Store } from "@/lib/data";
 
@@ -64,8 +65,10 @@ function App() {
         <TooltipProvider>
           <LanguageContext.Provider value={{ language, setLanguage, t }}>
             <StoreContext.Provider value={{ selectedStore, setStore }}>
-              <Toaster />
-              <Router />
+              <FavoritesProvider>
+                <Toaster />
+                <Router />
+              </FavoritesProvider>
             </StoreContext.Provider>
           </LanguageContext.Provider>
         </TooltipProvider>

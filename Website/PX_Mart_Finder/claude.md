@@ -99,6 +99,9 @@ Do NOT add a `motion.div` with `whileTap` around a Button/interactive element th
 
 Use CSS `active:scale-*` for press feedback on elements nested inside a `motion.div`.
 
+### FavoritesContext — shared state, not per-component hook
+`useFavorites()` reads from `FavoritesContext`, not a local `useState`. **Never** revert this to a standalone hook. Previously each `ProductCard` called `useFavorites()` internally, creating isolated state per instance — toggling multiple products overwrote each other in localStorage because every instance wrote from its own stale `prev`. The fix: `FavoritesProvider` (in `favorites-provider.tsx`) holds the single `useState`; all components share it via context. Follow the same pattern as `LanguageContext` if adding other app-wide state.
+
 ---
 
 # 3. Project Structure
@@ -145,7 +148,8 @@ Core app logic and shared frontend utilities.
 | `data.ts` | All product, category, store data + exported types |
 | `i18n.ts` | All translation strings (EN + ZH), context hooks |
 | `normalize.ts` | Aisle/shelf value normalization |
-| `storage.ts` | localStorage hooks (favorites, recent searches) |
+| `storage.ts` | `FavoritesContext` + `useFavorites()` hook + `useRecentSearches()` hook |
+| `favorites-provider.tsx` | `FavoritesProvider` component — holds single shared favorites `useState` |
 | `validateData.ts` | Data integrity checks (DEV mode only) |
 
 ### client/src/data/
@@ -305,8 +309,10 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Similar products section (checks both `category_en` and `category_zh`)
 
 ## Favorites System
-- Toggle via heart button on ProductCard
-- Stored in localStorage via `useFavorites()` hook
+- Toggle via heart button on `ProductCard` and on `product-detail.tsx`
+- Single shared state via `FavoritesContext` — provided by `FavoritesProvider` in `App.tsx`
+- `useFavorites()` reads from context; all components share one source of truth
+- State is persisted to localStorage inside `useFavoritesState()` (`storage.ts`)
 
 ## Search Suggestions
 - If no results: fuzzy "did you mean" suggestions + category shortcuts
@@ -362,10 +368,11 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Hardcoded English `"items"` string in `search-results.tsx` fixed with inline ternary
 - Dark mode classes in `not-found.tsx` changed from `gray-*` to theme-aware (`bg-background`, `text-foreground`, `text-muted-foreground`)
 - Unused `location`/`setLocation` variables removed from `store-map.tsx`
+- **Favorites multi-item bug fixed** — `useFavorites` now reads from a single shared `FavoritesContext` instead of creating an isolated `useState` per component. Previously each `ProductCard` had its own state copy; toggling two products caused the second card to write from stale `prev: []`, overwriting the first card's localStorage entry. Removing multiple items had the same problem in reverse.
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors
-Runtime: serving on port 5000 with no CSS/PostCSS errors
+Runtime: `npm run dev:client` → serves on port 5000, no CSS/PostCSS errors
 
 ## Pending / Future Improvements
 
@@ -422,6 +429,9 @@ Virtualization was intentionally removed. Do not add it back.
 
 ### Do NOT Add Enterprise Complexity
 Avoid microservice architecture, unnecessary backend layers, premature optimization, or complex state management libraries (Redux, Zustand, etc.).
+
+### Do NOT Make useFavorites a Standalone useState Hook
+`useFavorites()` must always read from `FavoritesContext`. Moving the `useState` back into the hook (so each component gets its own instance) silently reintroduces the multi-item favorites bug — components overwrite each other's localStorage writes. See the FavoritesContext technical decision above.
 
 ### Do NOT Pretend This Is Production Scale
 This is intentionally prototype scale and single-branch focused.

@@ -1,6 +1,9 @@
 <?php
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_name(SESSION_NAME);
+    session_start();
+}
 
 function isAdminLoggedIn() {
     return isset($_SESSION['admin_id']) && isset($_SESSION['admin_email']);

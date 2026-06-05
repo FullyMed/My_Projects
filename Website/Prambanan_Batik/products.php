@@ -11,7 +11,7 @@ $all_products = [];
 $total_products = 0;
 
 $current_page = get_query_param('page', 1, FILTER_VALIDATE_INT) ?: 1;
-$category_filter = get_query_param('category', '', FILTER_SANITIZE_STRING);
+$category_filter = get_query_param('category', '');
 
 try {
     $db = require __DIR__ . '/db_connect.php';
@@ -72,7 +72,8 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
     <section class="products-section">
         <div class="container">
-            <h2>Batik Collection</h2>
+            <h2 class="section-title reveal">Batik Collection</h2>
+            <p class="section-subtitle reveal">Browse our full range of authentic Indonesian batik</p>
 
             <div class="products-filters">
                 <form method="get" class="filter-form">

@@ -6,7 +6,9 @@ PX Mart Finder is a retail product discovery and in-store navigation prototype d
 
 The project is built as a single-branch proof-of-concept focused on **PX Mart Wufeng (Taichung)**. It demonstrates how modern frontend technologies can be applied to retail search UX, and is intended as a portfolio and prototype demo.
 
-### Getting Started
+---
+
+## Getting Started
 
 ```bash
 # Install dependencies (run inside WSL2 / Linux if on Windows)
@@ -19,7 +21,9 @@ npm run dev:client
 
 > **Windows / WSL2 note:** Always run `npm ci` from within WSL2. Installing `node_modules` on Windows and then running in WSL2 will cause native binary errors (esbuild, rollup).
 
-### Key Features
+---
+
+## Key Features
 
 - Fast product search with fuzzy matching and typo tolerance
 - Synonym expansion (e.g. searching "tissue" also finds 衛生紙, 面紙)
@@ -27,16 +31,34 @@ npm run dev:client
 - Category and subcategory browsing
 - Brand filtering and multi-sort (relevance, name, aisle order)
 - "Did you mean?" suggestions when no results are found
-- Favorites with localStorage persistence
+- Favorites with localStorage persistence — shared context keeps all toggles in sync
 - Store selection (Wufeng branch + demo placeholders)
 - Store map placeholder with aisle highlighting
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts
 
-### Technologies Used
+---
 
-- **React** + **TypeScript**
+## Project Structure
+
+```
+client/
+  src/
+    components/    # Layout, ProductCard, LanguageToggle, ThemeToggle
+    pages/         # Home, Search, Category, Product Detail, Favorites, Store Map
+    lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts
+    data/          # products.json, categories.json
+  public/Images/   # Product images organized by category
+server/            # Minimal Express scaffold (not actively used)
+shared/            # Shared types
+```
+
+---
+
+## Technologies Used
+
+- **React 19** + **TypeScript**
 - **Vite**
 - **Tailwind CSS v4**
 - **shadcn/ui**
@@ -47,11 +69,15 @@ npm run dev:client
 - **Lucide React** — icons
 - **Google Fonts** — Rubik (Latin) + Noto Sans TC (Traditional Chinese)
 
-### Purpose
+---
+
+## Purpose
 
 PX Mart Finder demonstrates how intelligent search and clear location data can reduce the time customers spend finding products inside a physical supermarket. It is designed as a portfolio piece and prototype pitch — not a production system.
 
-### Future Enhancements
+---
+
+## Future Enhancements
 
 - More products and richer category coverage
 - Real branch location data for additional stores

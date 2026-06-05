@@ -4,7 +4,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
 $product_id = get_query_param('id', 0, FILTER_VALIDATE_INT);
-$platform = get_query_param('platform', 'shopee', FILTER_SANITIZE_STRING);
+$platform = get_query_param('platform', 'shopee');
 
 if (!$product_id) {
     header('Location: /products.php');
@@ -16,6 +16,11 @@ $buy_url = null;
 
 try {
     $db = require __DIR__ . '/db_connect.php';
+
+    if ($db === null) {
+        header('Location: /product.php?id=' . $product_id);
+        exit;
+    }
 
     $stmt = $db->prepare('SELECT buy_link_shopee, buy_link_tokopedia, buy_link_other FROM products WHERE id = ? LIMIT 1');
     $stmt->execute([$product_id]);

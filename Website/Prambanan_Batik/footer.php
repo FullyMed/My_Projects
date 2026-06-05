@@ -1,5 +1,3 @@
-<?php
-?>
     </main>
 
     <footer class="footer">

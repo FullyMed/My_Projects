@@ -3,13 +3,16 @@ CREATE TABLE IF NOT EXISTS categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL UNIQUE,
   slug VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_categories_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create products table
 CREATE TABLE IF NOT EXISTS products (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  category_id INT NOT NULL,
+  category_id INT DEFAULT NULL,
   sku VARCHAR(255) NOT NULL UNIQUE,
   slug VARCHAR(255) NOT NULL UNIQUE,
   name VARCHAR(255) NOT NULL,
@@ -22,7 +25,7 @@ CREATE TABLE IF NOT EXISTS products (
   buy_link_other VARCHAR(500),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
   INDEX idx_products_category_id (category_id),
   INDEX idx_products_sku (sku),
   INDEX idx_products_slug (slug),
@@ -51,9 +54,12 @@ CREATE TABLE IF NOT EXISTS reviews (
   reviewer_name VARCHAR(255),
   rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
   content LONGTEXT,
+  title VARCHAR(255) DEFAULT NULL,
+  reviewer_email VARCHAR(255) DEFAULT NULL,
   review_source VARCHAR(50),
   verified_purchase BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
   INDEX idx_reviews_product_id (product_id),
   INDEX idx_reviews_rating (product_id, rating),

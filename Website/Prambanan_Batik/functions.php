@@ -129,14 +129,14 @@ function is_valid_url($url) {
 /**
  * Get query parameter safely
  */
-function get_query_param($key, $default = null, $filter = FILTER_SANITIZE_STRING) {
+function get_query_param($key, $default = null, $filter = FILTER_DEFAULT) {
     return isset($_GET[$key]) ? filter_var($_GET[$key], $filter) : $default;
 }
 
 /**
  * Get POST parameter safely
  */
-function get_post_param($key, $default = null, $filter = FILTER_SANITIZE_STRING) {
+function get_post_param($key, $default = null, $filter = FILTER_DEFAULT) {
     return isset($_POST[$key]) ? filter_var($_POST[$key], $filter) : $default;
 }
 

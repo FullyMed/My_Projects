@@ -44,15 +44,17 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
     <section class="hero">
         <div class="hero-content">
+            <span class="hero-eyebrow">Prambanan Batik</span>
             <h2>Discover Authentic Batik</h2>
             <p>Premium Indonesian batik craftsmanship with trusted customer reviews</p>
-            <a href="/products.php" class="btn btn-primary">Explore Collection</a>
+            <a href="/products.php" class="btn btn-primary btn-large">Explore Collection</a>
         </div>
     </section>
 
     <section class="featured-section">
         <div class="container">
-            <h2>Featured Products</h2>
+            <h2 class="section-title reveal">Featured Products</h2>
+            <p class="section-subtitle reveal">Handpicked pieces loved by our customers</p>
             <div class="products-grid">
                 <?php foreach ($featured_products as $product): ?>
                     <article class="product-card">
