@@ -8,9 +8,9 @@ define('SITE_TIMEZONE', 'Asia/Jakarta');
 
 // Database Configuration - MySQL
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'product_catalog');
+define('DB_NAME', getenv('DB_NAME') ?: 'prambanan_batik');
 define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
+define('DB_PASSWORD', getenv('DB_PASSWORD') ?: 'Pel1kmysql*');
 
 // Application Settings
 define('ITEMS_PER_PAGE', 12);
