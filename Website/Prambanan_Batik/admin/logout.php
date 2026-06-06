@@ -1,8 +1,9 @@
 <?php
 
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/auth.php';
 
 logoutAdmin();
 
-header('Location: /admin/login.php');
+header('Location: ' . BASE_URL . '/admin/login.php');
 exit;

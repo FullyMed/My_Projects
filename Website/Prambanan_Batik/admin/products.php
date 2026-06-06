@@ -45,7 +45,7 @@ $products = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
 </head>
 <body>
     <div class="admin-container">
@@ -55,11 +55,11 @@ $products = $stmt->fetchAll();
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li><a href="/admin/index.php">Dashboard</a></li>
-                    <li><a href="/admin/categories.php">Categories</a></li>
-                    <li><a href="/admin/products.php" class="active">Products</a></li>
-                    <li><a href="/admin/reviews.php">Reviews</a></li>
-                    <li><a href="/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
                 </ul>
             </nav>
         </aside>
@@ -69,7 +69,7 @@ $products = $stmt->fetchAll();
                 <h1>Products</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
                 </div>
             </div>
 
@@ -77,8 +77,8 @@ $products = $stmt->fetchAll();
                 <div class="page-header">
                     <h2 class="page-title">Manage Products</h2>
                     <div style="display: flex; gap: 0.5rem;">
-                        <a href="/admin/product_edit.php" class="btn">Create Product</a>
-                        <a href="/admin/import_products.php" class="btn">Import CSV</a>
+                        <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php" class="btn">Create Product</a>
+                        <a href="<?php echo SITE_PATH; ?>/admin/import_products.php" class="btn">Import CSV</a>
                     </div>
                 </div>
 
@@ -112,8 +112,8 @@ $products = $stmt->fetchAll();
                                     <td><?php echo date('M d, Y', strtotime($product['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="/admin/product_edit.php?id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Edit</a>
-                                            <a href="/admin/product_images.php?product_id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Images</a>
+                                            <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php?id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Edit</a>
+                                            <a href="<?php echo SITE_PATH; ?>/admin/product_images.php?product_id=<?php echo urlencode($product['id']); ?>" class="btn-primary">Images</a>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($product['id']); ?>">

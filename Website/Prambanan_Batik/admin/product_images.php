@@ -81,7 +81,7 @@ if ($productId) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
 </head>
 <body>
     <div class="admin-container">
@@ -91,11 +91,11 @@ if ($productId) {
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li><a href="/admin/index.php">Dashboard</a></li>
-                    <li><a href="/admin/categories.php">Categories</a></li>
-                    <li><a href="/admin/products.php">Products</a></li>
-                    <li><a href="/admin/reviews.php">Reviews</a></li>
-                    <li><a href="/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
                 </ul>
             </nav>
         </aside>
@@ -105,13 +105,13 @@ if ($productId) {
                 <h1>Product Images</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <a href="/admin/products.php" class="back-link">← Back to Products</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to Products</a>
                 </div>
 
                 <?php if ($message): ?>

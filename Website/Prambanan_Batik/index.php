@@ -47,7 +47,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
             <span class="hero-eyebrow">Prambanan Batik</span>
             <h2>Discover Authentic Batik</h2>
             <p>Premium Indonesian batik craftsmanship with trusted customer reviews</p>
-            <a href="/products.php" class="btn btn-primary btn-large">Explore Collection</a>
+            <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-primary btn-large">Explore Collection</a>
         </div>
     </section>
 
@@ -63,7 +63,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                         </div>
                         <div class="product-info">
                             <span class="category"><?php echo escape($product['category']); ?></span>
-                            <h3><a href="/product.php?id=<?php echo $product['id']; ?>"><?php echo escape($product['name']); ?></a></h3>
+                            <h3><a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo $product['id']; ?>"><?php echo escape($product['name']); ?></a></h3>
                             <div class="rating">
                                 <span class="stars"><?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?></span>
                                 <span class="rating-value"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?></span>
@@ -71,7 +71,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                             </div>
                             <div class="product-footer">
                                 <span class="price"><?php echo format_currency($product['price_display'] ?? $product['price'] ?? 0); ?></span>
-                                <a href="/product.php?id=<?php echo $product['id']; ?>" class="btn btn-small">View</a>
+                                <a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo $product['id']; ?>" class="btn btn-small">View</a>
                             </div>
                         </div>
                     </article>

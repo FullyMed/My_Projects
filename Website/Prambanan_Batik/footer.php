@@ -9,8 +9,8 @@
             <div class="footer-section">
                 <h3>Quick Links</h3>
                 <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/products.php">Batik Collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/">Home</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/products.php">Batik Collection</a></li>
                 </ul>
             </div>
             <div class="footer-section">

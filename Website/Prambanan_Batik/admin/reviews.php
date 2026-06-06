@@ -49,7 +49,7 @@ $reviews = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
 </head>
 <body>
     <div class="admin-container">
@@ -59,11 +59,11 @@ $reviews = $stmt->fetchAll();
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li><a href="/admin/index.php">Dashboard</a></li>
-                    <li><a href="/admin/categories.php">Categories</a></li>
-                    <li><a href="/admin/products.php">Products</a></li>
-                    <li><a href="/admin/reviews.php" class="active">Reviews</a></li>
-                    <li><a href="/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="active">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
                 </ul>
             </nav>
         </aside>
@@ -73,7 +73,7 @@ $reviews = $stmt->fetchAll();
                 <h1>Reviews</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
                 </div>
             </div>
 
@@ -120,12 +120,12 @@ $reviews = $stmt->fetchAll();
 
                                 <?php if ($review['product_name']): ?>
                                     <div class="review-product">
-                                        Product: <a href="/admin/product_edit.php?id=<?php echo urlencode($review['product_id']); ?>"><?php echo htmlspecialchars($review['product_name']); ?></a>
+                                        Product: <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php?id=<?php echo urlencode($review['product_id']); ?>"><?php echo htmlspecialchars($review['product_name']); ?></a>
                                     </div>
                                 <?php endif; ?>
 
                                 <div class="review-actions">
-                                    <a href="/admin/review_edit.php?id=<?php echo urlencode($review['id']); ?>" class="btn">Edit</a>
+                                    <a href="<?php echo SITE_PATH; ?>/admin/review_edit.php?id=<?php echo urlencode($review['id']); ?>" class="btn">Edit</a>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($review['id']); ?>">

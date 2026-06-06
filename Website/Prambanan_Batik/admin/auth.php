@@ -30,7 +30,7 @@ function validateCsrfToken($token) {
 
 function requireAdminLogin() {
     if (!isAdminLoggedIn()) {
-        header('Location: /admin/login.php');
+        header('Location: ' . BASE_URL . '/admin/login.php');
         exit;
     }
 }

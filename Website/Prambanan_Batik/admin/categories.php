@@ -95,7 +95,7 @@ $categories = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
 </head>
 <body>
     <div class="admin-container">
@@ -105,11 +105,11 @@ $categories = $stmt->fetchAll();
             </div>
             <nav>
                 <ul class="sidebar-nav">
-                    <li><a href="/admin/index.php">Dashboard</a></li>
-                    <li><a href="/admin/categories.php" class="active">Categories</a></li>
-                    <li><a href="/admin/products.php">Products</a></li>
-                    <li><a href="/admin/reviews.php">Reviews</a></li>
-                    <li><a href="/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php" class="active">Categories</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
                 </ul>
             </nav>
         </aside>
@@ -119,7 +119,7 @@ $categories = $stmt->fetchAll();
                 <h1>Categories</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
                 </div>
             </div>
 
@@ -157,7 +157,7 @@ $categories = $stmt->fetchAll();
 
                             <div style="display: flex; gap: 0.5rem;">
                                 <button type="submit" class="btn">Update Category</button>
-                                <a href="/admin/categories.php" class="btn btn-secondary">Cancel</a>
+                                <a href="<?php echo SITE_PATH; ?>/admin/categories.php" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
@@ -208,7 +208,7 @@ $categories = $stmt->fetchAll();
                                     <td><?php echo date('M d, Y', strtotime($category['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="/admin/categories.php?edit=<?php echo urlencode($category['id']); ?>" class="btn-primary">Edit</a>
+                                            <a href="<?php echo SITE_PATH; ?>/admin/categories.php?edit=<?php echo urlencode($category['id']); ?>" class="btn-primary">Edit</a>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($category['id']); ?>">

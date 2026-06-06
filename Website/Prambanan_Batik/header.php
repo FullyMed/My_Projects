@@ -16,7 +16,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/assets/css/styles.css">
 </head>
 <body>
     <?php if (is_preview_mode()): ?>
@@ -30,15 +30,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="header-left">
                 <div class="logo-section">
                     <h1 class="logo">
-                        <a href="/"><?php echo SITE_NAME; ?></a>
+                        <a href="<?php echo SITE_PATH; ?>/"><?php echo SITE_NAME; ?></a>
                     </h1>
                     <p class="tagline"><?php echo SITE_TAGLINE; ?></p>
                 </div>
             </div>
             <nav class="nav">
                 <ul>
-                    <li><a href="/" class="<?php echo $current_page === 'index.php' ? 'active' : ''; ?>">Home</a></li>
-                    <li><a href="/products.php" class="<?php echo $current_page === 'products.php' ? 'active' : ''; ?>">Batik Collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/" class="<?php echo $current_page === 'index.php' ? 'active' : ''; ?>">Home</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/products.php" class="<?php echo $current_page === 'products.php' ? 'active' : ''; ?>">Batik Collection</a></li>
                 </ul>
             </nav>
         </div>

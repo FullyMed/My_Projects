@@ -11,7 +11,7 @@ $reviews = [];
 $product_id = get_query_param('id', 0, FILTER_VALIDATE_INT);
 
 if (!$product_id) {
-    header('Location: /products.php');
+    header('Location: ' . BASE_URL . '/products.php');
     exit;
 }
 
@@ -109,11 +109,11 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
     <section class="product-detail">
         <div class="container">
             <div class="breadcrumb">
-                <a href="/">Home</a>
+                <a href="<?php echo SITE_PATH; ?>/">Home</a>
                 <span>/</span>
-                <a href="/products.php">Products</a>
+                <a href="<?php echo SITE_PATH; ?>/products.php">Products</a>
                 <span>/</span>
-                <a href="/products.php?category=<?php echo urlencode($product['category_slug'] ?? ''); ?>"><?php echo escape($product['category']); ?></a>
+                <a href="<?php echo SITE_PATH; ?>/products.php?category=<?php echo urlencode($product['category_slug'] ?? ''); ?>"><?php echo escape($product['category']); ?></a>
                 <span>/</span>
                 <span><?php echo escape($product['name']); ?></span>
             </div>
@@ -144,18 +144,18 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
                     <div class="action-buttons">
                         <?php if (!empty($product['buy_link_shopee'])): ?>
-                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank">Buy on Shopee</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank">Buy on Shopee</a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_tokopedia'])): ?>
-                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank">Buy on Tokopedia</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank">Buy on Tokopedia</a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_other'])): ?>
-                            <a href="/go.php?id=<?php echo $product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank">Buy Now</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank">Buy Now</a>
                         <?php endif; ?>
                         <?php if (empty($product['buy_link_shopee']) && empty($product['buy_link_tokopedia']) && empty($product['buy_link_other'])): ?>
                             <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank">Search on Shopee</a>
                         <?php endif; ?>
-                        <a href="/products.php" class="btn btn-secondary btn-large">Back to Products</a>
+                        <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary btn-large">Back to Products</a>
                     </div>
                 </div>
             </div>

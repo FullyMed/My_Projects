@@ -7,7 +7,7 @@ $product_id = get_query_param('id', 0, FILTER_VALIDATE_INT);
 $platform = get_query_param('platform', 'shopee');
 
 if (!$product_id) {
-    header('Location: /products.php');
+    header('Location: ' . BASE_URL . '/products.php');
     exit;
 }
 
@@ -18,7 +18,7 @@ try {
     $db = require __DIR__ . '/db_connect.php';
 
     if ($db === null) {
-        header('Location: /product.php?id=' . $product_id);
+        header('Location: ' . BASE_URL . '/product.php?id=' . $product_id);
         exit;
     }
 
@@ -56,6 +56,6 @@ try {
 if ($buy_url && preg_match('/^https?:\/\//i', $buy_url)) {
     header('Location: ' . $buy_url);
 } else {
-    header('Location: /product.php?id=' . $product_id);
+    header('Location: ' . BASE_URL . '/product.php?id=' . $product_id);
 }
 exit;

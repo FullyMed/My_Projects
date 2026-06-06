@@ -8,7 +8,7 @@ $error = '';
 $success = '';
 
 if (isAdminLoggedIn()) {
-    header('Location: /admin/index.php');
+    header('Location: ' . BASE_URL . '/admin/index.php');
     exit;
 }
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $result = loginAdmin($pdo, $email, $password);
         if ($result['success']) {
-            header('Location: /admin/index.php');
+            header('Location: ' . BASE_URL . '/admin/index.php');
             exit;
         } else {
             $error = $result['message'];
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
     <style>
         body {
             font-family: 'Inter', -apple-system, sans-serif;
