@@ -36,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($productId) || empty($imageUrl)) {
                 $error = 'Product and image URL are required';
+            } elseif (!preg_match('/^https?:\/\//i', $imageUrl)) {
+                $error = 'Image URL must start with http:// or https://';
             } else {
                 try {
                     $stmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (?, ?, ?, ?)');

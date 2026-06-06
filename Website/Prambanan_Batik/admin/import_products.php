@@ -13,6 +13,9 @@ $error = '';
 $report = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'import' && isset($_FILES['csv_file'])) {
@@ -163,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    } // end CSRF else
 }
 
 $stmt = $pdo->prepare('SELECT id, name FROM categories ORDER BY name');
@@ -313,6 +317,7 @@ PROD-003,Gadget X,49.99,,2,</pre>
 
                     <form method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="import">
+                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                         <div class="form-group">
                             <label>CSV File <span class="required">*</span></label>

@@ -43,6 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare('INSERT INTO reviews (product_id, rating, title, content, reviewer_name, reviewer_email, verified_purchase) VALUES (?, ?, ?, ?, ?, ?, ?)');
                 $stmt->execute([$productId, $rating, $title ?: null, $content ?: null, $reviewerName ?: null, $reviewerEmail ?: null, $verifiedPurchase]);
+                $ratingStmt = $pdo->prepare('
+                    UPDATE products SET
+                        rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+                        rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
+                    WHERE id = ?
+                ');
+                $ratingStmt->execute([$productId]);
                 $message = 'Review created successfully';
                 header('Location: ' . BASE_URL . '/admin/reviews.php');
                 exit;
@@ -66,6 +73,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $stmt = $pdo->prepare('UPDATE reviews SET product_id = ?, rating = ?, title = ?, content = ?, reviewer_name = ?, reviewer_email = ?, verified_purchase = ?, updated_at = NOW() WHERE id = ?');
                 $stmt->execute([$productId, $rating, $title ?: null, $content ?: null, $reviewerName ?: null, $reviewerEmail ?: null, $verifiedPurchase, $id]);
+                $ratingStmt = $pdo->prepare('
+                    UPDATE products SET
+                        rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+                        rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
+                    WHERE id = ?
+                ');
+                $ratingStmt->execute([$productId]);
                 $message = 'Review updated successfully';
                 $stmt = $pdo->prepare('SELECT * FROM reviews WHERE id = ? LIMIT 1');
                 $stmt->execute([$id]);

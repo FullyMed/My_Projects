@@ -89,3 +89,12 @@ CREATE TABLE IF NOT EXISTS admin_users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_admin_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create login_attempts table (brute-force protection)
+CREATE TABLE IF NOT EXISTS login_attempts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  ip_address VARCHAR(45) NOT NULL,
+  attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_login_attempts_ip (ip_address),
+  INDEX idx_login_attempts_time (attempted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

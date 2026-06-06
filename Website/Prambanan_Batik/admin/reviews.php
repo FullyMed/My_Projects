@@ -23,8 +23,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Review ID is required';
             } else {
                 try {
+                    // Fetch the product_id before deleting so we can update its rating
+                    $prodStmt = $pdo->prepare('SELECT product_id FROM reviews WHERE id = ? LIMIT 1');
+                    $prodStmt->execute([$id]);
+                    $deletedProductId = $prodStmt->fetchColumn();
+
                     $stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
                     $stmt->execute([$id]);
+
+                    if ($deletedProductId) {
+                        $ratingStmt = $pdo->prepare('
+                            UPDATE products SET
+                                rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+                                rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
+                            WHERE id = ?
+                        ');
+                        $ratingStmt->execute([$deletedProductId]);
+                    }
+
                     $message = 'Review deleted successfully';
                 } catch (Exception $e) {
                     $error = 'Failed to delete review: ' . $e->getMessage();

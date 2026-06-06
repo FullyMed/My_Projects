@@ -67,33 +67,52 @@ Two constants handle all URL generation:
 
 All admin pages include `admin/auth.php` at the top and call `requireAdminLogin()`, which redirects to `BASE_URL . '/admin/login.php'` if the session is invalid. Session state is stored under the key `product_hub_session` with a **30-minute idle timeout** (sliding window — refreshed on every authenticated request via `isAdminLoggedIn()`).
 
+**Brute-force protection**: `admin/login.php` enforces a rate limit of **5 failed attempts per IP per 15 minutes**, tracked in the `login_attempts` table. Failed attempts are recorded via `recordFailedLoginAttempt()`; on success, attempts for that IP are cleared via `clearLoginAttempts()`. The constants `LOGIN_MAX_ATTEMPTS` (5) and `LOGIN_LOCKOUT_MINUTES` (15) are defined in `admin/auth.php`.
+
 ### CSRF Protection
 
 All admin POST forms carry a hidden `csrf_token` field. Every POST handler must call `validateCsrfToken($_POST['csrf_token'] ?? '')` before processing any action — return an error and skip processing if it fails. Both helpers live in `admin/auth.php`:
 - `generateCsrfToken()` — call in the form to output the token value
 - `validateCsrfToken($token)` — call at the top of every POST handler; uses `hash_equals()` for timing-safe comparison
 
+### Denormalized Rating Fields
+
+`products.rating_avg` and `products.rating_count` are denormalized. They must be recalculated any time a review is **created, updated, or deleted**. The recalculation query pattern used in `admin/review_edit.php` and `admin/reviews.php`:
+
+```sql
+UPDATE products SET
+    rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+    rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
+WHERE id = ?
+```
+
+For deletes, fetch the `product_id` from the review **before** deleting, then run the update after.
+
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, etc.) — reads env vars first, then defaults |
+| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, etc.) — reads env vars first, then defaults. DB_PASSWORD default is `''` — set via env var. |
 | `db_connect.php` | Creates and returns a PDO instance; returns `null` on failure |
 | `functions.php` | Utility functions: `escape()`, `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (mb-safe), `get_sample_batik_products()`, etc. |
 | `header.php` / `footer.php` | Shared page chrome — `footer.php` includes `main.js` |
 | `go.php` | Redirect handler — validates URL starts with `http(s)://`, logs click to `outbound_clicks`, then redirects |
 | `sitemap.php` | Generates XML sitemap dynamically from DB; null-safe when `$pdo` is unavailable |
-| `admin/auth.php` | Session management (`loginAdmin`, `requireAdminLogin`, `logoutAdmin`, `isAdminLoggedIn`) + CSRF helpers (`generateCsrfToken`, `validateCsrfToken`) |
+| `admin/auth.php` | Session management (`loginAdmin`, `requireAdminLogin`, `logoutAdmin`, `isAdminLoggedIn`) + CSRF helpers (`generateCsrfToken`, `validateCsrfToken`) + rate-limiting helpers (`isLoginRateLimited`, `recordFailedLoginAttempt`, `clearLoginAttempts`) |
 | `admin/admins.php` | List, add, delete admins; change passwords; protects against self-deletion and deleting the last admin |
-| `admin/import_products.php` | CSV bulk import — upserts products by SKU |
+| `admin/import_products.php` | CSV bulk import — upserts products by SKU; CSRF-protected |
 | `admin/categories.php` | Create, edit (via `?edit=<id>` GET param), and delete categories |
+| `admin/review_edit.php` | Create / edit reviews — recalculates `rating_avg` / `rating_count` on save |
+| `admin/reviews.php` | List / delete reviews — recalculates `rating_avg` / `rating_count` on delete |
+| `admin/product_images.php` | Manage product image URLs — validates URL starts with `http(s)://` |
 
 ### Database Notes
 
-- `products.rating_avg` and `products.rating_count` are **denormalized** — updated whenever reviews are created or edited (not computed at query time).
+- `products.rating_avg` and `products.rating_count` are **denormalized** — updated whenever reviews are created, edited, or deleted (not computed at query time). See the recalculation pattern above.
 - Products are identified by `sku` (unique) for CSV upsert and by `slug` (unique) for URLs.
 - All tables use `utf8mb4_unicode_ci` for full Unicode/emoji support.
 - Prices are stored and displayed in **IDR (Indonesian Rupiah)**. Always use `format_currency()` which outputs `Rp X.XXX` — never use a dollar sign.
+- The `login_attempts` table is used for brute-force protection on admin login. Rows older than 1 day are pruned automatically on each login attempt.
 
 ### URL Patterns
 
@@ -108,5 +127,7 @@ All admin POST forms carry a hidden `csrf_token` field. Every POST handler must 
 - All output must be passed through `escape()` (htmlspecialchars ENT_QUOTES UTF-8).
 - Every admin POST handler must call `validateCsrfToken()` first.
 - Any redirect target from DB or user input must be validated (e.g., `preg_match('/^https?:\/\//')`) before issuing a `Location:` header.
+- Image/file URLs submitted by admins must be validated with `preg_match('/^https?:\/\//')` before saving.
 - File uploads: validate with `finfo` MIME type + extension allow-list via `is_valid_image_upload()`.
 - When adding new admin pages: include `admin/auth.php`, call `requireAdminLogin()`, add CSRF token to every form, use `SITE_PATH` on all links, use `BASE_URL` on all PHP redirects, and add the page to the sidebar nav in every admin page.
+- When adding review write operations: always recalculate `rating_avg` / `rating_count` using the pattern in `admin/review_edit.php`.

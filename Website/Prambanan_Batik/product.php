@@ -42,9 +42,11 @@ try {
                 FROM reviews
                 WHERE product_id = ?
                 ORDER BY created_at DESC
-                LIMIT ' . REVIEWS_PER_PAGE . '
+                LIMIT ?
             ');
-            $reviews_stmt->execute([$product_id]);
+            $reviews_stmt->bindValue(1, $product_id, PDO::PARAM_INT);
+            $reviews_stmt->bindValue(2, REVIEWS_PER_PAGE, PDO::PARAM_INT);
+            $reviews_stmt->execute();
             $reviews = $reviews_stmt->fetchAll();
         }
     }

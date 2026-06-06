@@ -102,3 +102,44 @@ function updateAdminPassword($pdo, $adminId, $newPassword) {
         return ['success' => false, 'message' => 'Failed to update password'];
     }
 }
+
+// Max failed attempts per IP before lockout; window is 15 minutes.
+define('LOGIN_MAX_ATTEMPTS', 5);
+define('LOGIN_LOCKOUT_MINUTES', 15);
+
+function isLoginRateLimited($pdo, $ip) {
+    if ($pdo === null) return false;
+    try {
+        $stmt = $pdo->prepare('
+            SELECT COUNT(*) FROM login_attempts
+            WHERE ip_address = ?
+              AND attempted_at > DATE_SUB(NOW(), INTERVAL ' . LOGIN_LOCKOUT_MINUTES . ' MINUTE)
+        ');
+        $stmt->execute([$ip]);
+        return (int)$stmt->fetchColumn() >= LOGIN_MAX_ATTEMPTS;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function recordFailedLoginAttempt($pdo, $ip) {
+    if ($pdo === null) return;
+    try {
+        $stmt = $pdo->prepare('INSERT INTO login_attempts (ip_address) VALUES (?)');
+        $stmt->execute([$ip]);
+        // Prune old rows to keep the table small
+        $pdo->prepare('DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 DAY)')->execute();
+    } catch (Exception $e) {
+        error_log('Failed to record login attempt: ' . $e->getMessage());
+    }
+}
+
+function clearLoginAttempts($pdo, $ip) {
+    if ($pdo === null) return;
+    try {
+        $stmt = $pdo->prepare('DELETE FROM login_attempts WHERE ip_address = ?');
+        $stmt->execute([$ip]);
+    } catch (Exception $e) {
+        error_log('Failed to clear login attempts: ' . $e->getMessage());
+    }
+}

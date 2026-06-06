@@ -7,11 +7,13 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **Product Management**: Browse and filter batik products by category
 - **Customer Reviews**: View product reviews with star ratings
 - **Admin Panel**: Secure authentication to manage products, categories, reviews, images, and admin users
+- **Admin Dashboard**: At-a-glance stats (product count, categories, reviews, outbound clicks) with recent review feed
 - **CSV Import**: Bulk import products with upsert by SKU
 - **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling, scroll-reveal animations
 - **SEO Optimized**: XML sitemap and robots.txt for search engines
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
+- **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
 
 ## Technology Stack
 
@@ -115,18 +117,18 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 │   └── js/main.js               # Scroll reveal (IntersectionObserver), sticky header, avatar initials
 └── admin/
     ├── admin.css                # Admin panel styles
-    ├── auth.php                 # Session management + CSRF helpers
-    ├── index.php                # Dashboard
-    ├── login.php                # Login form
+    ├── auth.php                 # Session management + CSRF helpers + login rate-limiting helpers
+    ├── index.php                # Dashboard — stats cards + recent reviews
+    ├── login.php                # Login form with brute-force rate limiting
     ├── logout.php               # Logout handler
     ├── admins.php               # List / add / delete admin users; change passwords
     ├── categories.php           # Create / edit / delete categories
     ├── products.php             # Products list (IDR pricing)
     ├── product_edit.php         # Create / edit product
-    ├── product_images.php       # Manage product images (URL-based)
-    ├── import_products.php      # CSV bulk import
-    ├── reviews.php              # Manage reviews
-    └── review_edit.php          # Create / edit review
+    ├── product_images.php       # Manage product images (URL-based, http(s):// validated)
+    ├── import_products.php      # CSV bulk import (CSRF-protected)
+    ├── reviews.php              # Manage reviews — recalculates rating on delete
+    └── review_edit.php          # Create / edit review — recalculates rating on save
 ```
 
 ## Database Schema
@@ -150,8 +152,8 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 | name | VARCHAR 255 | |
 | description | LONGTEXT | |
 | price_display | DECIMAL(10,2) | Displayed in IDR (Rp) |
-| rating_avg | DECIMAL(3,2) | Denormalized — updated on review change |
-| rating_count | INT | Denormalized |
+| rating_avg | DECIMAL(3,2) | Denormalized — recalculated on every review create/edit/delete |
+| rating_count | INT | Denormalized — same |
 | buy_link_shopee / tokopedia / other | VARCHAR 500 | Affiliate links |
 | created_at / updated_at | TIMESTAMP | |
 
@@ -166,6 +168,9 @@ Logs every click on a buy link: `product_id`, `platform`, `user_ip`, `user_agent
 
 ### `admin_users`
 `email` (UNIQUE) + `password_hash` (bcrypt, cost 12).
+
+### `login_attempts`
+Tracks failed admin login attempts by IP for brute-force protection. Columns: `ip_address`, `attempted_at`. Rows older than 24 hours are pruned automatically on each login attempt.
 
 ## URL Patterns
 
@@ -196,8 +201,9 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 - **Output escaping**: all dynamic content passed through `escape()` (htmlspecialchars)
 - **Passwords**: bcrypt via `password_hash()` (cost 12) / `password_verify()`
 - **CSRF protection**: all admin POST forms carry a per-session token validated server-side with `hash_equals()`
+- **Brute-force protection**: admin login blocked after 5 failed attempts per IP within 15 minutes, tracked in `login_attempts` table
 - **Session timeout**: admin sessions expire after 30 minutes of inactivity (sliding window — reset on every authenticated request)
-- **Open redirect protection**: `go.php` validates URLs start with `http://` or `https://`
+- **Open redirect protection**: `go.php` and `product_images.php` both validate URLs start with `http://` or `https://`
 - **File upload validation**: MIME type checked via `finfo`, extension allow-listed
 
 ### Recommendations
@@ -214,11 +220,20 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 
 **Admin login fails** — ensure the password was hashed with `password_hash()` (bcrypt), not SHA2. See admin user creation instructions above.
 
+**Admin login locked out** — if you (or a bot) triggered the rate limit, wait 15 minutes or manually clear the `login_attempts` table: `DELETE FROM login_attempts;`
+
 **Products / content invisible** — `main.js` must be loaded by `footer.php`. If the script tag is missing, `.reveal` and `.product-card` elements stay at `opacity: 0`. Check that `footer.php` ends with `<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>`.
 
 **"Not Found" after login or any redirect** — if the site lives in a subdirectory (e.g. `localhost/Prambanan_Batik`), confirm `BASE_URL` includes the subdirectory. All PHP redirects use `BASE_URL`; all HTML links use `SITE_PATH`.
 
 **Preview mode shown** — the site shows sample data when the DB is unavailable. A yellow banner appears at the top. Check DB credentials.
+
+**Rating not updating after review changes** — ratings are denormalized and recalculated in PHP on every review create/edit/delete. If ratings appear stale, you can force a recalculation by running:
+```sql
+UPDATE products p SET
+    rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = p.id), 0),
+    rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = p.id);
+```
 
 **CSV import errors** — verify UTF-8 encoding, required columns present, `category_id` exists, and file is under 5 MB.
 
@@ -235,6 +250,15 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.3.0** (2026-06): Security hardening + dashboard + bug fixes
+  - Removed hardcoded DB password fallback in `config.php` — credentials must be set via env var
+  - Brute-force protection on admin login — 5 attempts per IP per 15 minutes via new `login_attempts` table
+  - CSRF protection added to CSV import form (`import_products.php`)
+  - Image URLs in `product_images.php` now validated to start with `http(s)://`
+  - `rating_avg` / `rating_count` now recalculated on every review create, edit, and delete
+  - Admin dashboard rewritten with stats cards (products, categories, reviews, clicks) and recent reviews table
+  - PDO `LIMIT` binding in `product.php` cleaned up to use `bindValue(PDO::PARAM_INT)`
 
 - **v2.2.0** (2026-06): Admin management UI + path & animation fixes
   - New `admin/admins.php` — add, delete, and change passwords for admin accounts

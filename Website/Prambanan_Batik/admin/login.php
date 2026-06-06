@@ -12,7 +12,11 @@ if (isAdminLoggedIn()) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+
+if (isLoginRateLimited($pdo, $ip)) {
+    $error = 'Too many failed login attempts. Please try again in ' . LOGIN_LOCKOUT_MINUTES . ' minutes.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -21,9 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $result = loginAdmin($pdo, $email, $password);
         if ($result['success']) {
+            clearLoginAttempts($pdo, $ip);
             header('Location: ' . BASE_URL . '/admin/index.php');
             exit;
         } else {
+            recordFailedLoginAttempt($pdo, $ip);
             $error = $result['message'];
         }
     }
