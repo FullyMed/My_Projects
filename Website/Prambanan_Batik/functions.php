@@ -40,10 +40,10 @@ function get_pagination($current_page, $total_items, $items_per_page = ITEMS_PER
 }
 
 /**
- * Check if preview mode is enabled and user has access
+ * Check if preview mode is active — either the global constant or the per-request flag set via $_ENV.
  */
 function is_preview_mode() {
-    return PREVIEW_MODE === true;
+    return PREVIEW_MODE === true || (isset($_ENV['PREVIEW_MODE']) && $_ENV['PREVIEW_MODE'] === true);
 }
 
 /**
@@ -75,10 +75,10 @@ function get_star_rating($rating) {
  * Truncate text to specified length
  */
 function truncate_text($text, $length = 100, $suffix = '...') {
-    if (strlen($text) <= $length) {
+    if (mb_strlen($text, 'UTF-8') <= $length) {
         return $text;
     }
-    return substr($text, 0, $length - strlen($suffix)) . $suffix;
+    return mb_substr($text, 0, $length - mb_strlen($suffix, 'UTF-8'), 'UTF-8') . $suffix;
 }
 
 /**

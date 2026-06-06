@@ -67,6 +67,29 @@ if ($preview_mode || empty($all_products)) {
 
 $_ENV['PREVIEW_MODE'] = $preview_mode;
 
+$categories_for_filter = [];
+if (!$preview_mode && $db !== null) {
+    try {
+        $cat_stmt = $db->prepare('SELECT name, slug FROM categories ORDER BY name');
+        $cat_stmt->execute();
+        $categories_for_filter = $cat_stmt->fetchAll();
+    } catch (Exception $e) {
+        error_log('Failed to fetch categories: ' . $e->getMessage());
+    }
+}
+if (empty($categories_for_filter)) {
+    $categories_for_filter = [
+        ['name' => 'Traditional Patterns', 'slug' => 'traditional-patterns'],
+        ['name' => 'Ready to Wear',        'slug' => 'ready-to-wear'],
+        ['name' => 'Fabric & Cloth',       'slug' => 'fabric-cloth'],
+        ['name' => 'Traditional Wear',     'slug' => 'traditional-wear'],
+        ['name' => 'Regional Styles',      'slug' => 'regional-styles'],
+        ['name' => 'Premium Collection',   'slug' => 'premium-collection'],
+        ['name' => 'Accessories',          'slug' => 'accessories'],
+        ['name' => 'Home Decor',           'slug' => 'home-decor'],
+    ];
+}
+
 ?>
 <?php include __DIR__ . '/header.php'; ?>
 
@@ -81,14 +104,11 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                         <label for="category">Category:</label>
                         <select name="category" id="category" onchange="this.form.submit()">
                             <option value="">All Styles</option>
-                            <option value="traditional-patterns" <?php echo $category_filter === 'traditional-patterns' ? 'selected' : ''; ?>>Traditional Patterns</option>
-                            <option value="ready-to-wear" <?php echo $category_filter === 'ready-to-wear' ? 'selected' : ''; ?>>Ready to Wear</option>
-                            <option value="fabric-cloth" <?php echo $category_filter === 'fabric-cloth' ? 'selected' : ''; ?>>Fabric & Cloth</option>
-                            <option value="traditional-wear" <?php echo $category_filter === 'traditional-wear' ? 'selected' : ''; ?>>Traditional Wear</option>
-                            <option value="regional-styles" <?php echo $category_filter === 'regional-styles' ? 'selected' : ''; ?>>Regional Styles</option>
-                            <option value="premium-collection" <?php echo $category_filter === 'premium-collection' ? 'selected' : ''; ?>>Premium Collection</option>
-                            <option value="accessories" <?php echo $category_filter === 'accessories' ? 'selected' : ''; ?>>Accessories</option>
-                            <option value="home-decor" <?php echo $category_filter === 'home-decor' ? 'selected' : ''; ?>>Home Decor</option>
+                            <?php foreach ($categories_for_filter as $cat): ?>
+                                <option value="<?php echo escape($cat['slug']); ?>" <?php echo $category_filter === $cat['slug'] ? 'selected' : ''; ?>>
+                                    <?php echo escape($cat['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </form>

@@ -53,7 +53,7 @@ try {
     error_log('Failed to fetch product URL: ' . $e->getMessage());
 }
 
-if ($buy_url) {
+if ($buy_url && preg_match('/^https?:\/\//i', $buy_url)) {
     header('Location: ' . $buy_url);
 } else {
     header('Location: /product.php?id=' . $product_id);

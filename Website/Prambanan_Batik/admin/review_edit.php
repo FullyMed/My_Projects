@@ -23,6 +23,9 @@ if ($reviewId) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'create') {
@@ -71,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Failed to update review: ' . $e->getMessage();
             }
         }
+    }
     }
 }
 
@@ -133,6 +137,7 @@ $products = $stmt->fetchAll();
                 <div class="form-section">
                     <form method="POST">
                         <input type="hidden" name="action" value="<?php echo $review ? 'update' : 'create'; ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                         <?php if ($review): ?>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($review['id']); ?>">
                         <?php endif; ?>
@@ -143,7 +148,7 @@ $products = $stmt->fetchAll();
                                 <select id="product_id" name="product_id" required>
                                     <option value="">Select Product</option>
                                     <?php foreach ($products as $product): ?>
-                                        <option value="<?php echo htmlspecialchars($product['id']); ?>" <?php echo ($review && $review['product_id'] === $product['id']) ? 'selected' : ''; ?>>
+                                        <option value="<?php echo htmlspecialchars($product['id']); ?>" <?php echo ($review && (int)$review['product_id'] === (int)$product['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($product['name']); ?>
                                         </option>
                                     <?php endforeach; ?>

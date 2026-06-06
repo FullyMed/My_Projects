@@ -1,429 +1,246 @@
 # Prambanan Batik - Product Catalog & Review System
 
-A full-featured product catalog showcasing authentic Indonesian batik with admin management panel and customer reviews built with PHP and MySQL.
+A product catalog showcasing authentic Indonesian batik with an admin management panel and customer reviews, built with PHP and MySQL.
 
 ## Features
 
-- **Product Management**: Browse, search, and filter batik products by category
-- **Customer Reviews**: Submit and view product reviews with star ratings
+- **Product Management**: Browse and filter batik products by category
+- **Customer Reviews**: View product reviews with star ratings
 - **Admin Panel**: Secure authentication to manage products, categories, reviews, and images
 - **CSV Import**: Bulk import products with upsert by SKU
-- **Responsive Design**: Mobile-friendly interface with modern styling
+- **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling
 - **SEO Optimized**: XML sitemap and robots.txt for search engines
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
-- **Multi-Language Ready**: Built with internationalization in mind
+- **Preview Mode**: Sample data shown automatically when the database is unavailable
 
 ## Technology Stack
 
 - **Backend**: PHP 7.4+ with PDO
 - **Database**: MySQL 8.0+ with utf8mb4 charset
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Architecture**: MVC-inspired with utility functions
-- **Hosting**: Compatible with shared hosting (Niagahoster, etc.)
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript (no build step)
+- **Hosting**: Compatible with shared hosting (XAMPP/WAMP locally, Apache/Nginx in production)
 
 ## Prerequisites
 
 - PHP 7.4 or higher
 - MySQL 8.0 or higher
-- PDO extension for PHP
-- Web server (Apache/Nginx) with `.htaccess` support (for Apache)
+- PDO and `finfo` PHP extensions
+- Apache or Nginx web server
 
-## Installation & Deployment
+## Local Development
 
-### Step 1: Database Setup
+1. Install XAMPP or WAMP and start Apache + MySQL.
+2. Clone/copy the project into your web root (e.g. `htdocs/Prambanan_Batik`).
+3. Copy `.env.example` to `.env` and fill in your credentials — **or** set environment variables directly in your Apache config (`SetEnv DB_PASSWORD yourpassword`).
+4. Create the database and run the schema:
+   ```sql
+   CREATE DATABASE prambanan_batik CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+   Then in phpMyAdmin or CLI:
+   ```bash
+   mysql -u root prambanan_batik < schema.sql
+   mysql -u root prambanan_batik < seed.sql   # optional sample data
+   ```
+5. Access via `http://localhost/Prambanan_Batik/`.
 
-1. Access **cPanel** → **MySQL Databases**
-2. Create a new database:
-   - Database Name: `product_catalog` (or custom name)
-   - Click "Create Database"
-3. Create a database user:
-   - Username: `catalog_user` (or custom name)
-   - Password: Generate a strong password
-   - Click "Create User"
-4. Add user to database:
-   - Select the user and database → "Add"
-   - Grant ALL privileges
+> **Never commit credentials.** `config.php` reads credentials from environment variables first. The `.env` file is gitignored — use `.env.example` as a template.
+
+## Production Deployment
+
+### Step 1: Database Setup (cPanel)
+
+1. **MySQL Databases** → create database, create user, grant ALL privileges.
+2. Run `schema.sql` via phpMyAdmin SQL tab.
+3. (Optional) Run `seed.sql` for sample data.
 
 ### Step 2: Upload Files
 
-1. Connect via FTP using your hosting credentials
-2. Navigate to `public_html` folder
-3. Upload all project files maintaining the folder structure
+Upload all project files via FTP to `public_html`, maintaining folder structure.
 
-### Step 3: Configure Database Connection
+### Step 3: Configure Credentials
 
-Edit `config.php` with your database credentials:
+Set environment variables in cPanel → **Apache Handlers** / **`.htaccess`** or configure them in the hosting control panel. Do **not** hard-code credentials in `config.php`.
+
+```apacheconf
+# .htaccess or VirtualHost block
+SetEnv BASE_URL    https://yourdomain.com
+SetEnv DB_HOST     localhost
+SetEnv DB_NAME     your_db_name
+SetEnv DB_USER     your_db_user
+SetEnv DB_PASSWORD your_db_password
+```
+
+### Step 4: Create Admin User
+
+Run this in phpMyAdmin (SQL tab) — generates a proper bcrypt hash via PHP:
+
 ```php
-define('DB_HOST', 'localhost');        // Usually localhost
-define('DB_NAME', 'product_catalog');  // Your database name
-define('DB_USER', 'catalog_user');     // Your database user
-define('DB_PASSWORD', 'your_password'); // Your database password
-define('BASE_URL', 'https://yourdomain.com');
-define('SITE_TIMEZONE', 'Asia/Jakarta');
+// In a one-off script or phpMyAdmin's "Routines":
+$hash = password_hash('your_password', PASSWORD_BCRYPT, ['cost' => 12]);
+// Then INSERT:
+// INSERT INTO admin_users (email, password_hash) VALUES ('admin@example.com', '$hash');
 ```
 
-Also update `robots.txt` with your domain.
-
-### Step 4: Create Database Tables
-
-1. Access **cPanel** → **phpMyAdmin**
-2. Select your database from left sidebar
-3. Go to **SQL** tab
-4. Copy and paste the entire `schema.sql` file
-5. Click **Go** to execute
-6. (Optional) Run `seed.sql` to populate sample data
-
-### Step 5: Create Admin User
-
-In phpMyAdmin SQL tab, run:
+Or run directly if you know the bcrypt hash:
 ```sql
-INSERT INTO admin_users (email, password_hash, created_at) VALUES
-('admin@yourdomain.com', SHA2('your_password_here', 256), NOW());
+INSERT INTO admin_users (email, password_hash, created_at)
+VALUES ('admin@example.com', '<bcrypt_hash_here>', NOW());
 ```
 
-### Step 6: Verify Installation
-
-1. Visit your domain: `https://yourdomain.com`
-   - Should see the Prambanan Batik homepage with featured products
-2. Visit admin: `https://yourdomain.com/admin/`
-   - Login with admin email and password
-3. Test functionality:
-   - Browse products and filters
-   - Submit a review on a product
-   - Add/edit products in admin panel
-
-## Environment Variables (Optional)
-
-The application supports environment variables via a `.env` file:
-
-```
-BASE_URL=https://yourdomain.com
-DB_HOST=localhost
-DB_NAME=product_catalog
-DB_USER=catalog_user
-DB_PASSWORD=your_password
-```
-
-If not set, defaults from `config.php` will be used.
+> `password_hash()` / `password_verify()` (bcrypt) are used — **not** SHA2. Do not use `SHA2('password', 256)`.
 
 ## File Structure
 
 ```
 /
-├── index.php                    # Homepage with featured products
-├── products.php                 # Products listing with category filters
-├── product.php                  # Single product detail page with reviews
-├── go.php                       # Outbound redirect with click tracking
-├── sitemap.php                  # XML sitemap generator
+├── index.php                    # Homepage — featured products
+├── products.php                 # Listing — dynamic category filter from DB
+├── product.php                  # Product detail + reviews
+├── go.php                       # Tracked redirect to Shopee/Tokopedia/other
+├── sitemap.php                  # Dynamic XML sitemap
 ├── robots.txt                   # Search engine directives
-├── config.php                   # Site configuration constants
-├── db_connect.php               # Database connection setup
+├── config.php                   # Site constants — reads env vars first
+├── db_connect.php               # Returns PDO instance (or null on failure)
 ├── functions.php                # Utility functions
-├── header.php                   # Page header template
-├── footer.php                   # Page footer template
-├── schema.sql                   # Database schema (CREATE TABLE statements)
+├── header.php                   # Shared page header
+├── footer.php                   # Shared page footer
+├── schema.sql                   # CREATE TABLE statements
 ├── seed.sql                     # Sample data
-├── .env                         # Environment variables (if using)
+├── .env.example                 # Template for environment variables
 ├── assets/
-│   ├── css/
-│   │   └── styles.css          # Main website styles
-│   └── js/
-│       └── main.js             # Frontend JavaScript
-├── admin/
-│   ├── admin.css               # Admin panel styles
-│   ├── index.php               # Admin dashboard
-│   ├── login.php               # Admin login page
-│   ├── logout.php              # Admin logout handler
-│   ├── auth.php                # Authentication functions
-│   ├── categories.php          # Manage categories
-│   ├── products.php            # Manage products listing
-│   ├── product_edit.php        # Edit/create product
-│   ├── product_images.php      # Manage product images
-│   ├── import_products.php     # CSV bulk import
-│   ├── reviews.php             # Manage reviews
-│   └── review_edit.php         # Edit reviews
-└── README.md                    # This file
+│   ├── css/styles.css           # Main stylesheet (warm batik palette)
+│   └── js/main.js               # Scroll reveal, sticky header, avatar initials
+└── admin/
+    ├── admin.css                # Admin panel styles
+    ├── auth.php                 # Session management + CSRF helpers
+    ├── index.php                # Dashboard
+    ├── login.php                # Login form
+    ├── logout.php               # Logout handler
+    ├── categories.php           # Create / edit / delete categories
+    ├── products.php             # Products list (IDR pricing)
+    ├── product_edit.php         # Create / edit product
+    ├── product_images.php       # Manage product images (URL-based)
+    ├── import_products.php      # CSV bulk import
+    ├── reviews.php              # Manage reviews
+    └── review_edit.php          # Create / edit review
 ```
 
 ## Database Schema
 
-### Tables
+### `categories`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INT PK | |
+| name | VARCHAR 255 | UNIQUE |
+| slug | VARCHAR 255 | UNIQUE, used in URL filters |
+| description | TEXT | |
+| created_at / updated_at | TIMESTAMP | |
 
-**categories**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `name` (VARCHAR 255, UNIQUE)
-- `slug` (VARCHAR 255, UNIQUE) - URL-friendly name
-- Indexes on slug for fast lookups
+### `products`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INT PK | |
+| category_id | INT FK | ON DELETE SET NULL |
+| sku | VARCHAR 255 | UNIQUE — used as CSV upsert key |
+| slug | VARCHAR 255 | UNIQUE — used in URLs |
+| name | VARCHAR 255 | |
+| description | LONGTEXT | |
+| price_display | DECIMAL(10,2) | Displayed in IDR (Rp) |
+| rating_avg | DECIMAL(3,2) | Denormalized — updated on review change |
+| rating_count | INT | Denormalized |
+| buy_link_shopee / tokopedia / other | VARCHAR 500 | Affiliate links |
+| created_at / updated_at | TIMESTAMP | |
 
-**products**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `category_id` (INT, FOREIGN KEY)
-- `sku` (VARCHAR 255, UNIQUE) - Stock Keeping Unit for CSV import
-- `slug` (VARCHAR 255, UNIQUE) - URL-friendly name
-- `name` (VARCHAR 255)
-- `description` (LONGTEXT)
-- `price_display` (DECIMAL 10,2)
-- `rating_avg` (DECIMAL 3,2) - Average rating from reviews
-- `rating_count` (INT) - Total number of reviews
-- `buy_link_shopee` (VARCHAR 500) - Shopee affiliate link
-- `buy_link_tokopedia` (VARCHAR 500) - Tokopedia affiliate link
-- `buy_link_other` (VARCHAR 500) - Other marketplace link
-- `created_at`, `updated_at` - Timestamps
-- Indexes on category, sku, slug, price, rating for query optimization
+### `product_images`
+Stores image URLs and a `sort_order`; the first image (lowest `sort_order`) is the product thumbnail.
 
-**product_images**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `product_id` (INT, FOREIGN KEY)
-- `image_url` (VARCHAR 500)
-- `alt_text` (VARCHAR 255) - Accessibility text
-- `sort_order` (INT) - Display order
-- `created_at` - Timestamp
+### `reviews`
+Rating is `INT CHECK (rating >= 1 AND rating <= 5)`. Fields include `reviewer_name`, `rating`, `content`, `verified_purchase`, `review_source`.
 
-**reviews**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `product_id` (INT, FOREIGN KEY)
-- `reviewer_name` (VARCHAR 255)
-- `rating` (INT 1-5) - CHECK constraint validates 1-5
-- `content` (LONGTEXT)
-- `review_source` (VARCHAR 50) - e.g., 'customer', 'verified_purchase'
-- `verified_purchase` (BOOLEAN) - For future integration
-- `created_at` - Timestamp
+### `outbound_clicks`
+Logs every click on a buy link: `product_id`, `platform`, `user_ip`, `user_agent`, `referrer`.
 
-**outbound_clicks**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `product_id` (INT, FOREIGN KEY)
-- `platform` (VARCHAR 50) - 'shopee', 'tokopedia', 'other'
-- `user_ip` (VARCHAR 45) - IPv4 or IPv6
-- `user_agent` (TEXT) - Browser information
-- `referrer` (VARCHAR 500) - HTTP referrer
-- `created_at` - Timestamp
-- For tracking affiliate link clicks
+### `admin_users`
+`email` (UNIQUE) + `password_hash` (bcrypt, cost 12).
 
-**admin_users**
-- `id` (INT, AUTO_INCREMENT, PRIMARY KEY)
-- `email` (VARCHAR 255, UNIQUE)
-- `password_hash` (VARCHAR 255) - SHA2(password, 256)
-- `created_at` - Timestamp
+## URL Patterns
 
-## API/URL Patterns
-
-### Frontend Pages
-
-- `/` - Homepage
-- `/products.php` - Products listing (supports `?category=slug` filter)
-- `/product.php?id={id}` - Product detail page
-- `/sitemap.php` - XML sitemap
-
-### Redirect Handler
-
-- `/go.php?id={product_id}&platform={shopee|tokopedia|other}` - Redirects to affiliate link and logs click
-
-### Admin Pages
-
-- `/admin/` - Dashboard (login required)
-- `/admin/login.php` - Login form
-- `/admin/logout.php` - Logout handler
-- `/admin/categories.php` - Manage categories
-- `/admin/products.php` - List products
-- `/admin/product_edit.php` - Create/edit product
-- `/admin/product_images.php` - Manage product images
-- `/admin/import_products.php` - CSV import
-- `/admin/reviews.php` - Manage reviews
-- `/admin/review_edit.php` - Edit review
+| URL | Purpose |
+|-----|---------|
+| `/` | Homepage |
+| `/products.php?category=<slug>` | Filter by category |
+| `/product.php?id=<id>` | Product detail |
+| `/go.php?id=<id>&platform=<shopee\|tokopedia\|other>` | Tracked redirect |
+| `/sitemap.php` | XML sitemap |
+| `/admin/` | Admin dashboard |
 
 ## CSV Import Format
 
-Upload CSV files to bulk import products. Required format:
-
 ```
 sku,name,price,description,category_id,image_url
-PROD-001,Cloud Pattern Batik,299999,Hand-made traditional batik with cloud motifs,1,https://example.com/image.jpg
+BATIK-001,Mega Mendung Batik,350000,Hand-drawn cloud patterns,1,https://example.com/img.jpg
 ```
 
-**Required columns**: `sku`, `name`, `price`
-**Optional columns**: `description`, `category_id`, `image_url`
+**Required**: `sku`, `name`, `price` — **Optional**: `description`, `category_id`, `image_url`
 
-Products are **upserted by SKU** - existing products with the same SKU are updated.
+Products are upserted by `sku` — existing products with the same SKU are updated.
 
-## Core Functions (functions.php)
+## Security
 
-Key utility functions available:
+- **Prepared statements**: all queries use PDO with bound parameters
+- **Output escaping**: all dynamic content passed through `escape()` (htmlspecialchars)
+- **Passwords**: bcrypt via `password_hash()` (cost 12) / `password_verify()`
+- **CSRF protection**: all admin POST forms carry a per-session token validated server-side
+- **Session timeout**: admin sessions expire after 30 minutes of inactivity (sliding window)
+- **Open redirect protection**: `go.php` validates URLs start with `http://` or `https://`
+- **File upload validation**: MIME type checked via `finfo`, extension allow-listed
 
-- `escape($str)` - HTML escape user input
-- `format_currency($amount)` - Format price display
-- `get_star_rating($rating)` - Generate star HTML
-- `get_query_param($name, $default, $filter)` - Safe query parameter retrieval
-- `get_pagination($page, $total, $per_page)` - Pagination calculations
-- `get_sample_batik_products()` - Sample product data for preview mode
+### Recommendations
 
-## Session Management
-
-- Session name: `product_hub_session` (customizable in config)
-- Session timeout: 30 minutes
-- Auto-regeneration on admin login
-- Secure flag on session cookies
-
-## Security Features
-
-- **Prepared Statements**: All queries use PDO prepared statements (SQL injection protection)
-- **Input Validation**: GET/POST parameters validated and sanitized
-- **Password Hashing**: Admin passwords hashed with SHA2-256
-- **Output Escaping**: All dynamic content escaped with `escape()` function
-- **HTTPS Ready**: Full support for HTTPS
-- **Error Handling**: Errors logged to server logs, not displayed to users
-- **CORS Ready**: Can be extended with CORS headers for API usage
-
-### Security Recommendations
-
-1. **Rename Admin Path**: Change `/admin/` folder name to something non-obvious
-2. **Strong Passwords**: Use 12+ character passwords with mixed case, numbers, symbols
-3. **HTTPS Only**: Redirect HTTP to HTTPS in `.htaccess`
-4. **Regular Backups**: Backup database and files weekly
-5. **Update PHP**: Keep PHP version current
-6. **Disable Direct Access**: Add `.htaccess` to restrict direct access to sensitive files
-7. **Monitor Logs**: Check cPanel error logs regularly
-
-## Performance Tips
-
-### Database Optimization
-
-- Indexes are already configured on all frequently queried columns
-- Use phpMyAdmin "Optimize" feature: Operations → Optimize
-
-### Server-Side
-
-1. **Enable Gzip Compression** in `.htaccess`:
-   ```
-   <IfModule mod_deflate.c>
-     AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript
-   </IfModule>
-   ```
-
-2. **Browser Caching** (already set in header.php):
-   ```
-   Cache-Control: public, max-age=3600
-   ```
-
-3. **Minimize Database Queries**:
-   - Featured products are cached in memory during page load
-   - Product images fetched with efficient subqueries
-
-### Client-Side
-
-1. **Lazy Loading**: Images use `loading="lazy"` attribute
-2. **Asset Optimization**: Minify CSS/JS for production
-3. **CDN Ready**: Image URLs can be absolute for CDN integration
+1. Serve over HTTPS — redirect HTTP in `.htaccess`
+2. Use a strong, unique DB password set via environment variable (never committed)
+3. Rename the `/admin/` folder to something non-obvious
+4. Keep PHP updated
+5. Monitor server error logs regularly
 
 ## Troubleshooting
 
-### Database Connection Error
+**Database connection error** — check env vars or `config.php` defaults, confirm MySQL is running and the user has full privileges.
 
-**Error**: "Database connection failed"
-- Check credentials in `config.php`
-- Verify database user has ALL privileges
-- Confirm MySQL is running (cPanel → Services)
-- Check database host (usually 'localhost')
+**Admin login fails** — ensure the password was hashed with `password_hash()` (bcrypt), not SHA2. See admin user creation instructions above.
 
-### Admin Login Issues
+**Preview mode shown** — the site shows sample data when the DB is unavailable. A yellow banner appears at the top. Check DB credentials.
 
-- Verify admin email and password in database
-- Clear browser cookies/cache
-- Check session save path in cPanel PHP Configuration
-- Ensure cookies are enabled in browser
+**CSV import errors** — verify UTF-8 encoding, required columns present, `category_id` exists, and file is under 5 MB.
 
-### CSV Import Fails
-
-- Verify CSV format matches required columns
-- Check file encoding (should be UTF-8)
-- Ensure category_id exists in database
-- Maximum file size check in `config.php`
-
-### Product Images Not Showing
-
-- Verify image URLs are accessible
-- Check file permissions (755 for directories, 644 for files)
-- Ensure image extensions are in ALLOWED_IMAGE_TYPES
-- Check max upload size in PHP configuration
-
-### Sitemap Not Generating
-
-- Verify products exist in database
-- Check file permissions for write access
-- Monitor error logs for PHP errors
+**Sitemap blank** — no products in DB, or DB connection failed (sitemap gracefully omits product URLs).
 
 ## Maintenance
 
-### Regular Tasks
-
-**Weekly**:
-- Monitor disk space usage (cPanel → Disk Usage)
-- Check error logs (cPanel → Error Log)
-
-**Monthly**:
-- Backup database (phpMyAdmin → Export)
-- Backup files via FTP
-- Review admin logs if available
-- Run database optimization
-
-**Quarterly**:
-- Update PHP version if available
-- Review security settings
-- Check SSL certificate expiry
-
-### Database Maintenance
-
-In phpMyAdmin, for your database:
-- Go to **Operations** tab
-- Click **Optimize** to optimize tables
-- Click **Check** to check for errors
-
-## Development Notes
-
-### Running Locally
-
-For local development with XAMPP/WAMP:
-
-1. Create database and user
-2. Update `config.php` with local credentials
-3. Run `schema.sql` to create tables
-4. Optional: Run `seed.sql` for sample data
-5. Access via `http://localhost/project-folder/`
-
-### Preview Mode
-
-The application has a "preview mode" that activates when:
-- Database connection fails
-- No products found in database
-
-In preview mode, sample batik products are displayed from `get_sample_batik_products()`.
-
-## Contributing
-
-This is a proprietary project. For bug reports or feature requests, contact the administrator.
-
-## Support & Resources
-
-- [PHP Documentation](https://www.php.net/docs.php)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
-- [PDO Documentation](https://www.php.net/manual/en/book.pdo.php)
-- [Niagahoster Docs](https://niagahoster.co.id/panduan/)
-- [cPanel Documentation](https://documentation.cpanel.net/)
+- **Weekly**: check disk space and error logs
+- **Monthly**: back up database (phpMyAdmin → Export) and files
+- **Quarterly**: review PHP version, SSL expiry, and security settings
 
 ## License
 
-Proprietary and Confidential. All rights reserved.
+Proprietary and confidential. All rights reserved.
 
 ## Version History
 
+- **v2.1.0** (2026-06): Security hardening + bug fixes
+  - CSRF protection on all admin forms
+  - Session idle timeout enforced (30 min)
+  - Open redirect validation in `go.php`
+  - Preview banner now correctly shows when DB is down
+  - Category filter loaded from DB (no longer hardcoded)
+  - Admin currency display corrected to IDR (Rp)
+  - Multibyte-safe text truncation
+  - Categories admin now supports editing
+  - `sitemap.php` null-safe when DB unavailable
+
 - **v2.0.0** (2026): Complete rewrite
   - Modernized PHP with PDO
-  - Fixed asset paths
   - Prambanan Batik branding
-  - Improved security and performance
-  
+  - Admin panel with CSV import
+
 - **v1.0.0** (2024): Initial release
-  - Product catalog with categories
-  - Customer review system
-  - Admin management panel
-  - CSV import functionality
-  - SEO optimization

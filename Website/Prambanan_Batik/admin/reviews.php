@@ -11,20 +11,24 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
+        $action = $_POST['action'] ?? '';
 
-    if ($action === 'delete') {
-        $id = trim($_POST['id'] ?? '');
+        if ($action === 'delete') {
+            $id = trim($_POST['id'] ?? '');
 
-        if (empty($id)) {
-            $error = 'Review ID is required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
-                $stmt->execute([$id]);
-                $message = 'Review deleted successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to delete review: ' . $e->getMessage();
+            if (empty($id)) {
+                $error = 'Review ID is required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $message = 'Review deleted successfully';
+                } catch (Exception $e) {
+                    $error = 'Failed to delete review: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -125,6 +129,7 @@ $reviews = $stmt->fetchAll();
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($review['id']); ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this review?')">Delete</button>
                                     </form>
                                 </div>

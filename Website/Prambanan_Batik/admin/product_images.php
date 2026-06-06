@@ -24,36 +24,40 @@ if (!$productId) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
+        $action = $_POST['action'] ?? '';
 
-    if ($action === 'upload') {
-        $imageUrl = trim($_POST['image_url'] ?? '');
-        $altText = trim($_POST['alt_text'] ?? '');
-        $sortOrder = intval($_POST['sort_order'] ?? 0);
+        if ($action === 'upload') {
+            $imageUrl = trim($_POST['image_url'] ?? '');
+            $altText = trim($_POST['alt_text'] ?? '');
+            $sortOrder = intval($_POST['sort_order'] ?? 0);
 
-        if (empty($productId) || empty($imageUrl)) {
-            $error = 'Product and image URL are required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (?, ?, ?, ?)');
-                $stmt->execute([$productId, $imageUrl, $altText ?: null, $sortOrder]);
-                $message = 'Image added successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to add image: ' . $e->getMessage();
+            if (empty($productId) || empty($imageUrl)) {
+                $error = 'Product and image URL are required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (?, ?, ?, ?)');
+                    $stmt->execute([$productId, $imageUrl, $altText ?: null, $sortOrder]);
+                    $message = 'Image added successfully';
+                } catch (Exception $e) {
+                    $error = 'Failed to add image: ' . $e->getMessage();
+                }
             }
-        }
-    } elseif ($action === 'delete') {
-        $imageId = trim($_POST['id'] ?? '');
+        } elseif ($action === 'delete') {
+            $imageId = trim($_POST['id'] ?? '');
 
-        if (empty($imageId)) {
-            $error = 'Image ID is required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('DELETE FROM product_images WHERE id = ?');
-                $stmt->execute([$imageId]);
-                $message = 'Image deleted successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to delete image: ' . $e->getMessage();
+            if (empty($imageId)) {
+                $error = 'Image ID is required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('DELETE FROM product_images WHERE id = ?');
+                    $stmt->execute([$imageId]);
+                    $message = 'Image deleted successfully';
+                } catch (Exception $e) {
+                    $error = 'Failed to delete image: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -127,6 +131,7 @@ if ($productId) {
                         <h3>Add Image</h3>
                         <form method="POST">
                             <input type="hidden" name="action" value="upload">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                             <div class="form-grid">
                                 <div class="form-group full">
@@ -167,6 +172,7 @@ if ($productId) {
                                                 <form method="POST">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($image['id']); ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                     <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this image?')">Delete</button>
                                                 </form>
                                             </div>

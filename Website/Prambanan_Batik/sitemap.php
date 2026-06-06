@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/db_connect.php';
+$pdo = require __DIR__ . '/db_connect.php';
 
 header('Content-Type: application/xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
@@ -17,8 +17,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
-    <?php
-
+    <?php if ($pdo !== null):
     $stmt = $pdo->prepare('SELECT id, updated_at FROM products ORDER BY updated_at DESC');
     $stmt->execute();
     $products = $stmt->fetchAll();
@@ -34,5 +33,6 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
     </url>
     <?php
     endforeach;
+    endif;
     ?>
 </urlset>

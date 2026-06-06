@@ -11,17 +11,21 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
-    $id = trim($_POST['id'] ?? '');
-
-    if (empty($id)) {
-        $error = 'Product ID is required';
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
     } else {
-        try {
-            $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
-            $stmt->execute([$id]);
-            $message = 'Product deleted successfully';
-        } catch (Exception $e) {
-            $error = 'Failed to delete product: ' . $e->getMessage();
+        $id = trim($_POST['id'] ?? '');
+
+        if (empty($id)) {
+            $error = 'Product ID is required';
+        } else {
+            try {
+                $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
+                $stmt->execute([$id]);
+                $message = 'Product deleted successfully';
+            } catch (Exception $e) {
+                $error = 'Failed to delete product: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -104,7 +108,7 @@ $products = $stmt->fetchAll();
                                     <td><?php echo htmlspecialchars($product['name']); ?></td>
                                     <td><?php echo htmlspecialchars($product['sku']); ?></td>
                                     <td><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></td>
-                                    <td>$<?php echo number_format($product['price_display'], 2); ?></td>
+                                    <td>Rp <?php echo number_format($product['price_display'], 0, ',', '.'); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($product['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
@@ -113,6 +117,7 @@ $products = $stmt->fetchAll();
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($product['id']); ?>">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this product?')">Delete</button>
                                             </form>
                                         </div>

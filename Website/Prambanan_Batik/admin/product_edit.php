@@ -23,6 +23,9 @@ if ($productId) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'create') {
@@ -75,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Failed to update product: ' . $e->getMessage();
             }
         }
+    }
     }
 }
 
@@ -137,6 +141,7 @@ $categories = $stmt->fetchAll();
                 <div class="form-section">
                     <form method="POST">
                         <input type="hidden" name="action" value="<?php echo $product ? 'update' : 'create'; ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                         <?php if ($product): ?>
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($product['id']); ?>">
                         <?php endif; ?>
@@ -162,7 +167,7 @@ $categories = $stmt->fetchAll();
                                 <select id="category_id" name="category_id" required>
                                     <option value="">Select Category</option>
                                     <?php foreach ($categories as $category): ?>
-                                        <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ($product && $product['category_id'] === $category['id']) ? 'selected' : ''; ?>>
+                                        <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ($product && (int)$product['category_id'] === (int)$category['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($category['name']); ?>
                                         </option>
                                     <?php endforeach; ?>

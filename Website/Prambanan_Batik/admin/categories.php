@@ -9,55 +9,72 @@ $admin = getAdminSession();
 
 $message = '';
 $error = '';
+$edit_category = null;
+$edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : null;
+
+if ($edit_id) {
+    $stmt = $pdo->prepare('SELECT id, name, slug, description FROM categories WHERE id = ? LIMIT 1');
+    $stmt->execute([$edit_id]);
+    $edit_category = $stmt->fetch();
+    if (!$edit_category) {
+        $edit_id = null;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request token';
+    } else {
+        $action = $_POST['action'] ?? '';
 
-    if ($action === 'create') {
-        $name = trim($_POST['name'] ?? '');
-        $slug = trim($_POST['slug'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        if ($action === 'create') {
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            $description = trim($_POST['description'] ?? '');
 
-        if (empty($name) || empty($slug)) {
-            $error = 'Name and slug are required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)');
-                $stmt->execute([$name, $slug, $description ?: null]);
-                $message = 'Category created successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to create category: ' . $e->getMessage();
+            if (empty($name) || empty($slug)) {
+                $error = 'Name and slug are required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)');
+                    $stmt->execute([$name, $slug, $description ?: null]);
+                    $message = 'Category created successfully';
+                } catch (Exception $e) {
+                    $error = 'Failed to create category: ' . $e->getMessage();
+                }
             }
-        }
-    } elseif ($action === 'update') {
-        $id = trim($_POST['id'] ?? '');
-        $name = trim($_POST['name'] ?? '');
-        $slug = trim($_POST['slug'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        } elseif ($action === 'update') {
+            $id = trim($_POST['id'] ?? '');
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            $description = trim($_POST['description'] ?? '');
 
-        if (empty($id) || empty($name) || empty($slug)) {
-            $error = 'ID, name and slug are required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('UPDATE categories SET name = ?, slug = ?, description = ?, updated_at = NOW() WHERE id = ?');
-                $stmt->execute([$name, $slug, $description ?: null, $id]);
-                $message = 'Category updated successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to update category: ' . $e->getMessage();
+            if (empty($id) || empty($name) || empty($slug)) {
+                $error = 'ID, name and slug are required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('UPDATE categories SET name = ?, slug = ?, description = ?, updated_at = NOW() WHERE id = ?');
+                    $stmt->execute([$name, $slug, $description ?: null, $id]);
+                    $message = 'Category updated successfully';
+                    $edit_category = null;
+                    $edit_id = null;
+                } catch (Exception $e) {
+                    $error = 'Failed to update category: ' . $e->getMessage();
+                }
             }
-        }
-    } elseif ($action === 'delete') {
-        $id = trim($_POST['id'] ?? '');
+        } elseif ($action === 'delete') {
+            $id = trim($_POST['id'] ?? '');
 
-        if (empty($id)) {
-            $error = 'Category ID is required';
-        } else {
-            try {
-                $stmt = $pdo->prepare('DELETE FROM categories WHERE id = ?');
-                $stmt->execute([$id]);
-                $message = 'Category deleted successfully';
-            } catch (Exception $e) {
-                $error = 'Failed to delete category: ' . $e->getMessage();
+            if (empty($id)) {
+                $error = 'Category ID is required';
+            } else {
+                try {
+                    $stmt = $pdo->prepare('DELETE FROM categories WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $message = 'Category deleted successfully';
+                } catch (Exception $e) {
+                    $error = 'Failed to delete category: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -74,7 +91,7 @@ $categories = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Categories</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -115,29 +132,61 @@ $categories = $stmt->fetchAll();
                     <div class="message error"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
 
-                <div class="form-section">
-                    <h3>Create New Category</h3>
-                    <form method="POST">
-                        <input type="hidden" name="action" value="create">
+                <?php if ($edit_category): ?>
+                    <div class="form-section">
+                        <h3>Edit Category</h3>
+                        <form method="POST">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($edit_category['id']); ?>">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
+                            <div class="form-group">
+                                <label for="edit_name">Name</label>
+                                <input type="text" id="edit_name" name="name" value="<?php echo htmlspecialchars($edit_category['name']); ?>" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="slug">Slug</label>
-                            <input type="text" id="slug" name="slug" required>
-                        </div>
+                            <div class="form-group">
+                                <label for="edit_slug">Slug</label>
+                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea id="description" name="description"></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label for="edit_description">Description</label>
+                                <textarea id="edit_description" name="description"><?php echo htmlspecialchars($edit_category['description'] ?? ''); ?></textarea>
+                            </div>
 
-                        <button type="submit" class="btn">Create Category</button>
-                    </form>
-                </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" class="btn">Update Category</button>
+                                <a href="/admin/categories.php" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="form-section">
+                        <h3>Create New Category</h3>
+                        <form method="POST">
+                            <input type="hidden" name="action" value="create">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="slug">Slug</label>
+                                <input type="text" id="slug" name="slug" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn">Create Category</button>
+                        </form>
+                    </div>
+                <?php endif; ?>
 
                 <div class="table-section">
                     <table>
@@ -159,9 +208,11 @@ $categories = $stmt->fetchAll();
                                     <td><?php echo date('M d, Y', strtotime($category['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
+                                            <a href="/admin/categories.php?edit=<?php echo urlencode($category['id']); ?>" class="btn-primary">Edit</a>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($category['id']); ?>">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category?')">Delete</button>
                                             </form>
                                         </div>
