@@ -1,0 +1,3 @@
+http://localhost/Prambanan_Batik/
+
+http://localhost/Prambanan_Batik/admin/

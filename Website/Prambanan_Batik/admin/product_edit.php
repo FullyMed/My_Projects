@@ -111,6 +111,7 @@ $categories = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
                 </ul>
             </nav>
