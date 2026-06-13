@@ -10,7 +10,7 @@ const GoalsPage: React.FC = () => {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl xs:text-3xl font-bold text-gray-900 dark:text-white">Goal Tracker</h1>
+        <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Goal Tracker</h1>
         <ExportButton onPrint={() => setPrintView(true)} label="Export" />
       </div>
       <GoalTracker />

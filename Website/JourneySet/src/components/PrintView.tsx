@@ -98,7 +98,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
             </thead>
             <tbody>
               {days.map(day => {
-                const dayKey = format(day, 'yyyy-MM-dd');
+                const dayKey = format(day, 'EEEE');
                 const dayTasks = tasks
                   .filter(t => t.dayKey === dayKey)
                   .sort((a, b) => {

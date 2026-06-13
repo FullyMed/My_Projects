@@ -84,7 +84,7 @@ All four tables have **Row Level Security** enabled. Every policy enforces `auth
 | Table | Key fields |
 |---|---|
 | `profiles` | `user_id` (FK → `auth.users`), `email`, `name` |
-| `planner_tasks` | `day_key` (YYYY-MM-DD), `week_key` (YYYY-Www), `recurring` (`'none'`\|`'weekly'`) |
+| `planner_tasks` | `day_key` (day name: `Monday`–`Sunday`), `week_key` (YYYY-Www), `recurring` (`'none'`\|`'weekly'`) |
 | `goals` | `target_value`, `current_value`, `unit`, `allow_exceed_target` |
 | `events` | `date_iso` (YYYY-MM-DD), `time` (HH:MM, optional), `category` (`work`\|`personal`\|`health`\|`social`\|`other`) |
 
