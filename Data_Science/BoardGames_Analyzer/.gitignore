@@ -4,6 +4,9 @@ Dataset/Processed/merged_clean_sample.csv
 *.npy
 *.parquet
 *.joblib
+!Dataset/Processed/desc_topk_csr.joblib
+!Dataset/Processed/content_topk_csr.joblib
+!Dataset/Processed/emb_topk_csr.joblib
 
 # Python venv
 .venv/
