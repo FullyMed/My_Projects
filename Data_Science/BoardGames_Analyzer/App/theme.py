@@ -106,9 +106,9 @@ div[data-baseweb="select"] > div {
         flex: 0 0 100% !important;
     }
 
-    /* Reduce main area padding */
+    /* Reduce main area padding — extra top clears Streamlit's sticky header on mobile */
     .block-container {
-        padding: 1rem 0.75rem 3rem !important;
+        padding: 3.5rem 0.75rem 3rem !important;
     }
 
     /* Sidebar padding */
