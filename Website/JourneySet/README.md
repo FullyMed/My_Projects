@@ -2,6 +2,8 @@
 
 A personal productivity planner built with React, TypeScript, and Supabase. Plan your week, track goals, and manage events — all in one elegant workspace.
 
+**Live demo**: [journeyset.vercel.app](https://journeyset.vercel.app/)
+
 ## Features
 
 - **Weekly Planner** — schedule tasks by day with optional time slots; weekly-recurring tasks carry forward automatically
@@ -34,8 +36,8 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 ### 2. Clone and install
 
 ```bash
-git clone <repo-url>
-cd JourneySet
+git clone https://github.com/FullyMed/My_Projects.git
+cd My_Projects/Website/JourneySet
 npm install
 ```
 
