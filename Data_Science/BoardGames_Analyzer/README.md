@@ -75,7 +75,8 @@ BoardGames_Analyzer/
 ### Prerequisites
 
 - Python 3.10+
-- All dependencies in `Requirements.txt`
+- Full dev environment: all dependencies in `Requirements.txt`
+- Streamlit Cloud deployment: minimal deps in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, matplotlib)
 
 ### Install
 
@@ -108,6 +109,14 @@ streamlit run app.py
 ```
 
 Then open `http://localhost:8501` in your browser.
+
+---
+
+## Deployment
+
+The app is deployed live on **Streamlit Community Cloud**, served from `App/app.py` in this repository.
+
+Streamlit Cloud uses `App/requirements.txt` as the dependency manifest. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are committed to the repository and loaded at startup — no build step required.
 
 ---
 

@@ -96,6 +96,7 @@ BoardGames_Analyzer/
 │   ├── app.py                      ← Home / landing page
 │   ├── recommender.py              ← Self-contained copy of the engine
 │   ├── theme.py                    ← Shared CSS (light/dark) + chart color helpers
+│   ├── requirements.txt            ← Minimal deps for Streamlit Cloud deployment
 │   └── pages/
 │       ├── 1_Recommendation.py     ← Recommendation engine UI
 │       └── 2_Analytics.py         ← EDA / analytics dashboard
@@ -347,6 +348,7 @@ Evaluation protocol: 300 sampled users, 3 seed games → recommend → check aga
 - Multi-page Streamlit app (`App/`) complete with Home, Recommendation, and Analytics pages
 - Light/dark theme with full responsive design
 - All major bugs fixed (see Bug Fixes section)
+- Deployed live on Streamlit Community Cloud
 
 ---
 
@@ -407,6 +409,21 @@ Table II shows polished natural-language explanations (e.g. "Shared engine-build
 
 **Fix:** Replaced all `use_container_width=True` with `width='stretch'` across all three files.
 
+## Bug 7 — `scipy` missing from `App/requirements.txt`
+**What was wrong:** `App/requirements.txt` only listed 5 packages and omitted `scipy`. The recommender loads scipy sparse CSR matrices via `joblib.load()` and calls `.getrow()` on them — requiring scipy at runtime. On Streamlit Cloud, scipy was only available as a transitive dependency of scikit-learn, making the deployment fragile and liable to break on future scikit-learn version changes.
+
+**Fix:** Added `scipy` to `App/requirements.txt`.
+
+## Bug 8 — Fragile `"formatted" in locals()` pattern in root `app.py`
+**What was wrong:** The same Bug 3 pattern (`"formatted" in locals()`) remained in root `app.py` (lines 457 and 510) and was never updated when Bug 3 was fixed in `App/pages/1_Recommendation.py`.
+
+**Fix:** Added `formatted = None` initialization at the top of the `if run_btn:` block. Replaced both `"formatted" in locals()` guards with `formatted is not None`.
+
+## Bug 9 — Trait-only path in `discover()` missing `_apply_difficulty_filter()` post-processing call
+**What was wrong:** The title-only and combined return paths in `discover()` both called `_apply_difficulty_filter()` as a post-processing step, but the trait-only path did not — difficulty filtering only happened inside `build_type_candidates()`, making the architecture inconsistent with the documented design.
+
+**Fix:** Added `out = self._apply_difficulty_filter(out, difficulty_label)` before the `return` in the trait-only path in both `App/recommender.py` and root `recommender.py`. The call is safe (no double-filtering side effects) because `_apply_difficulty_filter()` returns the dataframe unchanged when `difficulty_label is None`, and the data is already filtered when it is set.
+
 ---
 
 # 10. Important Rules for Claude Code
@@ -433,6 +450,8 @@ Avoid black-box-only logic. The `make_reason()` method and matched field display
 
 ### Keep App/ Self-Contained
 `App/recommender.py` is a self-contained copy of the engine. Any changes to root `recommender.py` must also be applied to `App/recommender.py` (or vice versa). Always instantiate the engine with `base_path=str(PROJECT_ROOT)` using `Path(__file__)` resolution so it works from any working directory.
+
+`App/requirements.txt` is the Streamlit Cloud deployment manifest. If new imports are added to `App/recommender.py` or any page file, update `App/requirements.txt` too — the live app will break silently if a dependency is missing.
 
 ---
 

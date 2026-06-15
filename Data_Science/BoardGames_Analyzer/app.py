@@ -401,6 +401,7 @@ run_btn = st.button("Get Recommendations", width='stretch')
 # -----------------------------
 if run_btn:
     try:
+        formatted = None
         expanded_categories = wanted_categories
         expanded_mechanics = wanted_mechanics
 
@@ -454,7 +455,7 @@ if run_btn:
                 )
                 formatted = engine.format_results(results)
 
-        if "formatted" in locals() and len(formatted) > 0:
+        if formatted is not None and len(formatted) > 0:
             st.markdown("---")
             st.markdown('<div class="section-title">🔍 System Interpretation</div>', unsafe_allow_html=True)
 
@@ -507,7 +508,7 @@ if run_btn:
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
 
-        elif "formatted" in locals() and len(formatted) == 0:
+        elif formatted is not None and len(formatted) == 0:
             st.info("No results found for the given inputs.")
 
     except Exception as e:

@@ -697,6 +697,7 @@ class BoardGameDiscoveryEngine:
             )
 
             out["reason"] = out.apply(self.make_reason, axis=1)
+            out = self._apply_difficulty_filter(out, difficulty_label)
             return out.sort_values(
                 ["final_score", "score_trait", "avg_rating", "num_votes"],
                 ascending=[False, False, False, False]
