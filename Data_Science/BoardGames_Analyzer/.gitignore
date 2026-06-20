@@ -1,4 +1,8 @@
 Dataset/Raw/large_*.csv
+Dataset/Raw/artists_reduced.csv
+Dataset/Raw/designers_reduced.csv
+Dataset/Raw/publishers_reduced.csv
+Dataset/Raw/games_detailed_info.csv
 
 Dataset/Processed/merged_clean_sample.csv
 *.npy

@@ -1,1 +1,14 @@
 lib/config/tdx_credentials.dart
+
+# Flutter build outputs
+/build/
+
+# Dart tool cache
+.dart_tool/
+
+# IntelliJ IDE
+.idea/
+
+# Flutter plugin files
+.flutter-plugins
+.flutter-plugins-dependencies
