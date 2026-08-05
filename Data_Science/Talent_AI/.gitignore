@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Env / secrets
+.env
+kaggle.json
+
+# Data (raw resumes contain PII; processed artifacts are regenerable)
+Dataset/Raw/*
+!Dataset/Raw/.gitkeep
+Dataset/Processed/*
+!Dataset/Processed/.gitkeep
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

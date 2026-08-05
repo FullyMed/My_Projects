@@ -1,0 +1,17 @@
+Data Scientist
+
+We are looking for a Data Scientist to build and deploy machine learning models
+that drive business decisions.
+
+Required skills:
+- Python, pandas, numpy, scikit-learn
+- Machine learning and statistics
+- SQL and data analysis
+- Data visualization (Tableau or Power BI)
+- Experience with deep learning frameworks (TensorFlow or PyTorch) is a plus
+- Strong communication skills to present findings to non-technical stakeholders
+
+This is a general demo job description (not used for evaluation ground truth,
+since this dataset's category taxonomy doesn't include an exact "Data Science"
+label) — useful for sanity-checking skill-based ranking on a role type that spans
+multiple dataset categories (IT, Engineering, Finance).

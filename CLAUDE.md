@@ -12,7 +12,7 @@ My Projects/
 │   └── Taiwan_Fare_Finder/     Flutter app — Taiwan transit fare search
 ├── Data_Science/
 │   ├── BoardGames_Analyzer/    Python/Streamlit — board game recommender
-│   └── Future_Analyzer/        Early-stage data science project
+│   └── Talent_AI/              Python/NLP — AI resume parsing & candidate matching
 └── Website/
     ├── JourneySet/             React/TypeScript/Supabase — productivity planner
     ├── Prambanan_Batik/        PHP/MySQL — Indonesian batik product catalog
@@ -51,10 +51,15 @@ Then run `claude` to start Claude Code in that project.
 - **Key traits:** TF-IDF + MiniLM embeddings + DistilBERT sentiment, three recommendation modes, IEEE paper included
 - **Run:** `streamlit run App/app.py`
 
-### Data Science / Future Analyzer
-- **Type:** Python data science (early stage)
-- **Purpose:** TBD — project in planning/setup phase
-- **Key traits:** Only notebooks and dataset folders exist so far
+### Data Science / Talent_AI
+- **Type:** Python — NLP/ML capstone project
+- **Purpose:** AI Talent Intelligence Platform — parses resumes, extracts structured
+  candidate data, and semantically ranks candidates against a job description
+- **Key traits:** PyMuPDF + OCR parsing, spaCy skill extraction, PII anonymization before
+  embedding, Sentence Transformers + FAISS ranking vs. a TF-IDF baseline, Precision@K
+  evaluation. Phased roadmap — Phase 1 (core pipeline) built; LLM insights/dashboard/
+  automation planned. See its `CLAUDE.md` for phase details and key decisions.
+- **Run:** `python scripts/build_index.py && python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt`
 
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA

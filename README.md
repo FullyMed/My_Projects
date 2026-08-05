@@ -32,9 +32,6 @@ Personal portfolio of software projects across mobile apps, data science, and we
 
 **Stack:** Python, Streamlit, scikit-learn, sentence-transformers, HuggingFace Transformers, pandas
 
-### [Future Analyzer](Data_Science/Future_Analyzer/)
-Early-stage data science project. Currently in planning/setup (notebooks and dataset folders only).
-
 ---
 
 ## Website

@@ -1,0 +1,18 @@
+# Phase 1: parsing -> extraction -> embeddings -> ranking
+pymupdf
+pytesseract
+pdf2image
+spacy
+sentence-transformers
+faiss-cpu
+scikit-learn
+pandas
+pyarrow
+pydantic
+python-dotenv
+kagglehub
+pytest
+jupyter
+
+# Phase 2+ (LLM insights, dashboard, automation) will extend this file
+# when those phases start: fastapi, streamlit, openai, docker, watchdog...
