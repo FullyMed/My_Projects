@@ -57,9 +57,11 @@ Then run `claude` to start Claude Code in that project.
   candidate data, and semantically ranks candidates against a job description
 - **Key traits:** PyMuPDF + OCR parsing, spaCy skill extraction, PII anonymization before
   embedding, Sentence Transformers + FAISS ranking vs. a TF-IDF baseline, Precision@K
-  evaluation. Phased roadmap — Phase 1 (core pipeline) built; LLM insights/dashboard/
-  automation planned. See its `CLAUDE.md` for phase details and key decisions.
-- **Run:** `python scripts/build_index.py && python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt`
+  evaluation, OpenAI-powered candidate insights, Streamlit recruiter dashboard.
+  Phased roadmap — Phases 1-3 (core pipeline, AI insights, dashboard) built and
+  live-tested; Phase 4 (automation) planned. See its `CLAUDE.md` for phase details
+  and key decisions.
+- **Run:** `streamlit run app/dashboard.py` (or `python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt` for CLI)
 
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA

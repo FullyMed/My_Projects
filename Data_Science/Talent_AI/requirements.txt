@@ -14,5 +14,10 @@ kagglehub
 pytest
 jupyter
 
-# Phase 2+ (LLM insights, dashboard, automation) will extend this file
-# when those phases start: fastapi, streamlit, openai, docker, watchdog...
+# Phase 2: AI candidate insights (summaries, missing skills, interview questions)
+openai
+
+# Phase 3: recruiter dashboard
+streamlit
+
+# Phase 4 (automation) will extend this file when that phase starts: docker, watchdog...
