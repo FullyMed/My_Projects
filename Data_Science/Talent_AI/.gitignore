@@ -14,6 +14,8 @@ Dataset/Raw/*
 !Dataset/Raw/.gitkeep
 Dataset/Processed/*
 !Dataset/Processed/.gitkeep
+Dataset/Incoming/*
+!Dataset/Incoming/.gitkeep
 
 # Notebook checkpoints
 .ipynb_checkpoints/

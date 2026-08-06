@@ -80,6 +80,37 @@ would silently multiply OpenAI API calls. Requires `Dataset/Processed/candidates
 to already exist (run `scripts/build_index.py` first) and, for the AI Insights
 button, the same `OPENAI_API_KEY` setup as Phase 2 above.
 
+### Phase 4 — Automation (folder watcher, scheduled reports, email, Docker)
+
+```bash
+python scripts/run_automation.py [--interval-minutes 30] [--top-k 10]
+```
+
+Runs two things together until you Ctrl+C:
+- **Folder watcher**: drop a new resume PDF into `Dataset/Incoming/` and it's
+  automatically parsed, extracted, anonymized, embedded, and added to the index —
+  then moved into `Dataset/Raw/INCOMING/` so it's part of the permanent corpus.
+  No OpenAI calls happen here; this only touches the free, local Phase 1 pipeline.
+- **Scheduler**: every `--interval-minutes`, re-ranks the current candidate pool
+  against every job description in `scripts/sample_jds/*.txt` and writes a
+  timestamped Markdown report to `Dataset/Processed/Reports/`. Also free/local —
+  the scheduler never calls the OpenAI API either, so it can run unattended
+  without risk of runaway API cost. (AI Insights stay a manual, on-demand button
+  in the dashboard, same as Phase 2/3.)
+
+**Email notifications** (optional): set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`,
+`SMTP_PASSWORD`, `SMTP_FROM`, and `RECRUITER_EMAIL` in `.env` and each cycle's
+report gets emailed too. Without these set, the scheduler logs "SMTP not
+configured, skipping" and keeps running — nothing breaks if you don't set up
+email. Note: this emails the full report every cycle rather than diffing "what's
+new since last time" — a deliberate scope simplification.
+
+**Docker**: `Dockerfile` + `docker-compose.yml` are included (containerizes both
+the dashboard and the automation daemon, sharing a `./Dataset` volume, with
+Tesseract/poppler installed so OCR fully works in the container). These were
+written but not run/tested in this project's dev environment — verify with
+`docker compose up` once you have Docker available.
+
 ## Architecture
 
 ```
@@ -100,6 +131,11 @@ Resume PDFs (Dataset/Raw)
        v
   -> app/dashboard.py       (Streamlit: interactive JD input, rankings, on-demand
                               AI insights per candidate)
+
+Dataset/Incoming (new resumes)
+  -> automation/watcher.py   (watchdog: detect -> indexing.py -> Dataset/Raw/INCOMING)
+  -> automation/scheduler.py (periodic re-rank -> Dataset/Processed/Reports/*.md)
+  -> automation/notifier.py  (optional: email the report via SMTP)
 ```
 
 ## Roadmap
@@ -114,12 +150,13 @@ Resume PDFs (Dataset/Raw)
 - [x] **Phase 3 — Dashboard**: Streamlit recruiter dashboard — pick/paste a job
       description, view semantic/TF-IDF/side-by-side rankings, drill into candidate
       profiles, generate AI insights on demand per candidate.
-- [ ] **Phase 4 — Automation**: folder watcher for new resumes, scheduled re-ranking,
-      report generation, Dockerized deployment.
+- [x] **Phase 4 — Automation**: `Dataset/Incoming/` folder watcher, scheduled
+      re-ranking with Markdown report generation, optional email notifications,
+      Dockerfile + docker-compose. Watcher and scheduler live-tested; Docker written
+      but not run (no Docker in this dev environment) — verify with `docker compose up`.
 
-## Tech stack (current phase)
+## Tech stack
 
 Python, PyMuPDF, pytesseract/Tesseract (optional OCR), spaCy, Sentence Transformers,
-FAISS, scikit-learn (TF-IDF baseline), Pydantic, pandas/pyarrow, OpenAI API, Streamlit.
-
-Phase 4 will add: Docker, watchdog.
+FAISS, scikit-learn (TF-IDF baseline), Pydantic, pandas/pyarrow, OpenAI API,
+Streamlit, watchdog, Docker.

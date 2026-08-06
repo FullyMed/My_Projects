@@ -20,4 +20,6 @@ openai
 # Phase 3: recruiter dashboard
 streamlit
 
-# Phase 4 (automation) will extend this file when that phase starts: docker, watchdog...
+# Phase 4: automation (folder watcher, scheduled re-ranking). Docker/SMTP need no
+# extra Python packages (Docker isn't a pip dep; email uses the smtplib stdlib).
+watchdog

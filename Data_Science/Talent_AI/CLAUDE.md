@@ -6,7 +6,8 @@ TF-IDF baseline for comparison. Full concept in the project owner's
 `AI_Talent_Intelligence_Platform_Project_Proposal.pdf`. See `README.md` for setup,
 usage, and the phased roadmap (Phase 1 = core pipeline, done; Phase 2 = LLM insights,
 live-tested with a real OpenAI account; Phase 3 = Streamlit dashboard, done; Phase 4 =
-automation — not yet built).
+automation + Docker, done — watcher/scheduler live-tested, Docker written but unverified
+since Docker isn't installed in this dev environment).
 
 ## Key decisions (don't relitigate without asking)
 
@@ -30,9 +31,25 @@ automation — not yet built).
 - **Anonymization**: names/emails/phones are stripped from text *before* embedding
   (`src/talent_ai/extraction/anonymize.py`). This is a deliberate fairness measure —
   don't remove it to "simplify."
-- **Automation stack** (Phase 4, not yet built): plain `watchdog` for folder
-  monitoring is enough for this project's scale — don't reach for Celery/Prefect
-  unless the workload genuinely needs distributed task scheduling.
+- **Automation stack**: plain `watchdog` for folder monitoring + a plain
+  `time.sleep` loop for scheduling (`src/talent_ai/automation/`) — don't reach for
+  Celery/Prefect/APScheduler unless the workload genuinely needs distributed task
+  scheduling, which it doesn't at this project's scale.
+- **Automation never calls the OpenAI API.** `automation/scheduler.py` only refreshes
+  the free, local `SemanticRanker` and writes Markdown reports. AI Insights stay a
+  manual dashboard button. Don't wire `insight_generator.generate_insights` into the
+  scheduler — that would let a timer silently rack up OpenAI cost unattended.
+- **Email notifications are optional and fail silently** (`automation/notifier.py`):
+  if `SMTP_HOST`/`SMTP_USERNAME`/`SMTP_PASSWORD`/`SMTP_FROM`/`RECRUITER_EMAIL` aren't
+  all set in `.env`, `send_report_email` logs and returns `False` rather than
+  raising — the scheduler must keep running even with zero email setup.
+- **`Dataset/Incoming/` is the folder-watcher's target**, separate from the bulk
+  `Dataset/Raw/` historical dataset. Processed files move to `Dataset/Raw/INCOMING/`
+  (success) or `Dataset/Incoming/_failed/` (failure) — never left in `Incoming/`,
+  so nothing gets reprocessed on watcher restart.
+- **`build_index.py` (full batch) and `automation/watcher.py` (incremental) share**
+  `src/talent_ai/indexing.py`'s `process_resume`/`embed_profiles`/`persist_candidates`
+  — don't let per-resume processing logic drift between the two call sites.
 - **Dashboard**: Streamlit (`app/dashboard.py`), not React — faster to build,
   sufficient for a recruiter-facing internal tool.
 - **AI Insights in the dashboard are on-demand per-candidate** (a button inside each
@@ -50,14 +67,23 @@ automation — not yet built).
   so they're interchangeable in `evaluate.py`)
 - `src/talent_ai/insights/` — OpenAI wrapper (`llm_client.py`) + prompt/insight
   generation (`insight_generator.py`) + `CandidateInsights` schema
+- `src/talent_ai/indexing.py` — shared per-resume processing + index persistence,
+  used by both `scripts/build_index.py` (full batch) and `automation/watcher.py`
+  (incremental, one resume at a time)
+- `src/talent_ai/automation/` — `watcher.py` (watchdog folder monitor),
+  `scheduler.py` (periodic re-rank + Markdown report), `notifier.py` (optional SMTP email)
 - `app/dashboard.py` — Streamlit recruiter dashboard, reuses all of the above
   (`storage.load_candidates`, `matching.ranker`/`baseline`, `insights.insight_generator`)
-- `scripts/` — CLI entry points (download data, build index, rank, evaluate, generate insights)
-- `tests/` — pytest unit tests for parsing/extraction/ranking/insights/dashboard.
-  Insights and dashboard tests mock the LLM call (`parse_structured` /
-  `generate_insights`) — no network/API key/cost needed to run the suite. Dashboard
-  tests use `streamlit.testing.v1.AppTest` against the real `Dataset/Processed/`
-  data and are skipped automatically if `build_index.py` hasn't been run yet.
+- `scripts/` — CLI entry points (download data, build index, rank, evaluate,
+  generate insights, run automation daemon)
+- `Dockerfile` / `docker-compose.yml` — two services (`dashboard`, `automation`)
+  sharing a `./Dataset` bind mount
+- `tests/` — pytest unit tests for parsing/extraction/ranking/insights/dashboard/
+  indexing/notifier. Insights/dashboard/notifier tests mock the external call
+  (`parse_structured` / `generate_insights` / SMTP) — no network/API key/cost/real
+  email needed to run the suite. Dashboard tests use `streamlit.testing.v1.AppTest`
+  against the real `Dataset/Processed/` data and are skipped automatically if
+  `build_index.py` hasn't been run yet.
 
 ## Working conventions
 
@@ -65,4 +91,5 @@ automation — not yet built).
   signature — the evaluation harness depends on that symmetry.
 - When adding a new pipeline stage, wire it into `Notebooks/01_pipeline_walkthrough.ipynb`
   too, not just the scripts — the notebook is the human-readable walkthrough.
-- Don't add Docker/Celery/watchdog to `requirements.txt` until Phase 4 actually starts.
+- All phases (1-4) are now built. Any new feature is additive scope beyond the
+  original proposal — confirm with the user before adding it rather than assuming.

@@ -1,0 +1,19 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./Dataset:/app/Dataset
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  automation:
+    build: .
+    command: ["python", "scripts/run_automation.py"]
+    volumes:
+      - ./Dataset:/app/Dataset
+    env_file:
+      - .env
+    restart: unless-stopped
