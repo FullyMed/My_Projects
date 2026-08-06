@@ -6,8 +6,8 @@ TF-IDF baseline for comparison. Full concept in the project owner's
 `AI_Talent_Intelligence_Platform_Project_Proposal.pdf`. See `README.md` for setup,
 usage, and the phased roadmap (Phase 1 = core pipeline, done; Phase 2 = LLM insights,
 live-tested with a real OpenAI account; Phase 3 = Streamlit dashboard, done; Phase 4 =
-automation + Docker, done — watcher/scheduler live-tested, Docker written but unverified
-since Docker isn't installed in this dev environment).
+automation + Docker, done — watcher, scheduler, and the Dockerized deployment are all
+live-tested end-to-end, including in real containers).
 
 ## Key decisions (don't relitigate without asking)
 
@@ -50,6 +50,18 @@ since Docker isn't installed in this dev environment).
 - **`build_index.py` (full batch) and `automation/watcher.py` (incremental) share**
   `src/talent_ai/indexing.py`'s `process_resume`/`embed_profiles`/`persist_candidates`
   — don't let per-resume processing logic drift between the two call sites.
+- **`watcher.py` uses `watchdog.observers.polling.PollingObserver`, not the default
+  native `Observer`.** Found by live Docker testing: the default relies on inotify
+  events that don't reliably fire when a file is written from the Windows host side
+  of a Docker-on-Windows/WSL2 bind mount (the file appears in the container's
+  filesystem, but no event fires). Don't switch back to the native `Observer` to
+  "reduce polling overhead" — it silently breaks the one deployment target
+  (Docker) this daemon is actually meant for.
+- **Docker image: install CPU-only PyTorch before `pip install -r requirements.txt`**
+  (see the `Dockerfile` comment). Without this, `sentence-transformers` pulls the
+  default CUDA-enabled torch build — confirmed by live testing to add ~6.5GB of
+  unused GPU libraries (9.98GB image vs. 3.43GB with the fix), even though this
+  container only ever does CPU inference.
 - **Dashboard**: Streamlit (`app/dashboard.py`), not React — faster to build,
   sufficient for a recruiter-facing internal tool.
 - **AI Insights in the dashboard are on-demand per-candidate** (a button inside each

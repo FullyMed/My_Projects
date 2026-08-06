@@ -14,7 +14,15 @@ import time
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+# PollingObserver, not the default native Observer: the default relies on OS-level
+# filesystem events (inotify on Linux), which don't reliably propagate across a
+# Docker-on-Windows/WSL2 bind mount for files written from the Windows-host side
+# -- confirmed by live testing (file appeared in the container's filesystem but no
+# watchdog event fired). Polling works everywhere at the cost of a small per-cycle
+# stat() scan, which is negligible for a folder that isn't expected to hold
+# thousands of files at once.
+from watchdog.observers.polling import PollingObserver as Observer
 
 from ..config import DATASET_INCOMING_DIR, DATASET_RAW_DIR
 from ..embeddings.embedder import embed_texts

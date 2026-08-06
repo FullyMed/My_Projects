@@ -11,6 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY requirements.txt .
+# Install CPU-only PyTorch first. sentence-transformers pulls in torch as a
+# dependency, and without this, pip resolves the default (CUDA-enabled) build --
+# several GB of GPU libraries this container never uses, since it only ever does
+# CPU inference. Pre-satisfying the dependency here keeps the image lean.
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt \
     && python -m spacy download en_core_web_sm
 

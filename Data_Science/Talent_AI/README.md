@@ -105,11 +105,24 @@ configured, skipping" and keeps running — nothing breaks if you don't set up
 email. Note: this emails the full report every cycle rather than diffing "what's
 new since last time" — a deliberate scope simplification.
 
-**Docker**: `Dockerfile` + `docker-compose.yml` are included (containerizes both
-the dashboard and the automation daemon, sharing a `./Dataset` volume, with
-Tesseract/poppler installed so OCR fully works in the container). These were
-written but not run/tested in this project's dev environment — verify with
-`docker compose up` once you have Docker available.
+**Docker**: `Dockerfile` + `docker-compose.yml` containerize both the dashboard
+and the automation daemon, sharing a `./Dataset` volume, with Tesseract/poppler
+installed so OCR fully works in the container. Live-tested end-to-end: built
+(~3.4GB image — see the CPU-only PyTorch note in the Dockerfile, without it this
+balloons to ~10GB from unused CUDA libraries), ran both containers, hit the
+dashboard's health endpoint, dropped a real resume into `Dataset/Incoming/` and
+confirmed the containerized watcher indexed it, and confirmed the scheduler wrote
+real reports. One real bug only surfaced here and got fixed: `watchdog`'s default
+`Observer` relies on inotify events that don't reliably fire for a Windows-host
+bind-mounted file write reaching the Linux container — `watcher.py` now uses
+`PollingObserver` instead (same fix Streamlit's own dev-mode file watcher applies
+automatically under WSL).
+
+```bash
+docker compose up -d          # starts both the dashboard (port 8501) and automation daemon
+docker compose logs -f        # watch both services
+docker compose down           # stop and remove both
+```
 
 ## Architecture
 
@@ -152,8 +165,8 @@ Dataset/Incoming (new resumes)
       profiles, generate AI insights on demand per candidate.
 - [x] **Phase 4 — Automation**: `Dataset/Incoming/` folder watcher, scheduled
       re-ranking with Markdown report generation, optional email notifications,
-      Dockerfile + docker-compose. Watcher and scheduler live-tested; Docker written
-      but not run (no Docker in this dev environment) — verify with `docker compose up`.
+      Dockerfile + docker-compose. All of it, including the Dockerized deployment,
+      live-tested end-to-end (see the Docker section above).
 
 ## Tech stack
 
