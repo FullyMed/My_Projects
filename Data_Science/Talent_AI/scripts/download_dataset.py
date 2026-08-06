@@ -1,13 +1,15 @@
 """Download the public Kaggle resume dataset into Dataset/Raw/<category>/*.pdf.
 
-Requires your own Kaggle API credentials (free, per-user):
-  1. Create an account at https://www.kaggle.com
-  2. Go to https://www.kaggle.com/settings -> "API" -> "Create New Token"
-     This downloads a kaggle.json file.
-  3. Place it at:
-       Windows: C:\\Users\\<you>\\.kaggle\\kaggle.json
-       macOS/Linux: ~/.kaggle/kaggle.json
-     (or set KAGGLE_USERNAME / KAGGLE_KEY environment variables instead)
+Requires your own Kaggle API credentials (free, per-user). Kaggle has two token
+formats depending on when your account generated one — either works:
+  - Newer API token (starts with "KGAT_"): save it to
+      Windows: C:\\Users\\<you>\\.kaggle\\access_token
+      macOS/Linux: ~/.kaggle/access_token
+    (or set the KAGGLE_API_TOKEN environment variable instead)
+  - Classic kaggle.json (Settings -> API -> "Create New Token"): save it to
+      Windows: C:\\Users\\<you>\\.kaggle\\kaggle.json
+      macOS/Linux: ~/.kaggle/kaggle.json
+    (or set KAGGLE_USERNAME / KAGGLE_KEY environment variables instead)
 
 Dataset: snehaanbhawal/resume-dataset
   Categorized resume PDFs (e.g. "Data Science", "Accountant", "HR", ...) plus a CSV
@@ -29,20 +31,27 @@ DATASET_SLUG = "snehaanbhawal/resume-dataset"
 def _has_kaggle_credentials() -> bool:
     import os
 
+    if os.environ.get("KAGGLE_API_TOKEN"):
+        return True
     if os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"):
         return True
-    return (Path.home() / ".kaggle" / "kaggle.json").exists()
+    return (Path.home() / ".kaggle" / "kaggle.json").exists() or (
+        Path.home() / ".kaggle" / "access_token"
+    ).exists()
 
 
 def main() -> None:
     if not _has_kaggle_credentials():
         print(
             "No Kaggle API credentials found.\n"
-            "Set them up first:\n"
+            "Set them up first (see the module docstring for both token formats):\n"
             "  1. https://www.kaggle.com/settings -> API -> Create New Token\n"
-            "  2. Save the downloaded kaggle.json to "
+            "  2a. Newer token (starts with KGAT_): save it to "
+            f"{Path.home() / '.kaggle' / 'access_token'}\n"
+            "      (or set the KAGGLE_API_TOKEN env var)\n"
+            "  2b. Classic kaggle.json: save it to "
             f"{Path.home() / '.kaggle' / 'kaggle.json'}\n"
-            "     (or set KAGGLE_USERNAME / KAGGLE_KEY env vars)\n"
+            "      (or set KAGGLE_USERNAME / KAGGLE_KEY env vars)\n"
             "Then re-run this script.",
             file=sys.stderr,
         )
