@@ -94,6 +94,16 @@ live-tested end-to-end, including in real containers).
   problem as Docker); on this Windows dev machine it happened to already resolve
   to the CPU build regardless, so don't be surprised if `pip install` looks like
   a no-op locally.
+- **`runtime.txt` (`python-3.11`) pins Streamlit Cloud's Python version.** Found
+  necessary by live testing: Streamlit Cloud's default (Python 3.14, much newer
+  than the 3.11 used everywhere else in this project) let `pip install` silently
+  fail partway through `requirements.txt` on a compiled-extension package before
+  ever reaching `pydantic`, so the app booted with an incomplete environment and
+  crashed at runtime (`ModuleNotFoundError: No module named 'pydantic'`) rather
+  than failing the build outright. Don't remove this file to "track the latest
+  Python" without confirming torch/spaCy/faiss-cpu/PyMuPDF all have matching
+  wheels first — these are exactly the kind of compiled-extension packages that
+  lag behind new Python releases.
 
 ## Code layout
 

@@ -174,8 +174,9 @@ for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
    (you do this part — I can't create accounts or complete OAuth for you).
 3. "New app" -> pick this repo/branch -> **main file path**:
    `Data_Science/Talent_AI/app/dashboard.py` (this is a monorepo — Talent_AI is a
-   subdirectory, not the repo root; Streamlit Cloud finds `requirements.txt`
-   automatically since it's in the same directory as the entrypoint's parent).
+   subdirectory, not the repo root; Streamlit Cloud finds `requirements.txt` and
+   `runtime.txt` automatically since they're in the same directory as the
+   entrypoint's parent).
 4. Under "Advanced settings" -> "Secrets", paste:
    ```toml
    OPENAI_API_KEY = "sk-..."
@@ -183,10 +184,18 @@ for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
    PUBLIC_DEPLOYMENT = "true"
    APP_PASSWORD = "choose-a-password"
    ```
-5. Deploy. First load will be slower (downloading the embedding model) — this
-   part is unverified against Streamlit Cloud's actual resource limits, since I
-   can't create an account to test-deploy it myself; if it's too slow/tight on
-   memory, that's the first place to look.
+5. Deploy. First load will be slower (downloading the embedding model).
+
+`runtime.txt` (`python-3.11`) pins Streamlit Cloud to the same Python version as
+local dev and Docker — found necessary by live testing: Streamlit Cloud's
+default Python (3.14, far newer than anything this project was tested against)
+let `pip install` silently fail partway through `requirements.txt` on a
+compiled-extension package before ever reaching `pydantic`, so the app booted
+with an incomplete environment (`ModuleNotFoundError: No module named
+'pydantic'` at runtime, not a build-time failure). Don't remove `runtime.txt` to
+"track the latest Python" without confirming every dependency here (torch,
+spaCy, faiss-cpu, PyMuPDF — packages with compiled extensions that lag behind
+new Python releases) actually has a matching wheel first.
 
 ## Architecture
 
