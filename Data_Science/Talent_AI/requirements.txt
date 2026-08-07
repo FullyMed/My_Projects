@@ -11,6 +11,12 @@ pymupdf
 pytesseract
 pdf2image
 spacy
+# en_core_web_sm as a direct wheel URL, not a separate `python -m spacy download`
+# step -- Streamlit Community Cloud only ever runs `pip install -r requirements.txt`,
+# it has no hook for a post-install command, so the model has to be installable
+# as a normal pip package. Version pinned to match the spacy 3.8.x resolved above
+# (spaCy models are versioned by compatible spaCy release, not exact-pinned).
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 sentence-transformers
 faiss-cpu
 scikit-learn

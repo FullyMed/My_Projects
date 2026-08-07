@@ -113,6 +113,15 @@ live-tested end-to-end, including in real containers).
   3.11 explicitly when (re)creating the app. Don't move either version pin off
   3.11 without confirming torch/spaCy/faiss-cpu/PyMuPDF (compiled-extension
   packages that lag behind new Python releases) all have matching wheels first.
+- **`en_core_web_sm` is installed via a direct wheel URL inside `requirements.txt`,
+  not `python -m spacy download`.** Streamlit Cloud only ever runs `pip install
+  -r requirements.txt` — no hook for a separate post-install command — so a
+  `spacy download` step (which the Dockerfile and local setup used to rely on)
+  silently doesn't happen there, and `spacy.load("en_core_web_sm")` crashes with
+  `OSError`/E050 at runtime. All three environments (local, Docker, Streamlit
+  Cloud) now install the model the same way, via that one requirements.txt line
+  — don't reintroduce a separate `spacy download` step for Docker "since it's
+  more explicit," it just makes Docker drift from what Streamlit Cloud can do.
 
 ## Code layout
 

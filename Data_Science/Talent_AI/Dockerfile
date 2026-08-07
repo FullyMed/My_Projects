@@ -16,8 +16,10 @@ COPY requirements.txt .
 # several GB of GPU libraries this container never uses, since it only ever does
 # CPU inference. Pre-satisfying the dependency here keeps the image lean.
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install --no-cache-dir -r requirements.txt \
-    && python -m spacy download en_core_web_sm
+# en_core_web_sm is installed via its direct wheel URL in requirements.txt, not
+# a separate `spacy download` step -- keeps this identical to how Streamlit
+# Community Cloud installs it (it has no hook for a post-install command).
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 

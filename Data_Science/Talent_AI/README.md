@@ -22,8 +22,12 @@ than by names or contact details that could carry demographic signal.
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm
 ```
+
+(`en_core_web_sm` installs automatically as part of `requirements.txt` — via its
+direct wheel URL, not a separate `spacy download` command — so it works
+identically in local dev, Docker, and Streamlit Community Cloud, which has no
+hook for a post-install step.)
 
 Dataset download requires your own Kaggle API credentials (`kaggle.json`) — see
 `scripts/download_dataset.py` for setup instructions if you don't have one yet.
@@ -186,7 +190,7 @@ for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
    ```
 6. Deploy. First load will be slower (downloading the embedding model).
 
-Two real deploy failures came up building this (both fixed by live testing, not
+Three real deploy failures came up building this (all fixed by live testing, not
 guessed at):
 
 - **Streamlit Cloud never found `requirements.txt`.** It only searches the repo
@@ -210,6 +214,15 @@ guessed at):
   — don't rely on `runtime.txt` alone. Don't change either away from 3.11
   without confirming torch/spaCy/faiss-cpu/PyMuPDF (compiled-extension packages
   that lag behind new Python releases) all have matching wheels first.
+- **`spacy.load("en_core_web_sm")` crashed with `OSError`/spaCy error E050**
+  ("Can't find model") even after dependencies installed correctly. Streamlit
+  Cloud only ever runs `pip install -r requirements.txt` — there's no hook for
+  the separate `python -m spacy download en_core_web_sm` command Docker and the
+  local setup instructions used to rely on. Fixed by installing the model as a
+  direct wheel URL *inside* `requirements.txt` instead (see the file for the
+  exact line) — this is the standard approach for platforms with no
+  post-install hook, and it's what Docker and local dev now use too, so all
+  three environments install the model identically.
 
 ## Architecture
 
