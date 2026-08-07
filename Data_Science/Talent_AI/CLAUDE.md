@@ -74,6 +74,26 @@ live-tested end-to-end, including in real containers).
   top-K scoping: "what's this shortlist missing" is what a recruiter actually
   wants, and it's free since ranking already happened. Don't change it to run over
   all candidates without discussing — that changes what the number means.
+- **Public deployment (Streamlit Community Cloud) reads a separate, PII-redacted
+  dataset** — `Dataset/Public/candidates_public.parquet`, built by
+  `scripts/build_public_dataset.py` via `public_dataset.redact_for_public`, which
+  overwrites `raw_text` with `anonymized_text` before saving. This path is
+  deliberately **not** gitignored (unlike `Raw`/`Processed`/`Incoming`) since the
+  deployed app needs it committed. Never commit the real
+  `Dataset/Processed/candidates.parquet` instead — it still carries every
+  candidate's original, un-redacted `raw_text`.
+- **`PUBLIC_DEPLOYMENT` (config.py, off by default) gates two things in
+  `app/dashboard.py`**: it hides the raw-resume-text expander entirely, and
+  requires `APP_PASSWORD` (via Streamlit secrets) to unlock the "Generate AI
+  Insights" button. Without this gate, a public URL would expose real PII and let
+  any visitor run up the OpenAI bill with no rate limit. Don't deploy publicly
+  with this flag off.
+- **CPU-only PyTorch pin now lives in `requirements.txt` too** (not just the
+  Dockerfile) — `--extra-index-url https://download.pytorch.org/whl/cpu` before
+  `torch`. Needed for a viable Streamlit Cloud install (same multi-GB CUDA-bloat
+  problem as Docker); on this Windows dev machine it happened to already resolve
+  to the CPU build regardless, so don't be surprised if `pip install` looks like
+  a no-op locally.
 
 ## Code layout
 

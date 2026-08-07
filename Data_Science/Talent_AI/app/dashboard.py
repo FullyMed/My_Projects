@@ -9,6 +9,7 @@ insights.insight_generator. See CLAUDE.md "Key decisions" for why AI Insights ar
 on-demand per-candidate rather than auto-generated for the whole shortlist.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -17,8 +18,24 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pandas as pd
 import streamlit as st
 
+# Streamlit Community Cloud's "Secrets" UI populates st.secrets, not os.environ,
+# but config.py (shared with local .env / Docker env vars) reads via
+# os.environ.get(...) -- bridge secrets into the environment before
+# talent_ai.config loads. No-op locally where no secrets.toml exists.
+try:
+    for _key, _value in st.secrets.items():
+        os.environ.setdefault(_key, str(_value))
+except Exception:
+    pass
+
 from talent_ai.analytics import skill_gap_analysis  # noqa: E402
-from talent_ai.config import CANDIDATES_PARQUET, OPENAI_API_KEY  # noqa: E402
+from talent_ai.config import (  # noqa: E402
+    APP_PASSWORD,
+    CANDIDATES_PARQUET,
+    OPENAI_API_KEY,
+    PUBLIC_CANDIDATES_PARQUET,
+    PUBLIC_DEPLOYMENT,
+)
 from talent_ai.extraction.nlp_extractor import extract_skills  # noqa: E402
 from talent_ai.insights.insight_generator import generate_insights  # noqa: E402
 from talent_ai.matching.baseline import TfidfRanker  # noqa: E402
@@ -33,7 +50,8 @@ st.set_page_config(page_title="Talent_AI Dashboard", layout="wide")
 
 @st.cache_resource(show_spinner="Loading candidate profiles...")
 def _load_candidates_cached() -> list[CandidateProfile]:
-    return load_candidates()
+    path = PUBLIC_CANDIDATES_PARQUET if PUBLIC_DEPLOYMENT else CANDIDATES_PARQUET
+    return load_candidates(path)
 
 
 @st.cache_resource(show_spinner="Fitting rankers...")
@@ -93,15 +111,26 @@ def _render_candidate_detail(result: MatchResult, candidate: CandidateProfile, j
             for line in candidate.experience[:5]:
                 st.markdown(f"- {line}")
 
-        with st.expander("Raw resume text"):
-            st.text(candidate.raw_text[:3000])
+        if not PUBLIC_DEPLOYMENT:
+            with st.expander("Raw resume text"):
+                st.text(candidate.raw_text[:3000])
 
         st.divider()
+
+        insights_locked = (
+            PUBLIC_DEPLOYMENT and bool(APP_PASSWORD) and not st.session_state.get("insights_unlocked", False)
+        )
         if not OPENAI_API_KEY:
             st.info("Set OPENAI_API_KEY in .env to enable AI Insights.")
+        elif insights_locked:
+            st.info("Enter the AI Insights password in the sidebar to enable this.")
         st.caption("Generating insights calls the OpenAI API (small real cost per click).")
 
-        if st.button("Generate AI Insights", key=f"insights_{candidate.candidate_id}", disabled=not OPENAI_API_KEY):
+        if st.button(
+            "Generate AI Insights",
+            key=f"insights_{candidate.candidate_id}",
+            disabled=not OPENAI_API_KEY or insights_locked,
+        ):
             try:
                 with st.spinner("Calling OpenAI..."):
                     insights = _cached_insights(
@@ -139,11 +168,13 @@ def main() -> None:
     st.title("Talent_AI -- Recruiter Dashboard")
     st.caption("Semantic candidate matching, a TF-IDF baseline for comparison, and on-demand AI insights.")
 
-    if not CANDIDATES_PARQUET.exists():
+    data_path = PUBLIC_CANDIDATES_PARQUET if PUBLIC_DEPLOYMENT else CANDIDATES_PARQUET
+    if not data_path.exists():
+        build_command = "build_public_dataset.py" if PUBLIC_DEPLOYMENT else "build_index.py"
         st.error(
-            f"No processed candidate data found at `{CANDIDATES_PARQUET}`.\n\n"
+            f"No processed candidate data found at `{data_path}`.\n\n"
             "Run this first from the project root:\n\n"
-            "```bash\npython scripts/build_index.py\n```"
+            f"```bash\npython scripts/{build_command}\n```"
         )
         st.stop()
 
@@ -158,6 +189,11 @@ def main() -> None:
     sample_jd_names = [p.stem.replace("_", " ").title() for p in sample_jd_files]
 
     with st.sidebar:
+        if PUBLIC_DEPLOYMENT and APP_PASSWORD:
+            st.header("AI Insights Access")
+            entered_password = st.text_input("Password to enable AI Insights", type="password")
+            st.session_state["insights_unlocked"] = entered_password == APP_PASSWORD
+
         st.header("Job Description")
         selected_idx = st.selectbox(
             "Sample job description", options=range(len(sample_jd_files)), format_func=lambda i: sample_jd_names[i]

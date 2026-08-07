@@ -6,15 +6,18 @@ walkthrough notebook all need to save/load the same profiles.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
 from .config import CANDIDATES_PARQUET
 from .schemas import CandidateProfile
 
 
-def save_candidates(profiles: list[CandidateProfile]) -> None:
+def save_candidates(profiles: list[CandidateProfile], path: Path | None = None) -> None:
+    path = path or CANDIDATES_PARQUET
     df = pd.DataFrame([p.model_dump() for p in profiles])
-    df.to_parquet(CANDIDATES_PARQUET, index=False)
+    df.to_parquet(path, index=False)
 
 
 def _to_list(value, cast):
@@ -23,11 +26,12 @@ def _to_list(value, cast):
     return [cast(v) for v in value]
 
 
-def load_candidates() -> list[CandidateProfile]:
-    if not CANDIDATES_PARQUET.exists():
-        raise SystemExit(f"{CANDIDATES_PARQUET} not found. Run scripts/build_index.py first.")
+def load_candidates(path: Path | None = None) -> list[CandidateProfile]:
+    path = path or CANDIDATES_PARQUET
+    if not path.exists():
+        raise SystemExit(f"{path} not found. Run scripts/build_index.py first.")
 
-    df = pd.read_parquet(CANDIDATES_PARQUET)
+    df = pd.read_parquet(path)
     profiles = []
     for record in df.to_dict(orient="records"):
         record["skills"] = _to_list(record.get("skills"), str) or []

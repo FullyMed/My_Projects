@@ -1,3 +1,11 @@
+# CPU-only PyTorch. sentence-transformers pulls in torch as a dependency, and
+# without this, pip resolves the default CUDA-enabled build -- several GB of
+# GPU libraries never used here (same fix as the Dockerfile; confirmed by live
+# testing to cut the Docker image from ~10GB to ~3.4GB). Needed for a viable
+# Streamlit Community Cloud deploy too, not just Docker.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+
 # Phase 1: parsing -> extraction -> embeddings -> ranking
 pymupdf
 pytesseract

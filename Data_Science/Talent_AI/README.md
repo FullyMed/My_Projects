@@ -102,8 +102,12 @@ Runs two things together until you Ctrl+C:
 `SMTP_PASSWORD`, `SMTP_FROM`, and `RECRUITER_EMAIL` in `.env` and each cycle's
 report gets emailed too. Without these set, the scheduler logs "SMTP not
 configured, skipping" and keeps running — nothing breaks if you don't set up
-email. Note: this emails the full report every cycle rather than diffing "what's
-new since last time" — a deliberate scope simplification.
+email. Live-tested with real Gmail SMTP (host `smtp.gmail.com`, port 587, an
+[App Password](https://myaccount.google.com/apppasswords) — Gmail requires this
+instead of your normal password for SMTP login). Note: this emails the full
+report every cycle rather than diffing "what's new since last time" — a
+deliberate scope simplification. `RECRUITER_EMAIL` is whichever address should
+receive reports — swap it per deployment.
 
 **Docker**: `Dockerfile` + `docker-compose.yml` containerize both the dashboard
 and the automation daemon, sharing a `./Dataset` volume, with Tesseract/poppler
@@ -138,6 +142,51 @@ automatically in two places — no separate command needed:
 Deliberately scoped to the shortlist that's already been ranked, not the full
 2,483-resume dataset — consistent with every other per-JD feature here (Phase 2
 insights, Phase 4 reports), and free to compute since ranking already happened.
+
+## Going live (Streamlit Community Cloud)
+
+Streamlit Community Cloud can host the dashboard for free from this GitHub repo.
+It **cannot** run the automation daemon (folder watcher/scheduler) — that stays a
+local/Docker-only thing. Two safety measures are built in and *must* be enabled
+for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
+
+- The committed dataset is a **PII-redacted copy** — `raw_text` is overwritten
+  with the already-anonymized text before committing, so the file itself never
+  contains real names/emails/phone numbers even if someone downloads it directly
+  from GitHub. Regenerate it any time the real local dataset changes:
+  ```bash
+  python scripts/build_public_dataset.py
+  ```
+  This writes `Dataset/Public/candidates_public.parquet` (~26MB, fine for a
+  normal git commit — no Git LFS needed). Unlike `Dataset/Raw`/`Processed`/
+  `Incoming`, this path is **not** gitignored on purpose, since the deployed app
+  needs it committed.
+- `PUBLIC_DEPLOYMENT=true` (set via Streamlit secrets, below) hides the raw
+  resume text expander entirely and requires `APP_PASSWORD` before the
+  "Generate AI Insights" button unlocks — otherwise anyone with the URL could
+  run up your OpenAI bill with no rate limit.
+
+**Deploy steps:**
+1. Make sure `Dataset/Public/candidates_public.parquet` is committed and pushed
+   (ask me to do this, or do it yourself — it's the one step here I won't do
+   without separately confirming, since it pushes to your shared GitHub repo).
+2. Go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub
+   (you do this part — I can't create accounts or complete OAuth for you).
+3. "New app" -> pick this repo/branch -> **main file path**:
+   `Data_Science/Talent_AI/app/dashboard.py` (this is a monorepo — Talent_AI is a
+   subdirectory, not the repo root; Streamlit Cloud finds `requirements.txt`
+   automatically since it's in the same directory as the entrypoint's parent).
+4. Under "Advanced settings" -> "Secrets", paste:
+   ```toml
+   OPENAI_API_KEY = "sk-..."
+   OPENAI_MODEL = "gpt-4o-mini"
+   PUBLIC_DEPLOYMENT = "true"
+   APP_PASSWORD = "choose-a-password"
+   ```
+5. Deploy. First load will be slower (downloading the embedding model) — this
+   part is unverified against Streamlit Cloud's actual resource limits, since I
+   can't create an account to test-deploy it myself; if it's too slow/tight on
+   memory, that's the first place to look.
 
 ## Architecture
 
