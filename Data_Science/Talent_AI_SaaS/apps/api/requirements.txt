@@ -1,0 +1,31 @@
+# CPU-only PyTorch -- sentence-transformers pulls in torch as a dependency,
+# and without this it resolves the default CUDA build (multi-GB of unused
+# GPU libraries for a service that only ever does CPU inference). Same fix
+# the original Talent_AI project's Dockerfile/requirements.txt uses.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+httpx
+supabase
+
+# Resume parsing
+pymupdf
+pytesseract
+pdf2image
+
+# NLP extraction
+spacy
+# en_core_web_sm as a direct wheel URL rather than a separate `spacy download`
+# step -- works the same way in every environment (local, Docker, and any
+# platform with no post-install hook), matching the original project's fix
+# for this exact issue on Streamlit Community Cloud.
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# Embeddings + ranking
+sentence-transformers
+faiss-cpu
+numpy

@@ -12,7 +12,8 @@ My Projects/
 │   └── Taiwan_Fare_Finder/     Flutter app — Taiwan transit fare search
 ├── Data_Science/
 │   ├── BoardGames_Analyzer/    Python/Streamlit — board game recommender
-│   └── Talent_AI/              Python/NLP — AI resume parsing & candidate matching
+│   ├── Talent_AI/              Python/NLP — AI resume parsing & candidate matching (capstone, public demo)
+│   └── Talent_AI_SaaS/         FastAPI/Next.js/Supabase — multi-tenant commercial rebuild of Talent_AI
 └── Website/
     ├── JourneySet/             React/TypeScript/Supabase — productivity planner
     ├── Prambanan_Batik/        PHP/MySQL — Indonesian batik product catalog
@@ -63,6 +64,22 @@ Then run `claude` to start Claude Code in that project.
   containers (dashboard + automation daemon).
   See its `CLAUDE.md` for phase details and key decisions.
 - **Run:** `streamlit run app/dashboard.py` (or `python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt` for CLI)
+
+### Data Science / Talent_AI_SaaS
+- **Type:** FastAPI backend + Next.js frontend + Supabase (Postgres/pgvector/Auth/Storage)
+- **Purpose:** Multi-tenant commercial rebuild of Talent_AI — the same resume-ranking
+  concept, but sellable to multiple companies with real tenant data isolation.
+  A separate product from the Talent_AI capstone above, not a replacement: Talent_AI
+  stays as-is (including its live public demo); this vendors Talent_AI's
+  storage-agnostic pipeline logic (parsing/anonymize/extract/embed/rank) as a copied,
+  standalone `talent_ai_core/` package rather than importing across projects.
+- **Key traits:** Postgres Row-Level Security (not app code) is the actual tenant
+  isolation mechanism — every request carries the signed-in user's own Supabase JWT
+  through to PostgREST/Storage. Phase A (signup → upload → rank → RLS-proven
+  isolation) is built and live-verified against a real Supabase project. AI insights,
+  billing, and dashboard feature parity with the original are later phases — see its
+  own `README.md`.
+- **Run:** `apps/api`: `uvicorn app.main:app --reload --port 8010` · `apps/web`: `npm run dev`
 
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA
