@@ -124,6 +124,21 @@ docker compose logs -f        # watch both services
 docker compose down           # stop and remove both
 ```
 
+### Skill-gap analytics (additive — beyond the original 4 phases)
+
+One item from the proposal's "Future Enhancements" list: for the currently ranked
+top-K shortlist, what fraction of candidates are missing each required skill.
+Answers "what's my applicant pool missing," not just "who ranks highest." Shows up
+automatically in two places — no separate command needed:
+- **Dashboard**: a bar chart below the ranked-results table, for whichever JD/ranking
+  mode is currently selected.
+- **Scheduler reports**: a "Skill Gap Analysis" table appended to every
+  `Dataset/Processed/Reports/*.md` file.
+
+Deliberately scoped to the shortlist that's already been ranked, not the full
+2,483-resume dataset — consistent with every other per-JD feature here (Phase 2
+insights, Phase 4 reports), and free to compute since ranking already happened.
+
 ## Architecture
 
 ```
@@ -142,8 +157,9 @@ Resume PDFs (Dataset/Raw)
                               hiring recommendation, interview questions)
        |
        v
+  -> analytics.py           (skill-gap % over the current shortlist)
   -> app/dashboard.py       (Streamlit: interactive JD input, rankings, on-demand
-                              AI insights per candidate)
+                              AI insights per candidate, skill-gap chart)
 
 Dataset/Incoming (new resumes)
   -> automation/watcher.py   (watchdog: detect -> indexing.py -> Dataset/Raw/INCOMING)
@@ -167,6 +183,8 @@ Dataset/Incoming (new resumes)
       re-ranking with Markdown report generation, optional email notifications,
       Dockerfile + docker-compose. All of it, including the Dockerized deployment,
       live-tested end-to-end (see the Docker section above).
+- [x] **Additive: skill-gap analytics** — one "Future Enhancement" from the
+      proposal, built on request after the 4 phases were done. See above.
 
 ## Tech stack
 

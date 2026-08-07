@@ -69,6 +69,11 @@ live-tested end-to-end, including in real containers).
   or rerun. Streamlit reruns the entire script on every UI interaction — an
   auto-generate-on-load design would silently multiply OpenAI API calls. Don't
   "simplify" this into an automatic loop.
+- **Skill-gap analytics (`src/talent_ai/analytics.py`) is scoped to the currently
+  ranked top-K shortlist**, not the full dataset — same reasoning as Phase 2/4's
+  top-K scoping: "what's this shortlist missing" is what a recruiter actually
+  wants, and it's free since ranking already happened. Don't change it to run over
+  all candidates without discussing — that changes what the number means.
 
 ## Code layout
 
@@ -82,6 +87,8 @@ live-tested end-to-end, including in real containers).
 - `src/talent_ai/indexing.py` — shared per-resume processing + index persistence,
   used by both `scripts/build_index.py` (full batch) and `automation/watcher.py`
   (incremental, one resume at a time)
+- `src/talent_ai/analytics.py` — skill-gap analysis over a candidate shortlist
+  (additive, beyond the original 4 phases), used by the dashboard and scheduler reports
 - `src/talent_ai/automation/` — `watcher.py` (watchdog folder monitor),
   `scheduler.py` (periodic re-rank + Markdown report), `notifier.py` (optional SMTP email)
 - `app/dashboard.py` — Streamlit recruiter dashboard, reuses all of the above

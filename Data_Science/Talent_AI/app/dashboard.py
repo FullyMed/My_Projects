@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pandas as pd
 import streamlit as st
 
+from talent_ai.analytics import skill_gap_analysis  # noqa: E402
 from talent_ai.config import CANDIDATES_PARQUET, OPENAI_API_KEY  # noqa: E402
 from talent_ai.extraction.nlp_extractor import extract_skills  # noqa: E402
 from talent_ai.insights.insight_generator import generate_insights  # noqa: E402
@@ -209,6 +210,17 @@ def main() -> None:
             hide_index=True,
             use_container_width=True,
         )
+
+    st.subheader("Skill Gap Analysis")
+    st.caption("Share of the current top-K shortlist missing each required skill -- higher means a bigger gap.")
+    shortlist = [candidates_by_id[r.candidate_id] for r in results]
+    gaps = skill_gap_analysis(shortlist, job.required_skills)
+    if gaps:
+        gap_df = pd.DataFrame(gaps, columns=["Skill", "Fraction Missing"])
+        gap_df["% Missing"] = (gap_df["Fraction Missing"] * 100).round(1)
+        st.bar_chart(gap_df.set_index("Skill")["% Missing"])
+    else:
+        st.caption("No required skills detected for this job description.")
 
     st.subheader("Candidate details")
     for result in results:

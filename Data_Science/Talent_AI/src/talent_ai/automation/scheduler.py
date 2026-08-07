@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from ..analytics import skill_gap_analysis
 from ..config import CANDIDATES_PARQUET, REPORTS_DIR
 from ..extraction.nlp_extractor import extract_skills
 from ..matching.ranker import SemanticRanker
@@ -45,6 +46,19 @@ def _write_report(
             f"| {result.rank} | {result.candidate_id} | {candidate.category or ''} "
             f"| {result.score:.3f} | {', '.join(matched) or '-'} |"
         )
+
+    shortlist = [candidates_by_id[result.candidate_id] for result in results]
+    gaps = skill_gap_analysis(shortlist, job.required_skills)
+    if gaps:
+        lines += [
+            "",
+            "## Skill Gap Analysis",
+            "Share of this shortlist missing each required skill.",
+            "",
+            "| Skill | % Missing |",
+            "|---|---|",
+        ]
+        lines += [f"| {skill} | {fraction * 100:.1f}% |" for skill, fraction in gaps]
 
     report_path.write_text("\n".join(lines), encoding="utf-8")
     return report_path
