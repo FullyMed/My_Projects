@@ -12,8 +12,7 @@ My Projects/
 │   └── Taiwan_Fare_Finder/     Flutter app — Taiwan transit fare search
 ├── Data_Science/
 │   ├── BoardGames_Analyzer/    Python/Streamlit — board game recommender
-│   ├── Talent_AI/              Python/NLP — AI resume parsing & candidate matching (capstone, public demo)
-│   └── Talent_AI_SaaS/         FastAPI/Next.js/Supabase — multi-tenant commercial rebuild of Talent_AI
+│   └── Talent_AI/              FastAPI/Next.js/Supabase — multi-tenant AI resume-ranking SaaS
 └── Website/
     ├── JourneySet/             React/TypeScript/Supabase — productivity planner
     ├── Prambanan_Batik/        PHP/MySQL — Indonesian batik product catalog
@@ -53,32 +52,22 @@ Then run `claude` to start Claude Code in that project.
 - **Run:** `streamlit run App/app.py`
 
 ### Data Science / Talent_AI
-- **Type:** Python — NLP/ML capstone project
-- **Purpose:** AI Talent Intelligence Platform — parses resumes, extracts structured
-  candidate data, and semantically ranks candidates against a job description
-- **Key traits:** PyMuPDF + OCR parsing, spaCy skill extraction, PII anonymization before
-  embedding, Sentence Transformers + FAISS ranking vs. a TF-IDF baseline, Precision@K
-  evaluation, OpenAI-powered candidate insights, Streamlit recruiter dashboard,
-  watchdog folder watcher + scheduled re-ranking + email reports, Dockerized deployment.
-  All 4 proposal phases built and live-tested end-to-end, including real Docker
-  containers (dashboard + automation daemon).
-  See its `CLAUDE.md` for phase details and key decisions.
-- **Run:** `streamlit run app/dashboard.py` (or `python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt` for CLI)
-
-### Data Science / Talent_AI_SaaS
 - **Type:** FastAPI backend + Next.js frontend + Supabase (Postgres/pgvector/Auth/Storage)
-- **Purpose:** Multi-tenant commercial rebuild of Talent_AI — the same resume-ranking
-  concept, but sellable to multiple companies with real tenant data isolation.
-  A separate product from the Talent_AI capstone above, not a replacement: Talent_AI
-  stays as-is (including its live public demo); this vendors Talent_AI's
-  storage-agnostic pipeline logic (parsing/anonymize/extract/embed/rank) as a copied,
-  standalone `talent_ai_core/` package rather than importing across projects.
+- **Purpose:** Multi-tenant AI Talent Intelligence Platform — parses resumes, extracts
+  structured candidate data, and semantically ranks candidates against a job
+  description, sellable to multiple companies with real tenant data isolation.
+  Originally built as a single-user Streamlit capstone (4 phases, Precision@K
+  evaluation vs. a TF-IDF baseline, OpenAI insights, Docker automation — see git
+  history for that version); rebuilt from scratch on this stack once the goal became
+  a real product rather than a portfolio demo. The old capstone's public Streamlit
+  demo has been taken down.
 - **Key traits:** Postgres Row-Level Security (not app code) is the actual tenant
   isolation mechanism — every request carries the signed-in user's own Supabase JWT
   through to PostgREST/Storage. Phase A (signup → upload → rank → RLS-proven
-  isolation) is built and live-verified against a real Supabase project. AI insights,
-  billing, and dashboard feature parity with the original are later phases — see its
-  own `README.md`.
+  isolation) is built and live-verified against a real Supabase project, reusing the
+  original pipeline's storage-agnostic logic (parsing/anonymize/extract/embed/rank,
+  now in `apps/api/talent_ai_core/`) unchanged. AI insights, billing, and dashboard
+  feature parity with the original are later phases — see its own `README.md`.
 - **Run:** `apps/api`: `uvicorn app.main:app --reload --port 8010` · `apps/web`: `npm run dev`
 
 ### Website / JourneySet

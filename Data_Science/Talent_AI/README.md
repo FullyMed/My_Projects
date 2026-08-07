@@ -1,278 +1,138 @@
-# Talent_AI — AI Talent Intelligence Platform
+# Talent AI
 
-An AI-powered recruitment platform that parses resumes, extracts structured
-candidate information, and semantically ranks candidates against a job description
-— with a comparison against a traditional keyword-matching baseline.
+AI Talent Intelligence Platform — parses resumes, extracts structured candidate
+data, and semantically ranks candidates against a job description. Rebuilt
+multi-tenant from the ground up as a product multiple companies can sign up
+for and use, each with their own isolated candidate data (originally
+prototyped as a single-user Streamlit capstone; that version's public demo
+has since been retired — see git history for that era of the project).
 
-Full concept: `AI_Talent_Intelligence_Platform_Project_Proposal.pdf` (project owner's copy).
-This repo builds it in phases; see [Roadmap](#roadmap).
+This is **Phase A** of a longer roadmap: a thin but real vertical slice that
+proves the multi-tenant architecture works end-to-end (signup -> upload a
+resume -> submit a job description -> get a ranking -> confirm another
+company can't see any of it), rather than a full rebuild of every feature
+the original Streamlit dashboard had.
 
-## Why a public dataset, and why anonymize
+## Stack
 
-Resumes contain personal data (names, contact info). To keep this project safe to
-publish and free of consent issues, it uses a public, pre-anonymized/categorized
-Kaggle resume dataset rather than scraped or real resumes. On top of that, the
-extraction step strips names/emails/phone numbers from the text *before* it's
-embedded for matching, so ranking is driven by skills/experience content rather
-than by names or contact details that could carry demographic signal.
+- **Backend**: FastAPI (`apps/api`)
+- **Database + Auth + Storage**: Supabase — Postgres with `pgvector`, Auth,
+  and Storage (project `talent-ai-saas`, `https://ljtjlvyezkyakayetlod.supabase.co`)
+- **Frontend**: Next.js App Router (`apps/web`), deployed to Vercel
+- **Billing**: Stripe (not wired up yet — Phase D)
 
-## Setup
+## Why multi-tenant, and why this stack
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-pip install -r requirements.txt
-```
+The original Talent_AI project is a single-user, file-based pipeline (local
+Parquet files + one global FAISS index + one shared `.env`). Selling it to
+multiple companies requires that Company A can never see Company B's
+candidates — that's not something you can bolt on with app-level filtering
+alone, because a bug in that filtering code would leak data. Here, **Postgres
+Row-Level Security is the actual isolation mechanism**: every request from
+the frontend carries the signed-in user's own Supabase JWT all the way
+through FastAPI to PostgREST/Storage (see `apps/api/app/deps.py`), so even if
+this backend's own code had a bug, the database itself refuses to return
+another tenant's rows.
 
-(`en_core_web_sm` installs automatically as part of `requirements.txt` — via its
-direct wheel URL, not a separate `spacy download` command — so it works
-identically in local dev, Docker, and Streamlit Community Cloud, which has no
-hook for a post-install step.)
+## What's reused vs. replaced vs. deferred from the original project
 
-Dataset download requires your own Kaggle API credentials (`kaggle.json`) — see
-`scripts/download_dataset.py` for setup instructions if you don't have one yet.
+The core ML pipeline (parse -> anonymize -> extract -> embed -> rank) is
+storage-agnostic pure logic and didn't need to change — only the parts that
+assumed "one global file on disk, one tenant" did.
 
-OCR fallback (for scanned/image-based PDFs) requires the Tesseract binary installed
-separately on your system (not just the `pytesseract` Python package) — see
-https://github.com/UB-Mannheim/tesseract/wiki for the Windows installer. The
-pipeline degrades gracefully (skips OCR, keeps whatever text PyMuPDF extracted)
-if Tesseract isn't found, so this is optional for Phase 1.
+**Vendored into `apps/api/talent_ai_core/` and reused verbatim:**
+- `schemas.py` — `CandidateProfile`, `JobDescription`, `MatchResult`
+- `parsing/resume_parser.py` — `extract_text()` (PyMuPDF + OCR fallback)
+- `extraction/anonymize.py` — `anonymize_text()` (strips PII before embedding)
+- `extraction/nlp_extractor.py` + `extraction/skills_taxonomy.py` — skill/education/experience extraction
+- `embeddings/embedder.py` — `embed_text()`/`embed_texts()` (Sentence Transformers, 384-dim)
+- `matching/ranker.py` — `SemanticRanker` (FAISS `.fit()`/`.rank()`)
 
-## Usage
+**Replaced** (assumed one global file / one tenant):
+- `storage.py` (Parquet read/write) -> Postgres tables (`apps/api/app/services/*`)
+- `indexing.py`'s `persist_candidates`/`append_candidate` (Parquet + FAISS file) -> a Postgres insert + `pgvector` column per candidate
+- `config.py` (local filesystem paths, one shared `.env`) -> `apps/api/app/config.py`, Supabase env vars only, no dataset directories
+- `indexing.py`'s `process_resume()` itself isn't reused directly (it derives `candidate_id` from the filename and `source_path` from a local relative path) — `apps/api/app/services/candidate_service.py` calls the three functions inside it (`extract_text`, `anonymize_text`, `extract_all`) directly and builds a `CandidateProfile` with a UUID + Supabase Storage key instead
 
-```bash
-python scripts/download_dataset.py       # fetch the Kaggle resume dataset into Dataset/Raw
-python scripts/build_index.py            # parse resumes -> profiles -> embeddings -> FAISS index
-python scripts/rank_candidates.py --jd scripts/sample_jds/information_technology.txt
-python scripts/evaluate.py               # Precision@K: semantic ranking vs. TF-IDF baseline
-pytest tests/
-```
-
-Or step through `Notebooks/01_pipeline_walkthrough.ipynb`.
-
-### Phase 2 — AI insights (requires an OpenAI API key)
-
-1. Get a key at platform.openai.com (Settings -> API keys) — this is a separate,
-   billed-per-use developer credential, not your ChatGPT login.
-2. `cp .env.example .env` and set `OPENAI_API_KEY=sk-...` in `.env` (never commit this file).
-3. Run:
-
-```bash
-python scripts/generate_insights.py --jd scripts/sample_jds/information_technology.txt --top-k 5
-```
-
-This generates a summary, strengths/weaknesses, missing qualifications, a hiring
-recommendation, and interview questions for the top-K ranked candidates — deliberately
-scoped to a shortlist (not the whole dataset) to keep API cost bounded and to mirror
-how a recruiter would actually use it. Uses `gpt-4o-mini` by default (override with
-`OPENAI_MODEL` in `.env`) and only ever sends the anonymized resume text (see below),
-never the original with names/contact info.
-
-### Phase 3 — Recruiter dashboard
-
-```bash
-streamlit run app/dashboard.py
-```
-
-Interactive version of the same pipeline: pick a sample job description or paste
-your own, choose semantic ranking / TF-IDF baseline / side-by-side comparison,
-browse ranked candidates, and click "Generate AI Insights" on any candidate to run
-Phase 2's LLM analysis for just that one candidate. AI Insights are always
-on-demand (a button per candidate) rather than auto-generated for the whole
-shortlist — Streamlit reruns the script on every UI interaction, so auto-generating
-would silently multiply OpenAI API calls. Requires `Dataset/Processed/candidates.parquet`
-to already exist (run `scripts/build_index.py` first) and, for the AI Insights
-button, the same `OPENAI_API_KEY` setup as Phase 2 above.
-
-### Phase 4 — Automation (folder watcher, scheduled reports, email, Docker)
-
-```bash
-python scripts/run_automation.py [--interval-minutes 30] [--top-k 10]
-```
-
-Runs two things together until you Ctrl+C:
-- **Folder watcher**: drop a new resume PDF into `Dataset/Incoming/` and it's
-  automatically parsed, extracted, anonymized, embedded, and added to the index —
-  then moved into `Dataset/Raw/INCOMING/` so it's part of the permanent corpus.
-  No OpenAI calls happen here; this only touches the free, local Phase 1 pipeline.
-- **Scheduler**: every `--interval-minutes`, re-ranks the current candidate pool
-  against every job description in `scripts/sample_jds/*.txt` and writes a
-  timestamped Markdown report to `Dataset/Processed/Reports/`. Also free/local —
-  the scheduler never calls the OpenAI API either, so it can run unattended
-  without risk of runaway API cost. (AI Insights stay a manual, on-demand button
-  in the dashboard, same as Phase 2/3.)
-
-**Email notifications** (optional): set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`,
-`SMTP_PASSWORD`, `SMTP_FROM`, and `RECRUITER_EMAIL` in `.env` and each cycle's
-report gets emailed too. Without these set, the scheduler logs "SMTP not
-configured, skipping" and keeps running — nothing breaks if you don't set up
-email. Live-tested with real Gmail SMTP (host `smtp.gmail.com`, port 587, an
-[App Password](https://myaccount.google.com/apppasswords) — Gmail requires this
-instead of your normal password for SMTP login). Note: this emails the full
-report every cycle rather than diffing "what's new since last time" — a
-deliberate scope simplification. `RECRUITER_EMAIL` is whichever address should
-receive reports — swap it per deployment.
-
-**Docker**: `Dockerfile` + `docker-compose.yml` containerize both the dashboard
-and the automation daemon, sharing a `./Dataset` volume, with Tesseract/poppler
-installed so OCR fully works in the container. Live-tested end-to-end: built
-(~3.4GB image — see the CPU-only PyTorch note in the Dockerfile, without it this
-balloons to ~10GB from unused CUDA libraries), ran both containers, hit the
-dashboard's health endpoint, dropped a real resume into `Dataset/Incoming/` and
-confirmed the containerized watcher indexed it, and confirmed the scheduler wrote
-real reports. One real bug only surfaced here and got fixed: `watchdog`'s default
-`Observer` relies on inotify events that don't reliably fire for a Windows-host
-bind-mounted file write reaching the Linux container — `watcher.py` now uses
-`PollingObserver` instead (same fix Streamlit's own dev-mode file watcher applies
-automatically under WSL).
-
-```bash
-docker compose up -d          # starts both the dashboard (port 8501) and automation daemon
-docker compose logs -f        # watch both services
-docker compose down           # stop and remove both
-```
-
-### Skill-gap analytics (additive — beyond the original 4 phases)
-
-One item from the proposal's "Future Enhancements" list: for the currently ranked
-top-K shortlist, what fraction of candidates are missing each required skill.
-Answers "what's my applicant pool missing," not just "who ranks highest." Shows up
-automatically in two places — no separate command needed:
-- **Dashboard**: a bar chart below the ranked-results table, for whichever JD/ranking
-  mode is currently selected.
-- **Scheduler reports**: a "Skill Gap Analysis" table appended to every
-  `Dataset/Processed/Reports/*.md` file.
-
-Deliberately scoped to the shortlist that's already been ranked, not the full
-2,483-resume dataset — consistent with every other per-JD feature here (Phase 2
-insights, Phase 4 reports), and free to compute since ranking already happened.
-
-## Going live (Streamlit Community Cloud)
-
-Streamlit Community Cloud can host the dashboard for free from this GitHub repo.
-It **cannot** run the automation daemon (folder watcher/scheduler) — that stays a
-local/Docker-only thing. Two safety measures are built in and *must* be enabled
-for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
-
-- The committed dataset is a **PII-redacted copy** — `raw_text` is overwritten
-  with the already-anonymized text before committing, so the file itself never
-  contains real names/emails/phone numbers even if someone downloads it directly
-  from GitHub. Regenerate it any time the real local dataset changes:
-  ```bash
-  python scripts/build_public_dataset.py
-  ```
-  This writes `Dataset/Public/candidates_public.parquet` (~26MB, fine for a
-  normal git commit — no Git LFS needed). Unlike `Dataset/Raw`/`Processed`/
-  `Incoming`, this path is **not** gitignored on purpose, since the deployed app
-  needs it committed.
-- `PUBLIC_DEPLOYMENT=true` (set via Streamlit secrets, below) hides the raw
-  resume text expander entirely and requires `APP_PASSWORD` before the
-  "Generate AI Insights" button unlocks — otherwise anyone with the URL could
-  run up your OpenAI bill with no rate limit.
-
-**Deploy steps:**
-1. Make sure `Dataset/Public/candidates_public.parquet` is committed and pushed
-   (ask me to do this, or do it yourself — it's the one step here I won't do
-   without separately confirming, since it pushes to your shared GitHub repo).
-2. Go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub
-   (you do this part — I can't create accounts or complete OAuth for you).
-3. "New app" -> pick this repo/branch -> **main file path**:
-   `Data_Science/Talent_AI/app/dashboard.py` (this is a monorepo — Talent_AI is a
-   subdirectory, not the repo root).
-4. Under "Advanced settings" -> "Python version", explicitly pick **3.11** (see
-   below for why this matters even with `runtime.txt` present).
-5. Under "Advanced settings" -> "Secrets", paste:
-   ```toml
-   OPENAI_API_KEY = "sk-..."
-   OPENAI_MODEL = "gpt-4o-mini"
-   PUBLIC_DEPLOYMENT = "true"
-   APP_PASSWORD = "choose-a-password"
-   ```
-6. Deploy. First load will be slower (downloading the embedding model).
-
-Three real deploy failures came up building this (all fixed by live testing, not
-guessed at):
-
-- **Streamlit Cloud never found `requirements.txt`.** It only searches the repo
-  root or the exact same directory as the main script — *not* intermediate
-  parent directories. Since `app/dashboard.py` sits one level below the real
-  `Data_Science/Talent_AI/requirements.txt`, it was invisible to Streamlit Cloud,
-  which silently fell back to installing bare `streamlit` with none of this
-  project's actual dependencies (confirmed from the build log: only Streamlit's
-  own 38 transitive deps installed, nothing from our file). Fixed with a thin
-  pointer file at `app/requirements.txt` containing `-r ../requirements.txt` —
-  keep this a pointer, not a duplicate, so the two can't drift apart. Same
-  applies to `app/runtime.txt`.
-- **The Python version dropdown in the app's Settings -> General overrides
-  `runtime.txt`** for apps that already existed before `runtime.txt` was added —
-  it doesn't get picked up retroactively. Streamlit Cloud's default (Python
-  3.14, far newer than anything this project was tested against) let `pip
-  install` silently fail on a compiled-extension package before ever reaching
-  `pydantic`, so the app booted with an incomplete environment
-  (`ModuleNotFoundError: No module named 'pydantic'` at runtime, not a
-  build-time failure). Set the dropdown explicitly to 3.11 when creating the app
-  — don't rely on `runtime.txt` alone. Don't change either away from 3.11
-  without confirming torch/spaCy/faiss-cpu/PyMuPDF (compiled-extension packages
-  that lag behind new Python releases) all have matching wheels first.
-- **`spacy.load("en_core_web_sm")` crashed with `OSError`/spaCy error E050**
-  ("Can't find model") even after dependencies installed correctly. Streamlit
-  Cloud only ever runs `pip install -r requirements.txt` — there's no hook for
-  the separate `python -m spacy download en_core_web_sm` command Docker and the
-  local setup instructions used to rely on. Fixed by installing the model as a
-  direct wheel URL *inside* `requirements.txt` instead (see the file for the
-  exact line) — this is the standard approach for platforms with no
-  post-install hook, and it's what Docker and local dev now use too, so all
-  three environments install the model identically.
-
-## Architecture
-
-```
-Resume PDFs (Dataset/Raw)
-  -> resume_parser.py       (PyMuPDF text extraction, OCR fallback)
-  -> nlp_extractor.py       (spaCy: skills / education / experience)
-  -> anonymize.py           (strip PII before embedding)
-  -> embedder.py            (Sentence Transformers -> vector)
-  -> ranker.py (FAISS)      (semantic similarity ranking against a JD)
-       vs.
-  -> baseline.py (TF-IDF)   (keyword-matching baseline, for comparison)
-  -> evaluate.py            (Precision@K comparison of the two)
-       |
-       v (top-K shortlist only)
-  -> insight_generator.py   (OpenAI: summary, strengths/weaknesses, missing quals,
-                              hiring recommendation, interview questions)
-       |
-       v
-  -> analytics.py           (skill-gap % over the current shortlist)
-  -> app/dashboard.py       (Streamlit: interactive JD input, rankings, on-demand
-                              AI insights per candidate, skill-gap chart)
-
-Dataset/Incoming (new resumes)
-  -> automation/watcher.py   (watchdog: detect -> indexing.py -> Dataset/Raw/INCOMING)
-  -> automation/scheduler.py (periodic re-rank -> Dataset/Processed/Reports/*.md)
-  -> automation/notifier.py  (optional: email the report via SMTP)
-```
+**Explicitly deferred past Phase A** (not wired into any endpoint yet, so there's
+no accidental cost/scope creep before later phases design them properly):
+- `insights/insight_generator.py` — OpenAI-powered candidate insights (needs
+  per-tenant usage metering first — Phase D)
+- `matching/baseline.py` — TF-IDF baseline ranker
+- `analytics.py` — skill-gap analysis
+- `automation/*` — folder watcher, scheduler, email reports
 
 ## Roadmap
 
-- [x] **Phase 1 — Core matching pipeline**: PDF parsing, NLP extraction, embeddings,
-      FAISS semantic ranking, TF-IDF baseline, Precision@K evaluation. Validated
-      end-to-end on the real 2,483-resume dataset.
-- [x] **Phase 2 — AI insights**: OpenAI-powered candidate summaries, strengths/weaknesses,
-      missing-qualification detection, hiring recommendations, personalized interview
-      questions — one combined structured call per candidate, scoped to a ranked
-      shortlist. Live-tested end-to-end with a real OpenAI account.
-- [x] **Phase 3 — Dashboard**: Streamlit recruiter dashboard — pick/paste a job
-      description, view semantic/TF-IDF/side-by-side rankings, drill into candidate
-      profiles, generate AI insights on demand per candidate.
-- [x] **Phase 4 — Automation**: `Dataset/Incoming/` folder watcher, scheduled
-      re-ranking with Markdown report generation, optional email notifications,
-      Dockerfile + docker-compose. All of it, including the Dockerized deployment,
-      live-tested end-to-end (see the Docker section above).
-- [x] **Additive: skill-gap analytics** — one "Future Enhancement" from the
-      proposal, built on request after the 4 phases were done. See above.
+- [x] **Phase A** (this): multi-tenant skeleton — signup, upload, rank, RLS-proven isolation
+- [ ] **Phase B**: full backend API (candidate detail/delete, re-rank, pagination)
+- [ ] **Phase C**: push ranking into pgvector directly (`<=>` + the `hnsw` index) for scale; migrate the TF-IDF baseline and skill-gap analytics in
+- [ ] **Phase D**: auth hardening (enable Supabase's leaked-password protection — see `get_advisors`), Stripe billing, per-tenant OpenAI usage metering, then wire in AI insights
+- [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
+- [ ] **Phase F**: production deployment, observability, CI/CD
 
-## Tech stack
+## Local development
 
-Python, PyMuPDF, pytesseract/Tesseract (optional OCR), spaCy, Sentence Transformers,
-FAISS, scikit-learn (TF-IDF baseline), Pydantic, pandas/pyarrow, OpenAI API,
-Streamlit, watchdog, Docker.
+### Backend (`apps/api`)
+
+```bash
+cd apps/api
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements-dev.txt
+cp .env.example .env            # fill in SUPABASE_URL / SUPABASE_ANON_KEY
+uvicorn app.main:app --reload --port 8010
+pytest tests/
+```
+
+Needs the `tesseract-ocr` and `poppler` system binaries installed locally for
+the OCR fallback path (same as the original project) — optional, parsing
+degrades gracefully without them.
+
+### Frontend (`apps/web`)
+
+```bash
+cd apps/web
+npm install
+cp .env.local.example .env.local   # fill in the same Supabase project's URL/anon key + NEXT_PUBLIC_API_URL
+npm run dev
+```
+
+### Database
+
+Schema lives in `supabase/migrations/*.sql`, applied via the Supabase MCP
+tools (`apply_migration`) against project `ljtjlvyezkyakayetlod`
+(`talent-ai-saas`). Migrations are ordered and additive — `0007` is a
+follow-up hardening pass (moving `vector` out of `public` and two RLS helper
+functions into a non-PostgREST-exposed `private` schema), not a rewrite of
+`0001`-`0006`.
+
+## Verified working (Phase A acceptance test)
+
+Run manually against the real Supabase project and local dev servers:
+
+1. Signed up "Acme Recruiting" and "Beta Staffing" as two separate companies.
+2. Uploaded real resume PDFs as Acme — parsed, anonymized, skill-extracted,
+   embedded, and stored correctly (verified full pipeline output, including
+   `[NAME]`/`[EMAIL]` redaction in `anonymized_text`).
+3. Submitted a job description ("IT Systems Administrator") and ranked
+   Acme's 3 candidates — the IT resume correctly ranked #1 by semantic
+   similarity, ahead of an accountant and an engineer.
+4. Confirmed **Beta Staffing sees zero of Acme's candidates** via the API,
+   and vice versa after Beta uploaded its own candidate.
+5. Cross-checked directly in Postgres (bypassing RLS, as admin) that both
+   tenants' rows genuinely coexist in the same `candidates` table — the
+   isolation is enforced by RLS policy, not by the absence of data.
+6. `get_advisors` (Supabase security lints) clean except for one Auth-level
+   setting (leaked-password protection) unrelated to tenant isolation.
+7. `pytest tests/` — unit tests for `candidate_service`/`ranking_service`
+   with a mocked Supabase client, verifying tenant-scoped inserts.
+
+Known rough edges from this session, left as-is rather than over-polished
+for a Phase A skeleton:
+- `apps/web/middleware.ts` uses a convention Next.js 16 has deprecated in
+  favor of `proxy.ts` — still functional, flagged by a build warning only.
+- The FastAPI Dockerfile was written to mirror the working local setup
+  (`tesseract-ocr`, `poppler-utils`, the same spaCy model wheel install) but
+  wasn't itself built and run in Docker this session — only smoke-tested via
+  the local `uvicorn` dev server against real PDFs.

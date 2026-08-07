@@ -1,8 +1,0 @@
-# Streamlit Community Cloud only looks for requirements.txt at the repo root or
-# in the exact same directory as the main script -- it does NOT search parent
-# directories. Since app/dashboard.py is one level below the real
-# requirements.txt (Data_Science/Talent_AI/requirements.txt), this pointer file
-# exists purely so Streamlit Cloud finds it. Local dev/Docker use the real file
-# directly and never see this one. Keep this a pointer, not a duplicate -- don't
-# let the two drift apart.
--r ../requirements.txt
