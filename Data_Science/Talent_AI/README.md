@@ -174,28 +174,42 @@ for a public deployment (see "Key decisions" in `CLAUDE.md` for why):
    (you do this part — I can't create accounts or complete OAuth for you).
 3. "New app" -> pick this repo/branch -> **main file path**:
    `Data_Science/Talent_AI/app/dashboard.py` (this is a monorepo — Talent_AI is a
-   subdirectory, not the repo root; Streamlit Cloud finds `requirements.txt` and
-   `runtime.txt` automatically since they're in the same directory as the
-   entrypoint's parent).
-4. Under "Advanced settings" -> "Secrets", paste:
+   subdirectory, not the repo root).
+4. Under "Advanced settings" -> "Python version", explicitly pick **3.11** (see
+   below for why this matters even with `runtime.txt` present).
+5. Under "Advanced settings" -> "Secrets", paste:
    ```toml
    OPENAI_API_KEY = "sk-..."
    OPENAI_MODEL = "gpt-4o-mini"
    PUBLIC_DEPLOYMENT = "true"
    APP_PASSWORD = "choose-a-password"
    ```
-5. Deploy. First load will be slower (downloading the embedding model).
+6. Deploy. First load will be slower (downloading the embedding model).
 
-`runtime.txt` (`python-3.11`) pins Streamlit Cloud to the same Python version as
-local dev and Docker — found necessary by live testing: Streamlit Cloud's
-default Python (3.14, far newer than anything this project was tested against)
-let `pip install` silently fail partway through `requirements.txt` on a
-compiled-extension package before ever reaching `pydantic`, so the app booted
-with an incomplete environment (`ModuleNotFoundError: No module named
-'pydantic'` at runtime, not a build-time failure). Don't remove `runtime.txt` to
-"track the latest Python" without confirming every dependency here (torch,
-spaCy, faiss-cpu, PyMuPDF — packages with compiled extensions that lag behind
-new Python releases) actually has a matching wheel first.
+Two real deploy failures came up building this (both fixed by live testing, not
+guessed at):
+
+- **Streamlit Cloud never found `requirements.txt`.** It only searches the repo
+  root or the exact same directory as the main script — *not* intermediate
+  parent directories. Since `app/dashboard.py` sits one level below the real
+  `Data_Science/Talent_AI/requirements.txt`, it was invisible to Streamlit Cloud,
+  which silently fell back to installing bare `streamlit` with none of this
+  project's actual dependencies (confirmed from the build log: only Streamlit's
+  own 38 transitive deps installed, nothing from our file). Fixed with a thin
+  pointer file at `app/requirements.txt` containing `-r ../requirements.txt` —
+  keep this a pointer, not a duplicate, so the two can't drift apart. Same
+  applies to `app/runtime.txt`.
+- **The Python version dropdown in the app's Settings -> General overrides
+  `runtime.txt`** for apps that already existed before `runtime.txt` was added —
+  it doesn't get picked up retroactively. Streamlit Cloud's default (Python
+  3.14, far newer than anything this project was tested against) let `pip
+  install` silently fail on a compiled-extension package before ever reaching
+  `pydantic`, so the app booted with an incomplete environment
+  (`ModuleNotFoundError: No module named 'pydantic'` at runtime, not a
+  build-time failure). Set the dropdown explicitly to 3.11 when creating the app
+  — don't rely on `runtime.txt` alone. Don't change either away from 3.11
+  without confirming torch/spaCy/faiss-cpu/PyMuPDF (compiled-extension packages
+  that lag behind new Python releases) all have matching wheels first.
 
 ## Architecture
 

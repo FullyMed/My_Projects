@@ -94,16 +94,25 @@ live-tested end-to-end, including in real containers).
   problem as Docker); on this Windows dev machine it happened to already resolve
   to the CPU build regardless, so don't be surprised if `pip install` looks like
   a no-op locally.
-- **`runtime.txt` (`python-3.11`) pins Streamlit Cloud's Python version.** Found
-  necessary by live testing: Streamlit Cloud's default (Python 3.14, much newer
-  than the 3.11 used everywhere else in this project) let `pip install` silently
-  fail partway through `requirements.txt` on a compiled-extension package before
-  ever reaching `pydantic`, so the app booted with an incomplete environment and
-  crashed at runtime (`ModuleNotFoundError: No module named 'pydantic'`) rather
-  than failing the build outright. Don't remove this file to "track the latest
-  Python" without confirming torch/spaCy/faiss-cpu/PyMuPDF all have matching
-  wheels first — these are exactly the kind of compiled-extension packages that
-  lag behind new Python releases.
+- **`app/requirements.txt` and `app/runtime.txt` are thin pointer files
+  (`-r ../requirements.txt`, `python-3.11`), not duplicates.** Found by live
+  deploy testing: Streamlit Community Cloud only searches the repo root or the
+  *exact* directory of the main script for `requirements.txt`/`runtime.txt` — it
+  does not walk up parent directories. Since `app/dashboard.py` is one level
+  below the real `Data_Science/Talent_AI/requirements.txt`, Cloud never found it
+  and silently installed bare `streamlit` with none of this project's actual
+  dependencies (confirmed from the build log — only Streamlit's own transitive
+  deps got installed). Don't delete the `app/` pointer files thinking they're
+  redundant with the real ones one level up — they're the reason Streamlit Cloud
+  can find dependencies at all.
+- **Streamlit Cloud's per-app "Python version" Settings dropdown overrides
+  `runtime.txt` for apps created before the file existed** — it isn't picked up
+  retroactively. Cloud's default (Python 3.14) let `pip install` silently fail
+  on a compiled-extension package before ever reaching `pydantic`, producing a
+  runtime `ModuleNotFoundError` instead of a build failure. Set the dropdown to
+  3.11 explicitly when (re)creating the app. Don't move either version pin off
+  3.11 without confirming torch/spaCy/faiss-cpu/PyMuPDF (compiled-extension
+  packages that lag behind new Python releases) all have matching wheels first.
 
 ## Code layout
 
