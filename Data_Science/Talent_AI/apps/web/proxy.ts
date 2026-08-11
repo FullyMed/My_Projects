@@ -1,7 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+// Next.js 16 renamed middleware.ts -> proxy.ts. Not just a rename: proxy.ts
+// defaults to the Node.js runtime, whereas the deprecated middleware.ts
+// convention still runs on the Edge runtime -- which is what crashed in
+// production with "ReferenceError: __dirname is not defined" (a Node-only
+// global that Supabase's SSR client bundle references). Node.js runtime has
+// __dirname, so this fixes it.
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
