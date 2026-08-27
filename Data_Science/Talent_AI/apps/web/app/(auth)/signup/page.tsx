@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button, Card, ErrorText, Input, Logo } from "@/components/ui";
 
 export default function SignupPage() {
   const [companyName, setCompanyName] = useState("");
@@ -35,45 +36,44 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 p-6">
-      <h1 className="text-2xl font-semibold">Create your company account</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          className="rounded border px-3 py-2"
-          placeholder="Company name"
-          value={companyName}
-          onChange={(event) => setCompanyName(event.target.value)}
-          required
-        />
-        <input
-          className="rounded border px-3 py-2"
-          type="email"
-          placeholder="Work email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-        />
-        <input
-          className="rounded border px-3 py-2"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-          minLength={6}
-        />
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-black px-3 py-2 text-white disabled:opacity-50"
-        >
-          {loading ? "Creating account..." : "Sign up"}
-        </button>
-      </form>
-      <p className="text-sm text-gray-600">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
+      <Logo />
+      <Card className="w-full max-w-sm p-6">
+        <div className="mb-6 flex flex-col gap-1">
+          <h1 className="text-lg font-semibold">Create your company account</h1>
+          <p className="text-sm text-muted">Start ranking candidates in minutes.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Input
+            placeholder="Company name"
+            value={companyName}
+            onChange={(event) => setCompanyName(event.target.value)}
+            required
+          />
+          <Input
+            type="email"
+            placeholder="Work email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={6}
+          />
+          {error && <ErrorText>{error}</ErrorText>}
+          <Button type="submit" loading={loading} className="mt-1 w-full">
+            {loading ? "Creating account..." : "Sign up"}
+          </Button>
+        </form>
+      </Card>
+      <p className="text-sm text-muted">
         Already have an account?{" "}
-        <a className="underline" href="/login">
+        <a className="font-medium text-accent hover:text-accent-hover" href="/login">
           Log in
         </a>
       </p>

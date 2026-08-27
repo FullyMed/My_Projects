@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import { Badge, Button, Card, EmptyState, ErrorText, Input } from "@/components/ui";
 
 type Candidate = {
   id: string;
@@ -16,18 +17,25 @@ type Candidate = {
 
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function loadCandidates() {
-    const data = await apiFetch<Candidate[]>("/candidates");
-    setCandidates(data);
+    try {
+      const data = await apiFetch<Candidate[]>("/candidates");
+      setCandidates(data);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setLoadingList(false);
+    }
   }
 
   useEffect(() => {
-    loadCandidates().catch((err) => setError(String(err)));
+    loadCandidates();
   }, []);
 
   async function handleUpload(event: FormEvent) {
@@ -66,52 +74,82 @@ export default function CandidatesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Candidates</h1>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Candidates</h1>
+        <p className="text-sm text-muted">Resumes parsed, anonymized, and ready to rank.</p>
+      </div>
 
-      <form onSubmit={handleUpload} className="flex flex-col gap-3 rounded border p-4">
-        <input
-          type="file"
-          accept="application/pdf"
-          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-          required
+      <Card className="p-5">
+        <form onSubmit={handleUpload} className="flex flex-col gap-3">
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border px-4 py-6 text-center transition-colors hover:border-accent hover:bg-surface-hover">
+            <input
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              required
+            />
+            <span className="text-sm font-medium text-foreground">
+              {file ? file.name : "Click to choose a resume PDF"}
+            </span>
+            <span className="text-xs text-muted">PDF, up to a few MB</span>
+          </label>
+          <Input
+            placeholder="Category (optional)"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          />
+          <Button type="submit" loading={uploading} disabled={!file} className="w-fit">
+            {uploading ? "Uploading..." : "Upload resume"}
+          </Button>
+        </form>
+      </Card>
+
+      {error && <ErrorText>{error}</ErrorText>}
+
+      {loadingList ? (
+        <div className="flex justify-center py-12">
+          <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
+        </div>
+      ) : candidates.length === 0 ? (
+        <EmptyState
+          title="No candidates yet"
+          description="Upload a resume above to get started."
         />
-        <input
-          className="rounded border px-3 py-2"
-          placeholder="Category (optional)"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={uploading || !file}
-          className="w-fit rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
-        >
-          {uploading ? "Uploading..." : "Upload resume"}
-        </button>
-      </form>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Category</th>
-            <th className="py-2">Skills</th>
-            <th className="py-2">Uploaded</th>
-          </tr>
-        </thead>
-        <tbody>
-          {candidates.map((candidate) => (
-            <tr key={candidate.id} className="border-b">
-              <td className="py-2">{candidate.category ?? "—"}</td>
-              <td className="py-2">{candidate.skills.slice(0, 5).join(", ") || "—"}</td>
-              <td className="py-2">{new Date(candidate.created_at).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {candidates.length === 0 && <p className="text-gray-500">No candidates uploaded yet.</p>}
+      ) : (
+        <Card className="overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-xs text-muted">
+                <th className="px-4 py-3 font-medium">Category</th>
+                <th className="px-4 py-3 font-medium">Skills</th>
+                <th className="px-4 py-3 font-medium">Uploaded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {candidates.map((candidate) => (
+                <tr key={candidate.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3">{candidate.category ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {candidate.skills.slice(0, 5).map((skill) => (
+                        <Badge key={skill}>{skill}</Badge>
+                      ))}
+                      {candidate.skills.length === 0 && (
+                        <span className="text-muted">—</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-muted">
+                    {new Date(candidate.created_at).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
     </div>
   );
 }

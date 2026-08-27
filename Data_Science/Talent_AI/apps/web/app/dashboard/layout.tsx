@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo, Spinner } from "@/components/ui";
+
+const navItems = [
+  { href: "/dashboard/candidates", label: "Candidates" },
+  { href: "/dashboard/jobs", label: "Jobs" },
+];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const supabase = createClient();
@@ -30,30 +37,48 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!ready) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <Spinner className="h-6 w-6 text-muted" />
       </main>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <nav className="flex gap-4 text-sm font-medium">
-          <a href="/dashboard/candidates" className="hover:underline">
-            Candidates
-          </a>
-          <a href="/dashboard/jobs" className="hover:underline">
-            Jobs
-          </a>
-        </nav>
-        <div className="flex items-center gap-3 text-sm text-gray-600">
-          <span>{email}</span>
-          <button onClick={handleSignOut} className="underline">
-            Sign out
-          </button>
+      <header className="border-b border-border">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-8">
+            <Logo />
+            <nav className="flex gap-1">
+              {navItems.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-accent/10 text-accent"
+                        : "text-muted hover:bg-surface-hover hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-muted">{email}</span>
+            <button
+              onClick={handleSignOut}
+              className="font-medium text-muted transition-colors hover:text-foreground"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl p-6">{children}</main>
+      <main className="mx-auto max-w-3xl px-6 py-8">{children}</main>
     </div>
   );
 }

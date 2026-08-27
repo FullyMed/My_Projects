@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
+import { Badge, Button, Card, EmptyState, ErrorText, Input, Textarea } from "@/components/ui";
 
 type Job = { id: string; title: string; raw_text: string };
 type MatchResult = {
@@ -42,59 +43,75 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Rank candidates against a job description</h1>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Rank candidates</h1>
+        <p className="text-sm text-muted">
+          Paste a job description to find the best-matching candidates by semantic similarity.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded border p-4">
-        <input
-          className="rounded border px-3 py-2"
-          placeholder="Job title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          required
-        />
-        <textarea
-          className="min-h-40 rounded border px-3 py-2"
-          placeholder="Paste the job description here"
-          value={rawText}
-          onChange={(event) => setRawText(event.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-fit rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
-        >
-          {submitting ? "Ranking..." : "Rank candidates"}
-        </button>
-      </form>
+      <Card className="p-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Input
+            placeholder="Job title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            required
+          />
+          <Textarea
+            className="min-h-40"
+            placeholder="Paste the job description here"
+            value={rawText}
+            onChange={(event) => setRawText(event.target.value)}
+            required
+          />
+          <Button type="submit" loading={submitting} className="w-fit">
+            {submitting ? "Ranking..." : "Rank candidates"}
+          </Button>
+        </form>
+      </Card>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <ErrorText>{error}</ErrorText>}
 
-      {results && (
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Rank</th>
-              <th className="py-2">Score</th>
-              <th className="py-2">Category</th>
-              <th className="py-2">Skills</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((result) => (
-              <tr key={result.candidate_id} className="border-b">
-                <td className="py-2">{result.rank}</td>
-                <td className="py-2">{result.score.toFixed(3)}</td>
-                <td className="py-2">{result.category ?? "—"}</td>
-                <td className="py-2">{result.skills.slice(0, 5).join(", ") || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
       {results && results.length === 0 && (
-        <p className="text-gray-500">No candidates to rank yet — upload some resumes first.</p>
+        <EmptyState
+          title="No candidates to rank yet"
+          description="Upload some resumes on the Candidates page first."
+        />
+      )}
+
+      {results && results.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {results.map((result) => (
+            <Card key={result.candidate_id} className="flex items-center gap-4 p-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
+                {result.rank}
+              </div>
+              <div className="flex flex-1 flex-col gap-1.5 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{result.category ?? "Uncategorized"}</span>
+                  <span className="text-xs text-muted">
+                    {(result.score * 100).toFixed(1)}% match
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
+                  <div
+                    className="h-full rounded-full bg-accent"
+                    style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1 pt-0.5">
+                  {result.skills.slice(0, 6).map((skill) => (
+                    <Badge key={skill} tone="accent">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
