@@ -13,13 +13,34 @@ resume -> submit a job description -> get a ranking -> confirm another
 company can't see any of it), rather than a full rebuild of every feature
 the original Streamlit dashboard had.
 
+## Live
+
+- **App**: https://my-projects-zeta-three.vercel.app
+- **Backend API**: https://talent-ai-api-427358561754.us-central1.run.app
+- **Supabase project**: `TalentAI` (`ljtjlvyezkyakayetlod`)
+
+⚠️ **Supabase's free tier auto-pauses a project after ~1 week of inactivity.**
+If the live app starts failing with "Failed to fetch" on signup/login, this is
+almost certainly why — check the project's status in the Supabase dashboard
+and click **Restore** (or use the `restore_project` MCP tool) to wake it back
+up; it takes a few minutes to fully come back online. This isn't a code bug,
+it's a free-tier limitation — moving to a paid Supabase plan removes it.
+
 ## Stack
 
-- **Backend**: FastAPI (`apps/api`)
+- **Backend**: FastAPI (`apps/api`), containerized, deployed to **Google
+  Cloud Run** (`us-central1`, 2GiB RAM / 2 CPU)
 - **Database + Auth + Storage**: Supabase — Postgres with `pgvector`, Auth,
-  and Storage (project `talent-ai-saas`, `https://ljtjlvyezkyakayetlod.supabase.co`)
-- **Frontend**: Next.js App Router (`apps/web`), deployed to Vercel
+  and Storage
+- **Frontend**: Next.js App Router (`apps/web`), deployed to **Vercel**
 - **Billing**: Stripe (not wired up yet — Phase D)
+
+Backend hosting note: Render was tried first and rejected — its free *and*
+cheapest paid tier both cap out at 512MB RAM, which isn't enough to hold
+torch + sentence-transformers + spaCy in memory at once (confirmed via a real
+OOM crash in production). Cloud Run's pay-per-use pricing with configurable
+memory made it a better fit for a low-traffic app with a heavy dependency
+stack, at effectively $0/month within its free tier.
 
 ## Why multi-tenant, and why this stack
 
@@ -69,7 +90,9 @@ no accidental cost/scope creep before later phases design them properly):
 - [ ] **Phase C**: push ranking into pgvector directly (`<=>` + the `hnsw` index) for scale; migrate the TF-IDF baseline and skill-gap analytics in
 - [ ] **Phase D**: auth hardening (enable Supabase's leaked-password protection — see `get_advisors`), Stripe billing, per-tenant OpenAI usage metering, then wire in AI insights
 - [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
-- [ ] **Phase F**: production deployment, observability, CI/CD
+- [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +
+      Supabase) — done early, ahead of B-E, so the current feature set could
+      be shared with real colleagues. Observability and CI/CD still open.
 
 ## Local development
 
@@ -128,11 +151,66 @@ Run manually against the real Supabase project and local dev servers:
 7. `pytest tests/` — unit tests for `candidate_service`/`ranking_service`
    with a mocked Supabase client, verifying tenant-scoped inserts.
 
-Known rough edges from this session, left as-is rather than over-polished
-for a Phase A skeleton:
-- `apps/web/middleware.ts` uses a convention Next.js 16 has deprecated in
-  favor of `proxy.ts` — still functional, flagged by a build warning only.
-- The FastAPI Dockerfile was written to mirror the working local setup
-  (`tesseract-ocr`, `poppler-utils`, the same spaCy model wheel install) but
-  wasn't itself built and run in Docker this session — only smoke-tested via
-  the local `uvicorn` dev server against real PDFs.
+## Going live (Vercel + Cloud Run + Supabase)
+
+Deployed for real, not just locally. Several real failures came up getting
+there (fixed by live debugging, not guessed at) — worth knowing before
+touching the deploy config:
+
+- **`apps/web/middleware.ts` crashed in production** with
+  `ReferenceError: __dirname is not defined`. Next.js 16 deprecated
+  `middleware.ts` in favor of `proxy.ts` — not just a rename: `proxy.ts`
+  defaults to the **Node.js runtime**, while the deprecated `middleware.ts`
+  convention still runs on the **Edge runtime**, where `__dirname` (used
+  somewhere in the bundled Supabase SSR client) doesn't exist. Renamed the
+  file and the exported function (`middleware` → `proxy`) — fixed.
+- **Cloud Run rejected the container** with "failed to start and listen on
+  the port". The Dockerfile hardcoded `--port 8000`; Cloud Run requires the
+  container to listen on whatever port its `PORT` env var provides (defaults
+  to 8080) — Render happened to tolerate the hardcoded port, Cloud Run does
+  not. Fixed by using shell-form `CMD` so `${PORT:-8000}` actually expands.
+- **First real upload request hung, then 502'd.** `embeddings/embedder.py`
+  lazily downloads the `all-MiniLM-L6-v2` model from HuggingFace Hub on first
+  use — this hit a `429 Too Many Requests` on Cloud Run (shared cloud-provider
+  IPs get rate-limited by HF's anonymous-request limits). Fixed by
+  pre-downloading the model **at Docker build time** (one `RUN python -c
+  "...SentenceTransformer(...)"` line) so the container never makes that
+  network call at runtime at all.
+- **`gcloud run deploy --source .` hung for 10+ minutes** uploading sources
+  the first time — there was no `.gcloudignore`, so it was uploading the
+  entire 1.4GB local `.venv`. Added `apps/api/.gcloudignore` (same exclusions
+  as `.gitignore`) — fixed, uploads in seconds now.
+- **Vercel kept serving a stale backend URL after editing an env var.**
+  `NEXT_PUBLIC_API_URL` had been created as Vercel's **Secret** type, which
+  is write-only/encrypted and — critically — isn't exposed to the `next
+  build` step the way `NEXT_PUBLIC_*` variables need to be to get inlined
+  into the browser bundle. Vercel won't let you convert a Secret to Config in
+  place; had to delete and recreate all three `NEXT_PUBLIC_*` variables as
+  **Config** type, then redeploy. If a live Vercel deploy ever silently
+  ignores an env var change again, check this first.
+- **A corrupted Vercel routing manifest** (from the `__dirname` crash above)
+  kept returning a platform-level 404 on every path even after the code was
+  fixed and the build succeeded ("Ready" status, clean logs, still 404). Per
+  Vercel's own community guidance for this exact symptom: deleting and
+  re-importing the project from GitHub resets the manifest — a full redeploy
+  in place does not.
+
+## Verified working — Phase A acceptance test, live in production
+
+1. Signed up two separate companies locally, confirmed cross-tenant isolation
+   both via the API and directly in Postgres as admin (RLS proven, not just
+   claimed — see git history for the full local walkthrough).
+2. Deployed for real: Vercel (frontend) + Cloud Run (backend, 2GiB RAM) +
+   Supabase (already cloud-hosted). All three wired together with matching
+   CORS, env vars, and Supabase Auth redirect URLs.
+3. Uploaded a real resume through the live Cloud Run backend — parsed,
+   anonymized, skill-extracted, embedded, stored — then ranked it against a
+   real job description and got a correct similarity score.
+4. **The user (not just Claude) signed up with their own real email on the
+   live Vercel URL, received and clicked a real Supabase confirmation email,
+   and logged in successfully** — the actual end-to-end flow a real customer
+   would experience, confirmed working.
+5. `pytest tests/` — unit tests for `candidate_service`/`ranking_service`
+   with a mocked Supabase client, verifying tenant-scoped inserts.
+6. `get_advisors` (Supabase security lints) clean except for one Auth-level
+   setting (leaked-password protection) unrelated to tenant isolation.
