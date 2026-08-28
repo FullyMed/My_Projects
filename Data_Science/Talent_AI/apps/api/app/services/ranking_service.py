@@ -62,7 +62,16 @@ def rank_candidates_for_job(
         }
         for result in results
     ]
-    client.table("match_results").insert(match_rows).execute()
+
+    # Replace, not accumulate: without this, re-ranking the same job appends
+    # duplicate (job_id, candidate_id) rows every call, and a shrinking top_k
+    # between calls would leave stale rows behind that a naive upsert
+    # wouldn't remove either. This is two separate PostgREST calls, not one
+    # transaction -- a crash between them briefly leaves this job with zero
+    # saved matches until the next successful rank, not stale/wrong data.
+    client.table("match_results").delete().eq("job_description_id", job_id).execute()
+    if match_rows:
+        client.table("match_results").insert(match_rows).execute()
 
     candidates_by_id = {row["id"]: row for row in candidate_rows}
     return [
@@ -75,4 +84,46 @@ def rank_candidates_for_job(
             "skills": candidates_by_id[result.candidate_id]["skills"],
         }
         for result in results
+    ]
+
+
+def get_latest_ranking(*, client: Client, user: CurrentUser, job_id: str) -> list[dict]:
+    """Read back a job's already-computed ranking without recomputing it --
+    used by the job detail page so revisiting a job doesn't re-run the
+    embedding model on every page load."""
+    job_row = client.table("job_descriptions").select("id").eq("id", job_id).single().execute()
+    if not job_row.data:
+        raise ValueError("Job description not found")
+
+    match_rows = (
+        client.table("match_results")
+        .select("candidate_id, score, rank")
+        .eq("job_description_id", job_id)
+        .order("rank")
+        .execute()
+        .data
+    )
+    if not match_rows:
+        return []
+
+    candidate_ids = [row["candidate_id"] for row in match_rows]
+    candidate_rows = (
+        client.table("candidates")
+        .select("id, source_path, category, skills")
+        .in_("id", candidate_ids)
+        .execute()
+        .data
+    )
+    candidates_by_id = {row["id"]: row for row in candidate_rows}
+
+    return [
+        {
+            "candidate_id": row["candidate_id"],
+            "score": row["score"],
+            "rank": row["rank"],
+            "source_path": candidates_by_id[row["candidate_id"]]["source_path"],
+            "category": candidates_by_id[row["candidate_id"]]["category"],
+            "skills": candidates_by_id[row["candidate_id"]]["skills"],
+        }
+        for row in match_rows
     ]

@@ -5,6 +5,8 @@ import { apiFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, EmptyState, ErrorText, Input } from "@/components/ui";
 
+const PAGE_SIZE = 20;
+
 type Candidate = {
   id: string;
   source_path: string;
@@ -18,14 +20,18 @@ type Candidate = {
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [offset, setOffset] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadCandidates() {
+  async function loadCandidates(atOffset: number) {
+    setLoadingList(true);
     try {
-      const data = await apiFetch<Candidate[]>("/candidates");
+      const data = await apiFetch<Candidate[]>(
+        `/candidates?limit=${PAGE_SIZE}&offset=${atOffset}`,
+      );
       setCandidates(data);
     } catch (err) {
       setError(String(err));
@@ -35,8 +41,9 @@ export default function CandidatesPage() {
   }
 
   useEffect(() => {
-    loadCandidates();
-  }, []);
+    loadCandidates(offset);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offset]);
 
   async function handleUpload(event: FormEvent) {
     event.preventDefault();
@@ -65,7 +72,8 @@ export default function CandidatesPage() {
 
       setFile(null);
       setCategory("");
-      await loadCandidates();
+      setOffset(0);
+      await loadCandidates(0);
     } catch (err) {
       setError(String(err));
     } finally {
@@ -112,43 +120,66 @@ export default function CandidatesPage() {
         <div className="flex justify-center py-12">
           <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
         </div>
-      ) : candidates.length === 0 ? (
+      ) : candidates.length === 0 && offset === 0 ? (
         <EmptyState
           title="No candidates yet"
           description="Upload a resume above to get started."
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs text-muted">
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Skills</th>
-                <th className="px-4 py-3 font-medium">Uploaded</th>
-              </tr>
-            </thead>
-            <tbody>
-              {candidates.map((candidate) => (
-                <tr key={candidate.id} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3">{candidate.category ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {candidate.skills.slice(0, 5).map((skill) => (
-                        <Badge key={skill}>{skill}</Badge>
-                      ))}
-                      {candidate.skills.length === 0 && (
-                        <span className="text-muted">—</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted">
-                    {new Date(candidate.created_at).toLocaleString()}
-                  </td>
+        <>
+          <Card className="overflow-hidden">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs text-muted">
+                  <th className="px-4 py-3 font-medium">Category</th>
+                  <th className="px-4 py-3 font-medium">Skills</th>
+                  <th className="px-4 py-3 font-medium">Uploaded</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+              </thead>
+              <tbody>
+                {candidates.map((candidate) => (
+                  <tr key={candidate.id} className="border-b border-border last:border-0">
+                    <td className="px-0 py-0">
+                      <a
+                        href={`/dashboard/candidates/${candidate.id}`}
+                        className="block px-4 py-3 hover:text-accent"
+                      >
+                        {candidate.category ?? "—"}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {candidate.skills.slice(0, 5).map((skill) => (
+                          <Badge key={skill}>{skill}</Badge>
+                        ))}
+                        {candidate.skills.length === 0 && <span className="text-muted">—</span>}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted">
+                      {new Date(candidate.created_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="secondary"
+              disabled={offset === 0}
+              onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={candidates.length < PAGE_SIZE}
+              onClick={() => setOffset(offset + PAGE_SIZE)}
+            >
+              Next
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );

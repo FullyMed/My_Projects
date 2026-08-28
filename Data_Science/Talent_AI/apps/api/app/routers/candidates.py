@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
-from ..services.candidate_service import process_and_store_resume
+from ..services.candidate_service import (
+    delete_candidate,
+    get_resume_signed_url,
+    process_and_store_resume,
+)
 
 router = APIRouter()
 
@@ -35,12 +39,57 @@ async def upload_candidate(
 
 
 @router.get("")
-async def list_candidates(user: CurrentUser = Depends(get_current_user)) -> list[dict]:
+async def list_candidates(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    user: CurrentUser = Depends(get_current_user),
+) -> list[dict]:
     client = get_scoped_client(user.token)
     result = (
         client.table("candidates")
         .select("id, source_path, category, skills, education, experience, created_at")
         .order("created_at", desc=True)
+        .range(offset, offset + limit - 1)
         .execute()
     )
     return result.data
+
+
+@router.get("/{candidate_id}")
+async def get_candidate(
+    candidate_id: str, user: CurrentUser = Depends(get_current_user)
+) -> dict:
+    client = get_scoped_client(user.token)
+    result = client.table("candidates").select("*").eq("id", candidate_id).single().execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return result.data
+
+
+@router.get("/{candidate_id}/resume-url")
+async def get_candidate_resume_url(
+    candidate_id: str, user: CurrentUser = Depends(get_current_user)
+) -> dict:
+    client = get_scoped_client(user.token)
+    row = (
+        client.table("candidates")
+        .select("source_path")
+        .eq("id", candidate_id)
+        .single()
+        .execute()
+    )
+    if not row.data:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    url = get_resume_signed_url(token=user.token, path=row.data["source_path"])
+    return {"url": url, "expires_in": 3600}
+
+
+@router.delete("/{candidate_id}", status_code=204)
+async def remove_candidate(
+    candidate_id: str, user: CurrentUser = Depends(get_current_user)
+) -> None:
+    client = get_scoped_client(user.token)
+    try:
+        delete_candidate(client=client, user=user, candidate_id=candidate_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

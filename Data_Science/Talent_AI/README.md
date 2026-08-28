@@ -85,8 +85,13 @@ no accidental cost/scope creep before later phases design them properly):
 
 ## Roadmap
 
-- [x] **Phase A** (this): multi-tenant skeleton — signup, upload, rank, RLS-proven isolation
-- [ ] **Phase B**: full backend API (candidate detail/delete, re-rank, pagination)
+- [x] **Phase A**: multi-tenant skeleton — signup, upload, rank, RLS-proven isolation
+- [x] **Phase B**: full backend API — candidate detail (`GET /candidates/{id}`),
+      delete with Storage cleanup (`DELETE /candidates/{id}`), signed resume
+      URLs, job listing/detail (`GET /jobs`, `GET /jobs/{id}`), saved rankings
+      without recompute (`GET /jobs/{id}/results`), pagination on both list
+      endpoints, and a real bug fix: re-ranking a job used to accumulate
+      duplicate `match_results` rows on every call — it now replaces them.
 - [ ] **Phase C**: push ranking into pgvector directly (`<=>` + the `hnsw` index) for scale; migrate the TF-IDF baseline and skill-gap analytics in
 - [ ] **Phase D**: auth hardening (enable Supabase's leaked-password protection — see `get_advisors`), Stripe billing, per-tenant OpenAI usage metering, then wire in AI insights
 - [ ] **Phase E**: full dashboard feature parity with the original Streamlit app

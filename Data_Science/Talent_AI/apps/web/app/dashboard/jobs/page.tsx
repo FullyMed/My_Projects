@@ -1,31 +1,46 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { Badge, Button, Card, EmptyState, ErrorText, Input, Textarea } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorText, Input, Textarea } from "@/components/ui";
 
-type Job = { id: string; title: string; raw_text: string };
-type MatchResult = {
-  candidate_id: string;
-  score: number;
-  rank: number;
-  source_path: string;
-  category: string | null;
-  skills: string[];
-};
+const PAGE_SIZE = 20;
+
+type Job = { id: string; title: string; raw_text: string; created_at: string };
 
 export default function JobsPage() {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [rawText, setRawText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [results, setResults] = useState<MatchResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [offset, setOffset] = useState(0);
+
+  async function loadJobs(atOffset: number) {
+    setLoadingJobs(true);
+    try {
+      const data = await apiFetch<Job[]>(`/jobs?limit=${PAGE_SIZE}&offset=${atOffset}`);
+      setJobs(data);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setLoadingJobs(false);
+    }
+  }
+
+  useEffect(() => {
+    loadJobs(offset);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offset]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
     setError(null);
-    setResults(null);
 
     try {
       const job = await apiFetch<Job>("/jobs", {
@@ -33,11 +48,10 @@ export default function JobsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, raw_text: rawText, required_skills: [] }),
       });
-      const ranked = await apiFetch<MatchResult[]>(`/jobs/${job.id}/rank`, { method: "POST" });
-      setResults(ranked);
+      await apiFetch(`/jobs/${job.id}/rank`, { method: "POST" });
+      router.push(`/dashboard/jobs/${job.id}`);
     } catch (err) {
       setError(String(err));
-    } finally {
       setSubmitting(false);
     }
   }
@@ -74,45 +88,53 @@ export default function JobsPage() {
 
       {error && <ErrorText>{error}</ErrorText>}
 
-      {results && results.length === 0 && (
-        <EmptyState
-          title="No candidates to rank yet"
-          description="Upload some resumes on the Candidates page first."
-        />
-      )}
-
-      {results && results.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {results.map((result) => (
-            <Card key={result.candidate_id} className="flex items-center gap-4 p-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
-                {result.rank}
-              </div>
-              <div className="flex flex-1 flex-col gap-1.5 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{result.category ?? "Uncategorized"}</span>
-                  <span className="text-xs text-muted">
-                    {(result.score * 100).toFixed(1)}% match
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
-                  <div
-                    className="h-full rounded-full bg-accent"
-                    style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {result.skills.slice(0, 6).map((skill) => (
-                    <Badge key={skill} tone="accent">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-muted">Past jobs</h2>
+        {loadingJobs ? (
+          <div className="flex justify-center py-8">
+            <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
+          </div>
+        ) : jobs.length === 0 && offset === 0 ? (
+          <EmptyState
+            title="No jobs yet"
+            description="Create one above to see it show up here."
+          />
+        ) : (
+          <>
+            <div className="flex flex-col gap-2">
+              {jobs.map((job) => (
+                <a key={job.id} href={`/dashboard/jobs/${job.id}`}>
+                  <Card className="p-4 transition-colors hover:bg-surface-hover">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="font-medium">{job.title}</span>
+                      <span className="shrink-0 text-xs text-muted">
+                        {new Date(job.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="mt-1 truncate text-sm text-muted">{job.raw_text}</p>
+                  </Card>
+                </a>
+              ))}
+            </div>
+            <div className="flex items-center justify-between">
+              <Button
+                variant="secondary"
+                disabled={offset === 0}
+                onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={jobs.length < PAGE_SIZE}
+                onClick={() => setOffset(offset + PAGE_SIZE)}
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

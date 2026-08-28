@@ -103,3 +103,53 @@ def _upload_to_storage(*, token: str, path: str, file_bytes: bytes) -> None:
         timeout=30.0,
     )
     response.raise_for_status()
+
+
+def delete_candidate(*, client: Client, user: CurrentUser, candidate_id: str) -> None:
+    row = (
+        client.table("candidates")
+        .select("source_path")
+        .eq("id", candidate_id)
+        .single()
+        .execute()
+    )
+    if not row.data:
+        raise ValueError("Candidate not found")
+
+    # Storage first, then the DB row: if the Storage delete fails for any
+    # reason other than "already gone," the row is left intact so the user
+    # can retry, rather than leaving a DB row pointing at a deleted file or
+    # silently orphaning the file. match_results rows referencing this
+    # candidate cascade-delete automatically (existing FK) -- no manual
+    # cleanup needed here.
+    _delete_from_storage(token=user.token, path=row.data["source_path"])
+    client.table("candidates").delete().eq("id", candidate_id).execute()
+
+
+def _delete_from_storage(*, token: str, path: str) -> None:
+    url = f"{settings.supabase_url}/storage/v1/object/resumes/{path}"
+    response = httpx.delete(
+        url,
+        headers={"Authorization": f"Bearer {token}", "apikey": settings.supabase_anon_key},
+        timeout=30.0,
+    )
+    # 404 means the object is already gone (e.g. a retried delete) -- treat
+    # as success rather than failing the whole operation.
+    if response.status_code != 404:
+        response.raise_for_status()
+
+
+def get_resume_signed_url(*, token: str, path: str, expires_in: int = 3600) -> str:
+    url = f"{settings.supabase_url}/storage/v1/object/sign/resumes/{path}"
+    response = httpx.post(
+        url,
+        json={"expiresIn": expires_in},
+        headers={"Authorization": f"Bearer {token}", "apikey": settings.supabase_anon_key},
+        timeout=30.0,
+    )
+    response.raise_for_status()
+    # Storage's sign endpoint returns a path relative to /storage/v1, e.g.
+    # {"signedURL": "/object/sign/resumes/<tenant>/<id>.pdf?token=..."}, not
+    # a full URL.
+    signed_path = response.json()["signedURL"]
+    return f"{settings.supabase_url}/storage/v1{signed_path}"

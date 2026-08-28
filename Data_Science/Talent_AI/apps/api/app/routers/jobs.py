@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from talent_ai_core.embeddings.embedder import embed_text
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
-from ..services.ranking_service import rank_candidates_for_job
+from ..services.ranking_service import get_latest_ranking, rank_candidates_for_job
 
 router = APIRouter()
 
@@ -33,6 +33,49 @@ async def create_job(
     }
     result = client.table("job_descriptions").insert(row).execute()
     return result.data[0]
+
+
+@router.get("")
+async def list_jobs(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    user: CurrentUser = Depends(get_current_user),
+) -> list[dict]:
+    client = get_scoped_client(user.token)
+    result = (
+        client.table("job_descriptions")
+        .select("id, title, raw_text, required_skills, created_at")
+        .order("created_at", desc=True)
+        .range(offset, offset + limit - 1)
+        .execute()
+    )
+    return result.data
+
+
+@router.get("/{job_id}")
+async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) -> dict:
+    client = get_scoped_client(user.token)
+    result = (
+        client.table("job_descriptions")
+        .select("id, title, raw_text, required_skills, created_at")
+        .eq("id", job_id)
+        .single()
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Job description not found")
+    return result.data
+
+
+@router.get("/{job_id}/results")
+async def get_job_results(
+    job_id: str, user: CurrentUser = Depends(get_current_user)
+) -> list[dict]:
+    client = get_scoped_client(user.token)
+    try:
+        return get_latest_ranking(client=client, user=user, job_id=job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/{job_id}/rank")
