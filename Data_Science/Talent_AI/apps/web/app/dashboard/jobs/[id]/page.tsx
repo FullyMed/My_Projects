@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Badge, Button, Card, EmptyState, ErrorText, Spinner } from "@/components/ui";
 
-type Job = { id: string; title: string; raw_text: string; created_at: string };
+type Job = {
+  id: string;
+  title: string;
+  raw_text: string;
+  required_skills: string[];
+  created_at: string;
+};
 type MatchResult = {
   candidate_id: string;
   score: number;
@@ -14,14 +20,25 @@ type MatchResult = {
   category: string | null;
   skills: string[];
 };
+type SkillGap = { skill: string; missing_fraction: number };
+type Method = "semantic" | "tfidf";
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
   const [results, setResults] = useState<MatchResult[] | null>(null);
+  const [tfidfResults, setTfidfResults] = useState<MatchResult[] | null>(null);
+  const [skillGap, setSkillGap] = useState<SkillGap[] | null>(null);
+  const [method, setMethod] = useState<Method>("semantic");
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadSkillGap = useCallback(() => {
+    apiFetch<SkillGap[]>(`/jobs/${id}/skill-gap`)
+      .then(setSkillGap)
+      .catch(() => setSkillGap([]));
+  }, [id]);
 
   useEffect(() => {
     Promise.all([apiFetch<Job>(`/jobs/${id}`), apiFetch<MatchResult[]>(`/jobs/${id}/results`)])
@@ -31,7 +48,8 @@ export default function JobDetailPage() {
       })
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false));
-  }, [id]);
+    loadSkillGap();
+  }, [id, loadSkillGap]);
 
   async function handleRerank() {
     setRanking(true);
@@ -39,10 +57,30 @@ export default function JobDetailPage() {
     try {
       const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank`, { method: "POST" });
       setResults(ranked);
+      loadSkillGap();
     } catch (err) {
       setError(String(err));
     } finally {
       setRanking(false);
+    }
+  }
+
+  async function selectMethod(next: Method) {
+    setMethod(next);
+    setError(null);
+    if (next === "tfidf" && tfidfResults === null) {
+      setRanking(true);
+      try {
+        const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank?method=tfidf`, {
+          method: "POST",
+        });
+        setTfidfResults(ranked);
+      } catch (err) {
+        setError(String(err));
+        setMethod("semantic");
+      } finally {
+        setRanking(false);
+      }
     }
   }
 
@@ -54,9 +92,19 @@ export default function JobDetailPage() {
     );
   }
 
-  if (error || !job) {
-    return <ErrorText>{error ?? "Job not found."}</ErrorText>;
+  if (error && !job) {
+    return <ErrorText>{error}</ErrorText>;
   }
+  if (!job) {
+    return <ErrorText>Job not found.</ErrorText>;
+  }
+
+  const displayed = method === "semantic" ? results : tfidfResults;
+  const showSkillGap =
+    method === "semantic" &&
+    job.required_skills.length > 0 &&
+    (results?.length ?? 0) > 0 &&
+    (skillGap?.length ?? 0) > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -70,28 +118,65 @@ export default function JobDetailPage() {
             Created {new Date(job.created_at).toLocaleString()}
           </p>
         </div>
-        <Button loading={ranking} onClick={handleRerank} className="shrink-0">
-          {ranking ? "Ranking..." : "Re-rank"}
-        </Button>
+        {method === "semantic" && (
+          <Button loading={ranking} onClick={handleRerank} className="shrink-0">
+            {ranking ? "Ranking..." : "Re-rank"}
+          </Button>
+        )}
       </div>
 
       <Card className="p-5">
         <h2 className="mb-2 text-sm font-medium text-muted">Job description</h2>
         <p className="whitespace-pre-wrap text-sm">{job.raw_text}</p>
+        {job.required_skills.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {job.required_skills.map((skill) => (
+              <Badge key={skill}>{skill}</Badge>
+            ))}
+          </div>
+        )}
       </Card>
 
       {error && <ErrorText>{error}</ErrorText>}
 
-      {results && results.length === 0 && (
+      <div className="flex items-center gap-2">
+        <div className="inline-flex rounded-lg border border-border p-0.5">
+          <Button
+            variant={method === "semantic" ? "secondary" : "ghost"}
+            onClick={() => selectMethod("semantic")}
+            className="px-3 py-1.5"
+          >
+            Semantic
+          </Button>
+          <Button
+            variant={method === "tfidf" ? "secondary" : "ghost"}
+            onClick={() => selectMethod("tfidf")}
+            className="px-3 py-1.5"
+          >
+            Keyword (TF-IDF)
+          </Button>
+        </div>
+        {method === "tfidf" && (
+          <span className="text-xs text-muted">Comparison only — not saved</span>
+        )}
+      </div>
+
+      {ranking && method === "tfidf" && (
+        <div className="flex justify-center py-8">
+          <Spinner className="h-5 w-5 text-muted" />
+        </div>
+      )}
+
+      {displayed && displayed.length === 0 && (
         <EmptyState
           title="No ranking yet"
           description="Click Re-rank to score your candidates against this job."
         />
       )}
 
-      {results && results.length > 0 && (
+      {displayed && displayed.length > 0 && (
         <div className="flex flex-col gap-2">
-          {results.map((result) => (
+          {displayed.map((result) => (
             <Card key={result.candidate_id} className="flex items-center gap-4 p-4">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
                 {result.rank}
@@ -125,6 +210,33 @@ export default function JobDetailPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {showSkillGap && (
+        <Card className="p-5">
+          <h2 className="mb-1 text-sm font-medium text-muted">Skill gaps in your shortlist</h2>
+          <p className="mb-4 text-xs text-muted">
+            Share of the ranked candidates missing each required skill.
+          </p>
+          <div className="flex flex-col gap-3">
+            {skillGap!.map(({ skill, missing_fraction }) => (
+              <div key={skill} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium">{skill}</span>
+                  <span className="text-muted">
+                    {(missing_fraction * 100).toFixed(0)}% missing
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
+                  <div
+                    className="h-full rounded-full bg-danger"
+                    style={{ width: `${Math.max(0, Math.min(100, missing_fraction * 100))}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       )}
     </div>
   );

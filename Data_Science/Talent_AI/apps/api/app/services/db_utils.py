@@ -18,3 +18,14 @@ def parse_embedding(value: object) -> list[float] | None:
         stripped = value.strip("[]")
         return [float(v) for v in stripped.split(",") if v]
     raise TypeError(f"Unexpected embedding value type: {type(value)!r}")
+
+
+def format_embedding(values: object) -> str:
+    """pgvector's text input literal ("[0.01,0.02,...]") for a sequence of
+    floats. Used when passing a query vector to the `match_candidates` RPC:
+    the arg is typed `vector(384)`, and a text literal coerces to it
+    unambiguously, sidestepping any JSON-array-to-vector question at the
+    PostgREST boundary."""
+    if values is None:
+        raise TypeError("Cannot format a null embedding")
+    return "[" + ",".join(str(float(v)) for v in values) + "]"

@@ -67,20 +67,20 @@ assumed "one global file on disk, one tenant" did.
 - `extraction/anonymize.py` — `anonymize_text()` (strips PII before embedding)
 - `extraction/nlp_extractor.py` + `extraction/skills_taxonomy.py` — skill/education/experience extraction
 - `embeddings/embedder.py` — `embed_text()`/`embed_texts()` (Sentence Transformers, 384-dim)
-- `matching/ranker.py` — `SemanticRanker` (FAISS `.fit()`/`.rank()`)
+- `matching/baseline.py` — `TfidfRanker` (keyword baseline, on-demand comparison only)
+- `analytics.py` — `skill_gap_analysis()` (shortlist skill-coverage aggregate)
 
 **Replaced** (assumed one global file / one tenant):
 - `storage.py` (Parquet read/write) -> Postgres tables (`apps/api/app/services/*`)
 - `indexing.py`'s `persist_candidates`/`append_candidate` (Parquet + FAISS file) -> a Postgres insert + `pgvector` column per candidate
+- `matching/ranker.py`'s `SemanticRanker` (per-request in-memory `faiss.IndexFlatIP`) -> the `match_candidates` pgvector RPC (`supabase/migrations/0009`), an HNSW `<=>` search in Postgres — same cosine scores (embeddings are L2-normalized), no full-table load, no model on the re-rank path
 - `config.py` (local filesystem paths, one shared `.env`) -> `apps/api/app/config.py`, Supabase env vars only, no dataset directories
 - `indexing.py`'s `process_resume()` itself isn't reused directly (it derives `candidate_id` from the filename and `source_path` from a local relative path) — `apps/api/app/services/candidate_service.py` calls the three functions inside it (`extract_text`, `anonymize_text`, `extract_all`) directly and builds a `CandidateProfile` with a UUID + Supabase Storage key instead
 
-**Explicitly deferred past Phase A** (not wired into any endpoint yet, so there's
-no accidental cost/scope creep before later phases design them properly):
+**Still deferred** (not wired into any endpoint yet, so there's no
+accidental cost/scope creep before later phases design them properly):
 - `insights/insight_generator.py` — OpenAI-powered candidate insights (needs
   per-tenant usage metering first — Phase D)
-- `matching/baseline.py` — TF-IDF baseline ranker
-- `analytics.py` — skill-gap analysis
 - `automation/*` — folder watcher, scheduler, email reports
 
 ## Roadmap
@@ -92,7 +92,19 @@ no accidental cost/scope creep before later phases design them properly):
       without recompute (`GET /jobs/{id}/results`), pagination on both list
       endpoints, and a real bug fix: re-ranking a job used to accumulate
       duplicate `match_results` rows on every call — it now replaces them.
-- [ ] **Phase C**: push ranking into pgvector directly (`<=>` + the `hnsw` index) for scale; migrate the TF-IDF baseline and skill-gap analytics in
+- [x] **Phase C**: semantic ranking now runs in Postgres — a
+      `match_candidates` SECURITY INVOKER RPC (`supabase/migrations/0009`)
+      does an HNSW `<=>` nearest-neighbour search over `candidates.embedding`
+      instead of the API pulling every candidate row into a per-request
+      in-memory FAISS index (RLS on `candidates` still scopes it per tenant;
+      `faiss-cpu` and `matching/ranker.py` removed). The TF-IDF baseline
+      (`matching/baseline.py`) is back as a `POST /jobs/{id}/rank?method=tfidf`
+      comparison — computed on demand, never persisted — surfaced as a
+      Semantic ⇄ Keyword toggle on the job detail page. Skill-gap analytics
+      (`analytics.py`) is back as `GET /jobs/{id}/skill-gap` (fraction of a
+      job's saved shortlist missing each required skill) with a panel on the
+      same page; the job create form takes a comma-separated required-skills
+      list.
 - [ ] **Phase D**: auth hardening (enable Supabase's leaked-password protection — see `get_advisors`), Stripe billing, per-tenant OpenAI usage metering, then wire in AI insights
 - [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +

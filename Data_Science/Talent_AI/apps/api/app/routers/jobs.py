@@ -6,7 +6,12 @@ from pydantic import BaseModel, Field
 from talent_ai_core.embeddings.embedder import embed_text
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
-from ..services.ranking_service import get_latest_ranking, rank_candidates_for_job
+from ..services.ranking_service import (
+    get_latest_ranking,
+    rank_candidates_for_job,
+    rank_candidates_tfidf,
+    skill_gap_for_job,
+)
 
 router = APIRouter()
 
@@ -78,12 +83,29 @@ async def get_job_results(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/{job_id}/rank")
-async def rank_job(
-    job_id: str, top_k: int = 10, user: CurrentUser = Depends(get_current_user)
+@router.get("/{job_id}/skill-gap")
+async def get_job_skill_gap(
+    job_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> list[dict]:
     client = get_scoped_client(user.token)
     try:
-        return rank_candidates_for_job(client=client, user=user, job_id=job_id, top_k=top_k)
+        return skill_gap_for_job(client=client, user=user, job_id=job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/{job_id}/rank")
+async def rank_job(
+    job_id: str,
+    top_k: int = 10,
+    method: str = "semantic",
+    user: CurrentUser = Depends(get_current_user),
+) -> list[dict]:
+    if method not in ("semantic", "tfidf"):
+        raise HTTPException(status_code=400, detail="method must be 'semantic' or 'tfidf'")
+    client = get_scoped_client(user.token)
+    rank = rank_candidates_for_job if method == "semantic" else rank_candidates_tfidf
+    try:
+        return rank(client=client, user=user, job_id=job_id, top_k=top_k)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

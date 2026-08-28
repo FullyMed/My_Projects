@@ -13,6 +13,7 @@ export default function JobsPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [rawText, setRawText] = useState("");
+  const [requiredSkills, setRequiredSkills] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,10 +44,14 @@ export default function JobsPage() {
     setError(null);
 
     try {
+      const skills = requiredSkills
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
       const job = await apiFetch<Job>("/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, raw_text: rawText, required_skills: [] }),
+        body: JSON.stringify({ title, raw_text: rawText, required_skills: skills }),
       });
       await apiFetch(`/jobs/${job.id}/rank`, { method: "POST" });
       router.push(`/dashboard/jobs/${job.id}`);
@@ -79,6 +84,11 @@ export default function JobsPage() {
             value={rawText}
             onChange={(event) => setRawText(event.target.value)}
             required
+          />
+          <Input
+            placeholder="Required skills, comma-separated (optional) — e.g. python, aws, docker"
+            value={requiredSkills}
+            onChange={(event) => setRequiredSkills(event.target.value)}
           />
           <Button type="submit" loading={submitting} className="w-fit">
             {submitting ? "Ranking..." : "Rank candidates"}
