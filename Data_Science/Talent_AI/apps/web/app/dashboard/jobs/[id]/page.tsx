@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Badge, Button, Card, EmptyState, ErrorText, Spinner } from "@/components/ui";
+import { InsightsPanel } from "@/components/insights";
 
 type Job = {
   id: string;
@@ -33,6 +34,16 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openInsights, setOpenInsights] = useState<Set<string>>(new Set());
+
+  function toggleInsights(candidateId: string) {
+    setOpenInsights((prev) => {
+      const next = new Set(prev);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
+  }
 
   const loadSkillGap = useCallback(() => {
     apiFetch<SkillGap[]>(`/jobs/${id}/skill-gap`)
@@ -177,36 +188,52 @@ export default function JobDetailPage() {
       {displayed && displayed.length > 0 && (
         <div className="flex flex-col gap-2">
           {displayed.map((result) => (
-            <Card key={result.candidate_id} className="flex items-center gap-4 p-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
-                {result.rank}
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`/dashboard/candidates/${result.candidate_id}`}
-                    className="font-medium hover:text-accent"
+            <Card key={result.candidate_id} className="flex flex-col gap-3 p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
+                  {result.rank}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`/dashboard/candidates/${result.candidate_id}`}
+                      className="font-medium hover:text-accent"
+                    >
+                      {result.category ?? "Uncategorized"}
+                    </a>
+                    <span className="text-xs text-muted">
+                      {(result.score * 100).toFixed(1)}% match
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
+                    <div
+                      className="h-full rounded-full bg-accent"
+                      style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {result.skills.slice(0, 6).map((skill) => (
+                      <Badge key={skill} tone="accent">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                {method === "semantic" && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => toggleInsights(result.candidate_id)}
+                    className="shrink-0 px-2.5 py-1.5 text-xs"
                   >
-                    {result.category ?? "Uncategorized"}
-                  </a>
-                  <span className="text-xs text-muted">
-                    {(result.score * 100).toFixed(1)}% match
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
-                  <div
-                    className="h-full rounded-full bg-accent"
-                    style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {result.skills.slice(0, 6).map((skill) => (
-                    <Badge key={skill} tone="accent">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
+                    {openInsights.has(result.candidate_id) ? "Hide insights" : "AI insights"}
+                  </Button>
+                )}
               </div>
+              {method === "semantic" && openInsights.has(result.candidate_id) && (
+                <div className="border-t border-border pt-3">
+                  <InsightsPanel candidateId={result.candidate_id} jobId={id} />
+                </div>
+              )}
             </Card>
           ))}
         </div>

@@ -21,5 +21,12 @@ class Settings:
         if origin.strip()
     ]
 
+    # AI insights (Phase D). Optional -- the rest of the API runs fine without
+    # it; the insights endpoints return 503 until it's set. Read directly from
+    # os.getenv by talent_ai_core/insights/llm_client.py too; mirrored here so
+    # the config surface is discoverable in one place.
+    openai_api_key: str | None = os.environ.get("OPENAI_API_KEY")
+    openai_model: str = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+
 
 settings = Settings()

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Badge, Button, Card, ErrorText, Spinner } from "@/components/ui";
+import { InsightsPanel } from "@/components/insights";
 
 type CandidateDetail = {
   id: string;
@@ -25,12 +26,17 @@ export default function CandidateDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [resumeLoading, setResumeLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string>("");
 
   useEffect(() => {
     apiFetch<CandidateDetail>(`/candidates/${id}`)
       .then(setCandidate)
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false));
+    apiFetch<{ id: string; title: string }[]>(`/jobs?limit=100`)
+      .then(setJobs)
+      .catch(() => setJobs([]));
   }, [id]);
 
   async function handleViewResume() {
@@ -111,6 +117,25 @@ export default function CandidateDetailPage() {
             <span className="text-sm text-muted">None detected</span>
           )}
         </div>
+      </Card>
+
+      <Card className="p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-medium text-muted">AI insights</h2>
+          <select
+            value={selectedJobId}
+            onChange={(event) => setSelectedJobId(event.target.value)}
+            className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none focus:border-accent"
+          >
+            <option value="">Evaluate against a job…</option>
+            {jobs.map((job) => (
+              <option key={job.id} value={job.id}>
+                {job.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <InsightsPanel candidateId={id} jobId={selectedJobId || null} />
       </Card>
 
       <Card className="p-5">

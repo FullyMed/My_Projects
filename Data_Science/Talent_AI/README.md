@@ -77,10 +77,11 @@ assumed "one global file on disk, one tenant" did.
 - `config.py` (local filesystem paths, one shared `.env`) -> `apps/api/app/config.py`, Supabase env vars only, no dataset directories
 - `indexing.py`'s `process_resume()` itself isn't reused directly (it derives `candidate_id` from the filename and `source_path` from a local relative path) — `apps/api/app/services/candidate_service.py` calls the three functions inside it (`extract_text`, `anonymize_text`, `extract_all`) directly and builds a `CandidateProfile` with a UUID + Supabase Storage key instead
 
-**Still deferred** (not wired into any endpoint yet, so there's no
-accidental cost/scope creep before later phases design them properly):
-- `insights/insight_generator.py` — OpenAI-powered candidate insights (needs
-  per-tenant usage metering first — Phase D)
+**Now wired in (Phase D):**
+- `insights/` — OpenAI candidate insights, adapted to read config from env
+  and return token usage; see the Phase D roadmap entry
+
+**Still deferred:**
 - `automation/*` — folder watcher, scheduler, email reports
 
 ## Roadmap
@@ -105,7 +106,29 @@ accidental cost/scope creep before later phases design them properly):
       job's saved shortlist missing each required skill) with a panel on the
       same page; the job create form takes a comma-separated required-skills
       list.
-- [ ] **Phase D**: auth hardening (enable Supabase's leaked-password protection — see `get_advisors`), Stripe billing, per-tenant OpenAI usage metering, then wire in AI insights
+- [ ] **Phase D**: (in progress)
+  - [x] auth hardening — free-tier password policy tightened (min length 8,
+        character requirements). Supabase's HaveIBeenPwned leaked-password
+        check is **Pro-plan only**; deferred until the project moves off the
+        free tier (which would also remove the ~1-week auto-pause and the
+        signup email rate limit). The `get_advisors` finding for this is a
+        known, accepted free-tier limitation — it's auth hygiene, not a
+        tenant-isolation gap.
+  - [~] AI insights (OpenAI) — **code-complete, pending migration `0010` +
+        `OPENAI_API_KEY` on the service + deploy**. Vendored `insights/`
+        modules (`insight_generator` / `llm_client` / `schemas`, adapted to
+        read the key/model from env and to return token usage). One
+        structured call per (candidate, job) → summary, strengths,
+        weaknesses, missing qualifications, hiring recommendation, interview
+        questions; only `anonymized_text` is sent to OpenAI. Cached in
+        `candidate_insights` (RLS, `unique(candidate_id, job_description_id)`,
+        stores token counts). `GET|POST /candidates/{id}/insights?job_id=…`
+        (`?refresh=true` regenerates; 503 if the key isn't set). UI: an
+        expander per ranked candidate on the job page, and a job-picker
+        section on the candidate page — both via `components/insights.tsx`.
+  - [ ] per-tenant OpenAI usage metering (builds on the `candidate_insights`
+        token log)
+  - [ ] Stripe billing
 - [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +
       Supabase) — done early, ahead of B-E, so the current feature set could

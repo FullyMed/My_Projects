@@ -8,6 +8,7 @@ from ..services.candidate_service import (
     get_resume_signed_url,
     process_and_store_resume,
 )
+from ..services.insight_service import generate_insight, get_insight
 
 router = APIRouter()
 
@@ -93,3 +94,36 @@ async def remove_candidate(
         delete_candidate(client=client, user=user, candidate_id=candidate_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/{candidate_id}/insights")
+async def read_candidate_insight(
+    candidate_id: str,
+    job_id: str = Query(...),
+    user: CurrentUser = Depends(get_current_user),
+) -> dict | None:
+    client = get_scoped_client(user.token)
+    return get_insight(client=client, user=user, candidate_id=candidate_id, job_id=job_id)
+
+
+@router.post("/{candidate_id}/insights")
+async def create_candidate_insight(
+    candidate_id: str,
+    job_id: str = Query(...),
+    refresh: bool = Query(False),
+    user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    client = get_scoped_client(user.token)
+    try:
+        return generate_insight(
+            client=client,
+            user=user,
+            candidate_id=candidate_id,
+            job_id=job_id,
+            refresh=refresh,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        # OPENAI_API_KEY not configured on the service.
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
