@@ -158,7 +158,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1.5">
                 Theme
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {themes.map((t) => (
                   <button
                     key={t.id}
@@ -166,14 +166,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     title={t.label}
                     aria-label={`${t.label} theme`}
                     aria-pressed={theme === t.id}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 cursor-pointer ${
-                      theme === t.id
-                        ? 'ring-2 ring-slate-400 dark:ring-slate-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'
-                        : ''
-                    }`}
+                    className="flex-1 h-11 rounded-lg flex items-center justify-center transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                   >
                     <span
-                      className="w-5 h-5 rounded-full border border-black/10 dark:border-white/10"
+                      className={`w-5 h-5 rounded-full border transition-transform ${
+                        theme === t.id
+                          ? 'border-slate-400 dark:border-slate-400 ring-2 ring-slate-400/60 dark:ring-slate-500/60 scale-110'
+                          : 'border-black/10 dark:border-white/15'
+                      }`}
                       style={{ background: t.swatch }}
                     />
                   </button>

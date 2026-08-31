@@ -14,13 +14,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
       icon: CheckSquare,
       title: 'Weekly Planner',
       description: 'Structure every day with tasks and optional time slots. Recurring tasks carry forward automatically.',
-      color: 'bg-indigo-500',
+      color: 'bg-blue-500',
     },
     {
       icon: Target,
       title: 'Goal Tracker',
       description: 'Define weekly targets and watch your progress climb with clear visual indicators.',
-      color: 'bg-violet-500',
+      color: 'bg-fuchsia-500',
     },
     {
       icon: Calendar,

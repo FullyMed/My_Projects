@@ -118,7 +118,7 @@ Five **fixed** themes: `light`, `dark`, `sky`, `gold`, `forest` (defined in `src
 
 **Custom Tailwind additions** (see `tailwind.config.js`):
 - Breakpoint `xs: 475px` — fills the gap between 320 px phones and the standard `sm: 640px`.
-- `shadow-card` and `shadow-card-hover` with indigo tint.
+- `shadow-card` and `shadow-card-hover` tinted with the live accent (`rgb(var(--accent-600) / …)`).
 - `fontFamily.sans` set to Plus Jakarta Sans.
 - `minHeight.dvh` / `height.dvh` = `100dvh`.
 
@@ -153,7 +153,7 @@ The profile name is fetched with a fire-and-forget `.then()` after setting the u
 
 ## Key behaviours to preserve
 
-- **Recurring tasks**: when advancing to the next week (`handleNextWeek` in `WeeklyPlanner`), tasks marked `recurring: 'weekly'` are created via `createPlannerTask` in Supabase for the new week before the week state changes. Do not revert to client-only UUID generation.
+- **Recurring tasks**: when advancing to the next week (`handleNextWeek` in `WeeklyPlanner`), tasks marked `recurring: 'weekly'` are created via `createPlannerTask` in Supabase for the new week before the week state changes. Do not revert to client-only UUID generation. `handleNextWeek` first fetches the target week and skips any recurring task already present (matched on `dayKey|time|title`) so navigating forward → back → forward doesn't create duplicates — keep that guard.
 - **Event delete in modal**: the Delete button inside the event edit modal must call `deleteEventHandler` (closes modal + updates state), not the raw `deleteEvent` API import.
 - **localStorage fallback**: API functions catch Supabase errors and return the cached value — don't remove the catch blocks.
 - **Dynamic Tailwind classes**: never build class strings by interpolation (e.g. `` `gap-${n}` ``). Tailwind's scanner can't detect them at build time; use full static class names in ternaries instead.

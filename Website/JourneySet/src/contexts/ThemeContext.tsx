@@ -18,18 +18,25 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeName>('light');
+/**
+ * Resolve the initial theme synchronously so the first render already matches
+ * the value the pre-paint script in index.html applied — no flash, no stomp.
+ */
+const resolveInitialTheme = (): ThemeName => {
+  if (typeof document !== 'undefined') {
+    const attr = document.documentElement.getAttribute('data-theme') ?? '';
+    if (isThemeName(attr)) return attr;
+  }
+  const stored = storage.load<string>('journeyset:v1:theme', '');
+  if (stored && isThemeName(stored)) return stored;
+  if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
+};
 
-  useEffect(() => {
-    const stored = storage.load<string>('journeyset:v1:theme', '');
-    if (stored && isThemeName(stored)) {
-      setThemeState(stored);
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setThemeState(prefersDark ? 'dark' : 'light');
-    }
-  }, []);
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [theme, setThemeState] = useState<ThemeName>(resolveInitialTheme);
 
   useEffect(() => {
     const meta = THEMES.find(t => t.id === theme) ?? THEMES[0];

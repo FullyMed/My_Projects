@@ -20,7 +20,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 |---|---|
 | Framework | React 18 + TypeScript |
 | Build | Vite 5 |
-| Styling | Tailwind CSS 3 (Plus Jakarta Sans, indigo/violet palette) |
+| Styling | Tailwind CSS 3 (Plus Jakarta Sans; CSS-variable accent — 5 themes) |
 | Backend | Supabase (PostgreSQL + Auth + Row Level Security) |
 | Routing | react-router-dom v7 |
 | Icons | lucide-react |
@@ -94,13 +94,33 @@ src/
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components)
 ├── hooks/            # useModalFocus (trap + Escape handling)
-├── constants/        # EVENT_CATEGORIES colour/label config
+├── constants/        # EVENT_CATEGORIES + THEMES (the 5 theme definitions)
 ├── data/             # Static quotes array
 ├── types/            # Shared TypeScript interfaces
 └── utils/            # storage.ts (localStorage), supabaseClient.ts
 supabase/
 └── migrations/       # SQL schema files
 ```
+
+## Themes
+
+Five fixed themes, chosen in **Settings** or from the sidebar swatch row:
+
+| Theme | Base | Accent |
+|---|---|---|
+| Light | light | indigo / violet |
+| Dark | dark | indigo / violet |
+| Sky | light | sky / blue |
+| Gold | light | amber / orange |
+| Forest | dark | emerald / green |
+
+Each theme is a light-or-dark base **plus** an accent hue. The accent is a set of
+CSS variables (`--accent-*` / `--accent2-*`) that `tailwind.config.js` maps onto the
+`indigo` / `violet` class names, so every existing `indigo-*` class follows the theme
+with no per-component work. `ThemeContext` writes `data-theme` on `<html>` and stores
+the theme name in `localStorage`; a tiny script in `index.html` applies it before
+first paint to avoid a flash. Definitions live in `src/constants/themes.ts`; the
+per-theme variable blocks are in `src/index.css`.
 
 ## Responsive design
 
