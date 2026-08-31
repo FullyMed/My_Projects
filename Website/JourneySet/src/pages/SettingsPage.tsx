@@ -120,7 +120,7 @@ const SettingsPage: React.FC = () => {
                     <span
                       className={`w-full h-10 rounded-lg border ${t.dark ? 'border-slate-700' : 'border-slate-200'}`}
                       style={{
-                        background: `linear-gradient(135deg, ${t.dark ? '#0f172a' : '#f8fafc'} 0 55%, ${t.swatch} 55% 100%)`,
+                        background: `linear-gradient(135deg, ${t.base} 0 55%, ${t.swatch} 55% 100%)`,
                       }}
                     />
                     <span className="flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">

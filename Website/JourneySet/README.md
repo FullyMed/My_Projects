@@ -111,7 +111,7 @@ Five fixed themes, chosen in **Settings** or from the sidebar swatch row:
 | Light | light | indigo / violet |
 | Dark | dark | indigo / violet |
 | Sky | light | sky / blue |
-| Gold | light | amber / orange |
+| Gold | light | yellow-gold |
 | Forest | dark | emerald / green |
 
 Each theme is a light-or-dark base **plus** an accent hue. The accent is a set of

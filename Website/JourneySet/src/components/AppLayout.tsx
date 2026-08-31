@@ -172,9 +172,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                       className={`w-5 h-5 rounded-full border transition-transform ${
                         theme === t.id
                           ? 'border-slate-400 dark:border-slate-400 ring-2 ring-slate-400/60 dark:ring-slate-500/60 scale-110'
-                          : 'border-black/10 dark:border-white/15'
+                          : 'border-black/15 dark:border-white/20'
                       }`}
-                      style={{ background: t.swatch }}
+                      style={{
+                        background: `linear-gradient(135deg, ${t.base} 0 50%, ${t.swatch} 50% 100%)`,
+                      }}
                     />
                   </button>
                 ))}

@@ -68,30 +68,31 @@
   --accent-contrast: 255 255 255;
 }
 
-/* Gold — amber + orange, near-black text on accent for contrast */
+/* Gold — a true yellow-gold (no orange), near-black text on filled accent.
+   accent2 mirrors accent so the gradient stays in gold territory. */
 [data-theme='gold'] {
-  --accent-50: 255 251 235;
-  --accent-100: 254 243 199;
-  --accent-200: 253 230 138;
-  --accent-300: 252 211 77;
-  --accent-400: 251 191 36;
-  --accent-500: 245 158 11;
-  --accent-600: 217 119 6;
-  --accent-700: 180 83 9;
-  --accent-800: 146 64 14;
-  --accent-900: 120 53 15;
-  --accent-950: 69 26 3;
-  --accent2-50: 255 247 237;
-  --accent2-100: 255 237 213;
-  --accent2-200: 254 215 170;
-  --accent2-300: 253 186 116;
-  --accent2-400: 251 146 60;
-  --accent2-500: 249 115 22;
-  --accent2-600: 234 88 12;
-  --accent2-700: 194 65 12;
-  --accent2-800: 154 52 18;
-  --accent2-900: 124 45 18;
-  --accent2-950: 67 20 7;
+  --accent-50: 254 252 232;
+  --accent-100: 254 249 195;
+  --accent-200: 254 240 138;
+  --accent-300: 253 224 71;
+  --accent-400: 250 204 21;
+  --accent-500: 234 179 8;
+  --accent-600: 202 138 4;
+  --accent-700: 161 98 7;
+  --accent-800: 133 77 14;
+  --accent-900: 113 63 18;
+  --accent-950: 66 32 6;
+  --accent2-50: 254 252 232;
+  --accent2-100: 254 249 195;
+  --accent2-200: 254 240 138;
+  --accent2-300: 253 224 71;
+  --accent2-400: 250 204 21;
+  --accent2-500: 234 179 8;
+  --accent2-600: 202 138 4;
+  --accent2-700: 161 98 7;
+  --accent2-800: 133 77 14;
+  --accent2-900: 113 63 18;
+  --accent2-950: 66 32 6;
   --accent-contrast: 41 26 5;
 }
 
