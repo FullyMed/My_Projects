@@ -6,7 +6,7 @@
       - `id` (uuid, primary key)
       - `user_id` (uuid, references auth.users)
       - `title` (text)
-      - `day_key` (text, format: YYYY-MM-DD)
+      - `day_key` (text, weekday name: Monday–Sunday)
       - `week_key` (text, format: YYYY-Www)
       - `time` (text, optional HH:MM)
       - `completed` (boolean)

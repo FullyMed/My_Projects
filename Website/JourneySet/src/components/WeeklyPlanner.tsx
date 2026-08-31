@@ -136,18 +136,30 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       const recurringTasks = tasks.filter(
         task => task.recurring === 'weekly' && task.weekKey === currentWeekKey
       );
-      await Promise.all(
-        recurringTasks.map(task =>
-          createPlannerTask(user.id, {
-            title: task.title,
-            dayKey: task.dayKey,
-            weekKey: nextWeekKey,
-            time: task.time,
-            completed: false,
-            recurring: 'weekly',
-          })
-        )
-      );
+
+      if (recurringTasks.length > 0) {
+        // Skip any recurring task that already exists in the target week, so
+        // navigating forward → back → forward doesn't create duplicates.
+        const existing = await getPlannerTasks(user.id, nextWeekKey);
+        const seen = new Set(
+          existing.map(t => `${t.dayKey}|${t.time ?? ''}|${t.title}`)
+        );
+
+        await Promise.all(
+          recurringTasks
+            .filter(task => !seen.has(`${task.dayKey}|${task.time ?? ''}|${task.title}`))
+            .map(task =>
+              createPlannerTask(user.id, {
+                title: task.title,
+                dayKey: task.dayKey,
+                weekKey: nextWeekKey,
+                time: task.time,
+                completed: false,
+                recurring: 'weekly',
+              })
+            )
+        );
+      }
     }
 
     setCurrentWeek(nextWeek);
@@ -245,7 +257,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             onClick={() => setFilter(filterOption)}
             className={`inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg text-xs font-medium transition-colors capitalize cursor-pointer whitespace-nowrap flex-shrink-0 ${
               filter === filterOption
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-indigo-600 text-on-accent'
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700'
             }`}
           >
@@ -296,7 +308,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             <button
               onClick={addTask}
               disabled={!newTask.trim() || !selectedDay}
-              className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+              className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
               <Plus className="h-5 w-5" />
             </button>

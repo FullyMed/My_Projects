@@ -57,7 +57,7 @@ VITE_SUPABASE_ANON_KEY=...
 | Context | Exports | Persisted to |
 |---|---|---|
 | `AuthContext` | `user`, `login`, `register`, `logout`, `isLoading` | Supabase session |
-| `ThemeContext` | `isDark`, `toggleTheme` | `localStorage` (`journeyset:v1:theme`) |
+| `ThemeContext` | `theme`, `setTheme`, `toggleTheme`, `isDark`, `themes` | `localStorage` (`journeyset:v1:theme`) |
 | `CompactModeContext` | `isCompact`, `toggleCompact` | `localStorage` (`journeyset_compact_mode`) |
 
 ### Data layer (`src/api/`)
@@ -90,7 +90,7 @@ All four tables have **Row Level Security** enabled. Every policy enforces `auth
 
 ## Design system
 
-The UI uses an **indigo/violet Enterprise SaaS** palette.
+The UI uses an **indigo/violet Enterprise SaaS** palette by default.
 
 | Token | Value |
 |---|---|
@@ -102,8 +102,19 @@ The UI uses an **indigo/violet Enterprise SaaS** palette.
 | Border | `slate-200` / dark: `slate-800` |
 | Success | `emerald-500/600` |
 | Destructive | `rose-500/600` |
-| Card shadow | `shadow-card` (`0 2px 12px rgba(79,70,229,0.07)`) |
+| Card shadow | `shadow-card` (`0 2px 12px rgb(var(--accent-600)/0.07)`) |
 | Primary button | `bg-gradient-to-r from-indigo-600 to-violet-600` |
+
+### Themes
+
+Five **fixed** themes: `light`, `dark`, `sky`, `gold`, `forest` (defined in `src/constants/themes.ts`).
+
+- Each theme = a base (light or dark) **+** an accent hue. The base is still the `.dark` class (`dark` and `forest` set it); the accent is a set of CSS variables.
+- `ThemeContext` writes `data-theme="<name>"` on `<html>` and persists the theme **name** to `localStorage` (`journeyset:v1:theme`; the old `'light'`/`'dark'` values are still valid). `index.html` has a pre-paint script that applies the saved theme before React mounts to avoid a flash.
+- `tailwind.config.js` remaps the `indigo` scale → `--accent-*` and `violet` → `--accent2-*` (space-separated R G B triplets, so `/60` opacity modifiers still work). `src/index.css` holds one `[data-theme=…]` block per non-default theme. **Never hardcode a hex accent** — use `indigo-*` / `violet-*` classes and they follow the theme.
+- Text/icons that sit on an accent-filled surface use **`text-on-accent`** (not `text-white`) — it is white for every theme except Gold, where it is near-black for contrast.
+- Adding a theme: add an entry to `THEMES`, add a `[data-theme='…']` block in `index.css`, add its name to the allow-list in `index.html`. Keep filled-accent (`--accent-600`) at ≥4.5:1 against `--accent-contrast`.
+- The picker lives in `SettingsPage` (full) and the `AppLayout` sidebar (swatch row / cycle button when compact). The `PrintView` `@media print` CSS is intentionally still hardcoded indigo — printouts are always light.
 
 **Custom Tailwind additions** (see `tailwind.config.js`):
 - Breakpoint `xs: 475px` — fills the gap between 320 px phones and the standard `sm: 640px`.

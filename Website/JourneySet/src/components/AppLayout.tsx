@@ -6,8 +6,7 @@ import {
   CheckSquare,
   User,
   LogOut,
-  Moon,
-  Sun,
+  Palette,
   Compass,
   Menu,
   X,
@@ -27,9 +26,15 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { theme, setTheme, themes } = useTheme();
   const { isCompact, toggleCompact } = useCompactMode();
   const location = useLocation();
+
+  const currentTheme = themes.find((t) => t.id === theme);
+  const cycleTheme = () => {
+    const idx = themes.findIndex((t) => t.id === theme);
+    setTheme(themes[(idx + 1) % themes.length].id);
+  };
 
   const navigation = [
     { path: '/app/planner', name: 'Weekly Planner', icon: CheckSquare },
@@ -66,7 +71,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             className={`flex items-center hover:opacity-80 transition-opacity ${isCompact ? '' : 'space-x-2.5'}`}
           >
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm flex-shrink-0">
-              <Compass className="h-4 w-4 text-white" />
+              <Compass className="h-4 w-4 text-on-accent" />
             </div>
             {!isCompact && (
               <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">JourneySet</span>
@@ -86,12 +91,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className={`border-b border-slate-100 dark:border-slate-800 ${isCompact ? 'px-3 py-3 flex justify-center' : 'px-5 py-4'}`}>
           {isCompact ? (
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
+              <User className="h-4 w-4 text-on-accent" />
             </div>
           ) : (
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
-                <User className="h-4 w-4 text-white" />
+                <User className="h-4 w-4 text-on-accent" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{user?.name}</p>
@@ -139,20 +144,43 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
         {/* Bottom Actions */}
         <div className={`border-t border-slate-100 dark:border-slate-800 pb-safe ${isCompact ? 'px-2 py-2 space-y-0.5' : 'px-3 py-2 space-y-0.5'}`}>
-          <button
-            onClick={toggleTheme}
-            title={`Toggle ${isDark ? 'light' : 'dark'} mode`}
-            className={`w-full flex items-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer min-h-[44px] ${
-              isCompact ? 'px-2 justify-center' : 'px-3 space-x-3'
-            }`}
-          >
-            {isDark ? (
-              <Sun className="h-4 w-4 text-amber-500 flex-shrink-0" />
-            ) : (
-              <Moon className="h-4 w-4 flex-shrink-0" />
-            )}
-            {!isCompact && <span className="text-sm font-medium">{isDark ? 'Light mode' : 'Dark mode'}</span>}
-          </button>
+          {isCompact ? (
+            <button
+              onClick={cycleTheme}
+              title={`Theme: ${currentTheme?.label ?? ''}`}
+              aria-label="Change theme"
+              className="w-full flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer min-h-[44px] px-2"
+            >
+              <Palette className="h-4 w-4 flex-shrink-0" />
+            </button>
+          ) : (
+            <div className="px-3 py-1.5">
+              <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1.5">
+                Theme
+              </p>
+              <div className="flex items-center gap-1.5">
+                {themes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTheme(t.id)}
+                    title={t.label}
+                    aria-label={`${t.label} theme`}
+                    aria-pressed={theme === t.id}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-105 cursor-pointer ${
+                      theme === t.id
+                        ? 'ring-2 ring-slate-400 dark:ring-slate-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'
+                        : ''
+                    }`}
+                  >
+                    <span
+                      className="w-5 h-5 rounded-full border border-black/10 dark:border-white/10"
+                      style={{ background: t.swatch }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             onClick={toggleCompact}

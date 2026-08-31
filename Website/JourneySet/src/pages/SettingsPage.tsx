@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, LogOut, Moon, Sun, Check, Clock, Maximize2, Minimize2, User, Wifi } from 'lucide-react';
+import { Trash2, LogOut, Palette, Check, Clock, Maximize2, Minimize2, User, Wifi } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { theme, setTheme, themes } = useTheme();
   const { isCompact, toggleCompact } = useCompactMode();
   const [showResetModal, setShowResetModal] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -97,24 +97,39 @@ const SettingsPage: React.FC = () => {
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {/* Theme */}
-            <div className="px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {isDark ? (
-                  <Sun className="h-4 w-4 text-amber-500" />
-                ) : (
-                  <Moon className="h-4 w-4 text-slate-500" />
-                )}
+            <div className="px-6 py-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Palette className="h-4 w-4 text-indigo-500" />
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{isDark ? 'Dark mode' : 'Light mode'}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Switch colour theme</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Theme</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Choose your colour theme</p>
                 </div>
               </div>
-              <button
-                onClick={toggleTheme}
-                className="px-4 min-h-[44px] text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
-              >
-                Toggle
-              </button>
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2.5">
+                {themes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTheme(t.id)}
+                    aria-pressed={theme === t.id}
+                    className={`flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors cursor-pointer ${
+                      theme === t.id
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                    }`}
+                  >
+                    <span
+                      className={`w-full h-10 rounded-lg border ${t.dark ? 'border-slate-700' : 'border-slate-200'}`}
+                      style={{
+                        background: `linear-gradient(135deg, ${t.dark ? '#0f172a' : '#f8fafc'} 0 55%, ${t.swatch} 55% 100%)`,
+                      }}
+                    />
+                    <span className="flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">
+                      {theme === t.id && <Check className="h-3 w-3 text-indigo-500" />}
+                      {t.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Compact */}

@@ -2,6 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────────
+   Theme accent ramps.
+
+   Five fixed themes: light · dark · sky · gold · forest.
+   `data-theme` on <html> selects the accent; the light/dark base
+   (page background, surfaces, text) is still the `.dark` class,
+   which ThemeContext toggles for the dark-based themes (dark, forest).
+
+   Values are space-separated R G B triplets so Tailwind's
+   `<alpha-value>` / `bg-indigo-950/60` opacity modifiers keep working.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  /* Accent — indigo (Light + Dark) */
+  --accent-50: 238 242 255;
+  --accent-100: 224 231 255;
+  --accent-200: 199 210 254;
+  --accent-300: 165 180 252;
+  --accent-400: 129 140 248;
+  --accent-500: 99 102 241;
+  --accent-600: 79 70 229;
+  --accent-700: 67 56 202;
+  --accent-800: 55 48 163;
+  --accent-900: 49 46 129;
+  --accent-950: 30 27 75;
+  /* Accent 2 — violet (gradient partner) */
+  --accent2-50: 245 243 255;
+  --accent2-100: 237 233 254;
+  --accent2-200: 221 214 254;
+  --accent2-300: 196 181 253;
+  --accent2-400: 167 139 250;
+  --accent2-500: 139 92 246;
+  --accent2-600: 124 58 237;
+  --accent2-700: 109 40 217;
+  --accent2-800: 91 33 182;
+  --accent2-900: 76 29 149;
+  --accent2-950: 46 16 101;
+  --accent-contrast: 255 255 255;
+}
+
+/* Sky — sky + blue, white text on accent */
+[data-theme='sky'] {
+  --accent-50: 240 249 255;
+  --accent-100: 224 242 254;
+  --accent-200: 186 230 253;
+  --accent-300: 125 211 252;
+  --accent-400: 56 189 248;
+  --accent-500: 14 165 233;
+  --accent-600: 2 132 199;
+  --accent-700: 3 105 161;
+  --accent-800: 7 89 133;
+  --accent-900: 12 74 110;
+  --accent-950: 8 47 73;
+  --accent2-50: 239 246 255;
+  --accent2-100: 219 234 254;
+  --accent2-200: 191 219 254;
+  --accent2-300: 147 197 253;
+  --accent2-400: 96 165 250;
+  --accent2-500: 59 130 246;
+  --accent2-600: 37 99 235;
+  --accent2-700: 29 78 216;
+  --accent2-800: 30 64 175;
+  --accent2-900: 30 58 138;
+  --accent2-950: 23 37 84;
+  --accent-contrast: 255 255 255;
+}
+
+/* Gold — amber + orange, near-black text on accent for contrast */
+[data-theme='gold'] {
+  --accent-50: 255 251 235;
+  --accent-100: 254 243 199;
+  --accent-200: 253 230 138;
+  --accent-300: 252 211 77;
+  --accent-400: 251 191 36;
+  --accent-500: 245 158 11;
+  --accent-600: 217 119 6;
+  --accent-700: 180 83 9;
+  --accent-800: 146 64 14;
+  --accent-900: 120 53 15;
+  --accent-950: 69 26 3;
+  --accent2-50: 255 247 237;
+  --accent2-100: 255 237 213;
+  --accent2-200: 254 215 170;
+  --accent2-300: 253 186 116;
+  --accent2-400: 251 146 60;
+  --accent2-500: 249 115 22;
+  --accent2-600: 234 88 12;
+  --accent2-700: 194 65 12;
+  --accent2-800: 154 52 18;
+  --accent2-900: 124 45 18;
+  --accent2-950: 67 20 7;
+  --accent-contrast: 41 26 5;
+}
+
+/* Forest — emerald + green, ramp shifted one stop darker from 600 up
+   so white text on a filled accent button still clears WCAG AA. */
+[data-theme='forest'] {
+  --accent-50: 236 253 245;
+  --accent-100: 209 250 229;
+  --accent-200: 167 243 208;
+  --accent-300: 110 231 183;
+  --accent-400: 52 211 153;
+  --accent-500: 16 185 129;
+  --accent-600: 4 120 87;
+  --accent-700: 6 95 70;
+  --accent-800: 6 78 59;
+  --accent-900: 2 44 34;
+  --accent-950: 1 30 22;
+  --accent2-50: 240 253 244;
+  --accent2-100: 220 252 231;
+  --accent2-200: 187 247 208;
+  --accent2-300: 134 239 172;
+  --accent2-400: 74 222 128;
+  --accent2-500: 34 197 94;
+  --accent2-600: 21 128 61;
+  --accent2-700: 22 101 52;
+  --accent2-800: 20 83 45;
+  --accent2-900: 5 46 22;
+  --accent2-950: 3 30 14;
+  --accent-contrast: 255 255 255;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;

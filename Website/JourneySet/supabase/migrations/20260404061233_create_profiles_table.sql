@@ -3,8 +3,9 @@
 
   1. New Tables
     - `profiles`
-      - `id` (uuid, primary key, references auth.users.id)
-      - `email` (text, from auth.users)
+      - `id` (uuid, primary key)
+      - `user_id` (uuid, unique, references auth.users.id, on delete cascade)
+      - `email` (text)
       - `name` (text)
       - `created_at` (timestamp)
       - `updated_at` (timestamp)

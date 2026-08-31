@@ -287,7 +287,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
           <button
             onClick={() => window.print()}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
+            className="inline-flex items-center gap-2 px-4 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
           >
             <Printer className="h-4 w-4" />
             <span className="hidden xs:inline">Print</span>

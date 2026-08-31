@@ -42,8 +42,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
     },
     {
       icon: isDark ? Sun : Moon,
-      title: 'Dark & Light Modes',
-      description: 'Seamlessly switch between light and dark themes — your preference is always remembered.',
+      title: 'Five Colour Themes',
+      description: 'Light, Dark, Sky, Gold and Forest — pick the look you like; your choice is always remembered.',
       color: 'bg-rose-500',
     },
   ];
@@ -55,7 +55,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
   ];
 
   return (
-    <div className="min-dvh bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       {/* ── Navigation ─────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 border-b border-slate-200/70 dark:border-slate-800/70 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md pt-safe">
         <div className="max-w-7xl mx-auto pl-safe pr-safe">
@@ -63,7 +63,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
             {/* Logo */}
             <div className="flex items-center space-x-2 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm flex-shrink-0">
-                <Compass className="h-4 w-4 text-white" />
+                <Compass className="h-4 w-4 text-on-accent" />
               </div>
               <span className="text-lg xs:text-xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
                 JourneySet
@@ -90,7 +90,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
 
               <button
                 onClick={() => onShowAuth('register')}
-                className="inline-flex items-center justify-center px-4 xs:px-5 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg transition-all duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
+                className="inline-flex items-center justify-center px-4 xs:px-5 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-lg transition-all duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
               >
                 <span className="xs:hidden">Join</span>
                 <span className="hidden xs:inline">Get started</span>
@@ -131,7 +131,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
           <div className="flex flex-col xs:flex-row gap-3 xs:gap-4 justify-center mb-12 xs:mb-16 px-4 xs:px-0">
             <button
               onClick={() => onShowAuth('register')}
-              className="group inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 xs:px-8 min-h-[52px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-semibold text-base transition-all duration-200 shadow-lg shadow-indigo-500/30 cursor-pointer"
+              className="group inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 xs:px-8 min-h-[52px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-base transition-all duration-200 shadow-lg shadow-indigo-500/30 cursor-pointer"
             >
               Start for free
               <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-150" />
@@ -189,14 +189,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
 
       {/* ── CTA Banner ─────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 xs:px-6 pb-16 xs:pb-24">
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl xs:rounded-3xl p-8 xs:p-12 md:p-16 text-white text-center">
+        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl xs:rounded-3xl p-8 xs:p-12 md:p-16 text-on-accent text-center">
           <div className="absolute top-0 right-0 w-60 xs:w-80 h-60 xs:h-80 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-60 xs:w-80 h-60 xs:h-80 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
           <Globe className="h-8 w-8 xs:h-10 xs:w-10 mx-auto mb-4 xs:mb-6 opacity-75" />
           <h2 className="text-2xl xs:text-3xl md:text-4xl font-bold mb-3 xs:mb-4 tracking-tight">
             Ready to get organised?
           </h2>
-          <p className="text-sm xs:text-base text-white/80 mb-6 xs:mb-8 max-w-xl mx-auto">
+          <p className="text-sm xs:text-base text-on-accent/80 mb-6 xs:mb-8 max-w-xl mx-auto">
             Join thousands building better weekly habits with JourneySet.
           </p>
           <button
@@ -214,7 +214,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
         <div className="max-w-7xl mx-auto px-4 xs:px-6 py-6 xs:py-8 flex flex-col xs:flex-row justify-between items-center gap-3">
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Compass className="h-3.5 w-3.5 text-white" />
+              <Compass className="h-3.5 w-3.5 text-on-accent" />
             </div>
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">JourneySet</span>
           </div>

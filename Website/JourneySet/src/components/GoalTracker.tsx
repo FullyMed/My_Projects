@@ -193,7 +193,7 @@ const GoalTracker: React.FC = () => {
             <button
               onClick={addGoal}
               disabled={!newGoal.title.trim() || !newGoal.target}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
               <Plus className="h-4 w-4" />
               Add goal

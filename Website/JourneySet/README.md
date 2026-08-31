@@ -10,7 +10,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Goal Tracker** — set numeric targets with any unit, track progress with gradient bars, lock or allow exceeding the target
 - **Event Calendar** — full monthly calendar with category colour-coding and time-conflict detection
 - **Export & Print** — generate print-ready views of the planner, goals, or calendar
-- **Dark / Light mode** — persisted per-device, respects `prefers-color-scheme` on first visit
+- **Five themes** — Light, Dark, Sky, Gold, Forest (each a light/dark base + accent); persisted per-device, respects `prefers-color-scheme` on first visit
 - **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
 - **Offline-resilient** — all reads fall back to a localStorage cache when Supabase is unreachable
 
@@ -121,7 +121,7 @@ On mobile, modals render as **bottom sheets** with a drag handle. All interactiv
 
 ```
 profiles          — user display name, linked to auth.users
-planner_tasks     — day_key (YYYY-MM-DD), week_key (YYYY-Www), recurring
+planner_tasks     — day_key (weekday name: Monday–Sunday), week_key (YYYY-Www), recurring
 goals             — target_value, current_value, unit, allow_exceed_target
 events            — date_iso (YYYY-MM-DD), time (HH:MM), category, title
 ```
