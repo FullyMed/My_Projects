@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:taiwan_fare_finder/config/tdx_credentials.dart';
+import 'package:taiwan_fare_finder/config/app_config.dart';
 
 class TdxAuthService {
   static const _tokenEndpoint = 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token';
@@ -11,7 +11,17 @@ class TdxAuthService {
   DateTime? _expiresAt;
 
   /// Returns a valid Bearer token, fetching a new one only when expired.
+  ///
+  /// Direct mode only — throws when no credentials were provided at build time,
+  /// so the caller falls back to cache then mock. Never called in proxy mode.
   Future<String> getToken() async {
+    if (!AppConfig.hasDirectCredentials) {
+      throw StateError(
+          'TdxAuthService: no TDX credentials. Pass --dart-define TDX_CLIENT_ID '
+          '/ TDX_CLIENT_SECRET for direct mode, or set TFF_PROXY_BASE_URL to use '
+          'the proxy.');
+    }
+
     final now = DateTime.now();
     if (_cachedToken != null && _expiresAt != null && now.isBefore(_expiresAt!)) {
       return _cachedToken!;
@@ -22,8 +32,8 @@ class TdxAuthService {
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: {
         'grant_type': 'client_credentials',
-        'client_id': tdxClientId,
-        'client_secret': tdxClientSecret,
+        'client_id': AppConfig.tdxClientId,
+        'client_secret': AppConfig.tdxClientSecret,
       },
     );
 

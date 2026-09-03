@@ -27,10 +27,11 @@ suffix):
 flutter run --dart-define=TFF_PROXY_BASE_URL=https://tff-tdx-proxy.<subdomain>.workers.dev/api/basic/v2
 ```
 
-Same `--dart-define` for `flutter build apk` / `build web`. When it's set the app
-never touches `lib/config/tdx_credentials.dart`; when it's absent the app falls
-back to calling TDX directly with the local credentials (fine for dev, not for
-release — and blocked entirely on web builds).
+Same `--dart-define` for `flutter build apk` / `build web` (or put it in a
+gitignored `tdx.env.json` and use `--dart-define-from-file=tdx.env.json`). When
+`TFF_PROXY_BASE_URL` is set the app sends no credentials at all; when it's absent
+the app only calls TDX directly if `TDX_CLIENT_ID` / `TDX_CLIENT_SECRET` defines
+were provided (dev only — blocked entirely on web builds).
 
 ## Local development
 

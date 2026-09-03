@@ -54,24 +54,38 @@ flutter run
 
 ### TDX credentials
 
-Live HSR and TRA fares require TDX API credentials. There are two ways to supply them.
+Live HSR and TRA fares require TDX API credentials. No secret is ever stored in
+source — everything comes from `--dart-define` at build time. Put your values in
+a gitignored `tdx.env.json` at the project root:
 
-**Recommended — the proxy (no secret in the app).** Deploy the Cloudflare Worker in [`proxy/`](proxy/README.md), which holds the TDX secret server-side, then point the app at it:
-
-```bash
-flutter run --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2
+```json
+{
+  "TFF_PROXY_BASE_URL": "https://<your-worker>.workers.dev/api/basic/v2"
+}
 ```
 
-Use the same `--dart-define` for every `flutter build`. This is the only supported way to ship a release: an embedded secret is extractable from the binary, and **web builds refuse to make a direct TDX call**.
-
-**Local development — direct credentials.** For quick local work without deploying the proxy:
-
 ```bash
-cp lib/config/tdx_credentials.dart.example lib/config/tdx_credentials.dart
-# edit tdx_credentials.dart with your client_id and client_secret
+flutter run --dart-define-from-file=tdx.env.json
 ```
 
-`lib/config/tdx_credentials.dart` is gitignored — never commit real credentials. With neither a proxy URL nor credentials, the app uses mock data for all modes.
+**Recommended — the proxy (no secret in the app).** Deploy the Cloudflare Worker
+in [`proxy/`](proxy/README.md); it holds the TDX secret server-side. Then only
+`TFF_PROXY_BASE_URL` is needed, as above. This is the only supported way to ship
+a release — an embedded secret is a plaintext string in the binary (R8 and Dart
+obfuscation do not hide string constants), and **web builds refuse a direct TDX
+call**.
+
+**Local development without the proxy.** Add the raw credentials to the same
+file instead:
+
+```json
+{
+  "TDX_CLIENT_ID": "your-client-id",
+  "TDX_CLIENT_SECRET": "your-client-secret"
+}
+```
+
+With neither a proxy URL nor credentials, the app uses mock data for all modes.
 
 See [`SECURITY.md`](SECURITY.md) for the full threat model and hardening notes.
 
@@ -131,12 +145,12 @@ dart format .         # format all Dart files
 flutter test          # run tests
 flutter gen-l10n      # regenerate ARB stubs (rarely needed)
 
-# Release builds — always pass the proxy URL, and obfuscate the Dart code:
+# Release builds — pass the proxy config file, and obfuscate the Dart code:
 flutter build apk --release \
-  --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2 \
+  --dart-define-from-file=tdx.env.json \
   --obfuscate --split-debug-info=build/symbols
 flutter build ios --release \
-  --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2 \
+  --dart-define-from-file=tdx.env.json \
   --obfuscate --split-debug-info=build/symbols
 ```
 

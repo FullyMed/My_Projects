@@ -67,7 +67,8 @@ class TdxFareService {
 
   String _requireStationId(String? id, {required String label}) {
     if (id == null || !_stationIdPattern.hasMatch(id)) {
-      throw ArgumentError('TdxFareService: invalid or missing $label station id');
+      throw ArgumentError(
+          'TdxFareService: invalid or missing $label station id');
     }
     return id;
   }
@@ -95,8 +96,10 @@ class TdxFareService {
       duration = await _fetchHsrDuration(
           headers: headers, originId: originId, destId: destId);
     } catch (e) {
-      debugPrint('TdxFareService: HSR duration fetch failed, using estimate: $e');
-      duration = _durationFallback(mode: TransportMode.hsr, distanceKm: distanceKm);
+      debugPrint(
+          'TdxFareService: HSR duration fetch failed, using estimate: $e');
+      duration =
+          _durationFallback(mode: TransportMode.hsr, distanceKm: distanceKm);
     }
 
     final now = DateTime.now();
@@ -128,7 +131,8 @@ class TdxFareService {
 
     final resp = await http.get(uri, headers: headers);
     if (resp.statusCode != 200) {
-      throw Exception('THSR ODFare HTTP ${resp.statusCode} for $originId→$destId');
+      throw Exception(
+          'THSR ODFare HTTP ${resp.statusCode} for $originId→$destId');
     }
 
     final list = _asJsonList(resp.body, context: 'THSR ODFare');
@@ -138,7 +142,8 @@ class TdxFareService {
 
     final first = list.first;
     if (first is! Map<String, dynamic>) {
-      throw Exception('THSR ODFare: unexpected row shape for $originId→$destId');
+      throw Exception(
+          'THSR ODFare: unexpected row shape for $originId→$destId');
     }
     final rawFares = first['Fares'];
     if (rawFares is! List) {
@@ -149,12 +154,14 @@ class TdxFareService {
     // Standard adult seat: TicketType=1 (full price), FareClass=1 (standard),
     // CabinClass=1 (standard car).
     final adultEntry = fares.firstWhere(
-      (f) => f['TicketType'] == 1 && f['FareClass'] == 1 && f['CabinClass'] == 1,
+      (f) =>
+          f['TicketType'] == 1 && f['FareClass'] == 1 && f['CabinClass'] == 1,
       orElse: () =>
           throw Exception('THSR ODFare: adult standard fare entry not found'),
     );
 
-    final adult = _asPositiveInt(adultEntry['Price'], context: 'THSR adult Price');
+    final adult =
+        _asPositiveInt(adultEntry['Price'], context: 'THSR adult Price');
     return FareBreakdown(
       adult: adult,
       student: _pct(adult, 0.85),
@@ -292,7 +299,8 @@ class TdxFareService {
 
     final resp = await http.get(uri, headers: headers);
     if (resp.statusCode != 200) {
-      throw Exception('TRA ODFare HTTP ${resp.statusCode} for $originId→$destId');
+      throw Exception(
+          'TRA ODFare HTTP ${resp.statusCode} for $originId→$destId');
     }
 
     final list = _asJsonList(resp.body, context: 'TRA ODFare');
@@ -332,7 +340,8 @@ class TdxFareService {
           'TRA ODFare: adult Ziqiang fare (成自) not found for $originId→$destId');
     }
     final adultFare = adult;
-    final childFare = (child != null && child > 0) ? child : _pct(adultFare, 0.50);
+    final childFare =
+        (child != null && child > 0) ? child : _pct(adultFare, 0.50);
 
     return FareBreakdown(
       adult: adultFare,
@@ -372,6 +381,7 @@ class TdxFareService {
     return v < 10 ? 10 : v;
   }
 
-  int _durationFallback({required TransportMode mode, required int distanceKm}) =>
+  int _durationFallback(
+          {required TransportMode mode, required int distanceKm}) =>
       estimateTravelMinutes(mode: mode, distanceKm: distanceKm);
 }

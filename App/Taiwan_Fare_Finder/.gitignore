@@ -1,3 +1,6 @@
+# TDX secrets — supplied at build time via --dart-define-from-file
+tdx.env.json
+*.env.json
 lib/config/tdx_credentials.dart
 
 # Secrets / env

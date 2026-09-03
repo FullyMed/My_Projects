@@ -71,7 +71,7 @@ Error and snack keys (e.g. `'offline_no_cache'`, `'search_failed'`, `'showing_ca
 Two ways in, chosen by `AppConfig.tdxProxyBaseUrl` (`lib/config/app_config.dart`, from `--dart-define=TFF_PROXY_BASE_URL`):
 
 - **Proxy mode (set)** — `TdxFareService` prefixes every request with the proxy base URL and sends **no** `Authorization` header. The Cloudflare Worker in `proxy/` holds the secret and injects the token. This is the only supported release configuration. Web builds hard-fail a direct call, so the secret can never ship in `main.dart.js`.
-- **Direct mode (unset)** — `TdxAuthService` (`lib/services/tdx_auth_service.dart`) runs the OAuth2 `client_credentials` flow with `tdxClientId` / `tdxClientSecret` from the gitignored `lib/config/tdx_credentials.dart`, caching the token in memory (refreshed 60 s before expiry). Local development only.
+- **Direct mode (unset)** — `TdxAuthService` (`lib/services/tdx_auth_service.dart`) runs the OAuth2 `client_credentials` flow with `AppConfig.tdxClientId` / `tdxClientSecret` (from `--dart-define` `TDX_CLIENT_ID` / `TDX_CLIENT_SECRET`, typically via a gitignored `tdx.env.json`), caching the token in memory (refreshed 60 s before expiry). No secret is stored in source. `getToken()` throws when credentials are absent, so the caller falls back to cache then mock. Local development only.
 
 Station IDs are validated against `^[0-9A-Za-z]{2,10}$` before entering the OData `$filter`. TDX responses are parsed defensively; any shape mismatch throws and the caller falls back to cache, then mock.
 

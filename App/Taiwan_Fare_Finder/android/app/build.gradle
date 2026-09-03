@@ -6,11 +6,27 @@ plugins {
 }
 
 
+// Release signing is used only when android/key.properties exists AND is fully
+// filled in AND points at a keystore file that actually exists. Otherwise the
+// release build falls back to debug signing so `flutter run --release` and
+// local test builds keep working. A Play Store build REQUIRES a real keystore.
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
-def hasReleaseKeystore = keystorePropertiesFile.exists()
-if (hasReleaseKeystore) {
+def useReleaseSigning = false
+if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    def storeFilePath = keystoreProperties['storeFile']
+    useReleaseSigning =
+        storeFilePath != null && !storeFilePath.trim().isEmpty() &&
+        file(storeFilePath).exists() &&
+        keystoreProperties['storePassword'] && keystoreProperties['storePassword'] != 'CHANGE_ME' &&
+        keystoreProperties['keyPassword'] && keystoreProperties['keyPassword'] != 'CHANGE_ME' &&
+        keystoreProperties['keyAlias']
+    if (!useReleaseSigning) {
+        logger.warn("WARNING: android/key.properties is present but incomplete " +
+            "(placeholder values, or keystore file not found). The release build " +
+            "will be DEBUG-SIGNED and is not suitable for distribution.")
+    }
 }
 
 android {
@@ -28,11 +44,11 @@ android {
     }
 
     signingConfigs {
-        if (hasReleaseKeystore) {
+        if (useReleaseSigning) {
             release {
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
-                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
             }
         }
@@ -48,10 +64,7 @@ android {
 
     buildTypes {
         release {
-            // Use the real upload key when android/key.properties exists,
-            // otherwise fall back to debug signing so `flutter run --release`
-            // still works locally. A store build REQUIRES key.properties.
-            signingConfig = hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
+            signingConfig = useReleaseSigning ? signingConfigs.release : signingConfigs.debug
 
             // Strip and obfuscate Java/Kotlin with R8, and drop unused resources.
             // Dart-side obfuscation is separate — build with:
