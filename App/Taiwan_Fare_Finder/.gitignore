@@ -1,5 +1,19 @@
 lib/config/tdx_credentials.dart
 
+# Secrets / env
+.env
+*.env
+proxy/.dev.vars
+
+# Android signing — never commit the keystore or its passwords
+android/key.properties
+*.jks
+*.keystore
+
+# Node / Wrangler (TDX proxy)
+proxy/node_modules/
+proxy/.wrangler/
+
 # Flutter build outputs
 /build/
 

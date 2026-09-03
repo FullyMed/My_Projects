@@ -1,0 +1,14 @@
+name = "tff-tdx-proxy"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# Public, non-secret config. CORS: fare data is public so "*" is fine; tighten
+# to your web app's origin(s) if you prefer, comma-separated.
+[vars]
+ALLOWED_ORIGINS = "*"
+
+# Secrets are NOT set here. Run once after `wrangler login`:
+#   wrangler secret put TDX_CLIENT_ID
+#   wrangler secret put TDX_CLIENT_SECRET
+#
+# Local dev reads them from proxy/.dev.vars (gitignored).

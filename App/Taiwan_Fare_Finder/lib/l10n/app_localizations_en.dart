@@ -185,13 +185,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataModeBody =>
-      'Mock data is stable and offline-friendly. API mode will be added in a future update.';
+      'Mock data is stable and offline-friendly. API mode fetches real HSR and TRA fares; other modes use mock data.';
 
   @override
   String get dataModeMock => 'Mock';
 
   @override
-  String get dataModeApi => 'API (soon)';
+  String get dataModeApi => 'API (HSR & TRA)';
 
   @override
   String get offlineMode => 'Offline mode';

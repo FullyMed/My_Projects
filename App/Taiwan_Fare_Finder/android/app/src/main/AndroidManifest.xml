@@ -2,7 +2,12 @@
     <application
         android:label="Taiwan Fare Finder"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
+        <!-- allowBackup="false": keep locally-cached search history / favorites
+             out of Android cloud backup. This data is device-local by design. -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

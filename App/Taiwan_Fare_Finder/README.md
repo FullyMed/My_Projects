@@ -54,14 +54,26 @@ flutter run
 
 ### TDX credentials
 
-Live HSR and TRA fares require a TDX client ID and secret. Copy the template and fill in your values:
+Live HSR and TRA fares require TDX API credentials. There are two ways to supply them.
+
+**Recommended — the proxy (no secret in the app).** Deploy the Cloudflare Worker in [`proxy/`](proxy/README.md), which holds the TDX secret server-side, then point the app at it:
+
+```bash
+flutter run --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2
+```
+
+Use the same `--dart-define` for every `flutter build`. This is the only supported way to ship a release: an embedded secret is extractable from the binary, and **web builds refuse to make a direct TDX call**.
+
+**Local development — direct credentials.** For quick local work without deploying the proxy:
 
 ```bash
 cp lib/config/tdx_credentials.dart.example lib/config/tdx_credentials.dart
 # edit tdx_credentials.dart with your client_id and client_secret
 ```
 
-`lib/config/tdx_credentials.dart` is gitignored — never commit real credentials. Without credentials the app falls back to mock data for all modes.
+`lib/config/tdx_credentials.dart` is gitignored — never commit real credentials. With neither a proxy URL nor credentials, the app uses mock data for all modes.
+
+See [`SECURITY.md`](SECURITY.md) for the full threat model and hardening notes.
 
 ---
 
@@ -89,7 +101,7 @@ lib/
 | Concern | Library |
 |---|---|
 | UI framework | Flutter (Material 3) |
-| Fonts | Google Fonts — Plus Jakarta Sans |
+| Fonts | Plus Jakarta Sans — bundled variable font (`assets/fonts/`, SIL OFL) |
 | State management | `provider` |
 | Navigation | `go_router` |
 | Local storage | `shared_preferences` |
@@ -118,6 +130,14 @@ flutter analyze       # lint
 dart format .         # format all Dart files
 flutter test          # run tests
 flutter gen-l10n      # regenerate ARB stubs (rarely needed)
-flutter build apk     # build Android release
-flutter build ios     # build iOS release
+
+# Release builds — always pass the proxy URL, and obfuscate the Dart code:
+flutter build apk --release \
+  --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2 \
+  --obfuscate --split-debug-info=build/symbols
+flutter build ios --release \
+  --dart-define=TFF_PROXY_BASE_URL=https://<your-worker>.workers.dev/api/basic/v2 \
+  --obfuscate --split-debug-info=build/symbols
 ```
+
+A Play Store build also needs `android/key.properties` (see `android/key.properties.example`). Keep `build/symbols/` to de-obfuscate crash reports.

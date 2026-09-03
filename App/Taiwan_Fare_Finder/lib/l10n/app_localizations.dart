@@ -440,7 +440,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataModeBody.
   ///
   /// In en, this message translates to:
-  /// **'Mock data is stable and offline-friendly. API mode will be added in a future update.'**
+  /// **'Mock data is stable and offline-friendly. API mode fetches real HSR and TRA fares; other modes use mock data.'**
   String get dataModeBody;
 
   /// No description provided for @dataModeMock.
@@ -452,7 +452,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataModeApi.
   ///
   /// In en, this message translates to:
-  /// **'API (soon)'**
+  /// **'API (HSR & TRA)'**
   String get dataModeApi;
 
   /// No description provided for @offlineMode.

@@ -28,12 +28,21 @@ class TdxAuthService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('TdxAuthService: token request failed (${response.statusCode}): ${response.body}');
+      // Body is deliberately not logged — it can echo back request parameters.
+      throw Exception('TdxAuthService: token request failed (${response.statusCode})');
     }
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    final token = json['access_token'] as String?;
-    final expiresIn = json['expires_in'] as int?;
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } catch (_) {
+      throw Exception('TdxAuthService: token response was not valid JSON');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('TdxAuthService: unexpected token response shape');
+    }
+    final token = decoded['access_token'] as String?;
+    final expiresIn = decoded['expires_in'] as int?;
 
     if (token == null || token.isEmpty) {
       throw Exception('TdxAuthService: response missing access_token');

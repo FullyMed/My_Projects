@@ -29,8 +29,14 @@ class FareCacheStats {
 }
 
 class FareService {
-  FareService({required this.storage, required TdxAuthService authService})
-      : _tdx = TdxFareService(authService: authService);
+  FareService({
+    required this.storage,
+    required TdxAuthService authService,
+    String proxyBaseUrl = '',
+  }) : _tdx = TdxFareService(
+          authService: authService,
+          proxyBaseUrl: proxyBaseUrl,
+        );
 
   final LocalStorageService storage;
   final TdxFareService _tdx;

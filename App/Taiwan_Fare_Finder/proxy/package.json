@@ -1,0 +1,14 @@
+{
+  "name": "tff-tdx-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker that holds the TDX client secret and proxies read-only fare/timetable requests for Taiwan Fare Finder.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

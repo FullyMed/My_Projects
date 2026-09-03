@@ -186,13 +186,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get dataModeBody =>
-      'Data simulasi stabil dan ramah offline. Mode API disiapkan untuk integrasi nyata di masa depan.';
+      'Data simulasi stabil dan ramah offline. Mode API mengambil tarif HSR dan TRA secara nyata; moda lain menggunakan data simulasi.';
 
   @override
   String get dataModeMock => 'Simulasi';
 
   @override
-  String get dataModeApi => 'API (segera)';
+  String get dataModeApi => 'API (HSR & TRA)';
 
   @override
   String get offlineMode => 'Mode offline';

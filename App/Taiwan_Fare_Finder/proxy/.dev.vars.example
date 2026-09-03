@@ -1,0 +1,4 @@
+# Copy to proxy/.dev.vars (gitignored) for `wrangler dev`.
+# In production these are set with `wrangler secret put`, NOT from this file.
+TDX_CLIENT_ID=your-tdx-client-id
+TDX_CLIENT_SECRET=your-tdx-client-secret

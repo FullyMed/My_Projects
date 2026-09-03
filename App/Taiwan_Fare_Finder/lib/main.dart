@@ -6,6 +6,7 @@ import 'package:taiwan_fare_finder/controllers/favorites_controller.dart';
 import 'package:taiwan_fare_finder/controllers/history_controller.dart';
 import 'package:taiwan_fare_finder/controllers/session_controller.dart';
 import 'package:taiwan_fare_finder/controllers/settings_controller.dart';
+import 'package:taiwan_fare_finder/config/app_config.dart';
 import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/services/analytics_service.dart';
@@ -39,6 +40,7 @@ class TffApp extends StatelessWidget {
             create: (c) => FareService(
                   storage: c.read<LocalStorageService>(),
                   authService: c.read<TdxAuthService>(),
+                  proxyBaseUrl: AppConfig.tdxProxyBaseUrl,
                 )),
         Provider(
             create: (c) =>

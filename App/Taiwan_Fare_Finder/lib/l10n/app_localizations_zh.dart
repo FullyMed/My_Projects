@@ -177,13 +177,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dataMode => '資料來源';
 
   @override
-  String get dataModeBody => '模擬資料穩定且可離線使用；API 模式保留給未來的真實串接。';
+  String get dataModeBody => '模擬資料穩定且可離線使用。API 模式可取得高鐵與台鐵的真實票價，其他方式仍使用模擬資料。';
 
   @override
   String get dataModeMock => '模擬';
 
   @override
-  String get dataModeApi => 'API（即將推出）';
+  String get dataModeApi => 'API（高鐵 & 台鐵）';
 
   @override
   String get offlineMode => '離線模式';
@@ -523,13 +523,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get dataMode => '資料來源';
 
   @override
-  String get dataModeBody => '模擬資料穩定且可離線使用；API 模式保留給未來的真實串接。';
+  String get dataModeBody => '模擬資料穩定且可離線使用。API 模式可取得高鐵與台鐵的真實票價，其他方式仍使用模擬資料。';
 
   @override
   String get dataModeMock => '模擬';
 
   @override
-  String get dataModeApi => 'API（即將推出）';
+  String get dataModeApi => 'API（高鐵 & 台鐵）';
 
   @override
   String get offlineMode => '離線模式';

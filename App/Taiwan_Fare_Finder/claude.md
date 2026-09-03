@@ -68,7 +68,12 @@ Error and snack keys (e.g. `'offline_no_cache'`, `'search_failed'`, `'showing_ca
 
 ### TDX API integration
 
-`TdxAuthService` (`lib/services/tdx_auth_service.dart`) manages OAuth2 `client_credentials` tokens. It caches the token in memory and refreshes 60 s before expiry. Credentials are stored in `lib/config/tdx_credentials.dart` (`tdxClientId` / `tdxClientSecret`).
+Two ways in, chosen by `AppConfig.tdxProxyBaseUrl` (`lib/config/app_config.dart`, from `--dart-define=TFF_PROXY_BASE_URL`):
+
+- **Proxy mode (set)** — `TdxFareService` prefixes every request with the proxy base URL and sends **no** `Authorization` header. The Cloudflare Worker in `proxy/` holds the secret and injects the token. This is the only supported release configuration. Web builds hard-fail a direct call, so the secret can never ship in `main.dart.js`.
+- **Direct mode (unset)** — `TdxAuthService` (`lib/services/tdx_auth_service.dart`) runs the OAuth2 `client_credentials` flow with `tdxClientId` / `tdxClientSecret` from the gitignored `lib/config/tdx_credentials.dart`, caching the token in memory (refreshed 60 s before expiry). Local development only.
+
+Station IDs are validated against `^[0-9A-Za-z]{2,10}$` before entering the OData `$filter`. TDX responses are parsed defensively; any shape mismatch throws and the caller falls back to cache, then mock.
 
 `TdxFareService` (`lib/services/tdx_fare_service.dart`) fetches real fares from TDX:
 
@@ -127,7 +132,7 @@ Defined in `lib/nav.dart` via `go_router`:
 ### Theme & design tokens
 
 `lib/theme.dart` defines:
-- `lightTheme` / `darkTheme` (Material 3, Google Fonts Plus Jakarta Sans)
+- `lightTheme` / `darkTheme` (Material 3, bundled Plus Jakarta Sans variable font from `assets/fonts/` — no runtime download)
 - `AppSpacing` — spacing scale (`xs` 4 → `xxl` 48)
 - `AppRadius` — border radius scale (`sm` 8 → `xl` 24)
 - `TextStyleExtensions` — `.bold`, `.semiBold`, `.medium`, etc. on `TextStyle`

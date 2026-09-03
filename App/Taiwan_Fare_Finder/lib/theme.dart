@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+/// Bundled font family. The variable TTF ships in `assets/fonts/` and is
+/// declared in `pubspec.yaml` — no runtime download, no third-party origin.
+const String _fontFamily = 'Plus Jakarta Sans';
 
 class AppSpacing {
   // Spacing values
@@ -269,73 +272,91 @@ ThemeData get darkTheme => ThemeData(
   textTheme: _buildTextTheme(Brightness.dark),
 );
 
-/// Build text theme using Plus Jakarta Sans font family
+/// Build text theme using the bundled Plus Jakarta Sans font family.
+///
+/// The `_fontFamily` string is a variable font; Flutter maps each
+/// [FontWeight] onto its `wght` axis, so all weights come from one asset.
 TextTheme _buildTextTheme(Brightness brightness) {
-  return TextTheme(
-    displayLarge: GoogleFonts.plusJakartaSans(
+  return const TextTheme(
+    displayLarge: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.displayLarge,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.25,
     ),
-    displayMedium: GoogleFonts.plusJakartaSans(
+    displayMedium: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.displayMedium,
       fontWeight: FontWeight.w400,
     ),
-    displaySmall: GoogleFonts.plusJakartaSans(
+    displaySmall: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.displaySmall,
       fontWeight: FontWeight.w400,
     ),
-    headlineLarge: GoogleFonts.plusJakartaSans(
+    headlineLarge: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.headlineLarge,
       fontWeight: FontWeight.w600,
       letterSpacing: -0.5,
     ),
-    headlineMedium: GoogleFonts.plusJakartaSans(
+    headlineMedium: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.headlineMedium,
       fontWeight: FontWeight.w600,
     ),
-    headlineSmall: GoogleFonts.plusJakartaSans(
+    headlineSmall: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.headlineSmall,
       fontWeight: FontWeight.w600,
     ),
-    titleLarge: GoogleFonts.plusJakartaSans(
+    titleLarge: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.titleLarge,
       fontWeight: FontWeight.w600,
     ),
-    titleMedium: GoogleFonts.plusJakartaSans(
+    titleMedium: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.titleMedium,
       fontWeight: FontWeight.w500,
     ),
-    titleSmall: GoogleFonts.plusJakartaSans(
+    titleSmall: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.titleSmall,
       fontWeight: FontWeight.w500,
     ),
-    labelLarge: GoogleFonts.plusJakartaSans(
+    labelLarge: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.labelLarge,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),
-    labelMedium: GoogleFonts.plusJakartaSans(
+    labelMedium: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.labelMedium,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    labelSmall: GoogleFonts.plusJakartaSans(
+    labelSmall: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.labelSmall,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.5,
     ),
-    bodyLarge: GoogleFonts.plusJakartaSans(
+    bodyLarge: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.bodyLarge,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.15,
     ),
-    bodyMedium: GoogleFonts.plusJakartaSans(
+    bodyMedium: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.bodyMedium,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.25,
     ),
-    bodySmall: GoogleFonts.plusJakartaSans(
+    bodySmall: TextStyle(
+      fontFamily: _fontFamily,
       fontSize: FontSizes.bodySmall,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.4,
