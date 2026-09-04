@@ -37,10 +37,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       (event, session) => {
         if (session?.user) {
           const tempName = session.user.email?.split('@')[0] ?? 'User';
+          const metadataName = (session.user.user_metadata?.name as string | undefined) || tempName;
           setUser({
             id: session.user.id,
             email: session.user.email ?? '',
-            name: tempName,
+            name: metadataName,
             createdAt: session.user.created_at,
           });
 
@@ -52,6 +53,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             .then(({ data: profile }) => {
               if (profile?.name) {
                 setUser(prev => (prev ? { ...prev, name: profile.name } : prev));
+              } else {
+                supabase
+                  .from('profiles')
+                  .upsert(
+                    { user_id: session.user.id, email: session.user.email ?? '', name: metadataName },
+                    { onConflict: 'user_id' }
+                  )
+                  .then(() => {
+                    setUser(prev => (prev ? { ...prev, name: metadataName } : prev));
+                  });
               }
             });
         } else {
@@ -91,16 +102,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     name: string,
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name } },
+      });
       if (error) return { success: false, error: error.message };
-
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({ user_id: data.user.id, email, name });
-        if (profileError) return { success: false, error: 'Failed to create profile' };
-      }
-
       return { success: true };
     } catch {
       return { success: false, error: 'An unexpected error occurred' };
