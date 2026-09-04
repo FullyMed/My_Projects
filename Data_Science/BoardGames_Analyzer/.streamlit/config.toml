@@ -1,0 +1,13 @@
+# Explicit security-relevant defaults for Streamlit.
+# Values mirror Streamlit's own secure defaults — kept here so they can't
+# silently change and so intent is documented for reviewers.
+
+[server]
+enableXsrfProtection = true
+enableCORS = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false

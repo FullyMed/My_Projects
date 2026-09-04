@@ -1,5 +1,9 @@
+import sys
+import html
 import streamlit as st
 from recommender import BoardGameDiscoveryEngine
+
+INPUT_MAX_CHARS = 200
 
 st.set_page_config(
     page_title="Board Game Discovery Engine",
@@ -349,7 +353,8 @@ with col1:
     title_input = st.text_input(
         "Favorite Game Titles",
         value=st.session_state["title_input"],
-        placeholder="Example: Splendor, Azul"
+        placeholder="Example: Splendor, Azul",
+        max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["title_input"] = title_input
 
@@ -357,7 +362,8 @@ with col2:
     category_input = st.text_input(
         "Preferred Categories",
         value=st.session_state["category_input"],
-        placeholder="Example: Strategy, Family, Horror"
+        placeholder="Example: Strategy, Family, Horror",
+        max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["category_input"] = category_input
 
@@ -367,7 +373,8 @@ with col3:
     mechanic_input = st.text_input(
         "Preferred Mechanics",
         value=st.session_state["mechanic_input"],
-        placeholder="Example: Cooperative Game, Tile Placement"
+        placeholder="Example: Cooperative Game, Tile Placement",
+        max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["mechanic_input"] = mechanic_input
 
@@ -375,14 +382,16 @@ with col4:
     family_input = st.text_input(
         "Preferred Families (optional)",
         value=st.session_state["family_input"],
-        placeholder="Example: Family Games"
+        placeholder="Example: Family Games",
+        max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["family_input"] = family_input
 
 publisher_input = st.text_input(
     "Preferred Publishers (optional)",
     value=st.session_state["publisher_input"],
-    placeholder="Example: Asmodee, CMON"
+    placeholder="Example: Asmodee, CMON",
+    max_chars=INPUT_MAX_CHARS,
 )
 st.session_state["publisher_input"] = publisher_input
 
@@ -462,24 +471,24 @@ if run_btn:
             int_col1, int_col2 = st.columns(2)
             with int_col1:
                 st.markdown(
-                    f'<div class="info-box"><b>Input Titles:</b><br>{", ".join(query_titles) if query_titles else "-"}</div>',
+                    f'<div class="info-box"><b>Input Titles:</b><br>{html.escape(", ".join(query_titles)) if query_titles else "-"}</div>',
                     unsafe_allow_html=True
                 )
             with int_col2:
                 st.markdown(
-                    f'<div class="info-box"><b>Difficulty Filter:</b><br>{difficulty_label if difficulty_label else "Any"}</div>',
+                    f'<div class="info-box"><b>Difficulty Filter:</b><br>{html.escape(difficulty_label) if difficulty_label else "Any"}</div>',
                     unsafe_allow_html=True
                 )
 
             int_col3, int_col4 = st.columns(2)
             with int_col3:
                 st.markdown(
-                    f'<div class="info-box"><b>Expanded Categories:</b><br>{", ".join(expanded_categories) if expanded_categories else "-"}</div>',
+                    f'<div class="info-box"><b>Expanded Categories:</b><br>{html.escape(", ".join(expanded_categories)) if expanded_categories else "-"}</div>',
                     unsafe_allow_html=True
                 )
             with int_col4:
                 st.markdown(
-                    f'<div class="info-box"><b>Expanded Mechanics:</b><br>{", ".join(expanded_mechanics) if expanded_mechanics else "-"}</div>',
+                    f'<div class="info-box"><b>Expanded Mechanics:</b><br>{html.escape(", ".join(expanded_mechanics)) if expanded_mechanics else "-"}</div>',
                     unsafe_allow_html=True
                 )
 
@@ -492,7 +501,7 @@ if run_btn:
 
             for _, row in formatted.head(5).iterrows():
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown(f'<div class="card-title">🎲 {row.get("name", "-")}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="card-title">🎲 {html.escape(str(row.get("name", "-")))}</div>', unsafe_allow_html=True)
 
                 metric_col1, metric_col2, metric_col3 = st.columns(3)
                 with metric_col1:
@@ -503,7 +512,7 @@ if run_btn:
                     st.metric("Votes", row.get("num_votes", "-"))
 
                 st.markdown(
-                    f'<div class="card-reason"><b>Reason:</b> {shorten_reason(row.get("reason", "-"))}</div>',
+                    f'<div class="card-reason"><b>Reason:</b> {html.escape(shorten_reason(row.get("reason", "-")))}</div>',
                     unsafe_allow_html=True
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -512,7 +521,8 @@ if run_btn:
             st.info("No results found for the given inputs.")
 
     except Exception as e:
-        st.error(f"An error occurred: {e}")
+        print(f"[app.py] error handling request: {e}", file=sys.stderr)
+        st.error("Something went wrong while generating recommendations. Please try a different query.")
 
 # -----------------------------
 # Footer

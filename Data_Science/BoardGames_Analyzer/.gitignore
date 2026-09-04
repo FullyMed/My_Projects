@@ -14,3 +14,16 @@ Dataset/Processed/merged_clean_sample.csv
 # Python venv
 .venv/
 **/.venv/
+
+# Compiled bytecode — never trust/execute cached .pyc from a repo
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Secrets — never commit credentials or API keys
+.streamlit/secrets.toml
+*.env
+.env.*
+*.pem
+*.key
+credentials.json
