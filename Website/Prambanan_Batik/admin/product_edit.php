@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
@@ -41,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($categoryId) || empty($sku) || empty($slug) || empty($name) || empty($priceDisplay)) {
             $error = 'Category, SKU, slug, name, and price are required';
+        } elseif (!is_valid_buy_link($buyLinkShopee) || !is_valid_buy_link($buyLinkTokopedia) || !is_valid_buy_link($buyLinkOther)) {
+            $error = 'Buy links must start with http:// or https://';
         } else {
             try {
                 $stmt = $pdo->prepare('INSERT INTO products (category_id, sku, slug, name, description, price_display, buy_link_shopee, buy_link_tokopedia, buy_link_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
@@ -49,7 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ' . BASE_URL . '/admin/products.php');
                 exit;
             } catch (Exception $e) {
-                $error = 'Failed to create product: ' . $e->getMessage();
+                error_log('Failed to create product: ' . $e->getMessage());
+                $error = 'Failed to create product. Check that the SKU and slug are unique.';
             }
         }
     } elseif ($action === 'update') {
@@ -66,6 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($id) || empty($categoryId) || empty($sku) || empty($slug) || empty($name) || empty($priceDisplay)) {
             $error = 'All required fields must be filled';
+        } elseif (!is_valid_buy_link($buyLinkShopee) || !is_valid_buy_link($buyLinkTokopedia) || !is_valid_buy_link($buyLinkOther)) {
+            $error = 'Buy links must start with http:// or https://';
         } else {
             try {
                 $stmt = $pdo->prepare('UPDATE products SET category_id = ?, sku = ?, slug = ?, name = ?, description = ?, price_display = ?, buy_link_shopee = ?, buy_link_tokopedia = ?, buy_link_other = ?, updated_at = NOW() WHERE id = ?');
@@ -75,7 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$id]);
                 $product = $stmt->fetch();
             } catch (Exception $e) {
-                $error = 'Failed to update product: ' . $e->getMessage();
+                error_log('Failed to update product: ' . $e->getMessage());
+                $error = 'Failed to update product. Check that the SKU and slug are unique.';
             }
         }
     }

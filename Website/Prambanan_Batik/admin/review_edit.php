@@ -54,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ' . BASE_URL . '/admin/reviews.php');
                 exit;
             } catch (Exception $e) {
-                $error = 'Failed to create review: ' . $e->getMessage();
+                error_log('Failed to create review: ' . $e->getMessage());
+                $error = 'Failed to create review';
             }
         }
     } elseif ($action === 'update') {
@@ -85,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$id]);
                 $review = $stmt->fetch();
             } catch (Exception $e) {
-                $error = 'Failed to update review: ' . $e->getMessage();
+                error_log('Failed to update review: ' . $e->getMessage());
+                $error = 'Failed to update review';
             }
         }
     }

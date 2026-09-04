@@ -24,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'delete') {
                 $stmt->execute([$id]);
                 $message = 'Product deleted successfully';
             } catch (Exception $e) {
-                $error = 'Failed to delete product: ' . $e->getMessage();
+                error_log('Failed to delete product: ' . $e->getMessage());
+                $error = 'Failed to delete product';
             }
         }
     }

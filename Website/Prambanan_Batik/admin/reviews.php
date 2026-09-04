@@ -43,7 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $message = 'Review deleted successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to delete review: ' . $e->getMessage();
+                    error_log('Failed to delete review: ' . $e->getMessage());
+                    $error = 'Failed to delete review';
                 }
             }
         }

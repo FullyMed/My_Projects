@@ -45,19 +45,25 @@ function getAdminSession() {
     return null;
 }
 
+// Valid-format bcrypt hash with no matching plaintext — verified against on a miss so that
+// "unknown email" and "wrong password" take the same amount of time (timing-safe lookup).
+define('DUMMY_PASSWORD_HASH', '$2y$12$Y.nYtL4wJ6HPjR/sAr96XucPXkKcSyeeYOyLWMCR8sJmmPWraHlD2');
+
 function loginAdmin($pdo, $email, $password) {
     try {
         $stmt = $pdo->prepare('SELECT id, email, password_hash FROM admin_users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         $admin = $stmt->fetch();
 
-        if (!$admin) {
+        $hashToCheck = $admin['password_hash'] ?? DUMMY_PASSWORD_HASH;
+        $passwordOk = password_verify($password, $hashToCheck);
+
+        if (!$admin || !$passwordOk) {
             return ['success' => false, 'message' => 'Invalid email or password'];
         }
 
-        if (!password_verify($password, $admin['password_hash'])) {
-            return ['success' => false, 'message' => 'Invalid email or password'];
-        }
+        // Regenerate the session ID on privilege change to prevent session fixation.
+        session_regenerate_id(true);
 
         $_SESSION['admin_id'] = $admin['id'];
         $_SESSION['admin_email'] = $admin['email'];
@@ -71,6 +77,21 @@ function loginAdmin($pdo, $email, $password) {
 }
 
 function logoutAdmin() {
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            $params['httponly']
+        );
+    }
+
     session_destroy();
     return true;
 }

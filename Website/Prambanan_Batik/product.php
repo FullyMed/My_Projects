@@ -146,16 +146,16 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
                     <div class="action-buttons">
                         <?php if (!empty($product['buy_link_shopee'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank">Buy on Shopee</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Shopee</a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_tokopedia'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank">Buy on Tokopedia</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Tokopedia</a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_other'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank">Buy Now</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo $product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy Now</a>
                         <?php endif; ?>
                         <?php if (empty($product['buy_link_shopee']) && empty($product['buy_link_tokopedia']) && empty($product['buy_link_other'])): ?>
-                            <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank">Search on Shopee</a>
+                            <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Search on Shopee</a>
                         <?php endif; ?>
                         <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary btn-large">Back to Products</a>
                     </div>

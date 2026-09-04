@@ -127,6 +127,16 @@ function is_valid_url($url) {
 }
 
 /**
+ * Validate an admin-entered outbound buy link. Empty is allowed (link is optional);
+ * a non-empty value must start with http:// or https:// so it can never resolve to a
+ * javascript:/data: URI or other non-http scheme when rendered as a redirect target.
+ */
+function is_valid_buy_link($url) {
+    $url = trim((string)$url);
+    return $url === '' || preg_match('/^https?:\/\//i', $url) === 1;
+}
+
+/**
  * Get query parameter safely
  */
 function get_query_param($key, $default = null, $filter = FILTER_DEFAULT) {

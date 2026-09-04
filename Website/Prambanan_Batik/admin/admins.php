@@ -39,7 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($e->getCode() === '23000') {
                         $error = 'That email is already registered as an admin';
                     } else {
-                        $error = 'Failed to create admin: ' . $e->getMessage();
+                        error_log('Failed to create admin: ' . $e->getMessage());
+                        $error = 'Failed to create admin account';
                     }
                 }
             }
@@ -65,7 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt->execute([$id]);
                         $message = 'Admin account deleted';
                     } catch (Exception $e) {
-                        $error = 'Failed to delete admin: ' . $e->getMessage();
+                        error_log('Failed to delete admin: ' . $e->getMessage());
+                        $error = 'Failed to delete admin account';
                     }
                 }
             }
@@ -88,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$hash, $id]);
                     $message = 'Password updated successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to update password: ' . $e->getMessage();
+                    error_log('Failed to update admin password: ' . $e->getMessage());
+                    $error = 'Failed to update password';
                 }
             }
         }

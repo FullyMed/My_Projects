@@ -200,18 +200,25 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 - **Prepared statements**: all queries use PDO with bound parameters
 - **Output escaping**: all dynamic content passed through `escape()` (htmlspecialchars)
 - **Passwords**: bcrypt via `password_hash()` (cost 12) / `password_verify()`
+- **Timing-safe login**: `password_verify()` always runs (against a dummy hash when the email doesn't exist) so "unknown email" and "wrong password" take the same time — prevents email enumeration via response timing
 - **CSRF protection**: all admin POST forms carry a per-session token validated server-side with `hash_equals()`
 - **Brute-force protection**: admin login blocked after 5 failed attempts per IP within 15 minutes, tracked in `login_attempts` table
-- **Session timeout**: admin sessions expire after 30 minutes of inactivity (sliding window — reset on every authenticated request)
-- **Open redirect protection**: `go.php` and `product_images.php` both validate URLs start with `http://` or `https://`
+- **Session security**: `HttpOnly`, `SameSite=Lax`, and (over HTTPS) `Secure` cookie flags; session ID is regenerated on login (prevents session fixation); 30-minute idle timeout (sliding window); logout clears the session cookie explicitly, not just server-side state
+- **Open redirect / SSRF-of-links protection**: `go.php`, `product_images.php`, admin product buy-links (`product_edit.php`), and the CSV importer all validate that URLs start with `http://` or `https://` before they're stored or redirected to
+- **Reverse-tabnabbing protection**: every `target="_blank"` link carries `rel="noopener noreferrer"`
 - **File upload validation**: MIME type checked via `finfo`, extension allow-listed
+- **Security headers**: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Content-Security-Policy`, and (over HTTPS) `Strict-Transport-Security` are sent on every response from `config.php`, reinforced at the web-server level in `.htaccess`
+- **Error handling**: `display_errors` is forced off whenever `DEBUG_MODE` is false — admin CRUD pages log exception details server-side via `error_log()` and show only a generic message, so database schema/internals are never exposed in the UI
+- **Hardened `.htaccess`**: blocks direct HTTP access to `config.php` / `db_connect.php` / `functions.php` (require/include-only files), `.env*`, `.sql`, `.log`, `.md`, lockfiles, and any stray `.git` directory; disables directory listing; force-redirects to HTTPS in production (skipped on `localhost`/`127.0.0.1` for local dev)
 
 ### Recommendations
 
-1. Serve over HTTPS — redirect HTTP in `.htaccess`
+1. Serve over HTTPS — `.htaccess` already redirects HTTP to HTTPS outside of local dev
 2. Use a strong, unique DB password set via environment variable (never committed)
 3. Rename the `/admin/` folder to something non-obvious
 4. Keep PHP updated
+5. If `.env` was ever committed to this repository's git history, treat any values in it as compromised and rotate them — removing it from tracking (`git rm --cached`) does not remove it from history; use `git filter-repo` or BFG Repo-Cleaner if it must be scrubbed
+6. The current `Content-Security-Policy` allows `'unsafe-inline'` for scripts and styles because a few admin pages use inline `<script>`/`<style>` blocks. Moving those to external files (or nonces) would allow tightening the policy further.
 5. Monitor server error logs regularly
 
 ## Troubleshooting
@@ -250,6 +257,16 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.4.0** (2026-09): Security hardening pass
+  - Security headers (`CSP`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`) sent from `config.php` on every request
+  - New root `.htaccess` — forces HTTPS in production, blocks direct access to internal-only PHP includes and to `.env`/`.sql`/`.log`/`.md`/lockfiles, disables directory listing
+  - Session cookies hardened: `HttpOnly` + `SameSite=Lax` + conditional `Secure`; session ID regenerated on admin login (session-fixation fix); logout now clears the cookie explicitly
+  - Admin login is timing-safe — `password_verify()` always runs against a real or dummy hash, so failed logins take constant time regardless of whether the email exists
+  - Admin buy-link fields (`buy_link_shopee`/`tokopedia`/`other`) and the CSV importer's `image_url` column are now validated to start with `http(s)://`, matching the existing `product_images.php` / `go.php` checks
+  - Added `rel="noopener noreferrer"` to every `target="_blank"` link (reverse-tabnabbing fix)
+  - Admin CRUD pages no longer echo raw exception messages to the browser — details go to `error_log()`, the UI shows a generic message
+  - `.env` (committed with a stray, inert Bolt.new/Vite scaffold key unused by this PHP app) removed from git tracking — see Security Recommendations above regarding history
 
 - **v2.3.0** (2026-06): Security hardening + dashboard + bug fixes
   - Removed hardcoded DB password fallback in `config.php` — credentials must be set via env var

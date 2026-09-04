@@ -15,7 +15,7 @@
             </div>
             <div class="footer-section">
                 <h3>Shop Now</h3>
-                <p><a href="https://shopee.co.id/search?keyword=prambanan%20batik" target="_blank">Find us on Shopee</a></p>
+                <p><a href="https://shopee.co.id/search?keyword=prambanan%20batik" target="_blank" rel="noopener noreferrer">Find us on Shopee</a></p>
             </div>
         </div>
         <div class="footer-bottom">

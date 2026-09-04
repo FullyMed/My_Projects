@@ -82,6 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         continue;
                     }
 
+                    if ($imageUrl && !preg_match('/^https?:\/\//i', $imageUrl)) {
+                        $report['errors'][] = "Row $rowNum (SKU: $sku): image_url ignored — must start with http:// or https://";
+                        $imageUrl = '';
+                    }
+
                     try {
                         $price = (float) $price;
 
@@ -156,8 +161,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $report['inserted']++;
                         }
                     } catch (Exception $e) {
+                        error_log("CSV import row $rowNum (SKU: $sku) failed: " . $e->getMessage());
                         $report['failed']++;
-                        $report['errors'][] = "Row $rowNum (SKU: $sku): " . $e->getMessage();
+                        $report['errors'][] = "Row $rowNum (SKU: $sku): Import failed — check that the SKU/slug is unique and category_id exists";
                     }
                 }
 

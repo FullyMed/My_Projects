@@ -1,0 +1,55 @@
+# Prambanan Batik — web-server hardening
+# These rules are defense-in-depth alongside the security headers already
+# sent from PHP in config.php. If this host disables .htaccess overrides
+# (AllowOverride None), the PHP-level headers still apply on every request
+# that reaches PHP, but the file-blocking rules below will not.
+
+# ── Disable directory listing ────────────────────────────────────────────
+Options -Indexes -MultiViews
+ServerSignature Off
+
+# ── Force HTTPS in production (skipped for local XAMPP/WAMP dev) ─────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Block direct access to the .git directory, if it was ever deployed here.
+    RewriteRule ^\.git - [F,L]
+</IfModule>
+
+# ── Security headers (mirrors config.php; also covers static assets) ─────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header unset X-Powered-By
+    Header always unset X-Powered-By
+</IfModule>
+
+# ── Block direct web access to internal-only PHP includes ────────────────
+# These files are only ever loaded via require/include and produce no
+# output of their own; they should never be requested directly over HTTP.
+<FilesMatch "^(config|db_connect|functions)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── Block access to secrets, data files, and project metadata ────────────
+<FilesMatch "(^\.env.*|\.(sql|log|md|lock)$|^composer\.(json|lock)$|^package(-lock)?\.json$|^CLAUDE\.md$|^Run\.txt$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

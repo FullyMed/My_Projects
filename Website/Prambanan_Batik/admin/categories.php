@@ -40,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$name, $slug, $description ?: null]);
                     $message = 'Category created successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to create category: ' . $e->getMessage();
+                    error_log('Failed to create category: ' . $e->getMessage());
+                    $error = 'Failed to create category. The name or slug may already be in use.';
                 }
             }
         } elseif ($action === 'update') {
@@ -59,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $edit_category = null;
                     $edit_id = null;
                 } catch (Exception $e) {
-                    $error = 'Failed to update category: ' . $e->getMessage();
+                    error_log('Failed to update category: ' . $e->getMessage());
+                    $error = 'Failed to update category. The name or slug may already be in use.';
                 }
             }
         } elseif ($action === 'delete') {
@@ -73,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$id]);
                     $message = 'Category deleted successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to delete category: ' . $e->getMessage();
+                    error_log('Failed to delete category: ' . $e->getMessage());
+                    $error = 'Failed to delete category';
                 }
             }
         }

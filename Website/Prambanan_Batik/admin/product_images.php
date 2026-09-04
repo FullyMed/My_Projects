@@ -44,7 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$productId, $imageUrl, $altText ?: null, $sortOrder]);
                     $message = 'Image added successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to add image: ' . $e->getMessage();
+                    error_log('Failed to add product image: ' . $e->getMessage());
+                    $error = 'Failed to add image';
                 }
             }
         } elseif ($action === 'delete') {
@@ -58,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$imageId]);
                     $message = 'Image deleted successfully';
                 } catch (Exception $e) {
-                    $error = 'Failed to delete image: ' . $e->getMessage();
+                    error_log('Failed to delete product image: ' . $e->getMessage());
+                    $error = 'Failed to delete image';
                 }
             }
         }
