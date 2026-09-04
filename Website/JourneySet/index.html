@@ -6,25 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>JourneySet - Personal Productivity Planner</title>
     <meta name="description" content="Plan your weekly schedules, set and track goals, and manage events with JourneySet - your personal productivity companion." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; base-uri 'self'; form-action 'self'; object-src 'none'" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script>
-      /* Apply the saved theme before first paint to avoid a flash. */
-      (function () {
-        try {
-          var raw = localStorage.getItem('journeyset:v1:theme') || '';
-          var t = raw.replace(/"/g, '');
-          if (['light', 'dark', 'sky', 'gold', 'forest'].indexOf(t) === -1) {
-            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          }
-          document.documentElement.setAttribute('data-theme', t);
-          if (t === 'dark' || t === 'forest') {
-            document.documentElement.classList.add('dark');
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

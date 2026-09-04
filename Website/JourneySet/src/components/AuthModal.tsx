@@ -165,7 +165,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   className={`${inputClass} pr-12`}
                   placeholder="Enter your password"
                   required
-                  minLength={6}
+                  minLength={8}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 />
                 <button
