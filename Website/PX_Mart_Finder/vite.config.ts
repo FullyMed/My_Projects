@@ -42,7 +42,10 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0",
-    allowedHosts: true,
+    // Wildcard host + DNS-rebinding protection bypass is only needed behind
+    // Replit's proxy (which fronts the dev server with its own auth/routing).
+    // Outside Replit, keep Vite's default host-header allowlist enabled.
+    allowedHosts: process.env.REPL_ID !== undefined ? true : undefined,
     fs: {
       strict: true,
       deny: ["**/.*"],
