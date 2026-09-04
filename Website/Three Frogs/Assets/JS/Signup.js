@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  let csrfToken = null;
+
   // Function to check session via backend
   async function checkSession() {
     try {
@@ -7,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
       const result = await response.json();
+      csrfToken = result.csrfToken || null;
       return result.loggedIn ? result.user : null;
     } catch (error) {
       console.error("Session check failed:", error);
@@ -52,7 +55,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      if (!csrfToken) {
+        await checkSession();
+      }
+
       const formData = new FormData(signupForm);
+      if (csrfToken) formData.append("csrf_token", csrfToken);
 
       try {
         const response = await fetch("Assets/PHP/signup.php", {

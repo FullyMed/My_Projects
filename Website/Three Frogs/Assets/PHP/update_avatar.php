@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once("security.php");
+secure_session_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
@@ -12,6 +13,15 @@ if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
     echo json_encode([
         "success" => false,
         "error" => "You must be logged in to update your avatar."
+    ]);
+    exit;
+}
+
+if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    echo json_encode([
+        "success" => false,
+        "error" => "Your session expired. Please refresh the page and try again."
     ]);
     exit;
 }
@@ -56,10 +66,11 @@ if (!in_array($newAvatar, $allowedAvatars)) {
 
 $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE email = ?");
 if (!$stmt) {
+    error_log("update_avatar.php: prepare failed: " . $conn->error);
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "Database error: " . $conn->error
+        "error" => "Something went wrong. Please try again later."
     ]);
     $conn->close();
     exit;
@@ -75,10 +86,11 @@ if ($stmt->execute()) {
         "message" => "Avatar updated successfully."
     ]);
 } else {
+    error_log("update_avatar.php: update failed: " . $stmt->error);
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "Failed to update avatar: " . $stmt->error
+        "error" => "Failed to update avatar. Please try again later."
     ]);
 }
 

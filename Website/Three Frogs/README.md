@@ -189,6 +189,27 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 );
 ```
 
+### `rate_limits`
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INT PK AUTO_INCREMENT | |
+| action | VARCHAR(50) | e.g. `login_ip`, `login_email`, `signup_ip`, `reset_request_ip` |
+| identifier | VARCHAR(255) | IP address or email being throttled |
+| created_at | DATETIME | Set to `NOW()` on each recorded attempt |
+
+Backs the brute-force/abuse throttling described below. Create it before deploying (rate limiting **fails open** — i.e. does nothing, not "locks everyone out" — if this table is missing):
+
+```sql
+CREATE TABLE IF NOT EXISTS rate_limits (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  action     VARCHAR(50)  NOT NULL,
+  identifier VARCHAR(255) NOT NULL,
+  created_at DATETIME     NOT NULL,
+  INDEX idx_action_identifier_time (action, identifier, created_at)
+);
+```
+
 ---
 
 ## PHP API Endpoints
@@ -207,6 +228,23 @@ All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0
 | `get_bookings.php` | POST (JSON body) | Yes | Returns user's active upcoming bookings + remaining cancel count |
 | `cancel_booking.php` | POST (JSON body) | Yes | Cancels booking; enforces monthly limit |
 | `update_avatar.php` | POST (form) | Yes | Updates avatar; validates against allowed set |
+
+---
+
+## Security Hardening
+
+| Measure | Where |
+|---|---|
+| CSRF tokens on every state-changing request | `Assets/PHP/security.php` (`csrf_token()`/`verify_csrf_token()`); enforced in `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, `update_avatar.php` |
+| Brute-force / abuse rate limiting | `security.php` (`rate_limit_exceeded()`/`record_attempt()` against the `rate_limits` table); applied to `login.php`, `signup.php`, `request_reset.php`, `forgot_password.php` |
+| Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `security.php`'s `secure_session_start()` — used everywhere instead of raw `session_start()` |
+| Session fixation prevention | `session_regenerate_id(true)` in `login.php` and `signup.php` after authentication |
+| No internal error leakage | DB/statement errors are `error_log()`'d server-side, never echoed in JSON responses |
+| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect on `localhost` for local dev) |
+| Sensitive files blocked from direct web access | `.htaccess` denies `db_config.php`, `*.xlsx`/`*.sql`/`*.log`/`*.md`, `.git*`; `Data/.htaccess` denies the whole folder |
+| Reverse-tabnabbing protection | `rel="noopener noreferrer"` on all `target="_blank"` links |
+
+New state-changing endpoints should follow the same pattern: `require_once("security.php")`, call `secure_session_start()` instead of `session_start()`, and validate a CSRF token before doing anything.
 
 ---
 

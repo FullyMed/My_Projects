@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once("security.php");
+secure_session_start();
 
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -28,6 +29,13 @@ if ($input === null) {
     respond(400, [
         "success" => false,
         "error" => "Invalid JSON input."
+    ]);
+}
+
+if (!verify_csrf_token(get_submitted_csrf_token($input))) {
+    respond(403, [
+        "success" => false,
+        "error" => "Your session expired. Please refresh the page and try again."
     ]);
 }
 

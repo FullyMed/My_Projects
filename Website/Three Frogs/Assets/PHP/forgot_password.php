@@ -4,6 +4,7 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 require_once("db_connect.php");
+require_once("security.php");
 
 function respond($status, $data) {
     http_response_code($status);
@@ -21,6 +22,16 @@ if (empty($token) || empty($newPassword)) {
 if (strlen($newPassword) < 8) {
     respond(400, ["success" => false, "error" => "Password must be at least 8 characters long."]);
 }
+
+if (strlen($newPassword) > 200) {
+    respond(400, ["success" => false, "error" => "Password is too long."]);
+}
+
+$ip = client_ip();
+if (rate_limit_exceeded($conn, 'reset_confirm_ip', $ip, 10, 15)) {
+    respond(429, ["success" => false, "error" => "Too many attempts. Please try again later."]);
+}
+record_attempt($conn, 'reset_confirm_ip', $ip);
 
 $stmt = $conn->prepare("SELECT email, expires_at FROM password_reset_tokens WHERE token = ?");
 $stmt->bind_param("s", $token);

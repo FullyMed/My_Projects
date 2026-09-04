@@ -2,6 +2,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const resultBox = document.getElementById("loginResult");
   const errorMessage = document.getElementById("errorMessage");
+
+  let csrfToken = null;
+  async function fetchCsrfToken() {
+    try {
+      const response = await fetch("Assets/PHP/check_session.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      const result = await response.json();
+      csrfToken = result.csrfToken || null;
+    } catch (error) {
+      console.error("Failed to fetch CSRF token:", error);
+    }
+  }
+  fetchCsrfToken();
+
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -20,7 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      if (!csrfToken) {
+        await fetchCsrfToken();
+      }
+
       const formData = new FormData(loginForm);
+      if (csrfToken) formData.append("csrf_token", csrfToken);
 
       try {
         const response = await fetch("Assets/PHP/login.php", {

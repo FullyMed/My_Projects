@@ -1,9 +1,11 @@
 <?php
+require_once("security.php");
+
 header("Content-Type: application/json");
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-if (!session_start()) {
+if (!secure_session_start()) {
     http_response_code(500);
     echo json_encode([
         "success" => false,

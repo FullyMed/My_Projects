@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let allBookings = [];
   let selectedBooking = null;
   let remainingCancels = 2;
+  let csrfToken = null;
 
   async function checkSession() {
     try {
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
       const result = await response.json();
+      csrfToken = result.csrfToken || null;
       if (result.loggedIn) {
         return result.user;
       } else {
@@ -142,8 +144,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       const newAvatar = document.querySelector('input[name="newAvatar"]:checked')?.value;
       if (newAvatar) {
+        if (!csrfToken) {
+          await checkSession();
+        }
         const formData = new FormData();
         formData.append("avatar", newAvatar);
+        formData.append("csrf_token", csrfToken);
         try {
           const response = await fetch("Assets/PHP/update_avatar.php", {
             method: "POST",
@@ -169,6 +175,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Confirm Cancel
   if (confirmCancel) {
     confirmCancel.addEventListener("click", async () => {
+      if (!csrfToken) {
+        await checkSession();
+      }
       try {
         const res = await fetch("Assets/PHP/cancel_booking.php", {
           method: "POST",
@@ -179,9 +188,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             email: loggedInUser.email,
             date: selectedBooking.date,
             start: selectedBooking.start_time,
-            end: selectedBooking.end_time
+            end: selectedBooking.end_time,
+            csrf_token: csrfToken
           })
-        });        
+        });
 
         const result = await res.json();
         if (result.success) {

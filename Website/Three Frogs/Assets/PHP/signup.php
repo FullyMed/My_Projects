@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once("security.php");
+secure_session_start();
 header("Content-Type: application/json");
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -10,6 +11,13 @@ function respond($status, $data) {
     http_response_code($status);
     echo json_encode($data);
     exit;
+}
+
+if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+    respond(403, [
+        "success" => false,
+        "error" => "Your session expired. Please refresh the page and try again."
+    ]);
 }
 
 $name = trim($_POST['name'] ?? '');
@@ -43,6 +51,13 @@ if (!$name || !$email || !$password) {
     ]);
 }
 
+if (strlen($name) > 100 || strlen($email) > 255 || strlen($password) > 200) {
+    respond(400, [
+        "success" => false,
+        "error" => "One or more fields exceed the maximum allowed length."
+    ]);
+}
+
 if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
     respond(400, [
         "success" => false,
@@ -64,6 +79,15 @@ if (strlen($password) < 8) {
     ]);
 }
 
+$ip = client_ip();
+if (rate_limit_exceeded($conn, 'signup_ip', $ip, 8, 60)) {
+    respond(429, [
+        "success" => false,
+        "error" => "Too many signup attempts from this network. Please try again later."
+    ]);
+}
+record_attempt($conn, 'signup_ip', $ip);
+
 $checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $checkStmt->bind_param("s", $email);
 $checkStmt->execute();
@@ -82,15 +106,17 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 $stmt = $conn->prepare("INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)");
 if (!$stmt) {
+    error_log("signup.php: prepare failed: " . $conn->error);
     respond(500, [
         "success" => false,
-        "error" => "Database error: " . $conn->error
+        "error" => "Something went wrong. Please try again later."
     ]);
 }
 
 $stmt->bind_param("ssss", $name, $email, $hashedPassword, $avatar);
 
 if ($stmt->execute()) {
+    session_regenerate_id(true);
     $_SESSION['user'] = [
         "id" => $stmt->insert_id,
         "name" => $name,
@@ -104,9 +130,10 @@ if ($stmt->execute()) {
         ]
     ]);
 } else {
+    error_log("signup.php: insert failed: " . $stmt->error);
     respond(500, [
         "success" => false,
-        "error" => "Signup failed: " . $stmt->error
+        "error" => "Signup failed. Please try again later."
     ]);
 }
 ?>

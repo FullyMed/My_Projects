@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once("security.php");
+secure_session_start();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
@@ -21,7 +22,12 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $emailSession = $user['email'];
 
-$data = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true) ?? [];
+
+if (!verify_csrf_token(get_submitted_csrf_token($data))) {
+    respond(false, "Your session expired. Please refresh the page and try again.");
+}
+
 $name = htmlspecialchars(strip_tags($data['name'] ?? ''));
 $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL);
 $date = $data['date'] ?? '';
@@ -31,6 +37,10 @@ $people = $data['people'] ?? '';
 
 if (!$name || !$email || !$date || !$start || !$end || !$people) {
     respond(false, "All fields are required.");
+}
+
+if (strlen($name) > 100) {
+    respond(false, "Name is too long.");
 }
 
 if ($email !== $emailSession) {
@@ -85,7 +95,8 @@ $stmt->bind_param("sssssi", $name, $email, $date, $start, $end, $people);
 if ($stmt->execute()) {
     respond(true, "Booking successful.");
 } else {
-    respond(false, "Failed to save booking. " . $conn->error);
+    error_log("booking.php: insert failed: " . $conn->error);
+    respond(false, "Failed to save booking. Please try again later.");
 }
 
 $stmt->close();

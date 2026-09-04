@@ -1,0 +1,42 @@
+# Three Frogs — server-level hardening for Apache/LiteSpeed (Hostinger).
+# Safe for local XAMPP/Laragon too: HTTPS redirect is skipped on localhost,
+# and every directive is guarded by its module so a missing module never
+# breaks local serving.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS in production only (skip localhost so local dev still works).
+  RewriteCond %{HTTP_HOST} !^localhost$ [NC]
+  RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://code.jquery.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+</IfModule>
+
+# Never list directory contents.
+Options -Indexes
+
+# Block direct web access to files that should only ever be read by PHP
+# includes or kept as internal reference material (PHP's require/include
+# reads straight from disk and is unaffected by these HTTP-level rules).
+<Files "db_config.php">
+  Require all denied
+</Files>
+
+<FilesMatch "\.(xlsx|sql|log|md|env)$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^(\.git|\.gitignore)">
+  Require all denied
+</FilesMatch>

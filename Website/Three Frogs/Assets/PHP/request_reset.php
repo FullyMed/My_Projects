@@ -17,6 +17,7 @@ ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 require_once("db_connect.php");
+require_once("security.php");
 
 function respond($status, $data) {
     http_response_code($status);
@@ -26,9 +27,19 @@ function respond($status, $data) {
 
 $email = strtolower(trim($_POST['email'] ?? ''));
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
     respond(400, ["success" => false, "error" => "Invalid email format."]);
 }
+
+$ip = client_ip();
+if (rate_limit_exceeded($conn, 'reset_request_ip', $ip, 10, 60) || rate_limit_exceeded($conn, 'reset_request_email', $email, 3, 60)) {
+    // Still respond 200 so a rate-limited caller can't use the response to
+    // learn whether the email exists — same reasoning as the enumeration
+    // defense below.
+    respond(200, ["success" => true]);
+}
+record_attempt($conn, 'reset_request_ip', $ip);
+record_attempt($conn, 'reset_request_email', $email);
 
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);

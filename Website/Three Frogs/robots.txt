@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /Assets/PHP/
+Disallow: /Data/

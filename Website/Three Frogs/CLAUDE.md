@@ -55,6 +55,7 @@ Every page calls `Assets/PHP/check_session.php` (POST) before rendering auth-sen
 | `bookings` | name, email, date, start_time, end_time, people, status ('active') |
 | `cancellations` | email, date, start, end, cancel_time |
 | `password_reset_tokens` | id, email, token (64-char hex, unique), expires_at (1-hour TTL) |
+| `rate_limits` | id, action, identifier (IP or email), created_at — brute-force/abuse throttling |
 
 Cancellations are capped at **2 per user per calendar month** (checked in both `get_bookings.php` and `cancel_booking.php`). Booking hours are enforced client- and server-side as **12:00–22:00**. Booking dates cannot be in the past (also enforced both sides).
 
@@ -67,6 +68,17 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   expires_at DATETIME     NOT NULL,
   INDEX idx_token (token),
   INDEX idx_email (email)
+);
+```
+
+The `rate_limits` table must also be created manually before login/signup/password-reset throttling will engage (see [Security hardening](#security-hardening) — it fails open, not closed, if missing):
+```sql
+CREATE TABLE IF NOT EXISTS rate_limits (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  action     VARCHAR(50)  NOT NULL,
+  identifier VARCHAR(255) NOT NULL,
+  created_at DATETIME     NOT NULL,
+  INDEX idx_action_identifier_time (action, identifier, created_at)
 );
 ```
 
@@ -88,12 +100,21 @@ Valid categories (must match the filter dropdown in `Collection.html`): Party, F
 
 - Every endpoint sets `ini_set('display_errors', 0)` and `error_reporting(E_ALL)` — errors go to the server log, never to the browser
 - Every endpoint sets `Content-Type: application/json`
-- Auth endpoints use `session_start()`
+- Auth/session endpoints call `secure_session_start()` from `Assets/PHP/security.php` — **never call raw `session_start()`** (it sets `HttpOnly`/`Secure`/`SameSite=Lax` cookie params first)
 - All use `require_once("db_connect.php")`
 - A local `respond($status, $data)` helper echoes JSON and calls `exit`
 - Booking/cancellation endpoints accept JSON body (`php://input`); auth endpoints accept form POST
 - Passwords use `password_hash` / `password_verify` (bcrypt)
 - Avatar values are validated against a hardcoded whitelist in both `signup.php` and `update_avatar.php`
+- Never echo `$conn->error` / `$stmt->error` (or any exception message) into a JSON response — log it with `error_log()` and return a generic message instead
+
+### Security hardening
+
+- **CSRF protection** — `Assets/PHP/security.php` provides `csrf_token()` / `verify_csrf_token()`. `check_session.php` hands every page a `csrfToken` in its JSON response; the frontend JS (`Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js`) caches it from that same call and resends it as `csrf_token` (form field, JSON body field, or `X-CSRF-Token` header) on every state-changing request. `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, and `update_avatar.php` all reject requests that don't present a valid token. When adding a new state-changing endpoint, wire it into this pattern.
+- **Rate limiting** — `security.php`'s `rate_limit_exceeded()` / `record_attempt()` back onto the `rate_limits` table, keyed by `action` + identifier (IP and/or email). Applied to `login.php` (per-IP and per-email), `signup.php` (per-IP), `request_reset.php` (per-IP and per-email), and `forgot_password.php` (per-IP). Fails **open** (i.e. does not block) if the table doesn't exist, so a missed migration can't lock out every user — create the table (see above) to actually enforce limits.
+- **Session fixation** — `login.php` and `signup.php` call `session_regenerate_id(true)` immediately after establishing `$_SESSION['user']`.
+- **Server-level hardening** — the root `.htaccess` forces HTTPS in production (skipped on `localhost`/`127.0.0.1` so local dev isn't broken), sets security headers (CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS), disables directory listing, and denies direct web access to `db_config.php` and `*.xlsx`/`*.sql`/`*.log`/`*.md`/`.git*`. `Data/.htaccess` denies all access to that folder outright. Keep the CSP's `script-src` free of `unsafe-inline`/`unsafe-eval` — if you need a new inline `<script>` or an `onclick=` attribute, wire it up as an external listener instead (see `Booking.js` for the pattern used to replace the old `authPopup` button `onclick`s).
+- External links using `target="_blank"` must include `rel="noopener noreferrer"` (reverse-tabnabbing protection) — see `About.html`.
 
 ## Design System
 

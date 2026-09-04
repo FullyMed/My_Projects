@@ -3,6 +3,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const popup = document.getElementById("authPopup");
   const bookingResult = document.getElementById("bookingResult");
 
+  document.getElementById("authPopupLoginBtn")?.addEventListener("click", () => {
+    window.location.href = "Login.html";
+  });
+  document.getElementById("authPopupSignupBtn")?.addEventListener("click", () => {
+    window.location.href = "Signup.html";
+  });
+
+  let csrfToken = null;
+
   async function checkSession() {
     try {
       const response = await fetch("Assets/PHP/check_session.php", {
@@ -10,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
       const result = await response.json();
+      csrfToken = result.csrfToken || null;
       return result.loggedIn ? result.user : null;
     } catch (error) {
       console.error("Session check failed:", error);
@@ -65,6 +75,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }      
 
+      if (!csrfToken) {
+        await checkSession();
+      }
+
       try {
         const response = await fetch("Assets/PHP/booking.php", {
           method: "POST",
@@ -75,7 +89,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             date,
             start,
             end,
-            people
+            people,
+            csrf_token: csrfToken
           })
         });
 
