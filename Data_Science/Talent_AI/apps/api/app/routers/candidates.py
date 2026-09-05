@@ -12,6 +12,8 @@ from ..services.insight_service import generate_insight, get_insight
 
 router = APIRouter()
 
+MAX_RESUME_BYTES = 10 * 1024 * 1024  # 10MB -- generous for a resume PDF
+
 
 @router.post("/upload")
 async def upload_candidate(
@@ -23,6 +25,15 @@ async def upload_candidate(
         raise HTTPException(status_code=400, detail="Only PDF uploads are supported")
 
     file_bytes = await file.read()
+
+    if len(file_bytes) > MAX_RESUME_BYTES:
+        raise HTTPException(status_code=413, detail="Resume file is too large (10MB limit)")
+    # Content-Type is client-supplied and trivially spoofed -- the magic
+    # bytes are what actually gets handed to the PDF parser, so check those
+    # too rather than trusting the header alone.
+    if not file_bytes.startswith(b"%PDF-"):
+        raise HTTPException(status_code=422, detail="File is not a valid PDF")
+
     client = get_scoped_client(user.token)
 
     try:

@@ -114,18 +114,23 @@ assumed "one global file on disk, one tenant" did.
         signup email rate limit). The `get_advisors` finding for this is a
         known, accepted free-tier limitation — it's auth hygiene, not a
         tenant-isolation gap.
-  - [~] AI insights (OpenAI) — **code-complete, pending migration `0010` +
-        `OPENAI_API_KEY` on the service + deploy**. Vendored `insights/`
-        modules (`insight_generator` / `llm_client` / `schemas`, adapted to
-        read the key/model from env and to return token usage). One
-        structured call per (candidate, job) → summary, strengths,
-        weaknesses, missing qualifications, hiring recommendation, interview
-        questions; only `anonymized_text` is sent to OpenAI. Cached in
+  - [x] AI insights (OpenAI) — **live**. Vendored `insights/` modules
+        (`insight_generator` / `llm_client` / `schemas`, adapted to read the
+        key/model from env and to return token usage). One structured call
+        per (candidate, job) → summary, strengths, weaknesses, missing
+        qualifications, hiring recommendation, interview questions; only
+        `anonymized_text` is sent to OpenAI, never `raw_text`. Cached in
         `candidate_insights` (RLS, `unique(candidate_id, job_description_id)`,
         stores token counts). `GET|POST /candidates/{id}/insights?job_id=…`
         (`?refresh=true` regenerates; 503 if the key isn't set). UI: an
         expander per ranked candidate on the job page, and a job-picker
         section on the candidate page — both via `components/insights.tsx`.
+        **`anonymize_text()` hardened** after a live test showed real names
+        reaching OpenAI (header line/split-line/bilingual name detection +
+        messaging-handle redaction added, on top of the existing regex +
+        spaCy NER pass) — see `extraction/anonymize.py`'s own docstring for
+        why this stays best-effort, not a guarantee, for non-Western names
+        and unusual resume layouts.
   - [ ] per-tenant OpenAI usage metering (builds on the `candidate_insights`
         token log)
   - [ ] Stripe billing

@@ -7,8 +7,10 @@ Vendored from the original Talent_AI project
 (src/talent_ai/insights/insight_generator.py); only the return type changed
 (it now also hands back token usage -- see llm_client.parse_structured).
 
-Uses the anonymized resume text -- the same PII-stripped text used for
-embedding -- so names/emails/phone numbers are never sent to the OpenAI API.
+Uses the anonymized resume text -- the same text used for embedding -- so
+contact details and (best-effort, not guaranteed -- see
+extraction/anonymize.py) names are stripped before anything reaches the
+OpenAI API.
 """
 
 from __future__ import annotations
