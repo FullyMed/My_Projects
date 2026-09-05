@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { apiFetch } from "@/lib/api";
 import { Logo, Spinner } from "@/components/ui";
 
 const navItems = [
@@ -10,9 +11,17 @@ const navItems = [
   { href: "/dashboard/jobs", label: "Jobs" },
 ];
 
+type UsageSummary = {
+  plan: string;
+  tokens_used: number;
+  token_limit: number;
+  tokens_remaining: number;
+};
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -27,6 +36,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setReady(true);
     });
   }, [router]);
+
+  useEffect(() => {
+    if (!ready) return;
+    apiFetch<UsageSummary>("/usage").then(setUsage).catch(() => setUsage(null));
+  }, [ready]);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -68,6 +82,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </nav>
           </div>
           <div className="flex items-center gap-4 text-sm">
+            {usage && (
+              <div
+                className="hidden flex-col gap-0.5 sm:flex"
+                title={`${usage.tokens_used.toLocaleString()} / ${usage.token_limit.toLocaleString()} AI tokens used this month (${usage.plan} plan)`}
+              >
+                <span className="text-xs text-muted">
+                  {usage.tokens_used.toLocaleString()} / {usage.token_limit.toLocaleString()} AI tokens
+                </span>
+                <div className="h-1 w-32 overflow-hidden rounded-full bg-surface-hover">
+                  <div
+                    className={`h-full rounded-full ${
+                      usage.tokens_used >= usage.token_limit ? "bg-danger" : "bg-accent"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, (usage.tokens_used / usage.token_limit) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             <span className="text-muted">{email}</span>
             <button
               onClick={handleSignOut}

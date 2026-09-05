@@ -41,6 +41,14 @@ def _single_execute(client):
     return client.table.return_value.select.return_value.eq.return_value.single.return_value.execute
 
 
+def _usage_gte_execute(client):
+    # usage_service.get_usage_summary's "tokens used this month" query --
+    # distinct chain from the cache lookup (.limit) and candidate/job fetch
+    # (.single), so it needs its own stub whenever a test reaches the actual
+    # LLM-call path (ensure_within_budget runs before every real generation).
+    return client.table.return_value.select.return_value.gte.return_value.execute
+
+
 def _fake_insights():
     return (
         CandidateInsights(
@@ -86,7 +94,9 @@ def test_generate_insight_calls_llm_and_upserts_tenant_scoped_row():
             "id": "job-1", "title": "Backend Engineer", "raw_text": "JD text",
             "required_skills": ["python", "aws"],
         }),
+        _resp({"plan": "trial"}),  # usage_service's tenant-plan lookup
     ]
+    _usage_gte_execute(client).return_value = _resp([])  # no usage yet this month
     saved = {**CACHED_ROW, "insights": {"summary": "Strong Python background"},
              "input_tokens": 800, "output_tokens": 200}
     client.table.return_value.upsert.return_value.execute.return_value = _resp([saved])
@@ -104,6 +114,37 @@ def test_generate_insight_calls_llm_and_upserts_tenant_scoped_row():
     assert client.table.return_value.upsert.call_args.kwargs["on_conflict"] == "candidate_id,job_description_id"
     assert out["input_tokens"] == 800
 
+    # The real OpenAI call also gets logged to the usage ledger.
+    usage_insert = client.table.return_value.insert.call_args.args[0]
+    assert usage_insert["tenant_id"] == "tenant-1"
+    assert usage_insert["input_tokens"] == 800 and usage_insert["output_tokens"] == 200
+
+
+def test_generate_insight_blocked_when_over_budget():
+    client = MagicMock()
+    _cache_select(client).return_value = _resp([])  # cache miss
+    _single_execute(client).side_effect = [
+        _resp({
+            "id": "cand-1", "source_path": "t/c.pdf", "category": None,
+            "raw_text": "raw", "anonymized_text": "anon", "skills": [],
+            "education": [], "experience": [],
+        }),
+        _resp({"id": "job-1", "title": "T", "raw_text": "JD", "required_skills": []}),
+    ]
+
+    with patch(
+        "app.services.insight_service.ensure_within_budget",
+        side_effect=PermissionError("Monthly AI usage limit reached"),
+    ), patch("app.services.insight_service.generate_insights") as gen:
+        try:
+            generate_insight(client=client, user=USER, candidate_id="cand-1", job_id="job-1")
+            raise AssertionError("expected PermissionError")
+        except PermissionError:
+            pass
+
+    gen.assert_not_called()
+    client.table.return_value.upsert.assert_not_called()
+
 
 def test_generate_insight_refresh_bypasses_cache():
     client = MagicMock()
@@ -115,7 +156,9 @@ def test_generate_insight_refresh_bypasses_cache():
             "education": [], "experience": [],
         }),
         _resp({"id": "job-1", "title": "T", "raw_text": "JD", "required_skills": []}),
+        _resp({"plan": "trial"}),
     ]
+    _usage_gte_execute(client).return_value = _resp([])
     client.table.return_value.upsert.return_value.execute.return_value = _resp([CACHED_ROW])
 
     with patch("app.services.insight_service.generate_insights", return_value=_fake_insights()) as gen:

@@ -87,7 +87,9 @@ export function InsightsPanel({
       setError(
         msg.includes("503")
           ? "AI insights aren't configured on the server yet (missing OpenAI key)."
-          : msg,
+          : msg.includes("402")
+            ? "Monthly AI usage limit reached for your workspace. It resets at the start of next month."
+            : msg,
       );
     } finally {
       setGenerating(false);

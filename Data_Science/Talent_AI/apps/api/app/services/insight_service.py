@@ -15,6 +15,7 @@ from supabase import Client
 from talent_ai_core.insights.insight_generator import generate_insights
 from talent_ai_core.schemas import CandidateProfile, JobDescription
 
+from .usage_service import ensure_within_budget, record_usage
 from ..deps import CurrentUser
 
 
@@ -87,7 +88,17 @@ def generate_insight(
         required_skills=job_row.get("required_skills") or [],
     )
 
+    # Checked here, not at the router level, so a cache hit above never
+    # touches the budget check -- only an actual OpenAI call costs anything.
+    ensure_within_budget(client=client, user=user)
     insights, usage = generate_insights(candidate, job)
+    record_usage(
+        client=client,
+        user=user,
+        model=usage.model,
+        input_tokens=usage.input_tokens,
+        output_tokens=usage.output_tokens,
+    )
 
     now = datetime.now(timezone.utc).isoformat()
     payload = {

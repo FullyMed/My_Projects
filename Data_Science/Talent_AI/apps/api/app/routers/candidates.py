@@ -135,6 +135,9 @@ async def create_candidate_insight(
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        # Monthly OpenAI usage cap reached for this tenant.
+        raise HTTPException(status_code=402, detail=str(exc)) from exc
     except RuntimeError as exc:
         # OPENAI_API_KEY not configured on the service.
         raise HTTPException(status_code=503, detail=str(exc)) from exc

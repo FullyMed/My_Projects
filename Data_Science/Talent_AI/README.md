@@ -131,8 +131,18 @@ assumed "one global file on disk, one tenant" did.
         spaCy NER pass) — see `extraction/anonymize.py`'s own docstring for
         why this stays best-effort, not a guarantee, for non-Western names
         and unusual resume layouts.
-  - [ ] per-tenant OpenAI usage metering (builds on the `candidate_insights`
-        token log)
+  - [x] per-tenant OpenAI usage metering — **live**. An append-only
+        `usage_events` ledger (`supabase/migrations/0011`, RLS-isolated like
+        every other tenant table) records one row per real OpenAI call
+        (cached-insight reads don't touch it). The monthly token limit is
+        keyed off the existing `tenants.plan` column (a Phase A hook) via a
+        plan→limit map in `app/services/usage_service.py`, not a separate
+        DB column — so wiring up Stripe later only means updating `plan` on
+        a webhook. `ensure_within_budget()` soft-caps new insight
+        generations at the tenant's monthly limit (`402` once reached); `GET
+        /usage` returns the tenant's usage/limit/remaining for the current
+        calendar month, shown as a small badge + bar in the dashboard
+        header.
   - [ ] Stripe billing
 - [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +
