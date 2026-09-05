@@ -73,6 +73,12 @@ def test_process_and_store_resume_inserts_tenant_scoped_row():
 def test_process_and_store_resume_rejects_empty_pdf_text():
     user = CurrentUser(user_id="user-1", tenant_id="tenant-1", token="fake-token")
     mock_client = MagicMock()
+    # Under the trial candidate-count limit, so ensure_can_add_candidate
+    # (which now runs first) doesn't itself block this call.
+    mock_client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+        "plan": "trial"
+    }
+    mock_client.table.return_value.select.return_value.execute.return_value.data = []
 
     with patch("app.services.candidate_service.extract_text", return_value="   "):
         try:
@@ -87,7 +93,9 @@ def test_process_and_store_resume_rejects_empty_pdf_text():
         except ValueError:
             pass
 
-    mock_client.table.assert_not_called()
+    # The trial-cap check is allowed to touch the DB, but no candidate row or
+    # Storage object should ever be written for empty/unparseable text.
+    mock_client.table.return_value.insert.assert_not_called()
 
 
 def test_delete_candidate_removes_storage_object_then_db_row():

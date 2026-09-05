@@ -56,7 +56,12 @@ export default function JobsPage() {
       await apiFetch(`/jobs/${job.id}/rank`, { method: "POST" });
       router.push(`/dashboard/jobs/${job.id}`);
     } catch (err) {
-      setError(String(err));
+      const msg = String(err);
+      setError(
+        msg.includes("402")
+          ? "Trial plan is limited to 3 job descriptions. Upgrade to add more."
+          : msg,
+      );
       setSubmitting(false);
     }
   }

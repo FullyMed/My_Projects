@@ -75,7 +75,12 @@ export default function CandidatesPage() {
       setOffset(0);
       await loadCandidates(0);
     } catch (err) {
-      setError(String(err));
+      const msg = String(err);
+      setError(
+        msg.includes("402")
+          ? "Trial plan is limited to 10 candidates. Upgrade to add more."
+          : msg,
+      );
     } finally {
       setUploading(false);
     }

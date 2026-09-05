@@ -12,6 +12,7 @@ from ..services.ranking_service import (
     rank_candidates_tfidf,
     skill_gap_for_job,
 )
+from ..services.usage_service import ensure_can_add_job
 
 router = APIRouter()
 
@@ -27,6 +28,12 @@ async def create_job(
     payload: JobCreateRequest, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
+    try:
+        ensure_can_add_job(client=client, user=user)
+    except PermissionError as exc:
+        # Trial plan's job-count cap reached.
+        raise HTTPException(status_code=402, detail=str(exc)) from exc
+
     embedding = embed_text(payload.raw_text)
 
     row = {

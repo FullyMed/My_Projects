@@ -9,6 +9,7 @@ import { Logo, Spinner } from "@/components/ui";
 const navItems = [
   { href: "/dashboard/candidates", label: "Candidates" },
   { href: "/dashboard/jobs", label: "Jobs" },
+  { href: "/dashboard/billing", label: "Billing" },
 ];
 
 type UsageSummary = {

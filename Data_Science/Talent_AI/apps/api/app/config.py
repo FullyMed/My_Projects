@@ -28,5 +28,20 @@ class Settings:
     openai_api_key: str | None = os.environ.get("OPENAI_API_KEY")
     openai_model: str = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
+    # Stripe billing (Phase D). All optional -- the rest of the API runs fine
+    # without them; the billing endpoints return 503 until they're set.
+    stripe_secret_key: str | None = os.environ.get("STRIPE_SECRET_KEY")
+    stripe_webhook_secret: str | None = os.environ.get("STRIPE_WEBHOOK_SECRET")
+    stripe_price_id: str | None = os.environ.get("STRIPE_PRICE_ID")
+    # service_role key -- deliberately narrow: used ONLY by
+    # billing_service._admin_client() to apply a Stripe webhook's verified
+    # plan change. Every other write in this app goes through the caller's
+    # own RLS-scoped client; a webhook has no user session to scope one with,
+    # so this is the one place that's structurally necessary. See
+    # billing_service.py's module docstring for the full reasoning.
+    supabase_service_role_key: str | None = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    # Used to build Stripe Checkout's success/cancel redirect URLs.
+    frontend_url: str = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
 
 settings = Settings()

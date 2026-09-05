@@ -22,6 +22,7 @@ from talent_ai_core.schemas import CandidateProfile
 
 from ..config import settings
 from ..deps import CurrentUser
+from .usage_service import ensure_can_add_candidate
 
 
 def process_and_store_resume(
@@ -32,6 +33,10 @@ def process_and_store_resume(
     file_bytes: bytes,
     category: str | None,
 ) -> dict:
+    # Checked first, before the (comparatively expensive) parse/embed work,
+    # so a blocked upload fails fast.
+    ensure_can_add_candidate(client=client, user=user)
+
     candidate_id = str(uuid.uuid4())
     suffix = Path(filename).suffix or ".pdf"
 

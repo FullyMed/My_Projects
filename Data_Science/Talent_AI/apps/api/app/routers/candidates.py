@@ -46,6 +46,9 @@ async def upload_candidate(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except PermissionError as exc:
+        # Trial plan's candidate-count cap reached.
+        raise HTTPException(status_code=402, detail=str(exc)) from exc
 
     return candidate
 

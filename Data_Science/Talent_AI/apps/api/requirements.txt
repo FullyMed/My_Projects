@@ -28,6 +28,9 @@ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0
 # AI insights (Phase D) -- structured-output candidate evaluation
 openai
 
+# Billing (Phase D) -- Stripe Checkout + billing portal + webhooks
+stripe
+
 # Embeddings + ranking
 sentence-transformers
 numpy

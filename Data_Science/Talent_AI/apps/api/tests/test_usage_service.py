@@ -11,6 +11,8 @@ import pytest
 
 from app.deps import CurrentUser
 from app.services.usage_service import (
+    ensure_can_add_candidate,
+    ensure_can_add_job,
     ensure_within_budget,
     get_usage_summary,
     record_usage,
@@ -71,6 +73,43 @@ def test_ensure_within_budget_uses_higher_limit_for_paid_plan():
     # Same usage that blocks a trial tenant should pass for a paid plan.
     client = _mock_client(plan="pro", usage_rows=[{"input_tokens": 200_000, "output_tokens": 0}])
     ensure_within_budget(client=client, user=USER)  # no raise
+
+
+def _mock_client_for_count(*, plan: str, row_count: int):
+    client = MagicMock()
+    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+        {"plan": plan}
+    )
+    # ensure_can_add_candidate/job: plain select("id").execute() -- distinct
+    # chain from both the tenant-plan lookup (.eq().single()) and the usage
+    # sum lookup (.gte()), so it needs its own stub.
+    client.table.return_value.select.return_value.execute.return_value = _resp(
+        [{"id": f"row-{i}"} for i in range(row_count)]
+    )
+    return client
+
+
+def test_ensure_can_add_candidate_passes_under_limit():
+    client = _mock_client_for_count(plan="trial", row_count=9)
+    ensure_can_add_candidate(client=client, user=USER)  # no raise (limit is 10)
+
+
+def test_ensure_can_add_candidate_raises_at_limit():
+    client = _mock_client_for_count(plan="trial", row_count=10)
+    with pytest.raises(PermissionError):
+        ensure_can_add_candidate(client=client, user=USER)
+
+
+def test_ensure_can_add_job_raises_at_limit():
+    client = _mock_client_for_count(plan="trial", row_count=3)
+    with pytest.raises(PermissionError):
+        ensure_can_add_job(client=client, user=USER)
+
+
+def test_pro_plan_has_unlimited_candidates_and_jobs():
+    client = _mock_client_for_count(plan="pro", row_count=10_000)
+    ensure_can_add_candidate(client=client, user=USER)  # no raise
+    ensure_can_add_job(client=client, user=USER)  # no raise
 
 
 def test_record_usage_inserts_tenant_scoped_row():
