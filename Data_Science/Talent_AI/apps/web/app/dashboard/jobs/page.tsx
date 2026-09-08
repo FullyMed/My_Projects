@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { Button, Card, EmptyState, ErrorText, Input, Textarea } from "@/components/ui";
+import { SAMPLE_JDS } from "@/lib/sampleJds";
 
 const PAGE_SIZE = 20;
 
@@ -77,6 +78,22 @@ export default function JobsPage() {
 
       <Card className="p-5">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+            <span>Load a sample:</span>
+            {SAMPLE_JDS.map((jd) => (
+              <button
+                key={jd.label}
+                type="button"
+                onClick={() => {
+                  setTitle(jd.title);
+                  setRawText(jd.text);
+                }}
+                className="rounded-md border border-border px-2 py-1 font-medium text-foreground transition-colors hover:bg-surface-hover"
+              >
+                {jd.label}
+              </button>
+            ))}
+          </div>
           <Input
             placeholder="Job title"
             value={title}

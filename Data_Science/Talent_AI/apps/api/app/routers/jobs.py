@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from talent_ai_core.embeddings.embedder import embed_text
+from talent_ai_core.extraction.nlp_extractor import extract_skills
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
 from ..services.ranking_service import (
@@ -36,11 +37,18 @@ async def create_job(
 
     embedding = embed_text(payload.raw_text)
 
+    # Auto-detect required skills from the JD text (as the original Streamlit
+    # app did) and union them with anything the user typed by hand -- the
+    # extractor covers the common cases, the manual field catches the rest.
+    required_skills = sorted(
+        set(payload.required_skills) | set(extract_skills(payload.raw_text))
+    )
+
     row = {
         "tenant_id": user.tenant_id,
         "title": payload.title,
         "raw_text": payload.raw_text,
-        "required_skills": payload.required_skills,
+        "required_skills": required_skills,
         "embedding": embedding.tolist(),
     }
     result = client.table("job_descriptions").insert(row).execute()

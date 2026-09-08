@@ -17,14 +17,17 @@ type Candidate = {
   created_at: string;
 };
 
+type BulkResult = { filename: string; status: "ok" | "error"; detail?: string };
+
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [offset, setOffset] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [category, setCategory] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
 
   async function loadCandidates(atOffset: number) {
     setLoadingList(true);
@@ -47,9 +50,10 @@ export default function CandidatesPage() {
 
   async function handleUpload(event: FormEvent) {
     event.preventDefault();
-    if (!file) return;
+    if (files.length === 0) return;
     setUploading(true);
     setError(null);
+    setBulkResults(null);
 
     try {
       const supabase = createClient();
@@ -57,11 +61,13 @@ export default function CandidatesPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
+      const single = files.length === 1;
       const formData = new FormData();
-      formData.append("file", file);
+      for (const f of files) formData.append(single ? "file" : "files", f);
       if (category) formData.append("category", category);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/candidates/upload`, {
+      const path = single ? "/candidates/upload" : "/candidates/upload/bulk";
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${path}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${session?.access_token}` },
         body: formData,
@@ -70,7 +76,10 @@ export default function CandidatesPage() {
         throw new Error(await response.text());
       }
 
-      setFile(null);
+      if (!single) {
+        setBulkResults((await response.json()) as BulkResult[]);
+      }
+      setFiles([]);
       setCategory("");
       setOffset(0);
       await loadCandidates(0);
@@ -99,24 +108,47 @@ export default function CandidatesPage() {
             <input
               type="file"
               accept="application/pdf"
+              multiple
               className="hidden"
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
               required
             />
             <span className="text-sm font-medium text-foreground">
-              {file ? file.name : "Click to choose a resume PDF"}
+              {files.length === 0
+                ? "Click to choose resume PDF(s)"
+                : files.length === 1
+                  ? files[0].name
+                  : `${files.length} files selected`}
             </span>
-            <span className="text-xs text-muted">PDF, up to a few MB</span>
+            <span className="text-xs text-muted">PDF, up to 10MB each — select several to bulk-upload</span>
           </label>
           <Input
             placeholder="Category (optional)"
             value={category}
             onChange={(event) => setCategory(event.target.value)}
           />
-          <Button type="submit" loading={uploading} disabled={!file} className="w-fit">
-            {uploading ? "Uploading..." : "Upload resume"}
+          <Button type="submit" loading={uploading} disabled={files.length === 0} className="w-fit">
+            {uploading
+              ? "Uploading..."
+              : files.length > 1
+                ? `Upload ${files.length} resumes`
+                : "Upload resume"}
           </Button>
         </form>
+
+        {bulkResults && (
+          <div className="mt-4 flex flex-col gap-1 border-t border-border pt-3 text-sm">
+            {bulkResults.map((r, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className={r.status === "ok" ? "text-accent" : "text-danger"}>
+                  {r.status === "ok" ? "✓" : "✗"}
+                </span>
+                <span className="text-foreground">{r.filename}</span>
+                {r.detail && <span className="text-xs text-muted">— {r.detail}</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       {error && <ErrorText>{error}</ErrorText>}

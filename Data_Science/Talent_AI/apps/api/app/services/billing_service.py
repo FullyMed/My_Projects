@@ -136,14 +136,19 @@ def handle_stripe_event(*, payload: bytes, sig_header: str) -> None:
     # at the event's contents.
     event = stripe.Webhook.construct_event(payload, sig_header, settings.stripe_webhook_secret)
 
-    obj = event["data"]["object"]
+    # stripe-python v15+ hands back typed StripeObjects (e.g. a Session), not
+    # plain dicts -- calling .get() on one raises. Flatten to a plain dict
+    # (recursively) so the lookups below are ordinary dict access.
+    event_type = event["type"]
+    raw_obj = event["data"]["object"]
+    obj = raw_obj.to_dict() if hasattr(raw_obj, "to_dict") else raw_obj
 
-    if event["type"] == "checkout.session.completed":
+    if event_type == "checkout.session.completed":
         tenant_id = (obj.get("metadata") or {}).get("tenant_id")
         if tenant_id:
             _set_tenant_plan(tenant_id=tenant_id, plan="pro", stripe_customer_id=obj.get("customer"))
 
-    elif event["type"] == "customer.subscription.updated":
+    elif event_type == "customer.subscription.updated":
         tenant_id = (obj.get("metadata") or {}).get("tenant_id") or _tenant_id_for_customer(
             obj.get("customer")
         )
@@ -151,7 +156,7 @@ def handle_stripe_event(*, payload: bytes, sig_header: str) -> None:
             plan = PLAN_FOR_SUBSCRIPTION_STATUS.get(obj.get("status"), DEFAULT_PLAN)
             _set_tenant_plan(tenant_id=tenant_id, plan=plan)
 
-    elif event["type"] == "customer.subscription.deleted":
+    elif event_type == "customer.subscription.deleted":
         tenant_id = (obj.get("metadata") or {}).get("tenant_id") or _tenant_id_for_customer(
             obj.get("customer")
         )

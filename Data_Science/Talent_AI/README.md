@@ -33,7 +33,9 @@ it's a free-tier limitation — moving to a paid Supabase plan removes it.
 - **Database + Auth + Storage**: Supabase — Postgres with `pgvector`, Auth,
   and Storage
 - **Frontend**: Next.js App Router (`apps/web`), deployed to **Vercel**
-- **Billing**: Stripe (not wired up yet — Phase D)
+- **Billing**: Stripe Checkout + billing portal + a signature-verified
+  webhook (`apps/api/app/services/billing_service.py`), plan state on
+  `tenants.plan`
 
 Backend hosting note: Render was tried first and rejected — its free *and*
 cheapest paid tier both cap out at 512MB RAM, which isn't enough to hold
@@ -106,7 +108,7 @@ assumed "one global file on disk, one tenant" did.
       job's saved shortlist missing each required skill) with a panel on the
       same page; the job create form takes a comma-separated required-skills
       list.
-- [ ] **Phase D**: (in progress)
+- [x] **Phase D**: billing + AI, all four pieces live
   - [x] auth hardening — free-tier password policy tightened (min length 8,
         character requirements). Supabase's HaveIBeenPwned leaked-password
         check is **Pro-plan only**; deferred until the project moves off the
@@ -143,8 +145,42 @@ assumed "one global file on disk, one tenant" did.
         /usage` returns the tenant's usage/limit/remaining for the current
         calendar month, shown as a small badge + bar in the dashboard
         header.
-  - [ ] Stripe billing
-- [ ] **Phase E**: full dashboard feature parity with the original Streamlit app
+  - [x] Stripe billing — **live**. Stripe Checkout (`POST /billing/checkout`,
+        `mode=subscription`, `tenant_id` in metadata), billing portal
+        (`POST /billing/portal`), and a signature-verified webhook
+        (`POST /billing/webhook` — the one intentionally unauthenticated
+        route; trust is Stripe's HMAC, not RLS) that flips `tenants.plan`
+        between `pro` and `trial` on subscription lifecycle events. No
+        migration — reuses the `tenants.plan` / `tenants.stripe_customer_id`
+        columns from `0002`. The webhook is the **only** place the Supabase
+        `service_role` key is used (`billing_service._admin_client()`),
+        because a webhook has no user JWT to scope an RLS client with, and
+        `tenants` has no UPDATE policy for regular users — so a plan change
+        is only reachable through that one signature-gated path. Trial caps
+        (10 candidates, 3 jobs, 200k AI tokens/mo) enforced in
+        `usage_service.py` → `402`; `pro` lifts all three. Verified
+        end-to-end with a real test-mode Checkout on the live site. One
+        placeholder "$29/mo" product exists; real pricing/tiers are still
+        TBD — only the plumbing is committed.
+- [ ] **Phase E**: dashboard parity with the original Streamlit app + a
+      SaaS-shaped take on its local automation
+  - [x] parity gaps (Parts 1 + 2a, **live**): `create_job` auto-detects
+        required skills from the JD text (`extract_skills`) and unions them
+        with anything typed; job detail page has a top-K control, a 3-way
+        Semantic / Keyword / **Compare** (side-by-side) view, and highlights
+        candidate skills that match the JD's required skills; job-create
+        form has "load sample JD" buttons (`apps/web/lib/sampleJds.ts`);
+        **bulk resume upload** — `POST /candidates/upload/bulk` takes many
+        PDFs, returns a per-file ok/error list, respects the trial
+        candidate cap; multi-file picker on the candidates page.
+  - [ ] Part 2b — opt-in weekly shortlist email per job (per-job toggle →
+        scheduler-triggered semantic re-rank + emailed digest, never calls
+        OpenAI). Needs SMTP creds + a `REPORT_TRIGGER_SECRET` + a GCP Cloud
+        Scheduler job; migration `0012` for the toggle column + a
+        tenant-explicit ranking function. Introduces the 2nd (and last) use
+        of the `service_role` key (a scheduler run has no user JWT).
+  - retired for good: the local folder watcher and `scripts/evaluate.py`'s
+    Precision@K benchmark — neither fits a multi-tenant product.
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +
       Supabase) — done early, ahead of B-E, so the current feature set could
       be shared with real colleagues. Observability and CI/CD still open.

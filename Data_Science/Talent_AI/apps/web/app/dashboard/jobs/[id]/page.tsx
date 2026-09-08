@@ -22,7 +22,20 @@ type MatchResult = {
   skills: string[];
 };
 type SkillGap = { skill: string; missing_fraction: number };
-type Method = "semantic" | "tfidf";
+type Method = "semantic" | "tfidf" | "compare";
+
+function SkillBadges({ skills, required }: { skills: string[]; required: string[] }) {
+  const req = new Set(required);
+  return (
+    <div className="flex flex-wrap gap-1 pt-0.5">
+      {skills.slice(0, 8).map((skill) => (
+        <Badge key={skill} tone={req.has(skill) ? "accent" : "default"}>
+          {skill}
+        </Badge>
+      ))}
+    </div>
+  );
+}
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +44,7 @@ export default function JobDetailPage() {
   const [tfidfResults, setTfidfResults] = useState<MatchResult[] | null>(null);
   const [skillGap, setSkillGap] = useState<SkillGap[] | null>(null);
   const [method, setMethod] = useState<Method>("semantic");
+  const [topK, setTopK] = useState(10);
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +65,13 @@ export default function JobDetailPage() {
       .catch(() => setSkillGap([]));
   }, [id]);
 
+  const fetchTfidf = useCallback(async () => {
+    const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank?method=tfidf&top_k=${topK}`, {
+      method: "POST",
+    });
+    setTfidfResults(ranked);
+  }, [id, topK]);
+
   useEffect(() => {
     Promise.all([apiFetch<Job>(`/jobs/${id}`), apiFetch<MatchResult[]>(`/jobs/${id}/results`)])
       .then(([jobData, resultsData]) => {
@@ -66,8 +87,11 @@ export default function JobDetailPage() {
     setRanking(true);
     setError(null);
     try {
-      const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank`, { method: "POST" });
+      const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank?top_k=${topK}`, {
+        method: "POST",
+      });
       setResults(ranked);
+      setTfidfResults(null); // stale after a top_k change
       loadSkillGap();
     } catch (err) {
       setError(String(err));
@@ -77,22 +101,20 @@ export default function JobDetailPage() {
   }
 
   async function selectMethod(next: Method) {
-    setMethod(next);
     setError(null);
-    if (next === "tfidf" && tfidfResults === null) {
+    if ((next === "tfidf" || next === "compare") && tfidfResults === null) {
       setRanking(true);
       try {
-        const ranked = await apiFetch<MatchResult[]>(`/jobs/${id}/rank?method=tfidf`, {
-          method: "POST",
-        });
-        setTfidfResults(ranked);
+        await fetchTfidf();
+        setMethod(next);
       } catch (err) {
         setError(String(err));
-        setMethod("semantic");
       } finally {
         setRanking(false);
       }
+      return;
     }
+    setMethod(next);
   }
 
   if (loading) {
@@ -110,7 +132,7 @@ export default function JobDetailPage() {
     return <ErrorText>Job not found.</ErrorText>;
   }
 
-  const displayed = method === "semantic" ? results : tfidfResults;
+  const displayed = method === "tfidf" ? tfidfResults : results;
   const showSkillGap =
     method === "semantic" &&
     job.required_skills.length > 0 &&
@@ -130,9 +152,24 @@ export default function JobDetailPage() {
           </p>
         </div>
         {method === "semantic" && (
-          <Button loading={ranking} onClick={handleRerank} className="shrink-0">
-            {ranking ? "Ranking..." : "Re-rank"}
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <label className="flex items-center gap-1.5 text-xs text-muted">
+              Top
+              <input
+                type="number"
+                min={5}
+                max={25}
+                value={topK}
+                onChange={(e) =>
+                  setTopK(Math.max(5, Math.min(25, Number(e.target.value) || 10)))
+                }
+                className="w-14 rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground outline-none focus:border-accent"
+              />
+            </label>
+            <Button loading={ranking} onClick={handleRerank}>
+              {ranking ? "Ranking..." : "Re-rank"}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -150,42 +187,70 @@ export default function JobDetailPage() {
 
       {error && <ErrorText>{error}</ErrorText>}
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-lg border border-border p-0.5">
-          <Button
-            variant={method === "semantic" ? "secondary" : "ghost"}
-            onClick={() => selectMethod("semantic")}
-            className="px-3 py-1.5"
-          >
-            Semantic
-          </Button>
-          <Button
-            variant={method === "tfidf" ? "secondary" : "ghost"}
-            onClick={() => selectMethod("tfidf")}
-            className="px-3 py-1.5"
-          >
-            Keyword (TF-IDF)
-          </Button>
+          {(["semantic", "tfidf", "compare"] as Method[]).map((m) => (
+            <Button
+              key={m}
+              variant={method === m ? "secondary" : "ghost"}
+              onClick={() => selectMethod(m)}
+              className="px-3 py-1.5"
+            >
+              {m === "semantic" ? "Semantic" : m === "tfidf" ? "Keyword (TF-IDF)" : "Compare"}
+            </Button>
+          ))}
         </div>
-        {method === "tfidf" && (
+        {method !== "semantic" && (
           <span className="text-xs text-muted">Comparison only — not saved</span>
         )}
       </div>
 
-      {ranking && method === "tfidf" && (
+      {ranking && method !== "semantic" && (
         <div className="flex justify-center py-8">
           <Spinner className="h-5 w-5 text-muted" />
         </div>
       )}
 
-      {displayed && displayed.length === 0 && (
+      {method === "compare" && results && tfidfResults && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            { label: "Semantic", rows: results },
+            { label: "Keyword (TF-IDF)", rows: tfidfResults },
+          ].map(({ label, rows }) => (
+            <div key={label} className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium text-muted">{label}</h3>
+              {rows.map((result) => (
+                <Card key={result.candidate_id} className="flex items-center gap-3 p-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+                    {result.rank}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <a
+                      href={`/dashboard/candidates/${result.candidate_id}`}
+                      className="text-sm font-medium hover:text-accent"
+                    >
+                      {result.category ?? "Uncategorized"}
+                    </a>
+                    <span className="ml-2 text-xs text-muted">
+                      {(result.score * 100).toFixed(1)}%
+                    </span>
+                    <SkillBadges skills={result.skills} required={job.required_skills} />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {method !== "compare" && displayed && displayed.length === 0 && (
         <EmptyState
           title="No ranking yet"
           description="Click Re-rank to score your candidates against this job."
         />
       )}
 
-      {displayed && displayed.length > 0 && (
+      {method !== "compare" && displayed && displayed.length > 0 && (
         <div className="flex flex-col gap-2">
           {displayed.map((result) => (
             <Card key={result.candidate_id} className="flex flex-col gap-3 p-4">
@@ -211,13 +276,7 @@ export default function JobDetailPage() {
                       style={{ width: `${Math.max(0, Math.min(100, result.score * 100))}%` }}
                     />
                   </div>
-                  <div className="flex flex-wrap gap-1 pt-0.5">
-                    {result.skills.slice(0, 6).map((skill) => (
-                      <Badge key={skill} tone="accent">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
+                  <SkillBadges skills={result.skills} required={job.required_skills} />
                 </div>
                 {method === "semantic" && (
                   <Button

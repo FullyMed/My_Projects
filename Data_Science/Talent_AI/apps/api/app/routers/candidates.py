@@ -53,6 +53,43 @@ async def upload_candidate(
     return candidate
 
 
+@router.post("/upload/bulk")
+async def upload_candidates_bulk(
+    files: list[UploadFile] = File(...),
+    category: str | None = Form(None),
+    user: CurrentUser = Depends(get_current_user),
+) -> list[dict]:
+    """Process several resume PDFs in one request. Always returns 200 with a
+    per-file result -- one bad file doesn't fail the batch. The trial
+    candidate-count cap is enforced per file, so a batch that crosses the
+    limit stops cleanly with the remaining files marked as errors."""
+    client = get_scoped_client(user.token)
+    results: list[dict] = []
+
+    for file in files:
+        name = file.filename or "resume.pdf"
+        try:
+            file_bytes = await file.read()
+            if len(file_bytes) > MAX_RESUME_BYTES:
+                raise ValueError("File is too large (10MB limit)")
+            if not file_bytes.startswith(b"%PDF-"):
+                raise ValueError("File is not a valid PDF")
+            candidate = process_and_store_resume(
+                client=client,
+                user=user,
+                filename=name,
+                file_bytes=file_bytes,
+                category=category,
+            )
+            results.append({"filename": name, "status": "ok", "candidate_id": candidate["id"]})
+        except PermissionError as exc:
+            results.append({"filename": name, "status": "error", "detail": str(exc)})
+        except ValueError as exc:
+            results.append({"filename": name, "status": "error", "detail": str(exc)})
+
+    return results
+
+
 @router.get("")
 async def list_candidates(
     limit: int = Query(20, ge=1, le=100),

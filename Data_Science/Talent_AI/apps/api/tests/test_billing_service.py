@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+import stripe
 
 from app.deps import CurrentUser
 from app.services import billing_service as bs
@@ -97,7 +98,12 @@ def test_create_billing_portal_session_succeeds_with_customer():
 
 
 def _fake_event(event_type: str, obj: dict):
-    return {"type": event_type, "data": {"object": obj}}
+    # A real typed StripeObject, not a plain dict -- stripe-python v15+ hands
+    # these back from construct_event, and calling .get() on one raises. An
+    # earlier version of this helper returned a dict and missed that.
+    return stripe.Event.construct_from(
+        {"type": event_type, "data": {"object": obj}}, "sk_test_x"
+    )
 
 
 def test_checkout_completed_sets_plan_pro_and_customer_id():
