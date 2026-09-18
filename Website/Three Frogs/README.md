@@ -37,7 +37,9 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 
 ```
 /
+├── .htaccess                       HTTPS redirect, security headers/CSP, ErrorDocument 404, file lockdown
 ├── .gitignore                      Excludes db_config.php
+├── robots.txt                      Disallows /Assets/PHP/ and /Data/
 ├── index.html                      Home — 10 random games, login prompt for full list
 ├── Collection.html                 Full A–Z game catalogue (login-gated)
 ├── Booking.html                    Table booking form (login-gated)
@@ -46,6 +48,7 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 ├── Signup.html
 ├── Forgot-password.html            Two-step password reset (email → token link → new password)
 ├── About.html
+├── 404.html                        Custom error page — see Security Hardening below for the <base> tag gotcha
 │
 ├── Assets/
 │   ├── CSS/
@@ -62,7 +65,8 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 │   │   ├── db_config.php           GITIGNORED — holds DB credentials (copy from example)
 │   │   ├── db_config.example.php   Credential template (safe to commit)
 │   │   ├── db_connect.php          Opens MySQLi connection via db_config.php
-│   │   ├── check_session.php       Returns { loggedIn, user } — called on every page load
+│   │   ├── security.php            CSRF tokens, hardened sessions, rate limiting — shared by every endpoint below
+│   │   ├── check_session.php       Returns { loggedIn, user, csrfToken } — called on every page load
 │   │   ├── login.php
 │   │   ├── logout.php
 │   │   ├── signup.php
@@ -76,6 +80,7 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 │       └── Avatars/                13 selectable user avatars
 │
 └── Data/
+    ├── .htaccess                   Denies all direct web access to this folder
     └── Three Frogs.xlsx            Offline reference spreadsheet for the game catalogue
 ```
 
@@ -240,11 +245,18 @@ All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0
 | Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `security.php`'s `secure_session_start()` — used everywhere instead of raw `session_start()` |
 | Session fixation prevention | `session_regenerate_id(true)` in `login.php` and `signup.php` after authentication |
 | No internal error leakage | DB/statement errors are `error_log()`'d server-side, never echoed in JSON responses |
-| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect on `localhost` for local dev) |
+| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect when `HTTP_HOST` is `localhost`/`127.0.0.1`, with or without a port, for local dev) |
 | Sensitive files blocked from direct web access | `.htaccess` denies `db_config.php`, `*.xlsx`/`*.sql`/`*.log`/`*.md`, `.git*`; `Data/.htaccess` denies the whole folder |
 | Reverse-tabnabbing protection | `rel="noopener noreferrer"` on all `target="_blank"` links |
 
 New state-changing endpoints should follow the same pattern: `require_once("security.php")`, call `secure_session_start()` instead of `session_start()`, and validate a CSRF token before doing anything.
+
+### 404 page
+
+`404.html` is served via `ErrorDocument 404 /404.html` in the root `.htaccess`. Two things make this work correctly:
+
+1. **The project must be the server's document root** — not nested inside some other `htdocs` folder — since Apache resolves `/404.html` from the server/vhost root, not from wherever the missing URL happened to be. This is already what the [Local Setup](#local-setup) instructions above tell you to do.
+2. **`404.html` has `<base href="/" />` in its `<head>`.** Apache serves the page's content under the visitor's original (bogus) URL without redirecting, so without a `<base>` tag every relative link/script/fetch on the page would resolve against that bogus path instead of the site root. Every other page in this project deliberately omits a `<base>` tag and uses plain relative paths — `404.html` is the one intentional exception.
 
 ---
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+        <!--
+          This page is served directly by Apache's ErrorDocument for any
+          missing URL, so the browser's address bar keeps showing whatever
+          bogus path triggered the 404 (Apache doesn't redirect, it just
+          swaps in this file's content). Without a <base> tag, every
+          relative path below (CSS, JS, fetch() calls inside Navbar.js)
+          would resolve against that bogus path instead of the site root
+          and silently fail. Keep this tag — see .htaccess's ErrorDocument
+          line and CLAUDE.md.
+        -->
+        <base href="/" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="robots" content="noindex, follow" />
+
+        <title>Page Not Found | Three Frogs Boardgame</title>
+        <meta name="description" content="The page you're looking for doesn't exist at Three Frogs Boardgame Surabaya." />
+        <meta name="author" content="Maximilliano Felix" />
+
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:site_name" content="Three Frogs" />
+        <meta property="og:title" content="Page Not Found | Three Frogs Boardgame" />
+        <meta property="og:description" content="The page you're looking for doesn't exist at Three Frogs Boardgame Surabaya." />
+        <meta property="og:url" content="https://threefrogsboardgame.com/404.html" />
+
+        <!-- Favicon Support -->
+        <link rel="icon" type="image/png" sizes="32x32" href="Assets/Images/favicon_io/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="Assets/Images/favicon_io/favicon-16x16.png" />
+        <link rel="icon" type="image/x-icon" href="Assets/Images/favicon_io/favicon.ico" />
+        <link rel="apple-touch-icon" href="Assets/Images/favicon_io/apple-touch-icon.png" />
+        <link rel="manifest" href="Assets/Images/favicon_io/site.webmanifest" />
+
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="Assets/CSS/Boardgame.css" />
+
+    </head>
+
+    <body>
+
+        <header>
+            <nav class="navbar">
+                <div class="logo">🐸 Three Frogs</div>
+                <button class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button>
+                <ul class="nav-links" id="navLinks"></ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="error-page">
+                <div class="error-emoji">🐸</div>
+                <p class="error-code">404</p>
+                <h1>This page hopped away.</h1>
+                <p>We couldn't find the page you were looking for. It may have been moved, renamed, or never existed in the first place.</p>
+                <div class="error-actions">
+                    <a href="index.html" class="view-more-button">Back to Home</a>
+                    <a href="Collection.html" class="view-more-button">Browse Boardgames</a>
+                    <a href="About.html" class="view-more-button">About Us</a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Three Frogs Boardgame Surabaya</p>
+        </footer>
+
+        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Navbar.js"></script>
+
+    </body>
+
+</html>

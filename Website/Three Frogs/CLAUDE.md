@@ -22,6 +22,8 @@ There is no local dev server configuration in this repo. To test PHP endpoints l
 | Path | Purpose |
 |---|---|
 | `*.html` | One file per page (index, Booking, Collection, Dashboard, Login, Signup, About, Forgot-password) |
+| `404.html` | Custom error page, served by `.htaccess`'s `ErrorDocument 404 /404.html` — see [404 page](#404-page) below |
+| `.htaccess` | Root-level Apache/LiteSpeed config — HTTPS redirect, security headers/CSP, directory-listing lockdown, `ErrorDocument 404` |
 | `.gitignore` | Excludes `Assets/PHP/db_config.php` from version control |
 | `Assets/CSS/Boardgame.css` | Single stylesheet shared across all pages |
 | `Assets/JS/Navbar.js` | Shared navbar + hamburger toggle; included on every page |
@@ -82,6 +84,12 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 );
 ```
 
+### 404 page
+
+`404.html` is wired up via `ErrorDocument 404 /404.html` in the root `.htaccess`. This only works correctly when **the project itself is the server's document root** (true for the live Hostinger deployment, and for local dev if you follow the setup instructions and point your local server directly at this folder — not at a subfolder inside some other `htdocs`). If you ever see a plain unstyled Apache "Not Found" page instead of the custom one, or a second 404 nested inside the first, the project is being served from a subdirectory of some other document root — fix the vhost/alias rather than the app.
+
+`404.html` carries `<base href="/" />` in its `<head>`. This is required: Apache's `ErrorDocument` serves this file's content under whatever bogus URL the visitor actually requested (no redirect, address bar unchanged), so without a `<base>` tag every relative path on the page — the stylesheet, `Navbar.js`, and the `fetch()` calls inside it — would resolve against that bogus path instead of the site root and silently fail. Every other page in this project intentionally uses root-relative paths without a leading `/` (see below); `404.html` is the one deliberate exception, and the `<base>` tag is why it can still use the same relative-path style as everywhere else.
+
 ### Forgot-password flow
 
 Two-step, token-based:
@@ -113,7 +121,7 @@ Valid categories (must match the filter dropdown in `Collection.html`): Party, F
 - **CSRF protection** — `Assets/PHP/security.php` provides `csrf_token()` / `verify_csrf_token()`. `check_session.php` hands every page a `csrfToken` in its JSON response; the frontend JS (`Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js`) caches it from that same call and resends it as `csrf_token` (form field, JSON body field, or `X-CSRF-Token` header) on every state-changing request. `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, and `update_avatar.php` all reject requests that don't present a valid token. When adding a new state-changing endpoint, wire it into this pattern.
 - **Rate limiting** — `security.php`'s `rate_limit_exceeded()` / `record_attempt()` back onto the `rate_limits` table, keyed by `action` + identifier (IP and/or email). Applied to `login.php` (per-IP and per-email), `signup.php` (per-IP), `request_reset.php` (per-IP and per-email), and `forgot_password.php` (per-IP). Fails **open** (i.e. does not block) if the table doesn't exist, so a missed migration can't lock out every user — create the table (see above) to actually enforce limits.
 - **Session fixation** — `login.php` and `signup.php` call `session_regenerate_id(true)` immediately after establishing `$_SESSION['user']`.
-- **Server-level hardening** — the root `.htaccess` forces HTTPS in production (skipped on `localhost`/`127.0.0.1` so local dev isn't broken), sets security headers (CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS), disables directory listing, and denies direct web access to `db_config.php` and `*.xlsx`/`*.sql`/`*.log`/`*.md`/`.git*`. `Data/.htaccess` denies all access to that folder outright. Keep the CSP's `script-src` free of `unsafe-inline`/`unsafe-eval` — if you need a new inline `<script>` or an `onclick=` attribute, wire it up as an external listener instead (see `Booking.js` for the pattern used to replace the old `authPopup` button `onclick`s).
+- **Server-level hardening** — the root `.htaccess` forces HTTPS in production (skipped when `HTTP_HOST` is `localhost`/`127.0.0.1`, with or without a port, so local dev isn't broken even on a non-default port), sets security headers (CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS), disables directory listing, serves `404.html` via `ErrorDocument`, and denies direct web access to `db_config.php` and `*.xlsx`/`*.sql`/`*.log`/`*.md`/`.git*`. `Data/.htaccess` denies all access to that folder outright. Keep the CSP's `script-src` free of `unsafe-inline`/`unsafe-eval` — if you need a new inline `<script>` or an `onclick=` attribute, wire it up as an external listener instead (see `Booking.js` for the pattern used to replace the old `authPopup` button `onclick`s).
 - External links using `target="_blank"` must include `rel="noopener noreferrer"` (reverse-tabnabbing protection) — see `About.html`.
 
 ## Design System
@@ -164,3 +172,4 @@ Valid categories (must match the filter dropdown in `Collection.html`): Party, F
 - **`[...]boardgames` shuffle** — index page uses `[...boardgames].sort(...)` (spread to avoid mutating the source array). Collection page re-sorts with `localeCompare`. Both branches read from the same module-level array.
 - **Booking email field** — set server-side from session on page load (`readOnly = true`). After a successful booking `bookingForm.reset()` is called, followed immediately by re-populating the email field so back-to-back bookings work.
 - **`db_config.php` is gitignored** — never commit real credentials. The file must exist on the server (and locally for dev) but is excluded from version control. Use `db_config.example.php` as the template.
+- **`404.html`'s `<base href="/" />`** — every other page uses relative asset paths with no leading `/` because they're all served from the document root anyway; `404.html` is the one page that must keep its `<base>` tag (see [404 page](#404-page)), since `ErrorDocument` serves it under an arbitrary, possibly-nested URL. Don't remove it, and don't "fix" the other pages to match — they're intentionally different.
