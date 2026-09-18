@@ -63,6 +63,8 @@ Two constants handle all URL generation:
 
 **Rule:** Every HTML `href`/`src` must be prefixed with `SITE_PATH`. Every PHP redirect must use `BASE_URL`. Never hardcode `/admin/...` or `/assets/...`.
 
+Unlike other paths, `.htaccess`'s `ErrorDocument 404 <path>` is resolved from the server **DocumentRoot**, not this project's directory, and can't read the `SITE_PATH` PHP constant — it must be hand-kept in sync with `BASE_URL`'s path whenever the deployment path changes: `/Prambanan_Batik/404.php` for local XAMPP/WAMP dev, `/404.php` when deployed at the domain root in production.
+
 ### Admin Authentication
 
 All admin pages include `admin/auth.php` at the top and call `requireAdminLogin()`, which redirects to `BASE_URL . '/admin/login.php'` if the session is invalid. Session state is stored under the key `product_hub_session` with a **30-minute idle timeout** (sliding window — refreshed on every authenticated request via `isAdminLoggedIn()`).
@@ -98,6 +100,7 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 | `header.php` / `footer.php` | Shared page chrome — `footer.php` includes `main.js` |
 | `go.php` | Redirect handler — validates URL starts with `http(s)://`, logs click to `outbound_clicks`, then redirects |
 | `sitemap.php` | Generates XML sitemap dynamically from DB; null-safe when `$pdo` is unavailable |
+| `404.php` | Custom 404 page — styled like the rest of the site, sends a real `404` status via `http_response_code(404)`. Wired up in `.htaccess` via `ErrorDocument 404`. |
 | `admin/auth.php` | Session management (`loginAdmin`, `requireAdminLogin`, `logoutAdmin`, `isAdminLoggedIn`) + CSRF helpers (`generateCsrfToken`, `validateCsrfToken`) + rate-limiting helpers (`isLoginRateLimited`, `recordFailedLoginAttempt`, `clearLoginAttempts`) |
 | `admin/admins.php` | List, add, delete admins; change passwords; protects against self-deletion and deleting the last admin |
 | `admin/import_products.php` | CSV bulk import — upserts products by SKU; CSRF-protected |

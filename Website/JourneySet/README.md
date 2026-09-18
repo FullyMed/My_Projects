@@ -13,6 +13,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Five themes** — Light, Dark, Sky, Gold, Forest (each a light/dark base + accent); persisted per-device, respects `prefers-color-scheme` on first visit
 - **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
 - **Offline-resilient** — all reads fall back to a localStorage cache when Supabase is unreachable
+- **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
 
 ## Tech stack
 
@@ -90,6 +91,7 @@ src/
 │   ├── EventCalendar.tsx     # Calendar feature
 │   ├── AuthModal.tsx         # Login / register
 │   ├── LandingPage.tsx       # Marketing page
+│   ├── NotFoundPage.tsx      # Custom 404 (standalone or embedded in AppLayout)
 │   └── PrintView.tsx         # Print-ready layout
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components)

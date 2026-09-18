@@ -271,7 +271,11 @@ if run_btn:
                 st.markdown('</div>', unsafe_allow_html=True)
 
         elif formatted is not None and len(formatted) == 0:
-            st.info("No results found for the given inputs. Try broadening your query.")
+            theme.render_not_found(
+                title="No Matches Found",
+                message="No games matched your query. Try broadening your titles, traits, or difficulty filter.",
+                icon="🔍",
+            )
 
     except Exception as e:
         print(f"[1_Recommendation] error handling request: {e}", file=sys.stderr)

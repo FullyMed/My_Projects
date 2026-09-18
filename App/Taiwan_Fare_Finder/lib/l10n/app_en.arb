@@ -112,5 +112,8 @@
   "privacyReadMore": "Read more",
   "about": "About",
   "aboutVersion": "Version",
-  "aboutDataSource": "Data source"
+  "aboutDataSource": "Data source",
+  "notFoundTitle": "Page not found",
+  "notFoundBody": "The page you’re looking for doesn’t exist or may have moved.",
+  "notFoundBackToSearch": "Back to search"
 }

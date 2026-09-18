@@ -127,7 +127,7 @@ Defined in `lib/nav.dart` via `go_router`:
 | `/saved` | `SavedPage` |
 | `/settings` | `SettingsPage` (pushed with fade+slide, not in shell) |
 
-`/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`. `AppRoutes` holds the path constants.
+`/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`. `AppRoutes` holds the path constants. `GoRouter.errorBuilder` renders `NotFoundPage` (`lib/pages/not_found_page.dart`) for any unmatched route — reuses `TffPageScaffold` + `TffEmptyState` + `TffPrimaryButton` and routes back to `AppRoutes.search`. Its strings (`notFoundTitle`, `notFoundBody`, `notFoundBackToSearch`) follow the normal ARB + `TffLocalizations` getter pattern.
 
 ### Theme & design tokens
 

@@ -34,6 +34,7 @@ npm run dev:client
 - Favorites with localStorage persistence — shared context keeps all toggles in sync
 - Store selection (Wufeng branch + demo placeholders)
 - Store map placeholder with aisle highlighting
+- Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts

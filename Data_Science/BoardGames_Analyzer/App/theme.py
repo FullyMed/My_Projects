@@ -611,6 +611,28 @@ def chart_colors(theme_mode: str) -> dict:
     }
 
 
+def render_not_found(title: str, message: str, icon: str = "🔍", show_links: bool = False):
+    """Themed 'not found' card — reused for empty results and the dedicated 404 page."""
+    st.markdown(
+        f'''
+        <div class="result-card" style="text-align:center;">
+            <div class="home-card-icon">{icon}</div>
+            <div class="card-title">{title}</div>
+            <div class="card-reason">{message}</div>
+        </div>
+        ''',
+        unsafe_allow_html=True,
+    )
+    if show_links:
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.page_link("app.py", label="Home", icon="🏠")
+        with c2:
+            st.page_link("pages/1_Recommendation.py", label="Recommendation", icon="🧠")
+        with c3:
+            st.page_link("pages/2_Analytics.py", label="Analytics", icon="📊")
+
+
 def style_ax(ax, fig, colors: dict, title: str = ""):
     """Apply consistent theme styling to a matplotlib Axes object."""
     fig.patch.set_facecolor(colors["fig_bg"])

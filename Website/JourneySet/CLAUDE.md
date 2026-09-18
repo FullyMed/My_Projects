@@ -48,6 +48,8 @@ VITE_SUPABASE_ANON_KEY=...
   /app/goals     → GoalsPage    → GoalTracker
   /app/calendar  → CalendarPage → EventCalendar
   /app/settings  → SettingsPage
+  /app/*         → NotFoundPage (fullPage={false}, rendered inside AppLayout)
+*               → NotFoundPage (fullPage={true}, standalone with its own nav/footer)
 ```
 
 ## Architecture
@@ -157,3 +159,4 @@ The profile name is fetched with a fire-and-forget `.then()` after setting the u
 - **Event delete in modal**: the Delete button inside the event edit modal must call `deleteEventHandler` (closes modal + updates state), not the raw `deleteEvent` API import.
 - **localStorage fallback**: API functions catch Supabase errors and return the cached value — don't remove the catch blocks.
 - **Dynamic Tailwind classes**: never build class strings by interpolation (e.g. `` `gap-${n}` ``). Tailwind's scanner can't detect them at build time; use full static class names in ternaries instead.
+- **404 handling**: `NotFoundPage` (`src/components/NotFoundPage.tsx`) is used at both catch-alls in `App.tsx` — the top-level `*` route (`fullPage={true}`, renders its own nav/footer since there's no layout wrapping it) and the nested `/app/*` catch-all inside `AppLayout` (`fullPage={false}`, renders just the centered content since the sidebar/header are already provided). It reads `useAuth()` itself to point "back home" at `/app/planner` when signed in or `/` when signed out — don't hardcode the home link.

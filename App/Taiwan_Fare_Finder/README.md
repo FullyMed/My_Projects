@@ -14,6 +14,7 @@ A cross-platform Flutter app for searching and comparing public transportation f
 - **Offline support** — LRU cache (up to 100 queries) stored in `shared_preferences`; works without a connection
 - **Responsive layout** — adapts from phone to tablet to desktop (bottom nav → nav rail → extended nav rail)
 - **Multilingual** — English, Traditional Chinese, Simplified Chinese, and Indonesian
+- **Custom 404 page** — unmatched routes render a themed "page not found" screen with a way back to Search
 
 ---
 

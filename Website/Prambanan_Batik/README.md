@@ -11,6 +11,7 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **CSV Import**: Bulk import products with upsert by SKU
 - **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling, scroll-reveal animations
 - **SEO Optimized**: XML sitemap and robots.txt for search engines
+- **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
 - **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
@@ -74,6 +75,8 @@ SetEnv DB_PASSWORD your_db_password
 
 When `BASE_URL` is set to the domain root (no subdirectory path), `SITE_PATH` resolves to an empty string automatically — no other code changes needed for deployment.
 
+**One exception**: `.htaccess`'s `ErrorDocument 404 /Prambanan_Batik/404.php` line is a raw server path and can't read `SITE_PATH`, so it doesn't follow the rule above automatically. When deploying to the domain root, change it to `ErrorDocument 404 /404.php`.
+
 ### Step 4: Create the First Admin User
 
 There is no self-registration. Use a one-off PHP script or phpMyAdmin to insert the first account:
@@ -103,6 +106,7 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── product.php                  # Product detail + reviews
 ├── go.php                       # Tracked redirect to Shopee/Tokopedia/other
 ├── sitemap.php                  # Dynamic XML sitemap (null-safe when DB unavailable)
+├── 404.php                      # Custom 404 page — wired up in .htaccess via ErrorDocument
 ├── robots.txt                   # Search engine directives
 ├── config.php                   # Site constants — BASE_URL, SITE_PATH, DB_*, SESSION_TIMEOUT, etc.
 ├── db_connect.php               # Returns PDO instance (or null on failure)
@@ -181,6 +185,7 @@ Tracks failed admin login attempts by IP for brute-force protection. Columns: `i
 | `/product.php?id=<id>` | Product detail |
 | `/go.php?id=<id>&platform=<shopee\|tokopedia\|other>` | Tracked redirect |
 | `/sitemap.php` | XML sitemap |
+| `/404.php` | Custom not-found page (also served for any unmatched URL via `.htaccess`) |
 | `/admin/` | Admin dashboard |
 | `/admin/admins.php` | Admin user management |
 
@@ -257,6 +262,10 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.5.0** (2026-09): Custom 404 page
+  - New `404.php` — styled to match the rest of the site, sends a real `404` status via `http_response_code(404)`
+  - `.htaccess` now serves it for any unmatched URL via `ErrorDocument 404` (path must be updated when deploying to the domain root — see Production Deployment)
 
 - **v2.4.0** (2026-09): Security hardening pass
   - Security headers (`CSP`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`) sent from `config.php` on every request

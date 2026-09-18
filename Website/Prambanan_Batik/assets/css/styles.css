@@ -377,6 +377,41 @@ p:last-child { margin-bottom: 0; }
   color: var(--color-neutral-500);
   font-size: var(--font-size-base);
   margin-bottom: var(--spacing-3xl);
+}
+
+/* ── 404 / Error page ─────────────────────────────────────── */
+.error-page {
+  padding: 6rem var(--spacing-xl) 7rem;
+  text-align: center;
+}
+
+.error-code {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: clamp(4rem, 12vw, 7rem);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  line-height: 1;
+  margin-bottom: var(--spacing-md);
+}
+
+.error-page h2 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.error-page p {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-lg);
+  max-width: 480px;
+  margin: 0 auto var(--spacing-2xl);
+}
+
+.error-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
   font-weight: var(--font-weight-normal);
 }
 
@@ -929,4 +964,7 @@ p:last-child { margin-bottom: 0; }
 
   .pagination { gap: var(--spacing-xs); }
   .pagination-link { padding: 0.4rem 0.75rem; }
+
+  .error-page { padding: 4rem var(--spacing-md) 4.5rem; }
+  .error-actions { flex-direction: column; align-items: stretch; }
 }

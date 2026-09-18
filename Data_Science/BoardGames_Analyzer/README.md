@@ -14,6 +14,7 @@ The system helps users discover board games through three complementary recommen
 - **Analytics dashboard** — interactive EDA with rating distributions, top games, mechanic/category frequency, and publication trends
 - **Responsive UI** — works on mobile (iOS/Android), tablet (iPad), and desktop
 - **Light / Dark theme** — toggleable from the sidebar on every page
+- **Custom 404 / Not Found page** — themed empty-state experience, both as a dedicated page and inline for zero-result searches
 
 ---
 
@@ -40,7 +41,8 @@ BoardGames_Analyzer/
 │   ├── theme.py                    ← Shared CSS, responsive design, chart colors
 │   └── pages/
 │       ├── 1_Recommendation.py     ← Recommendation engine UI
-│       └── 2_Analytics.py         ← EDA / analytics dashboard
+│       ├── 2_Analytics.py         ← EDA / analytics dashboard
+│       └── 3_Not_Found.py         ← Themed "Not Found" page
 │
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
@@ -186,6 +188,10 @@ Landing page with project overview, key stats, and navigation cards.
 - Choose mode: **Title-Based**, **Trait-Based**, or **Combined**
 - Optionally filter by difficulty level
 - Results include a full ranked table and top-5 styled cards with explanation text
+- A zero-result query shows a themed "No Matches Found" card instead of a plain message
+
+### Not Found
+A dedicated, themed 404 page (styled to match the rest of the app) with links back to Home, Recommendation, and Analytics. Note: Streamlit's router still shows its own built-in "Page not found" banner for genuinely unrecognized URLs before falling back to Home — this page covers in-app "not found" states, not arbitrary bad URLs (a Streamlit platform limitation).
 
 ### Analytics Dashboard
 Interactive dataset explorer with sidebar controls (min-vote threshold, year range, chart size):

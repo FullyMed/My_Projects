@@ -158,6 +158,11 @@ class TffLocalizations {
   String get about => _t('about');
   String get aboutVersion => _t('aboutVersion');
   String get aboutDataSource => _t('aboutDataSource');
+
+  // 404 / unknown route
+  String get notFoundTitle => _t('notFoundTitle');
+  String get notFoundBody => _t('notFoundBody');
+  String get notFoundBackToSearch => _t('notFoundBackToSearch');
 }
 
 class _TffLocalizationsDelegate extends LocalizationsDelegate<TffLocalizations> {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taiwan_fare_finder/pages/compare_page.dart';
+import 'package:taiwan_fare_finder/pages/not_found_page.dart';
 import 'package:taiwan_fare_finder/pages/saved_page.dart';
 import 'package:taiwan_fare_finder/pages/search_page.dart';
 import 'package:taiwan_fare_finder/pages/settings_page.dart';
@@ -9,6 +10,7 @@ import 'package:taiwan_fare_finder/pages/shell_page.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.search,
+    errorBuilder: (context, state) => const NotFoundPage(),
     routes: [
       GoRoute(path: AppRoutes.root, redirect: (_, __) => AppRoutes.search),
       StatefulShellRoute.indexedStack(

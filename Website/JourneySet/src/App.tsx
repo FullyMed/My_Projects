@@ -8,6 +8,7 @@ import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
+import NotFoundPage from './components/NotFoundPage';
 import PlannerPage from './pages/PlannerPage';
 import GoalsPage from './pages/GoalsPage';
 import CalendarPage from './pages/CalendarPage';
@@ -52,12 +53,13 @@ const AppContent: React.FC = () => {
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/" element={<Navigate to="/app/planner" replace />} />
+                <Route path="*" element={<NotFoundPage fullPage={false} />} />
               </Routes>
             </AppLayout>
           </ProtectedRoute>
         } />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );

@@ -112,5 +112,8 @@
   "privacyReadMore": "Baca selengkapnya",
   "about": "Tentang",
   "aboutVersion": "Versi aplikasi",
-  "aboutDataSource": "Sumber data"
+  "aboutDataSource": "Sumber data",
+  "notFoundTitle": "Halaman tidak ditemukan",
+  "notFoundBody": "Halaman yang Anda cari tidak ada atau mungkin telah dipindahkan.",
+  "notFoundBackToSearch": "Kembali ke pencarian"
 }

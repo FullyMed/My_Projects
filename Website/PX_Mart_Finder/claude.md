@@ -138,7 +138,7 @@ Page-level views.
 | `product-detail.tsx` | `/product/:id` | Two-column on desktop |
 | `favorites.tsx` | `/favorites` | Saved products |
 | `store-map.tsx` | `/store-map` | Placeholder aisle map |
-| `not-found.tsx` | `*` | 404, fully localized |
+| `not-found.tsx` | `*` | Custom branded 404 — icon, big "404", heading/description, Search Products + Back to Home CTAs, Go Back link. Fully localized, spring entrance animation |
 
 ### client/src/lib/
 Core app logic and shared frontend utilities.
@@ -326,6 +326,12 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Demo placeholder aisle map
 - Highlights the target aisle when navigated from product detail
 
+## Custom 404 Page
+- Branded not-found page (`not-found.tsx`) matching the app's design system — primary/secondary color icon badge, large "404", heading + description, `Search Products` (primary) and `Back to Home` (secondary) CTAs, plus a `Go Back` link using `window.history.back()`
+- Uses `buttonVariants` classes applied directly to `wouter`'s `Link` (not `Button asChild`) to avoid Radix `Slot` ref-forwarding assumptions with wouter v3
+- Spring entrance animation via `framer-motion`, fully bilingual (`pageNotFound`, `pageNotFoundDesc`, `searchProducts`, `backToHome`, `goBack` keys in `i18n.ts`)
+- Rendered inside the normal `Layout` (header/sidebar/bottom nav still present) since it's just another `<Route>` in `App.tsx`'s catch-all
+
 ---
 
 # 9. Current Progress
@@ -355,7 +361,7 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 ### Localization
 - All UI strings in `i18n.ts` with EN and ZH keys
 - Traditional Chinese throughout (門市, not 門店, etc.)
-- `not-found.tsx`, error states, store-map labels all fully localized
+- `not-found.tsx` (custom 404), error states, store-map labels all fully localized
 
 ### Bug Fixes Applied
 - Similar products filter checks both `category_en` and `category_zh`
@@ -369,6 +375,7 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Dark mode classes in `not-found.tsx` changed from `gray-*` to theme-aware (`bg-background`, `text-foreground`, `text-muted-foreground`)
 - Unused `location`/`setLocation` variables removed from `store-map.tsx`
 - **Favorites multi-item bug fixed** — `useFavorites` now reads from a single shared `FavoritesContext` instead of creating an isolated `useState` per component. Previously each `ProductCard` had its own state copy; toggling two products caused the second card to write from stale `prev: []`, overwriting the first card's localStorage entry. Removing multiple items had the same problem in reverse.
+- `not-found.tsx` rebuilt from a plain alert-style card into a fully branded 404 (icon badge, "404", CTAs) — see [Custom 404 Page](#custom-404-page)
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors

@@ -8,6 +8,14 @@
 Options -Indexes -MultiViews
 ServerSignature Off
 
+# ── Custom 404 page ────────────────────────────────────────────────────────
+# ErrorDocument paths are resolved from the server DocumentRoot, not from this
+# file's directory, so this must match SITE_PATH (see config.php): the
+# subdirectory prefix below is correct for local XAMPP/WAMP dev
+# (http://localhost/Prambanan_Batik/). When deployed at the domain root in
+# production, change this to just "/404.php".
+ErrorDocument 404 /Prambanan_Batik/404.php
+
 # ── Force HTTPS in production (skipped for local XAMPP/WAMP dev) ─────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
