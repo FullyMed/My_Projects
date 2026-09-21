@@ -3,8 +3,13 @@ import EventCalendar from '../components/EventCalendar';
 import ExportButton from '../components/ExportButton';
 import { useState } from 'react';
 import PrintView from '../components/PrintView';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const CalendarPage: React.FC = () => {
+  usePageMeta(
+    'Event Calendar | JourneySet',
+    "Manage appointments and events with conflict detection in JourneySet's monthly Event Calendar."
+  );
   const [printView, setPrintView] = useState(false);
 
   return (

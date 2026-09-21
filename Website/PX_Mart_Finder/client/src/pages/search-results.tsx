@@ -13,6 +13,7 @@ import { CATEGORIES, PRODUCTS, SYNONYMS } from "@/lib/data";
 import type { Product } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { normalizeAisle } from "@/lib/normalize";
+import { usePageMeta } from "@/lib/seo";
 import Fuse from "fuse.js";
 import { motion } from "framer-motion";
 import {
@@ -260,6 +261,24 @@ export default function SearchResults() {
     setQuery("");
     setLocation("/search");
   };
+
+  const activeCategory = categoryId ? CATEGORIES.find((c) => c.id === categoryId) : undefined;
+  const metaTitle = q
+    ? language === "en"
+      ? `"${q}" search results`
+      : `「${q}」的搜尋結果`
+    : activeCategory
+      ? language === "en"
+        ? activeCategory.en
+        : activeCategory.zh
+      : t("metaSearchTitle");
+  const metaDescription = q
+    ? language === "en"
+      ? `${results.length} results for "${q}" at PX Mart.`
+      : `全聯搜尋「${q}」共 ${results.length} 筆結果。`
+    : t("metaSearchDesc");
+
+  usePageMeta(metaTitle, metaDescription);
 
   return (
     <div className="flex flex-col flex-1 bg-muted/30 min-h-screen">

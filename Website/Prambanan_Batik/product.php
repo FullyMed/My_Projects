@@ -103,6 +103,15 @@ if ($preview_mode || !$product) {
 }
 
 $page_title = $product['name'] ?? 'Product Detail';
+
+if (!empty($product['description'])) {
+    $meta_description = truncate_text($product['description'], 155);
+} else {
+    $product_name = $product['name'] ?? 'this batik';
+    $product_category = $product['category'] ?? 'Batik';
+    $meta_description = "{$product_name} — authentic {$product_category} from Prambanan Batik, with verified customer reviews.";
+}
+
 $_ENV['PREVIEW_MODE'] = $preview_mode;
 
 ?>

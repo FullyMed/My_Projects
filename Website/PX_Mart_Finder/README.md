@@ -35,6 +35,7 @@ npm run dev:client
 - Store selection (Wufeng branch + demo placeholders)
 - Store map placeholder with aisle highlighting
 - Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
+- Per-page meta title and meta description (bilingual, updates live with the page and language)
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts
@@ -48,7 +49,7 @@ client/
   src/
     components/    # Layout, ProductCard, LanguageToggle, ThemeToggle
     pages/         # Home, Search, Category, Product Detail, Favorites, Store Map
-    lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts
+    lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts, seo.ts
     data/          # products.json, categories.json
   public/Images/   # Product images organized by category
 server/            # Minimal Express scaffold (not actively used)

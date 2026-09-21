@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Compass, Home, ArrowLeft, MapPinOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 interface NotFoundPageProps {
   /** false when rendered inside AppLayout, which already provides nav/sidebar/footer chrome */
@@ -9,6 +10,10 @@ interface NotFoundPageProps {
 }
 
 const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
+  usePageMeta(
+    'Page Not Found | JourneySet',
+    "The page you're looking for doesn't exist or may have been moved."
+  );
   const { user } = useAuth();
   const homePath = user ? '/app/planner' : '/';
   const homeLabel = user ? 'Back to Planner' : 'Back to Home';

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
+import { usePageMeta } from "@/lib/seo";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
@@ -9,8 +10,17 @@ export default function CategoryDetail() {
   const { t, language } = useLanguage();
   const [, setLocation] = useLocation();
   const [, params] = useRoute("/category/:id");
-  
+
   const category = CATEGORIES.find(c => c.id === params?.id);
+
+  usePageMeta(
+    category ? (language === "en" ? category.en : category.zh) : t("categoryNotFound"),
+    category
+      ? language === "en"
+        ? `Browse ${category.subCategories.length} subcategories in ${category.en} at PX Mart.`
+        : `瀏覽全聯「${category.zh}」分類下的 ${category.subCategories.length} 個子分類。`
+      : t("categoryNotFound")
+  );
 
   if (!category) {
     return <div className="p-8 text-center">{t("categoryNotFound")}</div>;

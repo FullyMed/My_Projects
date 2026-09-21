@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Map as MapIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { STORE_LIST } from "@/lib/data";
+import { usePageMeta } from "@/lib/seo";
 
 export default function StoreMap() {
   const { t, language } = useLanguage();
@@ -12,6 +13,13 @@ export default function StoreMap() {
   const searchParams = new URLSearchParams(window.location.search);
   const highlightedAisle = searchParams.get("aisle");
   const storeId = searchParams.get("store");
+
+  usePageMeta(
+    t("metaStoreMapTitle"),
+    language === "en"
+      ? `View a demo aisle map for ${selectedStore.nameEn}.`
+      : `查看全聯${selectedStore.nameZh}的示意走道地圖。`
+  );
 
   useEffect(() => {
     if (storeId && storeId !== selectedStore.id) {

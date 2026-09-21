@@ -6,6 +6,7 @@ require_once __DIR__ . '/functions.php';
 http_response_code(404);
 
 $page_title = 'Page Not Found';
+$meta_description = "The page you're looking for doesn't exist or may have been moved. Return to Prambanan Batik to explore our full batik collection.";
 
 ?>
 <?php include __DIR__ . '/header.php'; ?>

@@ -14,6 +14,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
 - **Offline-resilient** — all reads fall back to a localStorage cache when Supabase is unreachable
 - **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
+- **Per-page meta** — each route sets its own `<title>` and meta description for SEO/sharing
 
 ## Tech stack
 
@@ -95,7 +96,7 @@ src/
 │   └── PrintView.tsx         # Print-ready layout
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components)
-├── hooks/            # useModalFocus (trap + Escape handling)
+├── hooks/            # useModalFocus (trap + Escape handling), usePageMeta (per-route title/description)
 ├── constants/        # EVENT_CATEGORIES + THEMES (the 5 theme definitions)
 ├── data/             # Static quotes array
 ├── types/            # Shared TypeScript interfaces

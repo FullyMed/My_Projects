@@ -151,6 +151,7 @@ Core app logic and shared frontend utilities.
 | `storage.ts` | `FavoritesContext` + `useFavorites()` hook + `useRecentSearches()` hook |
 | `favorites-provider.tsx` | `FavoritesProvider` component — holds single shared favorites `useState` |
 | `validateData.ts` | Data integrity checks (DEV mode only) |
+| `seo.ts` | `usePageMeta(title, description)` hook — sets `document.title` and the `<meta name="description">` tag per page |
 
 ### client/src/data/
 Static mock data files (JSON):
@@ -332,6 +333,16 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Spring entrance animation via `framer-motion`, fully bilingual (`pageNotFound`, `pageNotFoundDesc`, `searchProducts`, `backToHome`, `goBack` keys in `i18n.ts`)
 - Rendered inside the normal `Layout` (header/sidebar/bottom nav still present) since it's just another `<Route>` in `App.tsx`'s catch-all
 
+## Per-Page SEO Meta Tags
+- `usePageMeta(title, description)` in `lib/seo.ts` sets `document.title` (as `"<title> | PX Mart"`) and upserts `<meta name="description">` via a `useEffect` — no `react-helmet`/SSR dependency, matching the project's simplicity-first philosophy for a client-only SPA
+- Every page calls it with bilingual, `language`-reactive content, so switching EN/繁中 updates the tab title and description live:
+  - `home.tsx` / `favorites.tsx` / `store-map.tsx` — static `i18n.ts` keys (`metaHomeTitle`/`metaHomeDesc`, `metaFavoritesTitle`/`metaFavoritesDesc`, `metaStoreMapTitle`/`metaStoreMapDesc`); store-map's description also interpolates the selected store name
+  - `category-detail.tsx` — title is the category name, description interpolates the subcategory count
+  - `product-detail.tsx` — title is the product name, description interpolates brand/category and aisle+shelf (when available for the selected store)
+  - `search-results.tsx` — title/description reflect the active query or category filter, falling back to `metaSearchTitle`/`metaSearchDesc`
+  - `not-found.tsx` — reuses the existing `pageNotFound`/`pageNotFoundDesc` keys
+- For pages with an early-return guard (`category-detail.tsx`, `product-detail.tsx`), `usePageMeta` is called *before* the guard with a not-found fallback title/description, to keep hook call order stable across renders
+
 ---
 
 # 9. Current Progress
@@ -376,6 +387,7 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Unused `location`/`setLocation` variables removed from `store-map.tsx`
 - **Favorites multi-item bug fixed** — `useFavorites` now reads from a single shared `FavoritesContext` instead of creating an isolated `useState` per component. Previously each `ProductCard` had its own state copy; toggling two products caused the second card to write from stale `prev: []`, overwriting the first card's localStorage entry. Removing multiple items had the same problem in reverse.
 - `not-found.tsx` rebuilt from a plain alert-style card into a fully branded 404 (icon badge, "404", CTAs) — see [Custom 404 Page](#custom-404-page)
+- Per-page meta title and meta description added across all 7 routes via `usePageMeta` — see [Per-Page SEO Meta Tags](#per-page-seo-meta-tags)
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors

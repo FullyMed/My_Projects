@@ -1,12 +1,17 @@
 import React from 'react';
 import { Calendar, Target, CheckSquare, Moon, Sun, BarChart3, Download, Compass, ArrowRight, Zap, Globe } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 interface LandingPageProps {
   onShowAuth: (mode: 'login' | 'register') => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
+  usePageMeta(
+    'JourneySet - Personal Productivity Planner',
+    'Plan your weekly schedules, set and track goals, and manage events with JourneySet - your personal productivity companion.'
+  );
   const { isDark, toggleTheme } = useTheme();
 
   const features = [

@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { CATEGORIES } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
 import { useRecentSearches } from "@/lib/storage";
+import { usePageMeta } from "@/lib/seo";
 import { motion } from "framer-motion";
 import {
   Apple,
@@ -66,6 +67,8 @@ export default function Home() {
   const { recent, addSearch } = useRecentSearches();
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");
+
+  usePageMeta(t("metaHomeTitle"), t("metaHomeDesc"));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

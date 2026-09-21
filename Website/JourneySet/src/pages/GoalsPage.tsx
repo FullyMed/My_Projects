@@ -3,8 +3,13 @@ import GoalTracker from '../components/GoalTracker';
 import ExportButton from '../components/ExportButton';
 import { useState } from 'react';
 import PrintView from '../components/PrintView';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const GoalsPage: React.FC = () => {
+  usePageMeta(
+    'Goal Tracker | JourneySet',
+    "Set targets, track progress, and hit your goals with JourneySet's visual Goal Tracker."
+  );
   const [printView, setPrintView] = useState(false);
 
   return (

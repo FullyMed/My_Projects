@@ -3,7 +3,8 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
-$page_title = 'Home';
+$page_title = 'Authentic Indonesian Batik';
+$meta_description = 'Discover authentic Indonesian batik at Prambanan Batik — premium handcrafted traditional patterns, ready-to-wear, and fabric collections with trusted customer reviews.';
 
 $db = null;
 $preview_mode = false;

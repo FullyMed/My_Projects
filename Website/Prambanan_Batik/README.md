@@ -10,7 +10,7 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **Admin Dashboard**: At-a-glance stats (product count, categories, reviews, outbound clicks) with recent review feed
 - **CSV Import**: Bulk import products with upsert by SKU
 - **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling, scroll-reveal animations
-- **SEO Optimized**: XML sitemap and robots.txt for search engines
+- **SEO Optimized**: XML sitemap, robots.txt, and a unique meta title + meta description per page (static on Home/404, dynamic by category on the collection page, dynamic by product on product pages)
 - **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
@@ -262,6 +262,11 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.6.0** (2026-09): Per-page SEO meta tags
+  - Every page now sets `$page_title` and `$meta_description` before `header.php` renders `<title>` and `<meta name="description">`; falls back to new `DEFAULT_META_DESCRIPTION` constant in `config.php` when a page doesn't set one
+  - `products.php` title/description are dynamic — reflect the active category filter, or a generic collection description when unfiltered
+  - `product.php` description is built from the product's own description text (truncated to ~155 chars), falling back to a templated name + category description when empty
 
 - **v2.5.0** (2026-09): Custom 404 page
   - New `404.php` — styled to match the rest of the site, sends a real `404` status via `http_response_code(404)`

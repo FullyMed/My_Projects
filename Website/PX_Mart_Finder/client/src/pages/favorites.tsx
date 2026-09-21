@@ -2,12 +2,15 @@ import { useLanguage } from "@/lib/i18n";
 import { PRODUCTS } from "@/lib/data";
 import { ProductCard } from "@/components/product-card";
 import { useFavorites } from "@/lib/storage";
+import { usePageMeta } from "@/lib/seo";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 
 export default function Favorites() {
   const { t, language } = useLanguage();
   const { favorites } = useFavorites();
+
+  usePageMeta(t("metaFavoritesTitle"), t("metaFavoritesDesc"));
 
   const favoriteProducts = PRODUCTS.filter(p => favorites.includes(p.id));
 

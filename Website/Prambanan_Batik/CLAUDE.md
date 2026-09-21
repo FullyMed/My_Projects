@@ -50,6 +50,17 @@ require config.php → require functions.php → $db = require db_connect.php �
 
 When `$db` is null or no products exist, pages fall back to hardcoded sample data from `get_sample_batik_products()` in `functions.php` and set `$_ENV['PREVIEW_MODE'] = true` before including `header.php`. `is_preview_mode()` checks both the `PREVIEW_MODE` constant and `$_ENV['PREVIEW_MODE']`, so the preview banner in `header.php` shows correctly when the DB is down at runtime.
 
+### SEO Meta Tags — $page_title and $meta_description
+
+Every public page sets `$page_title` and `$meta_description` **before** `include header.php`; `header.php` renders them into `<title><?php echo escape($page_title) . ' - ' . SITE_NAME; ?></title>` and `<meta name="description" content="...">`. If a page omits `$meta_description`, `header.php` falls back to `DEFAULT_META_DESCRIPTION` (defined in `config.php`) — so it's optional but should always be set on real content pages for unique, non-generic descriptions.
+
+- `index.php` — static, hand-written copy.
+- `products.php` — dynamic: resolves the `category` query param against `$categories_for_filter` and titles/describes the page after the active category, falling back to a generic "Batik Collection" description when no filter is applied. Set **after** `$categories_for_filter` is populated (order matters), right before the `header.php` include.
+- `product.php` — dynamic: `$meta_description` is `truncate_text($product['description'], 155)` when the product has a description, else a templated fallback using the product name and category.
+- `404.php` — static.
+
+**Rule:** When adding a new public page, set both `$page_title` and `$meta_description` before including `header.php` — don't rely on the sitewide `DEFAULT_META_DESCRIPTION` fallback for real content pages.
+
 ### URL Construction — SITE_PATH and BASE_URL
 
 Two constants handle all URL generation:
@@ -94,10 +105,10 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 
 | File | Purpose |
 |------|---------|
-| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, etc.) — reads env vars first, then defaults. DB_PASSWORD default is `''` — set via env var. |
+| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, `DEFAULT_META_DESCRIPTION`, etc.) — reads env vars first, then defaults. DB_PASSWORD default is `''` — set via env var. |
 | `db_connect.php` | Creates and returns a PDO instance; returns `null` on failure |
 | `functions.php` | Utility functions: `escape()`, `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (mb-safe), `get_sample_batik_products()`, etc. |
-| `header.php` / `footer.php` | Shared page chrome — `footer.php` includes `main.js` |
+| `header.php` / `footer.php` | Shared page chrome — renders `$page_title`/`$meta_description` into `<title>`/`<meta name="description">` (see SEO Meta Tags below); `footer.php` includes `main.js` |
 | `go.php` | Redirect handler — validates URL starts with `http(s)://`, logs click to `outbound_clicks`, then redirects |
 | `sitemap.php` | Generates XML sitemap dynamically from DB; null-safe when `$pdo` is unavailable |
 | `404.php` | Custom 404 page — styled like the rest of the site, sends a real `404` status via `http_response_code(404)`. Wired up in `.htaccess` via `ErrorDocument 404`. |

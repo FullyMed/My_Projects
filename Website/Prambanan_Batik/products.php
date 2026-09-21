@@ -3,8 +3,6 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
-$page_title = 'Products';
-
 $db = null;
 $preview_mode = false;
 $all_products = [];
@@ -88,6 +86,24 @@ if (empty($categories_for_filter)) {
         ['name' => 'Accessories',          'slug' => 'accessories'],
         ['name' => 'Home Decor',           'slug' => 'home-decor'],
     ];
+}
+
+$active_category_name = '';
+if (!empty($category_filter)) {
+    foreach ($categories_for_filter as $cat) {
+        if ($cat['slug'] === $category_filter) {
+            $active_category_name = $cat['name'];
+            break;
+        }
+    }
+}
+
+if ($active_category_name !== '') {
+    $page_title = $active_category_name;
+    $meta_description = "Shop {$active_category_name} batik at Prambanan Batik — authentic Indonesian craftsmanship with trusted customer reviews.";
+} else {
+    $page_title = 'Batik Collection';
+    $meta_description = 'Browse our full collection of authentic Indonesian batik — traditional patterns, ready-to-wear, fabric, and accessories, with real customer ratings and reviews.';
 }
 
 ?>

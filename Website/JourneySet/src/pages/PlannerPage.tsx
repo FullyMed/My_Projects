@@ -3,6 +3,7 @@ import { getISOWeek, getISOWeekYear } from 'date-fns';
 import WeeklyPlanner from '../components/WeeklyPlanner';
 import ExportButton from '../components/ExportButton';
 import PrintView from '../components/PrintView';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const getWeekKey = (date: Date) => {
   const year = getISOWeekYear(date);
@@ -11,6 +12,10 @@ const getWeekKey = (date: Date) => {
 };
 
 const PlannerPage: React.FC = () => {
+  usePageMeta(
+    'Weekly Planner | JourneySet',
+    "Organise your week with tasks, time slots, and recurring to-dos in JourneySet's Weekly Planner."
+  );
   const [printView, setPrintView] = useState(false);
   // Initialise to the current ISO week so PrintView is correct even before
   // the user navigates to a different week.

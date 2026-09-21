@@ -1,11 +1,14 @@
 import { buttonVariants } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n";
+import { usePageMeta } from "@/lib/seo";
 import { motion } from "framer-motion";
 import { ArrowLeft, Home, MapPinOff, Search } from "lucide-react";
 import { Link } from "wouter";
 
 export default function NotFound() {
   const { t } = useLanguage();
+
+  usePageMeta(t("pageNotFound"), t("pageNotFoundDesc"));
 
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-16">

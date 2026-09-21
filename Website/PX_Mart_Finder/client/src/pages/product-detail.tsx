@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/product-card";
 import { ArrowLeft, MapPin, Share2, Info, Heart, Map as MapIcon, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/lib/storage";
+import { usePageMeta } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { useState, useRef } from "react";
 
@@ -18,8 +19,20 @@ export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
   const [showOnlyWithLocation, setShowOnlyWithLocation] = useState(false);
   const similarSectionRef = useRef<HTMLDivElement>(null);
-  
+
   const product = PRODUCTS.find(p => p.id === params?.id);
+
+  usePageMeta(
+    product ? (language === "en" ? product.product_name_en : product.product_name_zh) : t("productNotFound"),
+    product
+      ? (() => {
+          const loc = product.locationsByStore[selectedStore.id];
+          return language === "en"
+            ? `${product.brand} ${product.product_name_en} (${product.category_en}) at PX Mart${loc ? ` — Aisle ${loc.aisle}, Shelf ${loc.shelf}` : ""}.`
+            : `全聯${product.category_zh}「${product.product_name_zh}」（${product.brand}）${loc ? `，走道 ${loc.aisle}、貨架 ${loc.shelf}` : ""}。`;
+        })()
+      : t("productNotFound")
+  );
 
   if (!product) {
     return <div className="p-8 text-center">{t("productNotFound")}</div>;

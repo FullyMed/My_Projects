@@ -6,8 +6,13 @@ import { useCompactMode } from '../hooks/useCompactMode';
 import { storage } from '../utils/storage';
 import { getLastSync } from '../api/plannerApi';
 import { formatDistanceToNow } from 'date-fns';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const SettingsPage: React.FC = () => {
+  usePageMeta(
+    'Settings | JourneySet',
+    'Manage your account, sync status, theme, and data preferences in JourneySet.'
+  );
   const { user, logout } = useAuth();
   const { theme, setTheme, themes } = useTheme();
   const { isCompact, toggleCompact } = useCompactMode();
