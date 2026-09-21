@@ -4,6 +4,7 @@
 define('SITE_NAME', 'Prambanan Batik');
 define('SITE_TAGLINE', 'Authentic Indonesian Batik Craftsmanship');
 define('DEFAULT_META_DESCRIPTION', 'Shop authentic Indonesian batik at Prambanan Batik — premium handcrafted pieces with trusted customer reviews.');
+define('CONTACT_EMAIL', getenv('CONTACT_EMAIL') ?: 'hello@prambananbatik.com');
 define('BASE_URL', getenv('BASE_URL') ?: 'http://localhost/Prambanan_Batik');
 define('SITE_PATH', rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?: '', '/'));
 define('SITE_TIMEZONE', 'Asia/Jakarta');

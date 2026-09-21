@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { X, Eye, EyeOff, Compass, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useModalFocus } from '../hooks/useModalFocus';
@@ -194,6 +195,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
+
+            {mode === 'register' && (
+              <p className="text-center text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
+                By creating an account, you agree to our{' '}
+                <Link to="/terms" className="text-indigo-600 dark:text-indigo-400 hover:underline">Terms of Use</Link>
+                {' '}and{' '}
+                <Link to="/privacy" className="text-indigo-600 dark:text-indigo-400 hover:underline">Privacy Policy</Link>.
+              </p>
+            )}
           </form>
 
           <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">

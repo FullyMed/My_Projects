@@ -25,7 +25,7 @@ function isNavActive(href: string, location: string) {
 
 function Sidebar() {
   const [location] = useLocation();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-border/40 sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto bg-background">
@@ -50,6 +50,15 @@ function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="mt-auto p-3 pb-6 space-y-1 text-xs text-muted-foreground/70">
+        <Link href="/terms" className="block px-3 py-1 hover:text-foreground transition-colors">
+          {t("termsTitle")}
+        </Link>
+        <Link href="/privacy" className="block px-3 py-1 hover:text-foreground transition-colors">
+          {t("privacyTitle")}
+        </Link>
+      </div>
     </aside>
   );
 }

@@ -306,7 +306,7 @@ class SettingsPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: AppSpacing.lg),
-                    PrivacyCard(onReadMore: () => _showPrivacySheet(context)),
+                    PrivacyCard(onReadMore: () => context.push('/privacy')),
                     const SizedBox(height: AppSpacing.lg),
                     AboutCard(dataMode: settings.dataMode),
                   ],
@@ -316,59 +316,6 @@ class SettingsPage extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  void _showPrivacySheet(BuildContext context) {
-    final l10n = TffLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: cs.surface,
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.xl,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.privacy,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  l10n.privacyBody,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.dataModeBody,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -498,7 +445,58 @@ class _AboutCardState extends State<AboutCard> {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: AppSpacing.md),
+          const Divider(height: 1),
+          const SizedBox(height: AppSpacing.sm),
+          _NavLinkRow(
+            icon: Icons.description_outlined,
+            title: l10n.termsOfUse,
+            onTap: () => context.push('/terms'),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _NavLinkRow extends StatelessWidget {
+  const _NavLinkRow({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: cs.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+          ],
+        ),
       ),
     );
   }

@@ -17,6 +17,7 @@ The system helps users discover board games through three complementary recommen
 - **Custom 404 / Not Found page** — themed empty-state experience, both as a dedicated page and inline for zero-result searches
 - **Per-page SEO metadata** — distinct browser-tab title and meta description on every page
 - **Loading states** — explicit spinners for the recommendation engine's cold start, each search, and dataset loading on the Analytics page
+- **Terms of Use / Privacy Policy pages** — linked from the home page footer
 
 ---
 
@@ -44,7 +45,9 @@ BoardGames_Analyzer/
 │   └── pages/
 │       ├── 1_Recommendation.py     ← Recommendation engine UI
 │       ├── 2_Analytics.py         ← EDA / analytics dashboard
-│       └── 3_Not_Found.py         ← Themed "Not Found" page
+│       ├── 3_Not_Found.py         ← Themed "Not Found" page
+│       ├── 4_Terms_of_Use.py      ← Terms of Use
+│       └── 5_Privacy_Policy.py    ← Privacy Policy
 │
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
@@ -194,6 +197,9 @@ Landing page with project overview, key stats, and navigation cards.
 
 ### Not Found
 A dedicated, themed 404 page (styled to match the rest of the app) with links back to Home, Recommendation, and Analytics. Note: Streamlit's router still shows its own built-in "Page not found" banner for genuinely unrecognized URLs before falling back to Home — this page covers in-app "not found" states, not arbitrary bad URLs (a Streamlit platform limitation).
+
+### Terms of Use / Privacy Policy
+Static pages describing what the app actually does with your input (short version: no accounts, no persisted personal data — search inputs live only in your browser session) and disclaiming BGG affiliation. Linked from the Home page footer and from each other.
 
 ### Analytics Dashboard
 Interactive dataset explorer with sidebar controls (min-vote threshold, year range, chart size):

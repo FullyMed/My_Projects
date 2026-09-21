@@ -17,6 +17,16 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
+    <url>
+        <loc><?php echo htmlspecialchars(BASE_URL . '/terms.php'); ?></loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    <url>
+        <loc><?php echo htmlspecialchars(BASE_URL . '/privacy.php'); ?></loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
     <?php if ($pdo !== null):
     $stmt = $pdo->prepare('SELECT id, updated_at FROM products ORDER BY updated_at DESC');
     $stmt->execute();

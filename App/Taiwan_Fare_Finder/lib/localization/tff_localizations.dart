@@ -163,6 +163,46 @@ class TffLocalizations {
   String get notFoundTitle => _t('notFoundTitle');
   String get notFoundBody => _t('notFoundBody');
   String get notFoundBackToSearch => _t('notFoundBackToSearch');
+
+  // Terms of Use
+  String get termsOfUse => _t('termsOfUse');
+  String get termsLastUpdated => _t('termsLastUpdated');
+  String get termsIntro => _t('termsIntro');
+  String get termsSection1Title => _t('termsSection1Title');
+  String get termsSection1Body => _t('termsSection1Body');
+  String get termsSection2Title => _t('termsSection2Title');
+  String get termsSection2Body => _t('termsSection2Body');
+  String get termsSection3Title => _t('termsSection3Title');
+  String get termsSection3Body => _t('termsSection3Body');
+  String get termsSection4Title => _t('termsSection4Title');
+  String get termsSection4Body => _t('termsSection4Body');
+  String get termsSection5Title => _t('termsSection5Title');
+  String get termsSection5Body => _t('termsSection5Body');
+  String get termsSection6Title => _t('termsSection6Title');
+  String get termsSection6Body => _t('termsSection6Body');
+  String get termsSection7Title => _t('termsSection7Title');
+  String get termsSection7Body => _t('termsSection7Body');
+  String get termsSection8Title => _t('termsSection8Title');
+  String get termsSection8Body => _t('termsSection8Body');
+
+  // Privacy Policy (full page — distinct from the short Settings blurb above)
+  String get privacyPolicyTitle => _t('privacyPolicyTitle');
+  String get privacyLastUpdated => _t('privacyLastUpdated');
+  String get privacyPolicyIntro => _t('privacyPolicyIntro');
+  String get privacySection1Title => _t('privacySection1Title');
+  String get privacySection1Body => _t('privacySection1Body');
+  String get privacySection2Title => _t('privacySection2Title');
+  String get privacySection2Body => _t('privacySection2Body');
+  String get privacySection3Title => _t('privacySection3Title');
+  String get privacySection3Body => _t('privacySection3Body');
+  String get privacySection4Title => _t('privacySection4Title');
+  String get privacySection4Body => _t('privacySection4Body');
+  String get privacySection5Title => _t('privacySection5Title');
+  String get privacySection5Body => _t('privacySection5Body');
+  String get privacySection6Title => _t('privacySection6Title');
+  String get privacySection6Body => _t('privacySection6Body');
+  String get privacySection7Title => _t('privacySection7Title');
+  String get privacySection7Body => _t('privacySection7Body');
 }
 
 class _TffLocalizationsDelegate extends LocalizationsDelegate<TffLocalizations> {

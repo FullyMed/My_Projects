@@ -13,10 +13,10 @@ matching App ID / provisioning profile in your Apple Developer account) before
 creating the App Store Connect record.
 
 **Fields not filled in below** (need real values from you before submission):
-- Privacy Policy URL (required by Apple even though the app collects no personal data — see [`SECURITY.md`](../SECURITY.md))
+- Privacy Policy URL (required by Apple even though the app collects no personal data — see [`SECURITY.md`](../SECURITY.md)). The app now has an in-app Privacy Policy screen (`lib/pages/privacy_page.dart`, strings in the ARB files under the `privacy*` keys, contact address `maxfelix05@gmail.com`) — host that same content at a public URL for this field.
 - Support URL
 - Marketing URL (optional)
-- Contact email / phone for App Review
+- Contact email / phone for App Review (the in-app pages use `maxfelix05@gmail.com` as a placeholder contact — fine for now, but consider a dedicated address before this ships broadly)
 - Age rating questionnaire answers (likely 4+ — no objectionable content, no user-generated content, no accounts)
 - Primary category suggestion: **Travel**; secondary: **Navigation**
 - Price: Free (no IAP — nothing in the codebase implements purchases)

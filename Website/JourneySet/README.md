@@ -16,6 +16,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
 - **Per-page meta** — each route sets its own `<title>` and meta description for SEO/sharing
 - **Loading states** — a themed full-page loader while auth resolves, plus per-feature spinners so the Planner, Goals, and Calendar lists never flash an empty state while their data is still loading
+- **Terms of Use & Privacy Policy** — dedicated pages at `/terms` and `/privacy`, linked from the landing footer, the sign-up form, and Settings
 
 ## Tech stack
 
@@ -95,6 +96,7 @@ src/
 │   ├── LandingPage.tsx       # Marketing page
 │   ├── NotFoundPage.tsx      # Custom 404 (standalone or embedded in AppLayout)
 │   ├── LoadingScreen.tsx     # Full-page loading state (auth resolving)
+│   ├── LegalPageLayout.tsx   # Shared nav/footer + prose chrome for Terms/Privacy
 │   └── PrintView.tsx         # Print-ready layout
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components)

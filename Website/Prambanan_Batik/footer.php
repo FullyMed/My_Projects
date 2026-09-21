@@ -11,6 +11,8 @@
                 <ul>
                     <li><a href="<?php echo SITE_PATH; ?>/">Home</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/products.php">Batik Collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/terms.php">Terms of Use</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/privacy.php">Privacy Policy</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -20,6 +22,11 @@
         </div>
         <div class="footer-bottom">
             <p>&copy; <?php echo date('Y'); ?> <?php echo SITE_NAME; ?>. All rights reserved.</p>
+            <p class="footer-legal-links">
+                <a href="<?php echo SITE_PATH; ?>/terms.php">Terms of Use</a>
+                <span aria-hidden="true">·</span>
+                <a href="<?php echo SITE_PATH; ?>/privacy.php">Privacy Policy</a>
+            </p>
         </div>
     </footer>
     <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>

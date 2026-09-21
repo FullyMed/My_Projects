@@ -100,7 +100,9 @@ BoardGames_Analyzer/
 │   └── pages/
 │       ├── 1_Recommendation.py     ← Recommendation engine UI
 │       ├── 2_Analytics.py         ← EDA / analytics dashboard
-│       └── 3_Not_Found.py         ← Themed "Not Found" page (see Section 3, App/theme.py)
+│       ├── 3_Not_Found.py         ← Themed "Not Found" page (see Section 3, App/theme.py)
+│       ├── 4_Terms_of_Use.py      ← Terms of Use page
+│       └── 5_Privacy_Policy.py    ← Privacy Policy page
 │
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
@@ -208,6 +210,9 @@ All charts use `width='stretch'` and are responsive to the container width.
 
 ### `App/pages/3_Not_Found.py`
 Standalone, themed "404 / Not Found" page. Appears in the sidebar nav like any other page (Streamlit's `pages/` convention auto-lists every file there — it cannot be hidden without switching the whole app off the `pages/` convention onto `st.navigation`, which this project intentionally does not do; see "Custom 404 / Not Found" in Section 6). Reads an optional `?reason=` query param to customize its message, and renders `theme.render_not_found(..., show_links=True)` with `st.page_link` buttons back to Home / Recommendation / Analytics.
+
+### `App/pages/4_Terms_of_Use.py` / `App/pages/5_Privacy_Policy.py`
+Static legal pages, styled with the existing `.section-title` / `.info-box` theme classes (no new CSS). Content is deliberately scoped to what's actually true for this project — see "Legal Pages" in Section 6 below for why, and for what must be kept in sync if the app's data handling ever changes.
 
 ### `Notebooks/08_Discovery_Engine.ipynb`
 Main recommendation system notebook.
@@ -342,6 +347,16 @@ Streamlit's default "running" indicator (top-right spinner icon) is easy to miss
 Root `app.py` (legacy single-page reference app) was **not** touched — it has no `App/`-style UI parity requirement (only `recommender.py` must stay synced, per Section 10), so it was left out of scope for this pass.
 
 If a new slow operation (cached loader, heavy compute) is added, give it an explicit `show_spinner="..."` or wrap it in `st.spinner("...")` with page-specific wording rather than relying on Streamlit's default indicator.
+
+## Legal Pages
+`App/pages/4_Terms_of_Use.py` and `App/pages/5_Privacy_Policy.py` are real, public-facing pages (indexed by search engines via their own meta title/description, like every other page — see "Per-Page Meta Title / Description" above). Their content was written to be **factually accurate for what this app actually does**, not generic boilerplate:
+- No account creation, login, or persisted personal data — confirmed by reading the actual code (no database, no forms that write anywhere; text inputs on the Recommendation page live only in `st.session_state` for that browser session)
+- No fabricated legal claims — e.g. no specific open-source license is asserted (none is published in this repo), no compliance certifications, no invented contact email or entity name
+- Both explicitly disclaim BGG affiliation and note recommendations are algorithmic, not advice
+- Both link to the actual public GitHub repo (`github.com/FullyMed/My_Projects`) as the contact method, since no other public contact channel exists
+- Both are linked from the Home page footer (`st.page_link`) and cross-link each other
+
+**If the app's actual data handling changes** (e.g. a database, user accounts, or third-party analytics/cookies are added), both pages **must** be updated to match — the whole point is that they stay true to the code, not that they sound reassuring.
 
 ---
 

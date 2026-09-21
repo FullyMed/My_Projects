@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar, Target, CheckSquare, Moon, Sun, BarChart3, Download, Compass, ArrowRight, Zap, Globe } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -216,12 +217,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
 
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer className="border-t border-slate-200 dark:border-slate-800 pb-safe">
-        <div className="max-w-7xl mx-auto px-4 xs:px-6 py-6 xs:py-8 flex flex-col xs:flex-row justify-between items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 xs:px-6 py-6 xs:py-8 flex flex-col xs:flex-row justify-between items-center gap-3 xs:gap-4">
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
               <Compass className="h-3.5 w-3.5 text-on-accent" />
             </div>
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">JourneySet</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs xs:text-sm text-slate-500 dark:text-slate-400">
+            <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Use</Link>
+            <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</Link>
           </div>
           <p className="text-xs xs:text-sm text-slate-400 dark:text-slate-600">
             Your personal productivity companion.

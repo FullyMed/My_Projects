@@ -1337,6 +1337,18 @@ footer {
   border-top: 3px solid var(--color-accent);
 }
 
+.footer-links {
+  margin-top: 0.5rem;
+}
+
+.footer-links a {
+  /* at least 44px touch target, without visually enlarging the small text link */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
 /* ================================================================
    RESPONSIVE BREAKPOINTS
    Mobile-first: base styles are for mobile

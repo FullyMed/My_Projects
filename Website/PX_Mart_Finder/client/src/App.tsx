@@ -15,6 +15,8 @@ import ProductDetail from "@/pages/product-detail";
 import CategoryDetail from "@/pages/category-detail";
 import Favorites from "@/pages/favorites";
 import StoreMap from "@/pages/store-map";
+import Terms from "@/pages/terms";
+import Privacy from "@/pages/privacy";
 import NotFound from "@/pages/not-found";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -28,6 +30,8 @@ function Router() {
         <Route path="/product/:id" component={ProductDetail} />
         <Route path="/favorites" component={Favorites} />
         <Route path="/store-map" component={StoreMap} />
+        <Route path="/terms" component={Terms} />
+        <Route path="/privacy" component={Privacy} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

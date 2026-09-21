@@ -49,6 +49,8 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 ├── Forgot-password.html            Two-step password reset (email → token link → new password)
 ├── About.html
 ├── 404.html                        Custom error page — see Security Hardening below for the <base> tag gotcha
+├── Terms-of-Use.html                Legal — linked from every page's footer
+├── Privacy-Policy.html              Legal — linked from every page's footer
 │
 ├── Assets/
 │   ├── CSS/
@@ -121,6 +123,12 @@ Note the phrasing above: the form/dashboard content is **hidden by default** (`c
 | Navbar | `#navLinks` shows a single spinner `<li>` (JS-injected, not part of the HTML source) until `check_session.php` resolves. |
 
 All loading UI reuses the existing `.spinner`/`.loading-state`/`.btn-loading` classes in `Boardgame.css` — no new colors or fonts.
+
+### Legal Pages
+
+`Terms-of-Use.html` and `Privacy-Policy.html` are linked from a `.footer-links` line in every page's footer (added right after the copyright notice). They reuse the `.about-section` card styling already used by `About.html` — no new content styling was introduced.
+
+> **Not a substitute for legal advice.** The Terms of Use and Privacy Policy text was written to honestly describe what this Site actually does (the real fields collected at signup/booking, the real security measures documented under [Security Hardening](#security-hardening), the real booking/cancellation rules) rather than generic template text. It has **not** been reviewed by a lawyer, including against Indonesia's Personal Data Protection Law (UU PDP). Have it reviewed before treating it as your business's final legal terms — and if you change how the Site collects or handles data, update these pages to match, since letting them drift from reality is worse than not having them.
 
 ### Password Reset Flow
 

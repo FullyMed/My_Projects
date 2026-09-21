@@ -115,6 +115,7 @@ A design-system layer of reusable widgets:
 | `TffAdaptive` | Adaptive layout helper — 3-tier breakpoints (phone / tablet / desktop) and navigation helpers (`useNavRail`, `isWide`, etc.) |
 | `LocationField` | Text field for origin/destination input |
 | `LocationPickerSheet` | Bottom sheet for picking a `Location` |
+| `LegalSection` | Titled paragraph block used to compose the Terms of Use / Privacy Policy pages |
 
 ### Routes
 
@@ -126,8 +127,12 @@ Defined in `lib/nav.dart` via `go_router`:
 | `/compare` | `ComparePage` |
 | `/saved` | `SavedPage` |
 | `/settings` | `SettingsPage` (pushed with fade+slide, not in shell) |
+| `/terms` | `TermsPage` (pushed with fade+slide, not in shell) |
+| `/privacy` | `PrivacyPolicyPage` (pushed with fade+slide, not in shell) |
 
 `/search`, `/compare`, `/saved` are wrapped in a `StatefulShellRoute.indexedStack` rendered by `ShellPage`. `AppRoutes` holds the path constants. `GoRouter.errorBuilder` renders `NotFoundPage` (`lib/pages/not_found_page.dart`) for any unmatched route — reuses `TffPageScaffold` + `TffEmptyState` + `TffPrimaryButton` and routes back to `AppRoutes.search`. Its strings (`notFoundTitle`, `notFoundBody`, `notFoundBackToSearch`) follow the normal ARB + `TffLocalizations` getter pattern.
+
+`TermsPage` (`lib/pages/terms_page.dart`) and `PrivacyPolicyPage` (`lib/pages/privacy_page.dart`) are full-page, scrollable legal documents built from `LegalSection` blocks, reached from Settings (`AboutCard`'s "Terms of Use" row, `PrivacyCard`'s "Read more" button). Their copy lives entirely in the ARB files (`terms*` / `privacy*` keys) like any other UI string — there is no separate content-management layer. Their Contact sections use `maxfelix05@gmail.com` as the support address (placeholder for now — swap for a dedicated address before wide release); see `store_listing/app_store.md` / `store_listing/play_store.md` for the matching Privacy Policy URL requirement.
 
 ### Theme & design tokens
 

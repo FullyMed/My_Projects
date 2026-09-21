@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Trash2, LogOut, Palette, Check, Clock, Maximize2, Minimize2, User, Wifi } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
@@ -182,6 +183,12 @@ const SettingsPage: React.FC = () => {
             </button>
           </div>
         </section>
+
+        {/* Legal */}
+        <div className="flex items-center gap-4 px-1 text-xs text-slate-400 dark:text-slate-500">
+          <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Use</Link>
+          <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</Link>
+        </div>
       </div>
 
       {/* Reset Confirmation Modal */}

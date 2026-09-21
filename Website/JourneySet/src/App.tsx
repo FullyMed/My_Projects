@@ -14,6 +14,8 @@ import PlannerPage from './pages/PlannerPage';
 import GoalsPage from './pages/GoalsPage';
 import CalendarPage from './pages/CalendarPage';
 import SettingsPage from './pages/SettingsPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 const AppContent: React.FC = () => {
   const [showAuth, setShowAuth] = useState<'login' | 'register' | null>(null);
@@ -40,6 +42,9 @@ const AppContent: React.FC = () => {
             </>
           )
         } />
+
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
 
         <Route path="/app/*" element={
           <ProtectedRoute>

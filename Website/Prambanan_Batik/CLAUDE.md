@@ -61,6 +61,16 @@ Every public page sets `$page_title` and `$meta_description` **before** `include
 
 **Rule:** When adding a new public page, set both `$page_title` and `$meta_description` before including `header.php` — don't rely on the sitewide `DEFAULT_META_DESCRIPTION` fallback for real content pages.
 
+### Legal Pages — terms.php and privacy.php
+
+Static content pages using the same `header.php`/`footer.php` request flow as every other public page (no `$db`, no preview mode). Linked from `footer.php` in both the "Quick Links" list and a compact `.footer-legal-links` row next to the copyright line, and listed in `sitemap.php`.
+
+`privacy.php`'s "Information We Collect" section is a factual description of what this codebase actually stores: review submissions (`reviews` table), outbound marketplace click logs (`outbound_clicks` — product, platform, IP, user agent, referrer, written by `go.php`), and the strictly-necessary session cookie set in `config.php`.
+
+**Rule:** If a future change adds a new place personal data is collected or a new cookie/tracking mechanism, update `privacy.php`'s "Information We Collect" section in the same change — don't let the policy drift from what the code actually does.
+
+Both pages use the `CONTACT_EMAIL` constant (`config.php`, env-overridable like `BASE_URL`) for their contact links — update the env var on deployment rather than editing the pages directly.
+
 ### Loading States — main.js is shared by public and admin pages
 
 `assets/js/main.js` is loaded on every public page via `footer.php`, **and** is also included directly (`<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>`) at the bottom of every `admin/*.php` page, right before any page-specific inline `<script>` block there. Its public-only init functions (`initHeader`, `initScrollReveal`, `initProductCards`, `initSelectMenus`) all guard on selectors that don't exist in admin markup, so they no-op safely on admin pages.
@@ -118,7 +128,7 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 
 | File | Purpose |
 |------|---------|
-| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, `DEFAULT_META_DESCRIPTION`, etc.) — reads env vars first, then defaults. DB_PASSWORD default is `''` — set via env var. |
+| `config.php` | All constants (`BASE_URL`, `SITE_PATH`, `DB_*`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, `DEFAULT_META_DESCRIPTION`, `CONTACT_EMAIL`, etc.) — reads env vars first, then defaults. DB_PASSWORD default is `''` — set via env var. |
 | `db_connect.php` | Creates and returns a PDO instance; returns `null` on failure |
 | `functions.php` | Utility functions: `escape()`, `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (mb-safe), `get_sample_batik_products()`, etc. |
 | `header.php` / `footer.php` | Shared page chrome — renders `$page_title`/`$meta_description` into `<title>`/`<meta name="description">` (see SEO Meta Tags below); `footer.php` includes `main.js` |
@@ -126,6 +136,7 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 | `go.php` | Redirect handler — validates URL starts with `http(s)://`, logs click to `outbound_clicks`, then redirects |
 | `sitemap.php` | Generates XML sitemap dynamically from DB; null-safe when `$pdo` is unavailable |
 | `404.php` | Custom 404 page — styled like the rest of the site, sends a real `404` status via `http_response_code(404)`. Wired up in `.htaccess` via `ErrorDocument 404`. |
+| `terms.php` / `privacy.php` | Static legal pages (see Legal Pages below) |
 | `admin/auth.php` | Session management (`loginAdmin`, `requireAdminLogin`, `logoutAdmin`, `isAdminLoggedIn`) + CSRF helpers (`generateCsrfToken`, `validateCsrfToken`) + rate-limiting helpers (`isLoginRateLimited`, `recordFailedLoginAttempt`, `clearLoginAttempts`) |
 | `admin/admins.php` | List, add, delete admins; change passwords; protects against self-deletion and deleting the last admin |
 | `admin/import_products.php` | CSV bulk import — upserts products by SKU; CSRF-protected |
@@ -147,6 +158,7 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 - `/products.php?category=<slug>` — filter by category slug (loaded dynamically from DB; falls back to hardcoded list in preview mode)
 - `/product.php?id=<id>` — product detail with reviews
 - `/go.php?id=<product_id>&platform=<shopee|tokopedia|other>` — tracked redirect
+- `/terms.php`, `/privacy.php` — legal pages
 - `/admin/admins.php` — admin user management
 
 ### Security Patterns to Follow

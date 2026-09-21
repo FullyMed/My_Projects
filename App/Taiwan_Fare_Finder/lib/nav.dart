@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taiwan_fare_finder/pages/compare_page.dart';
 import 'package:taiwan_fare_finder/pages/not_found_page.dart';
+import 'package:taiwan_fare_finder/pages/privacy_page.dart';
 import 'package:taiwan_fare_finder/pages/saved_page.dart';
 import 'package:taiwan_fare_finder/pages/search_page.dart';
 import 'package:taiwan_fare_finder/pages/settings_page.dart';
 import 'package:taiwan_fare_finder/pages/shell_page.dart';
+import 'package:taiwan_fare_finder/pages/terms_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -31,6 +33,26 @@ class AppRouter {
           },
         ),
       ),
+      GoRoute(
+        path: AppRoutes.terms,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const TermsPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+            return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved), child: child));
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          child: const PrivacyPolicyPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+            return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved), child: child));
+          },
+        ),
+      ),
     ],
   );
 }
@@ -41,4 +63,6 @@ class AppRoutes {
   static const String compare = '/compare';
   static const String saved = '/saved';
   static const String settings = '/settings';
+  static const String terms = '/terms';
+  static const String privacy = '/privacy';
 }

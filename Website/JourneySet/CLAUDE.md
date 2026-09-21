@@ -49,6 +49,8 @@ VITE_SUPABASE_ANON_KEY=...
   /app/calendar  → CalendarPage → EventCalendar
   /app/settings  → SettingsPage
   /app/*         → NotFoundPage (fullPage={false}, rendered inside AppLayout)
+/terms      → TermsPage (public, works whether authenticated or not)
+/privacy    → PrivacyPage (public, works whether authenticated or not)
 *               → NotFoundPage (fullPage={true}, standalone with its own nav/footer)
 ```
 
@@ -76,6 +78,10 @@ Each API file (`plannerApi`, `goalsApi`, `eventsApi`) follows the same pattern:
 - **`LoadingScreen`** (`src/components/LoadingScreen.tsx`): the single full-viewport loading UI (logo + `Loader2` spinner) shown while auth is resolving. Used by both `App.tsx` (top-level `isLoading` from `useAuth`) and `ProtectedRoute`. Don't reintroduce a bespoke spinner in either place — route any new "waiting on auth" case through this component so the loading UI stays visually consistent and on-theme.
 - **Per-feature data fetches**: `WeeklyPlanner`, `GoalTracker`, and `EventCalendar` each track their own `[tasks|goals|events]Loading` boolean around their initial Supabase fetch (and, for `WeeklyPlanner`, each week change) and render a centered `Loader2` block (`h-8 w-8 text-indigo-500 animate-spin` + a muted caption) in place of the grid while `true`. This matters because these lists start empty — without a loading flag, the "no data yet" empty state flashes before the real data arrives. `PrintView` already had this pattern (`isLoading` + `Loader2`); the other three follow the same convention. When adding a new data-fetching feature component, follow this pattern rather than leaving the empty state to double as a loading state.
 - **`AuthModal`** shows a `Loader2` spin icon next to "Please wait…" on its submit button while `loading` is true, matching the same icon+text convention.
+
+### Legal pages (`src/pages/TermsPage.tsx`, `src/pages/PrivacyPage.tsx`)
+
+Both are thin content components wrapped in `LegalPageLayout` (`src/components/LegalPageLayout.tsx`), which owns the shared nav/footer chrome and the prose styling (descendant-selector classes for `h2`/`p`/`ul`/`a`/`strong`/`code` — write page content as plain semantic HTML inside a `<section>` per clause, don't add per-element classes). `LegalPageLayout` reads `useAuth()` itself to point its back link at `/app/planner` or `/`, same pattern as `NotFoundPage`. Routed at `/terms` and `/privacy` — public, top-level routes outside `/app/*`, so they render for both signed-in and signed-out users. Linked from the `LandingPage` footer, the register form in `AuthModal` (consent line, register mode only), `SettingsPage` (small legal-links row), and cross-linked in `LegalPageLayout`'s own footer. When editing the copy, keep the "Last updated" date in sync with actual content changes.
 
 ### Per-page meta (`src/hooks/usePageMeta.ts`)
 

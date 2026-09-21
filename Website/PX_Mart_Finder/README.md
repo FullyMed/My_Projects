@@ -37,6 +37,7 @@ npm run dev:client
 - Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
 - Per-page meta title and meta description (bilingual, updates live with the page and language)
 - Loading states: image skeletons with fade-in and error fallback, an initial app-boot spinner, and a search-debounce indicator
+- Terms of Use and Privacy Policy pages, with a non-affiliation disclaimer (independent portfolio project, not affiliated with PX Mart)
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts
@@ -49,7 +50,7 @@ npm run dev:client
 client/
   src/
     components/    # Layout, ProductCard, ProductImage, LanguageToggle, ThemeToggle
-    pages/         # Home, Search, Category, Product Detail, Favorites, Store Map
+    pages/         # Home, Search, Category, Product Detail, Favorites, Store Map, Terms, Privacy
     lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts, seo.ts
     data/          # products.json, categories.json
   public/Images/   # Product images organized by category

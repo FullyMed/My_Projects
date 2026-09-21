@@ -34,7 +34,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 const iconMap: Record<string, LucideIcon> = {
   Cookie,
@@ -175,6 +175,20 @@ export default function Home() {
           })}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="px-6 py-6 text-center border-t border-border/40 mt-4">
+        <p className="text-[11px] text-muted-foreground/70 mb-2">{t("footerDisclaimer")}</p>
+        <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground/70">
+          <Link href="/terms" className="hover:text-foreground transition-colors">
+            {t("termsTitle")}
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
+            {t("privacyTitle")}
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

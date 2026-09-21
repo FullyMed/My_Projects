@@ -139,6 +139,8 @@ Page-level views.
 | `product-detail.tsx` | `/product/:id` | Two-column on desktop |
 | `favorites.tsx` | `/favorites` | Saved products |
 | `store-map.tsx` | `/store-map` | Placeholder aisle map |
+| `terms.tsx` | `/terms` | Terms of Use — back header + prose sections |
+| `privacy.tsx` | `/privacy` | Privacy Policy — back header + prose sections |
 | `not-found.tsx` | `*` | Custom branded 404 — icon, big "404", heading/description, Search Products + Back to Home CTAs, Go Back link. Fully localized, spring entrance animation |
 
 ### client/src/lib/
@@ -350,6 +352,12 @@ Since all data (`data.ts`/JSON) is static and rendered synchronously, there is n
 - **Initial app boot** — `client/index.html` renders a `#app-boot-loader` (inline-styled spinner, no Tailwind dependency since it must paint before the bundle loads) over `#root`; `main.tsx` fades it out via a `.hide` class after `createRoot().render()` and removes it from the DOM on `transitionend`, with a `setTimeout(400ms)` fallback removal since `transitionend` can fail to fire when the "hide" class is applied before the initial state has painted
 - **Search debounce** — `search-results.tsx` swaps the search icon for a spinning `Loader2` whenever `query !== debouncedQuery`, signaling that displayed results haven't caught up to what's typed yet (300ms `use-debounce` window)
 
+## Legal Pages
+- `terms.tsx` (`/terms`) and `privacy.tsx` (`/privacy`) — same back-header + prose-section layout as `store-map.tsx`, fully localized (`termsSection1-6Title/Body`, `privacySection1-5Title/Body`, `legalLastUpdated` keys in `i18n.ts`), each wired to `usePageMeta`
+- Both explicitly disclaim that the app is an independent, unofficial portfolio project **not affiliated with, endorsed by, or sponsored by PX Mart (全聯福利中心)** — important since the app is themed around a real retail brand's name/colors
+- Privacy Policy content reflects the app's actual behavior (nothing invented): everything is stored in `localStorage` only (`px-lang`, `px-store`, `px-favorites`, `px-recent-searches`, `vite-ui-theme`), there is no backend/accounts/analytics/tracking, and some product images load from Unsplash (a real third-party dependency — see `product-image.tsx` / [Loading States](#loading-states))
+- Discoverability: linked from the bottom of the desktop `Sidebar` (`layout.tsx`, anchored via `mt-auto`) and from a `<footer>` on `home.tsx` (chosen because Home has natural page flow with no inner `overflow-y-auto` region, unlike `search-results.tsx`) — not added to `NAV_ITEMS`/bottom nav, since legal pages aren't primary navigation
+
 ---
 
 # 9. Current Progress
@@ -396,6 +404,7 @@ Since all data (`data.ts`/JSON) is static and rendered synchronously, there is n
 - `not-found.tsx` rebuilt from a plain alert-style card into a fully branded 404 (icon badge, "404", CTAs) — see [Custom 404 Page](#custom-404-page)
 - Per-page meta title and meta description added across all 7 routes via `usePageMeta` — see [Per-Page SEO Meta Tags](#per-page-seo-meta-tags)
 - Loading states added for product images (skeleton + fade-in + error fallback), initial app boot (spinner overlay), and search debounce (spinner icon) — see [Loading States](#loading-states). Fixed a bug in the boot-loader removal where `transitionend` alone could leave `#app-boot-loader` stuck in the DOM (invisible but present) if the "hide" class was applied before the initial paint — added a `setTimeout` fallback removal
+- Terms of Use (`/terms`) and Privacy Policy (`/privacy`) pages added, with a non-affiliation disclaimer and honest, behavior-accurate privacy content (localStorage-only, no backend/tracking) — see [Legal Pages](#legal-pages)
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors

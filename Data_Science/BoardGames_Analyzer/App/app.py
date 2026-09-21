@@ -133,4 +133,11 @@ with h3:
     """, unsafe_allow_html=True)
 
 st.markdown("---")
+f1, f2 = st.columns(2)
+with f1:
+    st.page_link("pages/4_Terms_of_Use.py", label="Terms of Use", icon="📜")
+with f2:
+    st.page_link("pages/5_Privacy_Policy.py", label="Privacy Policy", icon="🔒")
+
+st.markdown("---")
 st.caption("BoardGames Analyzer — Explainable Hybrid Recommendation System · Built with Streamlit")

@@ -10,8 +10,8 @@ descriptions, so the terms from [`app_store.md`](app_store.md)'s keyword lists
 are already woven into the descriptions below.
 
 **Fields not filled in below** (need real values from you before submission):
-- Privacy Policy URL (required — see [`SECURITY.md`](../SECURITY.md) for the no-personal-data stance to summarize there)
-- Contact email
+- Privacy Policy URL (required — see [`SECURITY.md`](../SECURITY.md) for the no-personal-data stance to summarize there). The app now has an in-app Privacy Policy screen (`lib/pages/privacy_page.dart`, strings in the ARB files under the `privacy*` keys, contact address `maxfelix05@gmail.com`) — host that same content at a public URL for this field.
+- Contact email (the in-app pages use `maxfelix05@gmail.com` as a placeholder contact — fine for now, but consider a dedicated address before this ships broadly)
 - Category suggestion: **Travel & Local**
 - Content rating questionnaire answers (likely Everyone — no objectionable content, no user-generated content, no accounts)
 - Price: Free (no IAP — nothing in the codebase implements purchases)

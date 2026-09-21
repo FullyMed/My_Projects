@@ -16,6 +16,7 @@ A cross-platform Flutter app for searching and comparing public transportation f
 - **Multilingual** — English, Traditional Chinese, Simplified Chinese, and Indonesian
 - **Custom 404 page** — unmatched routes render a themed "page not found" screen with a way back to Search
 - **Shimmer loading states** — fare results, comparisons, and saved routes/history show content-shaped skeleton placeholders while loading, instead of a generic spinner
+- **In-app Terms of Use & Privacy Policy** — full, localized legal pages reachable from Settings, describing exactly what the app stores locally and what it sends to TDX in API mode
 
 ---
 

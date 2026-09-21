@@ -13,6 +13,7 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **SEO Optimized**: XML sitemap, robots.txt, and a unique meta title + meta description per page (static on Home/404, dynamic by category on the collection page, dynamic by product on product pages)
 - **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
 - **Loading States**: Top-of-page progress bar on navigation, shimmer skeletons on product images while they load, and a spinner + disabled state on form submit buttons — across both the public site and admin panel
+- **Legal Pages**: Terms of Use and Privacy Policy, linked from the footer and listed in the sitemap
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
 - **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
@@ -67,11 +68,12 @@ Set environment variables in `.htaccess` or in the hosting control panel. Do **n
 
 ```apacheconf
 # .htaccess or VirtualHost block
-SetEnv BASE_URL    https://yourdomain.com
-SetEnv DB_HOST     localhost
-SetEnv DB_NAME     your_db_name
-SetEnv DB_USER     your_db_user
-SetEnv DB_PASSWORD your_db_password
+SetEnv BASE_URL     https://yourdomain.com
+SetEnv DB_HOST      localhost
+SetEnv DB_NAME      your_db_name
+SetEnv DB_USER      your_db_user
+SetEnv DB_PASSWORD  your_db_password
+SetEnv CONTACT_EMAIL hello@yourdomain.com
 ```
 
 When `BASE_URL` is set to the domain root (no subdirectory path), `SITE_PATH` resolves to an empty string automatically — no other code changes needed for deployment.
@@ -108,6 +110,8 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── go.php                       # Tracked redirect to Shopee/Tokopedia/other
 ├── sitemap.php                  # Dynamic XML sitemap (null-safe when DB unavailable)
 ├── 404.php                      # Custom 404 page — wired up in .htaccess via ErrorDocument
+├── terms.php                    # Terms of Use
+├── privacy.php                  # Privacy Policy
 ├── robots.txt                   # Search engine directives
 ├── config.php                   # Site constants — BASE_URL, SITE_PATH, DB_*, SESSION_TIMEOUT, etc.
 ├── db_connect.php               # Returns PDO instance (or null on failure)
@@ -187,6 +191,8 @@ Tracks failed admin login attempts by IP for brute-force protection. Columns: `i
 | `/go.php?id=<id>&platform=<shopee\|tokopedia\|other>` | Tracked redirect |
 | `/sitemap.php` | XML sitemap |
 | `/404.php` | Custom not-found page (also served for any unmatched URL via `.htaccess`) |
+| `/terms.php` | Terms of Use |
+| `/privacy.php` | Privacy Policy |
 | `/admin/` | Admin dashboard |
 | `/admin/admins.php` | Admin user management |
 
@@ -263,6 +269,12 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.8.0** (2026-09): Terms of Use & Privacy Policy pages
+  - New `terms.php` and `privacy.php` — static legal pages using the same header/footer chrome as every other public page
+  - `privacy.php`'s "Information We Collect" section accurately reflects what the codebase collects: review submissions, `outbound_clicks` logging in `go.php`, and the strictly-necessary session cookie
+  - New `CONTACT_EMAIL` constant in `config.php` (env-overridable, like `BASE_URL`) used by both pages' contact links
+  - Linked from `footer.php` (Quick Links list + a compact legal-links row next to the copyright) and added to `sitemap.php`
 
 - **v2.7.0** (2026-09): Loading states
   - New top-of-page progress bar (`initNavProgressBar` in `main.js`) animates on link clicks and form submits across the whole site — every navigation here is a full page reload, so it never needs to "complete"

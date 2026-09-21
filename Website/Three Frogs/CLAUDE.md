@@ -23,6 +23,7 @@ There is no local dev server configuration in this repo. To test PHP endpoints l
 |---|---|
 | `*.html` | One file per page (index, Booking, Collection, Dashboard, Login, Signup, About, Forgot-password) |
 | `404.html` | Custom error page, served by `.htaccess`'s `ErrorDocument 404 /404.html` — see [404 page](#404-page) below |
+| `Terms-of-Use.html`, `Privacy-Policy.html` | Legal pages, linked from every page's footer — see [Legal pages](#legal-pages) below |
 | `.htaccess` | Root-level Apache/LiteSpeed config — HTTPS redirect, security headers/CSP, directory-listing lockdown, `ErrorDocument 404` |
 | `.gitignore` | Excludes `Assets/PHP/db_config.php` from version control |
 | `Assets/CSS/Boardgame.css` | Single stylesheet shared across all pages |
@@ -104,6 +105,18 @@ Two kinds, both built from the same CSS in `Boardgame.css` (`.spinner`, `.spinne
    - **Navbar** — `Navbar.js` fills `#navLinks` with a single `<li class="nav-loading">` spinner immediately on `DOMContentLoaded`, before its own `check_session.php` fetch. This one JS-injected placeholder doesn't violate "never add static `<li>` items to HTML pages" below — that rule is about what ships in the HTML source, not what `Navbar.js` itself writes at runtime.
 
 **Why this exists:** before this pattern, `Booking.html`/`Dashboard.html` briefly rendered their real (empty) content and `Collection.html` briefly rendered the *entire* ungated ~218-game list before each page's login check resolved and hid/redirected — a real flash of content a logged-out visitor should never see. Any new page or endpoint gated by `check_session.php` should follow the same hide-by-default-then-reveal pattern rather than hiding content reactively after the fact.
+
+### Legal pages
+
+`Terms-of-Use.html` and `Privacy-Policy.html` follow the same page boilerplate as every other page and reuse `.about-section` (the same card styling as `About.html`) for their content — no new CSS classes for the content itself, just a small `.footer-links` rule (see below) for the links that point to them.
+
+**Every page's footer links to both**, via:
+```html
+<p class="footer-links"><a href="Terms-of-Use.html">Terms of Use</a> · <a href="Privacy-Policy.html">Privacy Policy</a></p>
+```
+placed directly after the `&copy; 2025 ...` line. **Any new page must include this too** — it's not injected dynamically like the navbar, so it has to be copy-pasted into each new page's footer.
+
+**Content is a starting draft, not reviewed by a lawyer.** It was written to accurately describe what the Site actually does (the real data fields collected, the real security measures in `security.php`/`.htaccess`, the real booking rules) rather than generic boilerplate, but it has not been reviewed against Indonesia's Personal Data Protection Law (UU PDP) or any other applicable law by legal counsel. If the content of either page is edited, keep it truthful to the current implementation — e.g. don't claim a security measure, cookie behavior, or data-sharing practice that isn't actually true of the code at the time.
 
 ### Forgot-password flow
 
@@ -188,4 +201,5 @@ Valid categories (must match the filter dropdown in `Collection.html`): Party, F
 - **Booking email field** — set server-side from session on page load (`readOnly = true`). After a successful booking `bookingForm.reset()` is called, followed immediately by re-populating the email field so back-to-back bookings work.
 - **`db_config.php` is gitignored** — never commit real credentials. The file must exist on the server (and locally for dev) but is excluded from version control. Use `db_config.example.php` as the template.
 - **Hide-then-reveal for session-gated content** — `Booking.html`/`Dashboard.html` ship with their real content wrapped in `class="hidden"` and a `.loading-state` sibling shown by default; the page's JS only removes `hidden` once `checkSession()` confirms the right state (see [Loading states](#loading-states)). Don't revert to showing real content immediately and hiding it reactively after the fetch resolves — that's the flash-of-ungated-content bug this pattern replaced.
+- **Footer legal links on every page** — every page's footer must include the `.footer-links` paragraph linking to `Terms-of-Use.html` and `Privacy-Policy.html` (see [Legal pages](#legal-pages)). Copy it from an existing page's footer when creating a new one.
 - **`404.html`'s `<base href="/" />`** — every other page uses relative asset paths with no leading `/` because they're all served from the document root anyway; `404.html` is the one page that must keep its `<base>` tag (see [404 page](#404-page)), since `ErrorDocument` serves it under an arbitrary, possibly-nested URL. Don't remove it, and don't "fix" the other pages to match — they're intentionally different.
