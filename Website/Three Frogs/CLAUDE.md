@@ -132,6 +132,16 @@ All game data is a hardcoded JavaScript array in `Assets/JS/Boardgame.js` (~218 
 
 Valid categories (must match the filter dropdown in `Collection.html`): Party, Family, Abstract, Strategy, Dexterity, Thematic, Word Game, Cooperative, Card Game, Bluffing, Deduction, Social Deduction, Puzzle, Kids, Horror (and several minor ones with 1 game each).
 
+**New game cover images should be resized to a max dimension of ~900px on the longest side before committing** (matches every existing image after the optimization pass below). There's no build step and no image pipeline in this project — whatever file you commit is served as-is, so an uncompressed 3000px phone photo will genuinely ship to every visitor's browser.
+
+### Image optimization
+
+As of this pass, every file in `Assets/Images/` (except `Avatars/`, `favicon_io/`, and the 5 `.avif` files, which were already small) has been resized to a **900px max dimension** and re-encoded (JPEG quality 82, PNG `optimize=True`, WebP quality 82, via Pillow) — filenames and extensions are unchanged, so `Boardgame.js`'s `image:` paths needed no edits. This took the folder from ~96MB to ~24MB (~75% smaller) with no visible quality loss at the sizes these images are actually displayed (card thumbnails, per the breakpoints table below).
+
+**`ThreeFrogsPlace.jpg` is the one deliberate exception** — it's used as a full-bleed `background: url(...) cover` hero image (see `.hero` in `Boardgame.css`), not a card thumbnail, so it's sized to a 1920px-wide cap instead of 900px. If you ever re-run a bulk image pass, exclude this file from the generic card-image treatment or it will look upscaled/blurry on wide screens — check `Boardgame.css` for `background: url(` before assuming every image in this folder is a card thumbnail.
+
+Both `<img>` tags in `Boardgame.js` (`renderBoardgames()` and the Collection page's grouped-view renderer) carry `loading="lazy" decoding="async"` — meaningful here since `Collection.html` renders all ~218 game cards into the DOM at once (see [Loading states](#loading-states)); lazy-loading defers fetching images that are off-screen instead of downloading all of them upfront.
+
 ### PHP endpoint conventions
 
 - Every endpoint sets `ini_set('display_errors', 0)` and `error_reporting(E_ALL)` — errors go to the server log, never to the browser

@@ -8,7 +8,8 @@
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
-    "check": "tsc"
+    "check": "tsc",
+    "compress-images": "tsx script/compress-images.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -85,6 +86,7 @@
     "cross-env": "^10.1.0",
     "esbuild": "^0.25.0",
     "postcss": "^8.5.6",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.20.5",
     "typescript": "5.6.3",

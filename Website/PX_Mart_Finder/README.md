@@ -38,6 +38,7 @@ npm run dev:client
 - Per-page meta title and meta description (bilingual, updates live with the page and language)
 - Loading states: image skeletons with fade-in and error fallback, an initial app-boot spinner, and a search-debounce indicator
 - Terms of Use and Privacy Policy pages, with a non-affiliation disclaimer (independent portfolio project, not affiliated with PX Mart)
+- Product images compressed to WebP (9.9MB → ~0.8MB, 93% smaller) via `script/compress-images.ts`
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts

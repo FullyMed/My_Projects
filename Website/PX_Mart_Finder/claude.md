@@ -83,8 +83,14 @@ Secondary audience:
 - npm
 - Vite build system
 - TypeScript compiler
+- `sharp` (devDependency, build-time only — never shipped to the client bundle) — used by `script/compress-images.ts` to convert product photos to WebP
 
 ## Important Technical Decisions
+
+### Product images are WebP, not PNG
+Local product photos in `client/public/Images` are `.webp` (converted from the original PNGs via `script/compress-images.ts`, a one-off `sharp`-based script — resizes to a max 800px width and re-encodes at quality 80, preserving alpha transparency since these are cutout product shots on a `bg-muted` background, not flattened photos). This cut the folder from 9.9MB to ~0.8MB (93% smaller) with no visible quality loss at the sizes these render at (`product-card.tsx` thumbnails ~128px, `product-detail.tsx` hero up to ~430px).
+
+**When adding new local product images**: drop the PNG/JPEG into `client/public/Images/...`, run `npm run compress-images` (it walks the whole folder, skips files under 10KB, and deletes the original after writing the `.webp`), then update the `image_url` in `products.json` to the new `.webp` filename. Do NOT hand-author or commit multi-hundred-KB PNGs for product photos — Unsplash-hosted images (`image_url` starting with `https://`) are unaffected by this script and don't need local compression.
 
 ### No react-window
 The project previously used react-window, but virtualization was removed because:
@@ -405,6 +411,7 @@ Since all data (`data.ts`/JSON) is static and rendered synchronously, there is n
 - Per-page meta title and meta description added across all 7 routes via `usePageMeta` — see [Per-Page SEO Meta Tags](#per-page-seo-meta-tags)
 - Loading states added for product images (skeleton + fade-in + error fallback), initial app boot (spinner overlay), and search debounce (spinner icon) — see [Loading States](#loading-states). Fixed a bug in the boot-loader removal where `transitionend` alone could leave `#app-boot-loader` stuck in the DOM (invisible but present) if the "hide" class was applied before the initial paint — added a `setTimeout` fallback removal
 - Terms of Use (`/terms`) and Privacy Policy (`/privacy`) pages added, with a non-affiliation disclaimer and honest, behavior-accurate privacy content (localStorage-only, no backend/tracking) — see [Legal Pages](#legal-pages)
+- Local product images compressed from PNG to WebP via new `script/compress-images.ts` (`sharp`, devDependency) — 9.9MB → ~0.8MB (93% smaller) across 35 files, transparency preserved, `products.json` `image_url`s updated to `.webp` — see [Product images are WebP, not PNG](#product-images-are-webp-not-png)
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors

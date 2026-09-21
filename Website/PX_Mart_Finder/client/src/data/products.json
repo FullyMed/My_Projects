@@ -12,7 +12,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Netted Cantaloupe.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Netted Cantaloupe.webp",
     "keywords": ["netted", "cantaloupe", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -28,7 +28,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/British Watermelon.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/British Watermelon.webp",
     "keywords": ["british", "watermelon", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -44,7 +44,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Mini Watermelon.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Mini Watermelon.webp",
     "keywords": ["mini", "watermelon", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -60,7 +60,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Nantou Banana.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Nantou Banana.webp",
     "keywords": ["nantou", "banana", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -76,7 +76,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Selected Pearl Guava.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Selected Pearl Guava.webp",
     "keywords": ["pearl", "guava", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -92,7 +92,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Golden Diamond Pineapple.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Golden Diamond Pineapple.webp",
     "keywords": ["golden", "diamond", "pineapple", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -108,7 +108,7 @@
       "px_wufeng_01": { "aisle": "1", "shelf": "1", "section_en": "Fruits", "section_zh": "水果區" },
       "demo_taipei_01": { "aisle": "1", "shelf": "A", "section_en": "Fresh Produce", "section_zh": "生鮮區" }
     },
-    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Domestic Papaya.png",
+    "image_url": "/Images/Fresh Fruits/Tropical Fruits/Domestic Papaya.webp",
     "keywords": ["domestic", "papaya", "fruit", "tropical", "香蕉", "水果"]
   },
   {
@@ -123,7 +123,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Fuji Apples (Bag).png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Fuji Apples (Bag).webp",
     "keywords": ["apple", "fruit", "fuji", "usa", "蘋果", "水果"]
   },
   {
@@ -138,7 +138,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Washington Fuji Apple.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Washington Fuji Apple.webp",
     "keywords": ["apple", "fruit", "fuji", "usa", "washington", "蘋果", "水果"]
   },
   {
@@ -153,7 +153,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Washington Fuji Apple 2.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Washington Fuji Apple 2.webp",
     "keywords": ["apple", "fruit", "fuji", "usa", "washington", "蘋果", "水果"]
   },
   {
@@ -168,7 +168,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/U.S. Yellow Lemon.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/U.S. Yellow Lemon.webp",
     "keywords": ["fruit", "yellow", "lemon", "蘋果", "水果"]
   },
   {
@@ -183,7 +183,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA ENVY Apple.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA ENVY Apple.webp",
     "keywords": ["apple", "fruit", "envy", "usa", "蘋果", "水果"]
   },
   {
@@ -198,7 +198,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/Japan Aomori Honey Fuji Apple.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/Japan Aomori Honey Fuji Apple.webp",
     "keywords": ["apple", "fruit", "fuji", "japan", "honey", "aomori", "蘋果", "水果"]
   },
   {
@@ -213,7 +213,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Fuji Apples (Box).png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Fuji Apples (Box).webp",
     "keywords": ["apple", "fruit", "fuji", "usa", "蘋果", "水果"]
   },
   {
@@ -228,7 +228,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/Japanese Aomori Orin Apple.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/Japanese Aomori Orin Apple.webp",
     "keywords": ["apple", "fruit", "orin", "japan", "aomori", "蘋果", "水果"]
   },
   {
@@ -243,7 +243,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Imported Fuji Apples.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/USA Imported Fuji Apples.webp",
     "keywords": ["apple", "fruit", "fuji", "usa", "蘋果", "水果"]
   },
   {
@@ -258,7 +258,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand Gala Apple.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand Gala Apple.webp",
     "keywords": ["apple", "fruit", "gala", "new zealand", "蘋果", "水果"]
   },
   {
@@ -273,7 +273,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand TARZI Apples (Bag).png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand TARZI Apples (Bag).webp",
     "keywords": ["apple", "fruit", "tarzi", "new zealand", "蘋果", "水果"]
   },
   {
@@ -288,7 +288,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "2", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand Gala Apples.png",
+    "image_url": "/Images/Fresh Fruits/Apples & Pears/New Zealand Gala Apples.webp",
     "keywords": ["apple", "fruit", "gala", "new zealand", "蘋果", "水果"]
   },
   {
@@ -303,7 +303,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Peruvian Premium Blueberries.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Peruvian Premium Blueberries.webp",
     "keywords": ["blueberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
@@ -318,7 +318,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes.webp",
     "keywords": ["cherry", "fruit", "tomatoes", "草莓", "水果", "莓果"]
   },
   {
@@ -333,7 +333,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Tainan Saline Tomato.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Tainan Saline Tomato.webp",
     "keywords": ["tomato", "fruit", "tainan", "saline", "草莓", "水果", "莓果"]
   },
   {
@@ -348,7 +348,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Kyoho Grapes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Kyoho Grapes.webp",
     "keywords": ["grape", "fruit", "kyoho", "草莓", "水果", "莓果"]
   },
   {
@@ -363,7 +363,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes.webp",
     "keywords": ["tomato", "fruit", "cherry", "草莓", "水果", "莓果"]
   },
   {
@@ -378,7 +378,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Rosy Red Tomatoes (Traceable).png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Rosy Red Tomatoes (Traceable).webp",
     "keywords": ["tomato", "fruit", "rosy", "red", "草莓", "水果", "莓果"]
   },
   {
@@ -393,7 +393,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Shengyun Tomatoes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Shengyun Tomatoes.webp",
     "keywords": ["tomato", "fruit", "shengyun", "草莓", "水果", "莓果"]
   },
   {
@@ -408,7 +408,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Yu Nu Cherry Tomatoes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Yu Nu Cherry Tomatoes.webp",
     "keywords": ["tomato", "fruit", "cherry", "草莓", "水果", "莓果"]
   },
   {
@@ -423,7 +423,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Australia Green Seedless Grapes.png",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Australia Green Seedless Grapes.webp",
     "keywords": ["grape", "fruit", "green", "seedless", "australia", "草莓", "水果", "莓果"]
   },
   {
@@ -438,7 +438,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Air Flown Avocado.png",
+    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Air Flown Avocado.webp",
     "keywords": ["avocado", "fruit", "citrus", "usa", "草莓", "水果", "莓果"]
   },
   {
@@ -453,7 +453,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Sweet Orange.png",
+    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Sweet Orange.webp",
     "keywords": ["orange", "fruit", "citrus", "usa", "sweet", "草莓", "水果", "莓果"]
   },
   {
@@ -468,7 +468,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Sunkist Sweet Orange.png",
+    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Sunkist Sweet Orange.webp",
     "keywords": ["orange", "fruit", "citrus", "usa", "sunkist", "草莓", "水果", "莓果"]
   },
   {
@@ -483,7 +483,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Bagged Mandarin Orange (Small Packet).png",
+    "image_url": "/Images/Fresh Fruits/Citrus Fruits/USA Bagged Mandarin Orange (Small Packet).webp",
     "keywords": ["orange", "fruit", "citrus", "usa", "mandarin", "草莓", "水果", "莓果"]
   },
   {
@@ -498,7 +498,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Frozen Fruits/Frenature Canada A-Grade Frozen Blueberries.png",
+    "image_url": "/Images/Fresh Fruits/Frozen Fruits/Frenature Canada A-Grade Frozen Blueberries.webp",
     "keywords": ["blueberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
@@ -513,7 +513,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Frozen Fruits/Tian Shi Berry Grade A Frozen Blueberries.png",
+    "image_url": "/Images/Fresh Fruits/Frozen Fruits/Tian Shi Berry Grade A Frozen Blueberries.webp",
     "keywords": ["blueberry", "fruit", "berry", "草莓", "水果", "莓果"]
   },
   {
@@ -528,7 +528,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "2", "shelf": "1", "section_en": "Vegetables", "section_zh": "蔬菜區" }
     },
-    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Greenhouse Mini Cucumbers.png",
+    "image_url": "/Images/Fresh Vegetables/Legume & Melons/Greenhouse Mini Cucumbers.webp",
     "keywords": ["mini", "vegetable", "cucumber", "菠菜", "蔬菜", "有機"]
   },
   {

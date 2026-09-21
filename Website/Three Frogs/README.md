@@ -155,6 +155,16 @@ To add a game: append an object to the `boardgames` array and drop the cover ima
 }
 ```
 
+**Resize new cover images to ~900px max dimension before adding them.** There's no build step or image pipeline here — whatever you commit is exactly what ships to visitors. See [Image Optimization](#image-optimization) below.
+
+### Image Optimization
+
+Every image in `Assets/Images/` was resized to a 900px max dimension and recompressed in place (same filenames/extensions, so no code changes were needed) — the folder went from ~96MB to ~24MB (~75% smaller) with no visible quality loss at actual display sizes. `Avatars/`, `favicon_io/`, and the `.avif` files were already small and were left untouched.
+
+`ThreeFrogsPlace.jpg` (the homepage hero background, `background: url(...) cover` in `Boardgame.css`) is sized to 1920px wide instead of 900px, since it's displayed full-bleed across the page rather than as a small card — check for `background: url(` in the CSS before assuming every image is a card thumbnail if you ever bulk-process this folder again.
+
+Both card-rendering templates in `Boardgame.js` also carry `loading="lazy" decoding="async"` on their `<img>` tags, so `Collection.html` (which renders all ~218 cards into the DOM at once) doesn't download every image up front — only the ones actually scrolled into view.
+
 ---
 
 ## Database Schema

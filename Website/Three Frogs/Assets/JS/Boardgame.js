@@ -1986,7 +1986,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "boardgame-card fadeUp";
       card.innerHTML = `
-        <img src="${game.image}" alt="${game.name}">
+        <img src="${game.image}" alt="${game.name}" loading="lazy" decoding="async">
         <div class="info">
           <h3>${game.name}</h3>
           <p>${game.description}</p>
@@ -2120,7 +2120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const tagsHtml = game.tags.map(tag => `<span class='tag'>${tag}</span>`).join(" ");
                 
                 card.innerHTML = `
-                <img src="${game.image}" alt="${game.name}" />
+                <img src="${game.image}" alt="${game.name}" loading="lazy" decoding="async" />
                 <div class="info">
                 <h3>${game.name}</h3>
                 <p>Category: ${game.category}</p>
