@@ -1,4 +1,7 @@
+import json
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared responsive CSS — injected once per page render.
@@ -584,6 +587,34 @@ def apply_theme(theme_mode: str):
     """Inject base responsive CSS + theme-specific colour CSS."""
     st.markdown(_BASE_CSS, unsafe_allow_html=True)
     st.markdown(_DARK_CSS if theme_mode == "Dark" else _LIGHT_CSS, unsafe_allow_html=True)
+
+
+def set_meta_description(description: str):
+    """Inject <meta name="description"> into the real document head.
+
+    Streamlit has no public API for this (st.set_page_config only controls
+    <title> and the favicon), so this reaches into the parent document from
+    a same-origin components.v1.html iframe — the standard workaround.
+    """
+    payload = json.dumps(description)
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            var doc = window.parent.document;
+            var meta = doc.querySelector('meta[name="description"]');
+            if (!meta) {{
+                meta = doc.createElement('meta');
+                meta.name = "description";
+                doc.head.appendChild(meta);
+            }}
+            meta.content = {payload};
+        }})();
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 
 def chart_colors(theme_mode: str) -> dict:

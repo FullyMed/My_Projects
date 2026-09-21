@@ -11,6 +11,10 @@ st.set_page_config(
     page_icon="🎲",
     layout="wide",
 )
+theme.set_meta_description(
+    "BoardGames Analyzer is an explainable hybrid recommendation system for discovering "
+    "board games, combining content similarity, sentiment analysis, and trait matching."
+)
 
 st.sidebar.title("Navigation")
 st.sidebar.info("Use the pages above to navigate between the Recommendation engine and the Analytics dashboard.")

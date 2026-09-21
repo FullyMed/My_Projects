@@ -92,6 +92,17 @@ See [`SECURITY.md`](SECURITY.md) for the full threat model and hardening notes.
 
 ---
 
+## Store Listings
+
+Ready-to-paste App Store Connect / Play Console copy (title, subtitle, short
+and full description, keywords, release notes) for each supported language
+lives in [`store_listing/app_store.md`](store_listing/app_store.md) and
+[`store_listing/play_store.md`](store_listing/play_store.md). Update these
+alongside any change to features, supported cities, or supported languages so
+the listing copy doesn't drift from what the app actually does.
+
+---
+
 ## Project Structure
 
 ```

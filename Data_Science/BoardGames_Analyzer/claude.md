@@ -172,6 +172,7 @@ Contains:
 - `chart_colors(mode)` — returns a matplotlib colour palette dict
 - `style_ax(ax, fig, colors, title)` — applies consistent chart styling
 - `render_not_found(title, message, icon, show_links)` — themed "not found" card (see Section 6, "Custom 404 / Not Found")
+- `set_meta_description(description)` — injects `<meta name="description">` into the real document head per page (see Section 6, "Per-Page Meta Title / Description")
 
 ### `App/recommender.py`
 Self-contained copy of the core `BoardGameDiscoveryEngine` class.
@@ -323,6 +324,13 @@ Given that constraint, the app instead ships a **themed "Not Found" experience f
 - `theme.render_not_found(title, message, icon, show_links)` — a reusable themed card component (styled like `.result-card`), optionally with `st.page_link` buttons back to Home/Recommendation/Analytics
 - `App/pages/3_Not_Found.py` — a real, standalone page using that component in full-page form (reachable from the sidebar nav like any other page)
 - `App/pages/1_Recommendation.py` — the zero-results empty state uses the same component inline instead of a plain `st.info()`
+
+## Per-Page Meta Title / Description
+Each of the 4 pages (`App/app.py`, `pages/1_Recommendation.py`, `pages/2_Analytics.py`, `pages/3_Not_Found.py`) sets:
+- **Meta title** — via `st.set_page_config(page_title=...)`, Streamlit's native, fully-supported way to set the real `<title>` tag. Already distinct per page.
+- **Meta description** — via `theme.set_meta_description(text)`, called immediately after `st.set_page_config` on every page. Streamlit has **no public API** for `<meta name="description">`, so this injects it into the real top-level document head using a zero-size `st.components.v1.html` iframe with a script that reaches `window.parent.document` (same-origin, so this works) — a standard, verified workaround. **Verified in-browser**: `document.title` and `document.querySelector('meta[name="description"]').content` were checked on the real top-level document for all 4 pages and update correctly per page.
+
+If a new page is added, it must call both `st.set_page_config(page_title=...)` and `theme.set_meta_description(...)` right after it, with distinct, page-specific text for each.
 
 ---
 

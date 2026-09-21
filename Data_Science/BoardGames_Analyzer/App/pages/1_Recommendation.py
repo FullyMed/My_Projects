@@ -15,6 +15,10 @@ st.set_page_config(
     page_icon="🎲",
     layout="wide",
 )
+theme.set_meta_description(
+    "Get board game recommendations by title similarity, gameplay traits, or both — "
+    "with transparent, explainable reasons for every suggestion."
+)
 
 # Sidebar
 st.sidebar.title("⚙ Settings")

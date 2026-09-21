@@ -175,3 +175,4 @@ Defined in `lib/nav.dart` via `go_router`:
 - **Offline always works**: the cache + offline-toggle path must remain functional regardless of API state.
 - **Use `Location` for UI inputs**: never pass raw city-name strings from UI to controllers — always resolve through `LocationService` and pass `location.queryToken` for cache keys and station lookups.
 - **`AnalyticsService` is a stub**: it only `debugPrint`s. Do not add real tracking without also wiring a consent UI.
+- **Keep store listing copy in sync**: `store_listing/app_store.md` and `store_listing/play_store.md` hold per-locale (en, zh-Hant, id) title/description/keyword copy for App Store Connect and Play Console. When features, supported cities, or supported languages change, update these files in the same change.

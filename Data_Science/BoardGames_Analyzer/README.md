@@ -15,6 +15,7 @@ The system helps users discover board games through three complementary recommen
 - **Responsive UI** — works on mobile (iOS/Android), tablet (iPad), and desktop
 - **Light / Dark theme** — toggleable from the sidebar on every page
 - **Custom 404 / Not Found page** — themed empty-state experience, both as a dedicated page and inline for zero-result searches
+- **Per-page SEO metadata** — distinct browser-tab title and meta description on every page
 
 ---
 

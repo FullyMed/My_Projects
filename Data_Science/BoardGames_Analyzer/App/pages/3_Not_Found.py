@@ -11,6 +11,10 @@ st.set_page_config(
     page_icon="🧭",
     layout="wide",
 )
+theme.set_meta_description(
+    "The page or content you were looking for doesn't exist. Return to BoardGames "
+    "Analyzer's home page, or explore recommendations and analytics."
+)
 
 st.sidebar.title("⚙ Settings")
 selected_theme = theme.sidebar_theme()

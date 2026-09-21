@@ -19,6 +19,10 @@ st.set_page_config(
     page_icon="📊",
     layout="wide",
 )
+theme.set_meta_description(
+    "Explore the BoardGameGeek dataset behind the recommender: rating distributions, "
+    "top-rated games, most common mechanics and categories, and publication trends."
+)
 
 st.sidebar.title("⚙ Settings")
 selected_theme = theme.sidebar_theme()
