@@ -4,6 +4,7 @@ import { PRODUCTS } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/product-card";
+import { ProductImage } from "@/components/product-image";
 import { ArrowLeft, MapPin, Share2, Info, Heart, Map as MapIcon, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/lib/storage";
@@ -64,7 +65,7 @@ export default function ProductDetail() {
     <div className="flex flex-col flex-1 bg-background pb-8 lg:flex-row lg:pb-0 lg:items-start">
       {/* Hero Image — square on mobile, sticky tall column on desktop */}
       <div className="w-full aspect-square bg-muted relative lg:w-2/5 lg:shrink-0 lg:aspect-auto lg:h-[calc(100vh-72px)] lg:sticky lg:top-[72px] lg:self-start">
-        <img
+        <ProductImage
           src={product.image_url}
           alt={name}
           className="w-full h-full object-cover"

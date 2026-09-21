@@ -111,3 +111,54 @@ class CompareResultsSkeletonList extends StatelessWidget {
     );
   }
 }
+
+/// Skeleton placeholder sized like a single saved-route tile.
+///
+/// Structure mirrors `_RouteTile` (Saved page): title line → subtitle line,
+/// with a trailing icon + rerun button placeholder.
+class RouteTileSkeleton extends StatelessWidget {
+  const RouteTileSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return TffCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                TffSkeletonBox(height: 16, width: 160, radius: 6),
+                SizedBox(height: AppSpacing.xs),
+                TffSkeletonBox(height: 12, width: 90, radius: 6),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          const TffSkeletonBox(height: 20, width: 20, radius: 999),
+          const SizedBox(width: AppSpacing.sm),
+          const TffSkeletonBox(height: 28, width: 70, radius: 999),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton list used on the Saved page (Favorites / History tabs) while the
+/// controller loads its initial data.
+class RouteTileSkeletonList extends StatelessWidget {
+  const RouteTileSkeletonList({super.key, this.count = 4});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
+      itemCount: count,
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+      itemBuilder: (_, __) => const RouteTileSkeleton(),
+    );
+  }
+}

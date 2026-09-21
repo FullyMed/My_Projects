@@ -43,7 +43,12 @@
             </nav>
         </header>
 
-        <section class="dashboard-container">
+        <div id="dashboardLoadingState" class="loading-state">
+            <span class="spinner" aria-hidden="true"></span>
+            Loading your dashboard…
+        </div>
+
+        <section class="dashboard-container hidden">
             <h2>Your Profile</h2>
             
             <div class="avatar-profile">
@@ -144,6 +149,7 @@
         <button id="scrollTopBtn" title="Back to Top">⬆️</button>
         
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="Assets/JS/Loading.js"></script>
         <script src="Assets/JS/Dashboard.js"></script>
         <script src="Assets/JS/Navbar.js"></script>
 

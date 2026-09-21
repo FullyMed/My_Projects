@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X, Loader2 } from 'lucide-react';
 import { Event } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -32,14 +32,17 @@ const EventCalendar: React.FC = () => {
     time: '',
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [eventsLoading, setEventsLoading] = useState(true);
   const { user } = useAuth();
   const { isCompact } = useCompactMode();
 
   useEffect(() => {
     if (user) {
+      setEventsLoading(true);
       const loadEvents = async () => {
         const userEvents = await getEvents(user.id);
         setEvents(userEvents);
+        setEventsLoading(false);
       };
       loadEvents();
     }
@@ -192,6 +195,13 @@ const EventCalendar: React.FC = () => {
       <div className={`flex flex-col lg:flex-row ${isCompact ? 'gap-4' : 'gap-5'}`}>
         {/* Calendar grid */}
         <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 overflow-hidden">
+          {eventsLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[360px] gap-3">
+              <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Loading events…</p>
+            </div>
+          ) : (
+          <>
           {/* Week header */}
           <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
             {weekDays.map(day => (
@@ -268,6 +278,8 @@ const EventCalendar: React.FC = () => {
               );
             })}
           </div>
+          </>
+          )}
         </div>
 
         {/* Side panel */}

@@ -16,6 +16,7 @@ The system helps users discover board games through three complementary recommen
 - **Light / Dark theme** — toggleable from the sidebar on every page
 - **Custom 404 / Not Found page** — themed empty-state experience, both as a dedicated page and inline for zero-result searches
 - **Per-page SEO metadata** — distinct browser-tab title and meta description on every page
+- **Loading states** — explicit spinners for the recommendation engine's cold start, each search, and dataset loading on the Analytics page
 
 ---
 

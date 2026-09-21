@@ -17,6 +17,7 @@ import 'package:taiwan_fare_finder/ui/tff_button.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
 import 'package:taiwan_fare_finder/ui/tff_empty_state.dart';
 import 'package:taiwan_fare_finder/ui/tff_page_scaffold.dart';
+import 'package:taiwan_fare_finder/ui/tff_skeleton.dart';
 
 class SavedPage extends StatefulWidget {
   const SavedPage({super.key});
@@ -86,7 +87,7 @@ class _SavedPageState extends State<SavedPage>
     FavoritesController fav,
     SettingsController settings,
   ) {
-    if (fav.isLoading) return const Center(child: CircularProgressIndicator());
+    if (fav.isLoading) return const RouteTileSkeletonList();
     if (fav.favorites.isEmpty) {
       return TffEmptyState(
         title: l10n.emptyFavorites,
@@ -108,7 +109,7 @@ class _SavedPageState extends State<SavedPage>
     SettingsController settings, {
     bool showHeader = true,
   }) {
-    if (hist.isLoading) return const Center(child: CircularProgressIndicator());
+    if (hist.isLoading) return const RouteTileSkeletonList();
     if (hist.history.isEmpty) {
       return TffEmptyState(
         title: l10n.emptyHistory,

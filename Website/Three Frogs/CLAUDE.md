@@ -27,6 +27,7 @@ There is no local dev server configuration in this repo. To test PHP endpoints l
 | `.gitignore` | Excludes `Assets/PHP/db_config.php` from version control |
 | `Assets/CSS/Boardgame.css` | Single stylesheet shared across all pages |
 | `Assets/JS/Navbar.js` | Shared navbar + hamburger toggle; included on every page |
+| `Assets/JS/Loading.js` | Shared `setButtonLoading()`/`clearButtonLoading()` helpers — included on every page with an async-submitting form (see [Loading states](#loading-states)) |
 | `Assets/JS/Boardgame.js` | Handles **both** `index.html` and `Collection.html` by branching on `window.location.pathname` |
 | `Assets/JS/<Page>.js` | Per-page JS for Booking, Dashboard, Login, Signup, Forgot-password |
 | `Assets/PHP/db_config.php` | **Gitignored** — holds DB credentials; copy from `db_config.example.php` to create |
@@ -89,6 +90,20 @@ CREATE TABLE IF NOT EXISTS rate_limits (
 `404.html` is wired up via `ErrorDocument 404 /404.html` in the root `.htaccess`. This only works correctly when **the project itself is the server's document root** (true for the live Hostinger deployment, and for local dev if you follow the setup instructions and point your local server directly at this folder — not at a subfolder inside some other `htdocs`). If you ever see a plain unstyled Apache "Not Found" page instead of the custom one, or a second 404 nested inside the first, the project is being served from a subdirectory of some other document root — fix the vhost/alias rather than the app.
 
 `404.html` carries `<base href="/" />` in its `<head>`. This is required: Apache's `ErrorDocument` serves this file's content under whatever bogus URL the visitor actually requested (no redirect, address bar unchanged), so without a `<base>` tag every relative path on the page — the stylesheet, `Navbar.js`, and the `fetch()` calls inside it — would resolve against that bogus path instead of the site root and silently fail. Every other page in this project intentionally uses root-relative paths without a leading `/` (see below); `404.html` is the one deliberate exception, and the `<base>` tag is why it can still use the same relative-path style as everywhere else.
+
+### Loading states
+
+Two kinds, both built from the same CSS in `Boardgame.css` (`.spinner`, `.spinner-sm`, `.loading-state`, `.btn-loading`, `.nav-loading`) — no new colors/fonts, all existing design tokens:
+
+1. **Button loading state** — `Assets/JS/Loading.js` provides `setButtonLoading(button, loadingText)` / `clearButtonLoading(button)`. Call `setButtonLoading` right before an async `fetch` that a button triggers, and `clearButtonLoading` in every branch afterwards (success, failure, and the `catch`) — except when success immediately navigates away (see `Login.js`), where there's nothing left to restore. Used in `Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js` (avatar update + cancel-confirm), and `Forgot-password.js`. Include `Loading.js` via `<script>` on any page you add a new async-submitting button to — it must load before that page's own script.
+2. **Section/page-gating loading state** — a `.loading-state` block (spinner + short message) shown while a page's own `check_session.php` gate is pending, swapped out once the real content is known:
+   - **`Booking.html`** — `#bookingLoadingState` is visible by default; `.booking-form` ships with `class="hidden"`. `Booking.js` hides the loading state and reveals either the form (logged in) or `#authPopup` (not) — never both, never neither.
+   - **`Dashboard.html`** — `#dashboardLoadingState` is visible by default; `.dashboard-container` ships with `class="hidden"`. `Dashboard.js` only reveals the container after `checkSession()` confirms a logged-in user (the not-logged-in path redirects away instead, so the container is never revealed there).
+   - **`Collection.html`** — `Boardgame.js`'s "3. Initial load" step renders a `.loading-state` into `#boardgame-list` instead of the unfiltered game array when `window.location.pathname.includes("Collection.html")`; the session-check branch further down replaces it with the grouped view once login is confirmed.
+   - **Dashboard bookings** — `fetchBookingsFromServer()` writes a `.loading-state` into `#upcomingBookings` before its `fetch`, replaced by `renderBookings()`'s real output once the response arrives.
+   - **Navbar** — `Navbar.js` fills `#navLinks` with a single `<li class="nav-loading">` spinner immediately on `DOMContentLoaded`, before its own `check_session.php` fetch. This one JS-injected placeholder doesn't violate "never add static `<li>` items to HTML pages" below — that rule is about what ships in the HTML source, not what `Navbar.js` itself writes at runtime.
+
+**Why this exists:** before this pattern, `Booking.html`/`Dashboard.html` briefly rendered their real (empty) content and `Collection.html` briefly rendered the *entire* ungated ~218-game list before each page's login check resolved and hid/redirected — a real flash of content a logged-out visitor should never see. Any new page or endpoint gated by `check_session.php` should follow the same hide-by-default-then-reveal pattern rather than hiding content reactively after the fact.
 
 ### Forgot-password flow
 
@@ -172,4 +187,5 @@ Valid categories (must match the filter dropdown in `Collection.html`): Party, F
 - **`[...]boardgames` shuffle** — index page uses `[...boardgames].sort(...)` (spread to avoid mutating the source array). Collection page re-sorts with `localeCompare`. Both branches read from the same module-level array.
 - **Booking email field** — set server-side from session on page load (`readOnly = true`). After a successful booking `bookingForm.reset()` is called, followed immediately by re-populating the email field so back-to-back bookings work.
 - **`db_config.php` is gitignored** — never commit real credentials. The file must exist on the server (and locally for dev) but is excluded from version control. Use `db_config.example.php` as the template.
+- **Hide-then-reveal for session-gated content** — `Booking.html`/`Dashboard.html` ship with their real content wrapped in `class="hidden"` and a `.loading-state` sibling shown by default; the page's JS only removes `hidden` once `checkSession()` confirms the right state (see [Loading states](#loading-states)). Don't revert to showing real content immediately and hiding it reactively after the fetch resolves — that's the flash-of-ungated-content bug this pattern replaced.
 - **`404.html`'s `<base href="/" />`** — every other page uses relative asset paths with no leading `/` because they're all served from the document root anyway; `404.html` is the one page that must keep its `<base>` tag (see [404 page](#404-page)), since `ErrorDocument` serves it under an arbitrary, possibly-nested URL. Don't remove it, and don't "fix" the other pages to match — they're intentionally different.

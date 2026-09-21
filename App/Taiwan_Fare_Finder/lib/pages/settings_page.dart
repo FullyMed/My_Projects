@@ -11,6 +11,7 @@ import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
 import 'package:taiwan_fare_finder/ui/tff_page_scaffold.dart';
+import 'package:taiwan_fare_finder/ui/tff_skeleton.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -266,12 +267,8 @@ class SettingsPage extends StatelessWidget {
                           _DangerAction(
                             icon: Icons.delete_outline_rounded,
                             title: l10n.clearOfflineData,
-                            onTap: () => _confirm(
-                              context,
-                              title: l10n.clearOfflineData,
-                              onConfirm: () =>
-                                  context.read<FareController>().clearCache(),
-                            ),
+                            onConfirmed: () =>
+                                context.read<FareController>().clearCache(),
                           ),
                         ],
                       ),
@@ -294,23 +291,15 @@ class SettingsPage extends StatelessWidget {
                           _DangerAction(
                             icon: Icons.history_rounded,
                             title: l10n.clearHistory,
-                            onTap: () => _confirm(
-                              context,
-                              title: l10n.clearHistory,
-                              onConfirm: () =>
-                                  context.read<HistoryController>().clear(),
-                            ),
+                            onConfirmed: () =>
+                                context.read<HistoryController>().clear(),
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           _DangerAction(
                             icon: Icons.bookmark_remove_rounded,
                             title: l10n.clearFavorites,
-                            onTap: () => _confirm(
-                              context,
-                              title: l10n.clearFavorites,
-                              onConfirm: () =>
-                                  context.read<FavoritesController>().clear(),
-                            ),
+                            onConfirmed: () =>
+                                context.read<FavoritesController>().clear(),
                           ),
                         ],
                       ),
@@ -383,51 +372,6 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _confirm(
-    BuildContext context, {
-    required String title,
-    required Future<void> Function() onConfirm,
-  }) async {
-    final l10n = TffLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
-          content: Text(
-            l10n.confirmDialogBody,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => context.pop(false),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => context.pop(true),
-              child: Text(l10n.confirm),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed == true) {
-      try {
-        await onConfirm();
-      } catch (e) {
-        debugPrint('SettingsPage confirm action failed ($title): $e');
-      }
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.cleared)));
-    }
-  }
 }
 
 class PrivacyCard extends StatelessWidget {
@@ -526,15 +470,13 @@ class _AboutCardState extends State<AboutCard> {
           FutureBuilder<PackageInfo>(
             future: _infoFuture,
             builder: (context, snap) {
-              final versionText = (snap.data == null)
-                  ? '—'
-                  : '${snap.data!.version} (${snap.data!.buildNumber})';
+              final loadingVersion = snap.connectionState != ConnectionState.done;
               return Column(
                 children: [
                   _InfoRow(
                     icon: Icons.info_outline_rounded,
                     label: l10n.aboutVersion,
-                    value: versionText,
+                    value: loadingVersion ? null : '${snap.data!.version} (${snap.data!.buildNumber})',
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   _InfoRow(
@@ -562,23 +504,68 @@ class _AboutCardState extends State<AboutCard> {
   }
 }
 
-class _DangerAction extends StatelessWidget {
+class _DangerAction extends StatefulWidget {
   const _DangerAction({
     required this.icon,
     required this.title,
-    required this.onTap,
+    required this.onConfirmed,
   });
 
   final IconData icon;
   final String title;
-  final VoidCallback onTap;
+
+  /// Runs after the user accepts the confirmation dialog. The trailing
+  /// chevron becomes a spinner and taps are ignored for the duration.
+  final Future<void> Function() onConfirmed;
+
+  @override
+  State<_DangerAction> createState() => _DangerActionState();
+}
+
+class _DangerActionState extends State<_DangerAction> {
+  bool _busy = false;
+
+  Future<void> _handleTap() async {
+    if (_busy) return;
+    final l10n = TffLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(widget.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+          content: Text(
+            l10n.confirmDialogBody,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          actions: [
+            TextButton(onPressed: () => context.pop(false), child: Text(l10n.cancel)),
+            FilledButton(onPressed: () => context.pop(true), child: Text(l10n.confirm)),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      await widget.onConfirmed();
+    } catch (e) {
+      debugPrint('_DangerAction (${widget.title}) failed: $e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.cleared)));
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     return InkWell(
-      onTap: onTap,
+      onTap: _busy ? null : _handleTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -587,20 +574,26 @@ class _DangerAction extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: cs.error),
+            Icon(widget.icon, color: cs.error.withValues(alpha: _busy ? 0.5 : 1)),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
-                title,
+                widget.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: _busy ? cs.onSurfaceVariant : null,
+                    ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
+            _busy
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2.2, valueColor: AlwaysStoppedAnimation<Color>(cs.onSurfaceVariant)),
+                  )
+                : Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
           ],
         ),
       ),
@@ -617,7 +610,9 @@ class _InfoRow extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final String value;
+
+  /// Null shows a shimmer placeholder instead (value still loading).
+  final String? value;
 
   @override
   Widget build(BuildContext context) {
@@ -639,13 +634,15 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
-        Text(
-          value,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        value == null
+            ? const TffSkeletonBox(height: 14, width: 64, radius: 6)
+            : Text(
+                value!,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
       ],
     );
   }

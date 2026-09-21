@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Clock, Check, Trash2, CreditCard as Edit3, Download, Copy, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Plus, Clock, Check, Trash2, CreditCard as Edit3, Download, Copy, ChevronLeft, ChevronRight, Filter, Loader2 } from 'lucide-react';
 import { PlannerTask } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -20,6 +20,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
   const [editingTaskData, setEditingTaskData] = useState<PlannerTask | null>(null);
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
+  const [tasksLoading, setTasksLoading] = useState(true);
   const { user } = useAuth();
   const { isCompact } = useCompactMode();
 
@@ -35,9 +36,11 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
 
   useEffect(() => {
     if (user) {
+      setTasksLoading(true);
       const loadTasks = async () => {
         const weekTasks = await getPlannerTasks(user.id, currentWeekKey);
         setTasks(weekTasks);
+        setTasksLoading(false);
       };
       loadTasks();
     }
@@ -228,7 +231,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
               <span className="hidden xs:inline">{format(currentWeek, ', yyyy')}</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {currentWeekKey} · {weekTaskCount} task{weekTaskCount !== 1 ? 's' : ''}
+              {tasksLoading ? 'Loading…' : `${currentWeekKey} · ${weekTaskCount} task${weekTaskCount !== 1 ? 's' : ''}`}
             </p>
           </div>
           <button
@@ -317,6 +320,12 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       </div>
 
       {/* Weekly Grid */}
+      {tasksLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">Loading tasks…</p>
+        </div>
+      ) : (
       <div className={`grid gap-4 ${isCompact ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'}`}>
         {days.map((day, index) => {
           const dayTasks = getTasksForDay(day);
@@ -429,6 +438,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           );
         })}
       </div>
+      )}
 
       {editingTaskData && (
         <EditTaskModal

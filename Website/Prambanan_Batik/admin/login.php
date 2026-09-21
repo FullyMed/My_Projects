@@ -154,6 +154,27 @@ if (isLoginRateLimited($pdo, $ip)) {
         @media (max-width: 480px) {
             .login-box { padding: 1.75rem 1.25rem; }
         }
+        .btn-login.is-loading {
+            color: transparent;
+            pointer-events: none;
+            position: relative;
+        }
+        .btn-login.is-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1em;
+            height: 1em;
+            margin: -0.5em 0 0 -0.5em;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: btn-spinner 0.6s linear infinite;
+        }
+        @keyframes btn-spinner {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -200,5 +221,6 @@ if (isLoginRateLimited($pdo, $ip)) {
             </form>
         </div>
     </div>
+    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
 </body>
 </html>

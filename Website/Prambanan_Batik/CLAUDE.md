@@ -61,6 +61,19 @@ Every public page sets `$page_title` and `$meta_description` **before** `include
 
 **Rule:** When adding a new public page, set both `$page_title` and `$meta_description` before including `header.php` — don't rely on the sitewide `DEFAULT_META_DESCRIPTION` fallback for real content pages.
 
+### Loading States — main.js is shared by public and admin pages
+
+`assets/js/main.js` is loaded on every public page via `footer.php`, **and** is also included directly (`<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>`) at the bottom of every `admin/*.php` page, right before any page-specific inline `<script>` block there. Its public-only init functions (`initHeader`, `initScrollReveal`, `initProductCards`, `initSelectMenus`) all guard on selectors that don't exist in admin markup, so they no-op safely on admin pages.
+
+Three behaviors live in `main.js`:
+- `initImageLoading()` — adds `is-img-loading` to `.product-image` / `.product-image-section` containers (shimmer CSS) until their `<img>` fires `load`/`error`, then adds `img-loaded` to fade it in. Selector-driven — adding a new product image block needs no JS/PHP changes as long as it reuses one of those two container classes.
+- `initFormLoadingStates()` — on every form's `submit` event, disables the submit button and adds `is-loading` (spinner via `::after`), deferred with `setTimeout(fn, 0)` so the browser has already captured the submitted button's value first. This is also why admin delete-confirm buttons (`onclick="return confirm(...)"`) get a spinner: `confirm()` runs first, and if cancelled, no `submit` event fires at all.
+- `initNavProgressBar()` — a single fixed-position `.nav-progress-bar` div appended to `<body>`, animated toward (not to) 100% width on same-tab link clicks and form submits. Every navigation here is a full page reload (no SPA router), so the bar never needs to "complete" — the browser's own navigation replaces the document.
+
+**Rule:** `.btn.is-loading` and `.nav-progress-bar` CSS are defined **twice** — once in `assets/css/styles.css` (public, `--color-*` vars) and once in `admin/admin.css` (admin, `--admin-*` vars) — because the two stylesheets don't share `:root` variables. `admin/login.php`'s `.btn-login` button doesn't use the shared `.btn` class, so it carries its own `.btn-login.is-loading` rule in its inline `<style>` block. When restyling buttons or the progress bar, update all three places.
+
+Also: `products.php`'s category filter `<select>` submits via `form.requestSubmit()` (falling back to `.submit()`), not `.submit()` — `.submit()` does not fire a `submit` event, so without this the nav progress bar (and any future submit-driven logic) wouldn't trigger on category filtering.
+
 ### URL Construction — SITE_PATH and BASE_URL
 
 Two constants handle all URL generation:
@@ -109,6 +122,7 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 | `db_connect.php` | Creates and returns a PDO instance; returns `null` on failure |
 | `functions.php` | Utility functions: `escape()`, `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (mb-safe), `get_sample_batik_products()`, etc. |
 | `header.php` / `footer.php` | Shared page chrome — renders `$page_title`/`$meta_description` into `<title>`/`<meta name="description">` (see SEO Meta Tags below); `footer.php` includes `main.js` |
+| `assets/js/main.js` | Shared JS — scroll reveal, sticky header, avatar initials, category filter auto-submit, and the loading-state behaviors (`initImageLoading`, `initFormLoadingStates`, `initNavProgressBar` — see Loading States below). Loaded on every public page via `footer.php` **and** directly on every `admin/*.php` page. |
 | `go.php` | Redirect handler — validates URL starts with `http(s)://`, logs click to `outbound_clicks`, then redirects |
 | `sitemap.php` | Generates XML sitemap dynamically from DB; null-safe when `$pdo` is unavailable |
 | `404.php` | Custom 404 page — styled like the rest of the site, sends a real `404` status via `http_response_code(404)`. Wired up in `.htaccess` via `ErrorDocument 404`. |
@@ -143,5 +157,5 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 - Any redirect target from DB or user input must be validated (e.g., `preg_match('/^https?:\/\//')`) before issuing a `Location:` header.
 - Image/file URLs submitted by admins must be validated with `preg_match('/^https?:\/\//')` before saving.
 - File uploads: validate with `finfo` MIME type + extension allow-list via `is_valid_image_upload()`.
-- When adding new admin pages: include `admin/auth.php`, call `requireAdminLogin()`, add CSRF token to every form, use `SITE_PATH` on all links, use `BASE_URL` on all PHP redirects, and add the page to the sidebar nav in every admin page.
+- When adding new admin pages: include `admin/auth.php`, call `requireAdminLogin()`, add CSRF token to every form, use `SITE_PATH` on all links, use `BASE_URL` on all PHP redirects, add the page to the sidebar nav in every admin page, and include `<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>` before `</body>` (before any page-specific inline `<script>`) so its submit buttons get the loading spinner and the nav progress bar fires.
 - When adding review write operations: always recalculate `rating_avg` / `rating_count` using the pattern in `admin/review_edit.php`.

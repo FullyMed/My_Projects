@@ -62,6 +62,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const formData = new FormData(signupForm);
       if (csrfToken) formData.append("csrf_token", csrfToken);
 
+      const submitBtn = signupForm.querySelector('button[type="submit"]');
+      setButtonLoading(submitBtn, "Signing up...");
+
       try {
         const response = await fetch("Assets/PHP/signup.php", {
           method: "POST",
@@ -78,9 +81,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           setTimeout(() => window.location.href = "index.html", 1500);
           signupForm.reset();
         } else {
+          clearButtonLoading(submitBtn);
           resultBox.innerHTML = `<p style="color:red;"><strong>${result.error || "Signup failed."}</strong></p>`;
         }
       } catch (err) {
+        clearButtonLoading(submitBtn);
         resultBox.innerHTML = `<p style="color:red;"><strong>Server error. Please try again later.</strong></p>`;
         console.error("Signup error:", err);
       }

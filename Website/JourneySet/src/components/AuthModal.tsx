@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff, Compass } from 'lucide-react';
+import { X, Eye, EyeOff, Compass, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useModalFocus } from '../hooks/useModalFocus';
 
@@ -189,8 +189,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full min-h-[52px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
+              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
             >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
           </form>

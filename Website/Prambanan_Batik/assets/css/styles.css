@@ -152,6 +152,81 @@ p:last-child { margin-bottom: 0; }
   letter-spacing: 0.02em;
 }
 
+/* ── Navigation progress bar ──────────────────────────────── */
+.nav-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+.nav-progress-bar.is-active {
+  width: 72%;
+  opacity: 1;
+  transition: width 4s cubic-bezier(0.1, 0.6, 0.2, 1), opacity 0.15s ease-in;
+}
+
+/* ── Image loading skeleton ───────────────────────────────── */
+.product-image img,
+.product-image-section img {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.product-image img.img-loaded,
+.product-image-section img.img-loaded {
+  opacity: 1;
+}
+.product-image.is-img-loading::before,
+.product-image-section.is-img-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    var(--color-neutral-100) 25%,
+    var(--color-neutral-200) 37%,
+    var(--color-neutral-100) 63%);
+  background-size: 400% 100%;
+  animation: img-shimmer 1.4s ease infinite;
+}
+@keyframes img-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ── Button loading state ─────────────────────────────────── */
+.btn.is-loading {
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+}
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1em;
+  height: 1em;
+  margin: -0.5em 0 0 -0.5em;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spinner 0.6s linear infinite;
+}
+@keyframes btn-spinner {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-bar.is-active { transition-duration: 0.2s; }
+  .product-image.is-img-loading::before,
+  .product-image-section.is-img-loading::before { animation: none; }
+  .btn.is-loading::after { animation-duration: 1.2s; }
+}
+
 /* ── Header ───────────────────────────────────────────────── */
 .header {
   background: rgba(253, 248, 242, 0.96);

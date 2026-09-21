@@ -15,6 +15,7 @@ A cross-platform Flutter app for searching and comparing public transportation f
 - **Responsive layout** — adapts from phone to tablet to desktop (bottom nav → nav rail → extended nav rail)
 - **Multilingual** — English, Traditional Chinese, Simplified Chinese, and Indonesian
 - **Custom 404 page** — unmatched routes render a themed "page not found" screen with a way back to Search
+- **Shimmer loading states** — fare results, comparisons, and saved routes/history show content-shaped skeleton placeholders while loading, instead of a generic spinner
 
 ---
 

@@ -43,6 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const formData = new FormData(loginForm);
       if (csrfToken) formData.append("csrf_token", csrfToken);
 
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      setButtonLoading(submitBtn, "Logging in...");
+
       try {
         const response = await fetch("Assets/PHP/login.php", {
           method: "POST",
@@ -53,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await response.json();
 
         if (!response.ok) {
+          clearButtonLoading(submitBtn);
           errorMessage.textContent = result.error || "Invalid email or password.";
           errorMessage.classList.remove("hidden");
           return;
@@ -63,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       } catch (err) {
         console.error("Error during login:", err);
+        clearButtonLoading(submitBtn);
         errorMessage.textContent = "Server error: " + err.message;
         errorMessage.classList.remove("hidden");
       }

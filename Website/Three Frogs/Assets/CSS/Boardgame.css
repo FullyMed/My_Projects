@@ -113,6 +113,62 @@ img { max-width: 100%; display: block; }
 }
 
 /* ----------------------------------------------------------------
+   Loading States
+   ---------------------------------------------------------------- */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+/* Section-level loading placeholder (page gating, bookings list, etc.) */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: clamp(2rem, 8vw, 3.5rem) 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.93rem;
+  text-align: center;
+}
+
+/* Inline spinner shown inside the navbar while check_session.php is pending */
+.nav-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+}
+
+/* Button loading state — set by Assets/JS/Loading.js's setButtonLoading() */
+button.btn-loading {
+  opacity: 0.85;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+button.btn-loading .spinner {
+  margin-right: 0.5rem;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+}
+
+/* ----------------------------------------------------------------
    Navbar
    ---------------------------------------------------------------- */
 header {

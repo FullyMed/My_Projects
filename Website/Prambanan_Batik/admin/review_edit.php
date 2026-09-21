@@ -221,5 +221,6 @@ $products = $stmt->fetchAll();
             </div>
         </div>
     </div>
+    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
 </body>
 </html>

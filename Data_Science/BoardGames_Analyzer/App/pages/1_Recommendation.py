@@ -46,7 +46,7 @@ st.sidebar.caption("Board Game Discovery Engine — interactive recommendation d
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Loading recommendation engine...")
 def load_engine():
     return BoardGameDiscoveryEngine(base_path=str(PROJECT_ROOT))
 
@@ -169,12 +169,13 @@ if run_btn:
             if not query_titles:
                 st.warning("Please enter at least one game title.")
             else:
-                results = engine.discover(
-                    query_titles=query_titles,
-                    difficulty_label=difficulty_label,
-                    top_n=top_n,
-                )
-                formatted = engine.format_results(results)
+                with st.spinner("Finding recommendations..."):
+                    results = engine.discover(
+                        query_titles=query_titles,
+                        difficulty_label=difficulty_label,
+                        top_n=top_n,
+                    )
+                    formatted = engine.format_results(results)
 
         elif mode == "Trait-Based":
             if not any([wanted_categories, wanted_mechanics, wanted_families, wanted_publishers]):
@@ -184,15 +185,16 @@ if run_btn:
                     wanted_categories=wanted_categories,
                     wanted_mechanics=wanted_mechanics,
                 )
-                results = engine.discover(
-                    wanted_categories=wanted_categories,
-                    wanted_mechanics=wanted_mechanics,
-                    wanted_families=wanted_families,
-                    wanted_publishers=wanted_publishers,
-                    difficulty_label=difficulty_label,
-                    top_n=top_n,
-                )
-                formatted = engine.format_results(results)
+                with st.spinner("Finding recommendations..."):
+                    results = engine.discover(
+                        wanted_categories=wanted_categories,
+                        wanted_mechanics=wanted_mechanics,
+                        wanted_families=wanted_families,
+                        wanted_publishers=wanted_publishers,
+                        difficulty_label=difficulty_label,
+                        top_n=top_n,
+                    )
+                    formatted = engine.format_results(results)
 
         else:  # Combined
             if not any([query_titles, wanted_categories, wanted_mechanics, wanted_families, wanted_publishers]):
@@ -202,16 +204,17 @@ if run_btn:
                     wanted_categories=wanted_categories,
                     wanted_mechanics=wanted_mechanics,
                 )
-                results = engine.discover(
-                    query_titles=query_titles,
-                    wanted_categories=wanted_categories,
-                    wanted_mechanics=wanted_mechanics,
-                    wanted_families=wanted_families,
-                    wanted_publishers=wanted_publishers,
-                    difficulty_label=difficulty_label,
-                    top_n=top_n,
-                )
-                formatted = engine.format_results(results)
+                with st.spinner("Finding recommendations..."):
+                    results = engine.discover(
+                        query_titles=query_titles,
+                        wanted_categories=wanted_categories,
+                        wanted_mechanics=wanted_mechanics,
+                        wanted_families=wanted_families,
+                        wanted_publishers=wanted_publishers,
+                        difficulty_label=difficulty_label,
+                        top_n=top_n,
+                    )
+                    formatted = engine.format_results(results)
 
         if formatted is not None and len(formatted) > 0:
             # System interpretation summary

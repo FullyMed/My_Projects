@@ -12,6 +12,7 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling, scroll-reveal animations
 - **SEO Optimized**: XML sitemap, robots.txt, and a unique meta title + meta description per page (static on Home/404, dynamic by category on the collection page, dynamic by product on product pages)
 - **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
+- **Loading States**: Top-of-page progress bar on navigation, shimmer skeletons on product images while they load, and a spinner + disabled state on form submit buttons — across both the public site and admin panel
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
 - **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
@@ -118,7 +119,7 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── .env.example                 # Template for environment variables
 ├── assets/
 │   ├── css/styles.css           # Main stylesheet (warm batik palette; .reveal/.product-card start at opacity:0)
-│   └── js/main.js               # Scroll reveal (IntersectionObserver), sticky header, avatar initials
+│   └── js/main.js               # Scroll reveal, sticky header, avatar initials, image loading skeletons, form-submit spinners, nav progress bar (also loaded on admin pages)
 └── admin/
     ├── admin.css                # Admin panel styles
     ├── auth.php                 # Session management + CSRF helpers + login rate-limiting helpers
@@ -262,6 +263,13 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.7.0** (2026-09): Loading states
+  - New top-of-page progress bar (`initNavProgressBar` in `main.js`) animates on link clicks and form submits across the whole site — every navigation here is a full page reload, so it never needs to "complete"
+  - Product images (grid cards + detail page) now show a shimmer skeleton until they finish loading, then fade in (`initImageLoading`); no PHP/markup changes needed, it's driven entirely by existing `.product-image` / `.product-image-section` selectors
+  - Every form's submit button now disables itself and shows a spinner on submit (`initFormLoadingStates`), including admin delete-confirm buttons
+  - `assets/js/main.js` is now also loaded directly on every `admin/*.php` page (previously public-only) so the admin panel gets the same behaviors
+  - `products.php`'s category filter now submits via `requestSubmit()` instead of `submit()`, so it actually fires a `submit` event (needed for the progress bar to trigger on category filtering)
 
 - **v2.6.0** (2026-09): Per-page SEO meta tags
   - Every page now sets `$page_title` and `$meta_description` before `header.php` renders `<title>` and `<meta name="description">`; falls back to new `DEFAULT_META_DESCRIPTION` constant in `config.php` when a page doesn't set one

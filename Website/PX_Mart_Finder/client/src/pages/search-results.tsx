@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import {
   ArrowUpDown,
   Filter,
+  Loader2,
   Search,
   Sparkles,
   X,
@@ -284,7 +285,11 @@ export default function SearchResults() {
     <div className="flex flex-col flex-1 bg-muted/30 min-h-screen">
       <div className="bg-white dark:bg-card p-4 lg:px-6 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40 transition-colors">
         <form onSubmit={handleSearch} className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          {query !== debouncedQuery ? (
+            <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
+          ) : (
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          )}
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}

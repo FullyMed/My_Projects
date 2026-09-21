@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ProductImage } from "@/components/product-image";
 import { Product } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { useFavorites } from "@/lib/storage";
@@ -37,7 +38,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <CardContent className="p-0 flex">
             {/* Image */}
             <div className="w-28 h-28 sm:w-32 sm:h-32 bg-muted shrink-0 relative overflow-hidden">
-              <img
+              <ProductImage
                 src={product.image_url}
                 alt={name}
                 className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"

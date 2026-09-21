@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const currentAvatar = document.getElementById("currentAvatar");
+  const dashboardLoadingState = document.getElementById("dashboardLoadingState");
+  const dashboardContainer = document.querySelector(".dashboard-container");
 
   let loggedInUser = null;
   let allBookings = [];
@@ -53,6 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  dashboardLoadingState?.classList.add("hidden");
+  dashboardContainer?.classList.remove("hidden");
+
   function updateUserInfo() {
     document.getElementById("currentAvatar").src = loggedInUser.avatar;
     userInfo.innerHTML = `
@@ -63,6 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function fetchBookingsFromServer() {
+    upcomingContainer.innerHTML = `<div class="loading-state"><span class="spinner" aria-hidden="true"></span>Loading your bookings…</div>`;
+    historyContainer.innerHTML = "";
+
     try {
 
       const response = await fetch("Assets/PHP/get_bookings.php", {
@@ -150,12 +158,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const formData = new FormData();
         formData.append("avatar", newAvatar);
         formData.append("csrf_token", csrfToken);
+
+        const submitBtn = changeAvatarForm.querySelector('button[type="submit"]');
+        setButtonLoading(submitBtn, "Updating...");
+
         try {
           const response = await fetch("Assets/PHP/update_avatar.php", {
             method: "POST",
             body: formData,
           });
           const result = await response.json();
+          clearButtonLoading(submitBtn);
           if (result.success) {
             loggedInUser.avatar = newAvatar;
             updateUserInfo();
@@ -166,6 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         } catch (err) {
           console.error("Avatar update error:", err);
+          clearButtonLoading(submitBtn);
           avatarMsg.innerHTML = `<p style="color:red;">Server error.</p>`;
         }
       }
@@ -178,6 +192,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!csrfToken) {
         await checkSession();
       }
+      setButtonLoading(confirmCancel, "Cancelling...");
       try {
         const res = await fetch("Assets/PHP/cancel_booking.php", {
           method: "POST",
@@ -194,6 +209,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         const result = await res.json();
+        clearButtonLoading(confirmCancel);
         if (result.success) {
           popup.classList.add("hidden");
           remainingCancels--;
@@ -204,6 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } catch (err) {
         console.error("Cancel booking error:", err);
+        clearButtonLoading(confirmCancel);
         alert("Server error.");
       }
     });

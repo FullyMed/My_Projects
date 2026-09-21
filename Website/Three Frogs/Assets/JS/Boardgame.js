@@ -2020,7 +2020,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 3. Initial load
-  renderBoardgames(boardgames);
+  // Collection.html gates its content behind a login check further below —
+  // render a loading state there instead of flashing the full, ungrouped,
+  // unauthenticated game list before the check resolves.
+  if (window.location.pathname.includes("Collection.html")) {
+    container.innerHTML = `<div class="loading-state"><span class="spinner" aria-hidden="true"></span>Loading your boardgame collection…</div>`;
+  } else {
+    renderBoardgames(boardgames);
+  }
 
   // 4. Event listeners
   if (searchInput) searchInput.addEventListener("input", applyFilters);

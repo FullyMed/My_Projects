@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const bookingForm = document.getElementById("bookingForm");
   const popup = document.getElementById("authPopup");
   const bookingResult = document.getElementById("bookingResult");
+  const bookingLoadingState = document.getElementById("bookingLoadingState");
 
   document.getElementById("authPopupLoginBtn")?.addEventListener("click", () => {
     window.location.href = "Login.html";
@@ -28,14 +29,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const currentUser = await checkSession();
+  bookingLoadingState?.classList.add("hidden");
 
   if (!currentUser && bookingForm) {
-    bookingForm.style.display = "none";
     popup.classList.remove("hidden");
     return;
   }
 
   if (bookingForm && currentUser) {
+    bookingForm.classList.remove("hidden");
+
     const emailField = document.getElementById("email");
     if (emailField) {
       emailField.value = currentUser.email;
@@ -79,6 +82,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         await checkSession();
       }
 
+      const submitBtn = bookingForm.querySelector('button[type="submit"]');
+      setButtonLoading(submitBtn, "Booking...");
+
       try {
         const response = await fetch("Assets/PHP/booking.php", {
           method: "POST",
@@ -95,6 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         const result = await response.json();
+        clearButtonLoading(submitBtn);
 
         if (result.success) {
           bookingResult.innerHTML = `
@@ -115,6 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } catch (error) {
         console.error("Booking error:", error);
+        clearButtonLoading(submitBtn);
         bookingResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
       }
     });

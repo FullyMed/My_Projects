@@ -55,6 +55,7 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 │   │   └── Boardgame.css           Single shared stylesheet
 │   ├── JS/
 │   │   ├── Navbar.js               Shared navbar — injected dynamically on every page
+│   │   ├── Loading.js              Shared button loading-state helpers (setButtonLoading/clearButtonLoading)
 │   │   ├── Boardgame.js            Game data array (~218 games) + index & collection page logic
 │   │   ├── Booking.js
 │   │   ├── Dashboard.js
@@ -106,6 +107,20 @@ The navbar is injected by `Navbar.js` after this response — HTML pages ship wi
 | `Collection.html` | Redirects to `Login.html` |
 | `Booking.html` | Hides the form; shows `#authPopup` |
 | `Dashboard.html` | Redirects to `Login.html` |
+
+Note the phrasing above: the form/dashboard content is **hidden by default** (`class="hidden"` in the HTML, alongside a `.loading-state` spinner shown in its place) and only revealed by JS once `check_session.php` confirms the right state — not shown-then-hidden reactively. See [Loading States](#loading-states) below.
+
+### Loading States
+
+| Where | What |
+|---|---|
+| Any async-submitting button | `Assets/JS/Loading.js`'s `setButtonLoading(button, text)` swaps in a spinner + disables the button; `clearButtonLoading(button)` restores it. Used by `Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js`, `Forgot-password.js`. |
+| `Booking.html` / `Dashboard.html` | Real content ships `class="hidden"`; a sibling `.loading-state` is visible by default. Revealed only once `check_session.php` resolves — prevents a flash of the real form/dashboard before the login gate kicks in. |
+| `Collection.html` | `Boardgame.js` renders a `.loading-state` into `#boardgame-list` instead of the full unfiltered game array while the login check is pending — prevents an unauthenticated visitor from briefly seeing the entire ~218-game collection before the redirect fires. |
+| Dashboard bookings list | `#upcomingBookings`/`#bookingHistory` show a `.loading-state` while `get_bookings.php` is in flight. |
+| Navbar | `#navLinks` shows a single spinner `<li>` (JS-injected, not part of the HTML source) until `check_session.php` resolves. |
+
+All loading UI reuses the existing `.spinner`/`.loading-state`/`.btn-loading` classes in `Boardgame.css` — no new colors or fonts.
 
 ### Password Reset Flow
 

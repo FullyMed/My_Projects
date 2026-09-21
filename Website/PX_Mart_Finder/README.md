@@ -36,6 +36,7 @@ npm run dev:client
 - Store map placeholder with aisle highlighting
 - Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
 - Per-page meta title and meta description (bilingual, updates live with the page and language)
+- Loading states: image skeletons with fade-in and error fallback, an initial app-boot spinner, and a search-debounce indicator
 - Full bilingual support — English and Traditional Chinese (繁體中文)
 - Light and dark mode
 - Fully responsive — mobile, tablet, and desktop layouts
@@ -47,7 +48,7 @@ npm run dev:client
 ```
 client/
   src/
-    components/    # Layout, ProductCard, LanguageToggle, ThemeToggle
+    components/    # Layout, ProductCard, ProductImage, LanguageToggle, ThemeToggle
     pages/         # Home, Search, Category, Product Detail, Favorites, Store Map
     lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts, seo.ts
     data/          # products.json, categories.json

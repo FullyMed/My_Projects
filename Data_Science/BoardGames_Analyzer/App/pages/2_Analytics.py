@@ -37,7 +37,7 @@ PROCESSED_PATH = PROJECT_ROOT / "Dataset" / "Processed"
 # ─────────────────────────────────────────────────────────────────
 # Data loading
 # ─────────────────────────────────────────────────────────────────
-@st.cache_data
+@st.cache_data(show_spinner="Loading game dataset...")
 def load_games() -> pd.DataFrame:
     df = pd.read_csv(RAW_PATH / "games_detailed_info.csv", low_memory=False)
     df["id"] = pd.to_numeric(df["id"], errors="coerce")
@@ -53,7 +53,7 @@ def load_games() -> pd.DataFrame:
     return df
 
 
-@st.cache_data
+@st.cache_data(show_spinner="Loading sentiment data...")
 def load_sentiment() -> pd.DataFrame:
     path = PROCESSED_PATH / "sentiment_summary.csv"
     if not path.exists():

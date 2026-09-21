@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  navLinks.innerHTML = `<li class="nav-loading" aria-hidden="true"><span class="spinner spinner-sm"></span></li>`;
+
   fetch("Assets/PHP/check_session.php")
     .then(res => {
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);

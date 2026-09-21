@@ -71,6 +71,12 @@ Each API file (`plannerApi`, `goalsApi`, `eventsApi`) follows the same pattern:
 
 `plannerApi` also exports `recordSync` / `getLastSync` used by `SettingsPage` to display the last-sync timestamp.
 
+### Loading states
+
+- **`LoadingScreen`** (`src/components/LoadingScreen.tsx`): the single full-viewport loading UI (logo + `Loader2` spinner) shown while auth is resolving. Used by both `App.tsx` (top-level `isLoading` from `useAuth`) and `ProtectedRoute`. Don't reintroduce a bespoke spinner in either place — route any new "waiting on auth" case through this component so the loading UI stays visually consistent and on-theme.
+- **Per-feature data fetches**: `WeeklyPlanner`, `GoalTracker`, and `EventCalendar` each track their own `[tasks|goals|events]Loading` boolean around their initial Supabase fetch (and, for `WeeklyPlanner`, each week change) and render a centered `Loader2` block (`h-8 w-8 text-indigo-500 animate-spin` + a muted caption) in place of the grid while `true`. This matters because these lists start empty — without a loading flag, the "no data yet" empty state flashes before the real data arrives. `PrintView` already had this pattern (`isLoading` + `Loader2`); the other three follow the same convention. When adding a new data-fetching feature component, follow this pattern rather than leaving the empty state to double as a loading state.
+- **`AuthModal`** shows a `Loader2` spin icon next to "Please wait…" on its submit button while `loading` is true, matching the same icon+text convention.
+
 ### Per-page meta (`src/hooks/usePageMeta.ts`)
 
 This is a client-rendered SPA with no SSR, so there's no head-management library (react-helmet, etc.) — `usePageMeta(title, description)` sets `document.title` and the `<meta name="description">` content directly in a `useEffect`, restoring the previous values on unmount. Every route-level component calls it once near the top of the component body: `LandingPage`, `NotFoundPage`, and each page in `src/pages/` (`PlannerPage`, `GoalsPage`, `CalendarPage`, `SettingsPage`). When adding a new route, add a `usePageMeta` call with a distinct title/description rather than leaving the previous page's meta in place.

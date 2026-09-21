@@ -124,6 +124,7 @@ Reusable UI components.
 Key components:
 - `layout.tsx` — App shell: responsive header, sidebar (desktop), bottom nav (mobile)
 - `product-card.tsx` — Product list card with location pill, framer-motion hover/tap
+- `product-image.tsx` — `<ProductImage>`: shows a `Skeleton` while an image loads, fades it in on load, falls back to an `ImageOff` icon on error. Used by `product-card.tsx` and `product-detail.tsx`'s hero image
 - `language-toggle.tsx` — EN / 繁中 switcher
 - `theme-toggle.tsx` — Light / Dark mode toggle
 
@@ -343,6 +344,12 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
   - `not-found.tsx` — reuses the existing `pageNotFound`/`pageNotFoundDesc` keys
 - For pages with an early-return guard (`category-detail.tsx`, `product-detail.tsx`), `usePageMeta` is called *before* the guard with a not-found fallback title/description, to keep hook call order stable across renders
 
+## Loading States
+Since all data (`data.ts`/JSON) is static and rendered synchronously, there is no real "fetching" state to show. The genuine async gaps in this app are: remote product images (several `image_url`s point to Unsplash, not local `/Images/`), the initial JS bundle/font load, and the search input's debounce window — each gets a real loading indicator rather than a decorative one:
+- **Product images** — `components/product-image.tsx` (`<ProductImage>`) shows a `Skeleton` overlay while the image loads, cross-fades in the `<img>` via `onLoad` (`transition-opacity duration-300`), and falls back to a muted `ImageOff` icon on `onError`. Resets to `"loading"` on `src` change (via `useEffect`) since wouter keeps the `ProductDetail` component instance mounted across `/product/:id` param changes (e.g. clicking into a "Similar Products" card) — without this reset, a stale `"loaded"` status would skip the skeleton for the new image
+- **Initial app boot** — `client/index.html` renders a `#app-boot-loader` (inline-styled spinner, no Tailwind dependency since it must paint before the bundle loads) over `#root`; `main.tsx` fades it out via a `.hide` class after `createRoot().render()` and removes it from the DOM on `transitionend`, with a `setTimeout(400ms)` fallback removal since `transitionend` can fail to fire when the "hide" class is applied before the initial state has painted
+- **Search debounce** — `search-results.tsx` swaps the search icon for a spinning `Loader2` whenever `query !== debouncedQuery`, signaling that displayed results haven't caught up to what's typed yet (300ms `use-debounce` window)
+
 ---
 
 # 9. Current Progress
@@ -388,6 +395,7 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - **Favorites multi-item bug fixed** — `useFavorites` now reads from a single shared `FavoritesContext` instead of creating an isolated `useState` per component. Previously each `ProductCard` had its own state copy; toggling two products caused the second card to write from stale `prev: []`, overwriting the first card's localStorage entry. Removing multiple items had the same problem in reverse.
 - `not-found.tsx` rebuilt from a plain alert-style card into a fully branded 404 (icon badge, "404", CTAs) — see [Custom 404 Page](#custom-404-page)
 - Per-page meta title and meta description added across all 7 routes via `usePageMeta` — see [Per-Page SEO Meta Tags](#per-page-seo-meta-tags)
+- Loading states added for product images (skeleton + fade-in + error fallback), initial app boot (spinner overlay), and search debounce (spinner icon) — see [Loading States](#loading-states). Fixed a bug in the boot-loader removal where `transitionend` alone could leave `#app-boot-loader` stuck in the DOM (invisible but present) if the "hide" class was applied before the initial paint — added a `setTimeout` fallback removal
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors

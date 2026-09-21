@@ -332,6 +332,17 @@ Each of the 4 pages (`App/app.py`, `pages/1_Recommendation.py`, `pages/2_Analyti
 
 If a new page is added, it must call both `st.set_page_config(page_title=...)` and `theme.set_meta_description(...)` right after it, with distinct, page-specific text for each.
 
+## Loading States
+Streamlit's default "running" indicator (top-right spinner icon) is easy to miss, so slow operations show an explicit, custom-worded spinner instead of relying on it:
+- `App/pages/1_Recommendation.py`: `load_engine()` (`@st.cache_resource`) uses `show_spinner="Loading recommendation engine..."` for the cold-start load of the CSR similarity matrices + metadata; each of the three `engine.discover()` + `format_results()` call sites (Title-Based, Trait-Based, Combined) is wrapped in `with st.spinner("Finding recommendations..."):`
+- `App/pages/2_Analytics.py`: `load_games()` and `load_sentiment()` (`@st.cache_data`) use `show_spinner="Loading game dataset..."` / `"Loading sentiment data..."`
+
+**Verified in-browser**: screenshotted the app mid-load and caught both the "Loading recommendation engine..." spinner (cold start) and the "Finding recommendations..." spinner (on Get Recommendations click) rendering correctly, with results still rendering normally afterward.
+
+Root `app.py` (legacy single-page reference app) was **not** touched — it has no `App/`-style UI parity requirement (only `recommender.py` must stay synced, per Section 10), so it was left out of scope for this pass.
+
+If a new slow operation (cached loader, heavy compute) is added, give it an explicit `show_spinner="..."` or wrap it in `st.spinner("...")` with page-specific wording rather than relying on Streamlit's default indicator.
+
 ---
 
 # 7. Evaluation Results

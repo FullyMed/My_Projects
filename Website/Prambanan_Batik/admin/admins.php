@@ -303,6 +303,7 @@ $admins = $stmt->fetchAll();
         </div>
     </div>
 
+    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
     <script>
         function togglePwForm(id) {
             const form = document.getElementById('pw-form-' + id);

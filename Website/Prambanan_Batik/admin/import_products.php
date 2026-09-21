@@ -349,6 +349,7 @@ PROD-003,Gadget X,49.99,,2,</pre>
         </div>
     </div>
 
+    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
     <script>
         const fileInput = document.getElementById('csv_file');
         const fileLabel = document.querySelector('.file-input-label');

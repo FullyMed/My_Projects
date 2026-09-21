@@ -37,8 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const email     = document.getElementById("resetEmail").value.trim();
       const submitBtn = requestForm.querySelector("button[type='submit']");
 
-      submitBtn.disabled    = true;
-      submitBtn.textContent = "Sending...";
+      setButtonLoading(submitBtn, "Sending...");
 
       try {
         const formData = new FormData();
@@ -50,8 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         requestResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
         console.error("Request reset error:", err);
       } finally {
-        submitBtn.disabled    = false;
-        submitBtn.textContent = "Send Reset Link";
+        clearButtonLoading(submitBtn);
       }
     });
   }
@@ -71,8 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      submitBtn.disabled    = true;
-      submitBtn.textContent = "Resetting...";
+      setButtonLoading(submitBtn, "Resetting...");
 
       const formData = new FormData();
       formData.append("token", token);
@@ -89,15 +86,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           setTimeout(() => { window.location.href = "Login.html"; }, 1500);
         } else {
-          forgotResult.innerHTML    = `<p style="color:red;">${result.error}</p>`;
-          submitBtn.disabled        = false;
-          submitBtn.textContent     = "Reset Password";
+          forgotResult.innerHTML = `<p style="color:red;">${result.error}</p>`;
+          clearButtonLoading(submitBtn);
         }
       } catch (err) {
         forgotResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
         console.error("Reset password error:", err);
-        submitBtn.disabled    = false;
-        submitBtn.textContent = "Reset Password";
+        clearButtonLoading(submitBtn);
       }
     });
   }

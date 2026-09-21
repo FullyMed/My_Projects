@@ -110,7 +110,7 @@ A design-system layer of reusable widgets:
 | `TffFareTable` | Fare breakdown table (adult / student / child / senior) |
 | `TffErrorCard` | Inline error display with optional retry action |
 | `TffEmptyState` | Full-page or inline empty-state illustration + copy |
-| `TffSkeleton` | Shimmer placeholder for loading states |
+| `TffSkeleton` | Shimmer placeholders for loading states — `FareResultSkeletonCard`/`CompareResultsSkeletonList` (Search/Compare) and `RouteTileSkeleton`/`RouteTileSkeletonList` (Saved page favorites/history) |
 | `TffSwapButton` | Animated origin ↔ destination swap button |
 | `TffAdaptive` | Adaptive layout helper — 3-tier breakpoints (phone / tablet / desktop) and navigation helpers (`useNavRail`, `isWide`, etc.) |
 | `LocationField` | Text field for origin/destination input |
@@ -176,3 +176,4 @@ Defined in `lib/nav.dart` via `go_router`:
 - **Use `Location` for UI inputs**: never pass raw city-name strings from UI to controllers — always resolve through `LocationService` and pass `location.queryToken` for cache keys and station lookups.
 - **`AnalyticsService` is a stub**: it only `debugPrint`s. Do not add real tracking without also wiring a consent UI.
 - **Keep store listing copy in sync**: `store_listing/app_store.md` and `store_listing/play_store.md` hold per-locale (en, zh-Hant, id) title/description/keyword copy for App Store Connect and Play Console. When features, supported cities, or supported languages change, update these files in the same change.
+- **Loading states are shimmer skeletons, not spinners**: every list/card that loads async data (fare results, favorites, history) shows a `TffSkeleton` placeholder shaped like the real content while its controller's `isLoading` is true — not a bare `CircularProgressIndicator`. A small inline spinner (e.g. `_DangerAction` in `settings_page.dart`) is only appropriate for a short, in-place busy state on a button/row triggered by the user's own tap, not for initial page/list loads.

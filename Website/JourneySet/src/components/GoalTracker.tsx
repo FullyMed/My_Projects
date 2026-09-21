@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Target, Check, Trash2, TrendingUp, RotateCcw, Unlock, Lock } from 'lucide-react';
+import { Plus, Target, Check, Trash2, TrendingUp, RotateCcw, Unlock, Lock, Loader2 } from 'lucide-react';
 import { Goal, GoalStatus } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -16,6 +16,7 @@ const GoalTracker: React.FC = () => {
     allowExceedTarget: false,
   });
   const [resetConfirmId, setResetConfirmId] = useState<string | null>(null);
+  const [goalsLoading, setGoalsLoading] = useState(true);
   const { user } = useAuth();
 
   const units = [
@@ -30,9 +31,11 @@ const GoalTracker: React.FC = () => {
 
   useEffect(() => {
     if (user) {
+      setGoalsLoading(true);
       const loadGoals = async () => {
         const userGoals = await getGoals(user.id);
         setGoals(userGoals);
+        setGoalsLoading(false);
       };
       loadGoals();
     }
@@ -203,7 +206,12 @@ const GoalTracker: React.FC = () => {
       </div>
 
       {/* Goals Grid */}
-      {goals.length > 0 ? (
+      {goalsLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
+          <p className="text-sm text-slate-500 dark:text-slate-400">Loading goals…</p>
+        </div>
+      ) : goals.length > 0 ? (
         <div className={`grid ${isCompact ? 'gap-4 grid-cols-1 sm:grid-cols-2' : 'gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
           {goals.map(goal => {
             const progressPercentage = getProgressPercentage(goal.currentValue, goal.targetValue, goal.allowExceedTarget);
