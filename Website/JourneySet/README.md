@@ -17,6 +17,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Per-page meta** — each route sets its own `<title>` and meta description for SEO/sharing
 - **Loading states** — a themed full-page loader while auth resolves, plus per-feature spinners so the Planner, Goals, and Calendar lists never flash an empty state while their data is still loading
 - **Terms of Use & Privacy Policy** — dedicated pages at `/terms` and `/privacy`, linked from the landing footer, the sign-up form, and Settings
+- **Full favicon set** — SVG favicon, ICO fallback, Apple touch icon, and a web manifest with Android/PWA icons, all redrawn from the in-app logo mark
 
 ## Tech stack
 

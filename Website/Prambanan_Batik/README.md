@@ -14,6 +14,7 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 - **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
 - **Loading States**: Top-of-page progress bar on navigation, shimmer skeletons on product images while they load, and a spinner + disabled state on form submit buttons — across both the public site and admin panel
 - **Legal Pages**: Terms of Use and Privacy Policy, linked from the footer and listed in the sitemap
+- **Favicon Set**: A custom batik-motif icon (SVG source + ICO/PNG fallbacks, `apple-touch-icon`, Android/manifest icons, Safari mask icon) across the public site and admin panel
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
 - **Preview Mode**: Sample data shown automatically when the database is unavailable
 - **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
@@ -112,6 +113,7 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── 404.php                      # Custom 404 page — wired up in .htaccess via ErrorDocument
 ├── terms.php                    # Terms of Use
 ├── privacy.php                  # Privacy Policy
+├── favicon.ico                  # Root fallback for browsers that ignore <link> tags (domain-root deployments only)
 ├── robots.txt                   # Search engine directives
 ├── config.php                   # Site constants — BASE_URL, SITE_PATH, DB_*, SESSION_TIMEOUT, etc.
 ├── db_connect.php               # Returns PDO instance (or null on failure)
@@ -123,7 +125,8 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── .env.example                 # Template for environment variables
 ├── assets/
 │   ├── css/styles.css           # Main stylesheet (warm batik palette; .reveal/.product-card start at opacity:0)
-│   └── js/main.js               # Scroll reveal, sticky header, avatar initials, image loading skeletons, form-submit spinners, nav progress bar (also loaded on admin pages)
+│   ├── js/main.js               # Scroll reveal, sticky header, avatar initials, image loading skeletons, form-submit spinners, nav progress bar (also loaded on admin pages)
+│   └── favicon/                 # favicon.svg (canonical source) + exported ICO/PNGs, apple-touch-icon, Android icons, mask-icon, site.webmanifest
 └── admin/
     ├── admin.css                # Admin panel styles
     ├── auth.php                 # Session management + CSRF helpers + login rate-limiting helpers
@@ -269,6 +272,12 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.9.0** (2026-09): Favicon set
+  - New `assets/favicon/` — a custom four-petal batik-motif icon in the site's own espresso/copper-gold palette, with `favicon.svg` as the hand-authored canonical source
+  - Full ICO/PNG/manifest set exported from it: `favicon.ico` (16/32/48), `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png` (180×180), `android-chrome-192x192.png`, `android-chrome-512x512.png`, `safari-pinned-tab.svg`, `site.webmanifest`
+  - `header.php` links the full set on every public page; every `admin/*.php` page links a lighter 3-tag subset (SVG + ICO + apple-touch-icon) in its own `<head>`
+  - A plain copy of `favicon.ico` also sits at the project root as a fallback for browsers that request it directly, ignoring `<link>` tags (effective only when deployed at the domain root)
 
 - **v2.8.0** (2026-09): Terms of Use & Privacy Policy pages
   - New `terms.php` and `privacy.php` — static legal pages using the same header/footer chrome as every other public page

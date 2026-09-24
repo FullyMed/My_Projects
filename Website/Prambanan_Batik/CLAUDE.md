@@ -61,6 +61,14 @@ Every public page sets `$page_title` and `$meta_description` **before** `include
 
 **Rule:** When adding a new public page, set both `$page_title` and `$meta_description` before including `header.php` — don't rely on the sitewide `DEFAULT_META_DESCRIPTION` fallback for real content pages.
 
+### Favicon Set — assets/favicon/
+
+The site icon is a simple four-petal "flower" motif (a simplified batik kawung pattern) in the site's own palette — espresso background (`#2a1a0e`), copper-gold petals (`#c4872c`), pale-gold center dot (`#e8c47a`). **`assets/favicon/favicon.svg` is the canonical, hand-authored source** — it's plain SVG (4 `<ellipse>`s rotated 0/90/180/270 around a center `<circle>`), so it can be edited directly in any text or vector editor. Every raster file in that folder (`favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`) is an exported copy of the same design — if you change the SVG, regenerate these from it (e.g. re-export at each size from a vector tool; no build tooling is committed to this repo for it). `safari-pinned-tab.svg` is a monochrome (black-on-transparent) copy of the same shapes, used as-is by Safari's `mask-icon` (the browser recolors it using the `color` attribute on the `<link>` tag, so its own fill color doesn't matter).
+
+`header.php` links the full set (SVG first, then ICO/PNG fallbacks, `apple-touch-icon`, `mask-icon`, and `site.webmanifest` + a `theme-color` meta tag) for every public page. Every `admin/*.php` page (each has its own standalone `<head>`, not `header.php`) links a lighter subset — just the SVG, ICO, and `apple-touch-icon` — since the admin panel doesn't need PWA manifest/mask-icon treatment (it's `Disallow`'d in `robots.txt` anyway). There's also a plain copy of `favicon.ico` at the project root, purely as a fallback for browsers that ignore `<link>` tags and request `/favicon.ico` directly — only effective when deployed at the domain root, same caveat as the `404.php` `ErrorDocument` path.
+
+**Rule:** When adding a new admin page, copy the same 3-line favicon `<link>` block (SVG, ICO, apple-touch-icon) used in the other `admin/*.php` heads.
+
 ### Legal Pages — terms.php and privacy.php
 
 Static content pages using the same `header.php`/`footer.php` request flow as every other public page (no `$db`, no preview mode). Linked from `footer.php` in both the "Quick Links" list and a compact `.footer-legal-links` row next to the copyright line, and listed in `sitemap.php`.
@@ -169,5 +177,5 @@ For deletes, fetch the `product_id` from the review **before** deleting, then ru
 - Any redirect target from DB or user input must be validated (e.g., `preg_match('/^https?:\/\//')`) before issuing a `Location:` header.
 - Image/file URLs submitted by admins must be validated with `preg_match('/^https?:\/\//')` before saving.
 - File uploads: validate with `finfo` MIME type + extension allow-list via `is_valid_image_upload()`.
-- When adding new admin pages: include `admin/auth.php`, call `requireAdminLogin()`, add CSRF token to every form, use `SITE_PATH` on all links, use `BASE_URL` on all PHP redirects, add the page to the sidebar nav in every admin page, and include `<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>` before `</body>` (before any page-specific inline `<script>`) so its submit buttons get the loading spinner and the nav progress bar fires.
+- When adding new admin pages: include `admin/auth.php`, call `requireAdminLogin()`, add CSRF token to every form, use `SITE_PATH` on all links, use `BASE_URL` on all PHP redirects, add the page to the sidebar nav in every admin page, include `<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>` before `</body>` (before any page-specific inline `<script>`) so its submit buttons get the loading spinner and the nav progress bar fires, and copy the 3-line favicon `<link>` block (see Favicon Set below) into its `<head>`.
 - When adding review write operations: always recalculate `rating_avg` / `rating_count` using the pattern in `admin/review_edit.php`.
