@@ -158,6 +158,7 @@ flutter analyze       # lint
 dart format .         # format all Dart files
 flutter test          # run tests
 flutter gen-l10n      # regenerate ARB stubs (rarely needed)
+dart run flutter_launcher_icons  # regenerate Android/iOS/web icons from assets/icons/app_icon.png
 
 # Release builds — pass the proxy config file, and obfuscate the Dart code:
 flutter build apk --release \

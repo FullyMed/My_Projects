@@ -363,4 +363,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDataSource => 'Data source';
+
+  @override
+  String get notFoundTitle => 'Page not found';
+
+  @override
+  String get notFoundBody =>
+      'The page you’re looking for doesn’t exist or may have moved.';
+
+  @override
+  String get notFoundBackToSearch => 'Back to search';
+
+  @override
+  String get termsOfUse => 'Terms of Use';
+
+  @override
+  String get termsLastUpdated => 'Last updated: September 21, 2026';
+
+  @override
+  String get termsIntro =>
+      'These Terms of Use (\"Terms\") govern your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to these Terms. If you don\'t agree, please don\'t use the App.';
+
+  @override
+  String get termsSection1Title => 'Acceptance of These Terms';
+
+  @override
+  String get termsSection1Body =>
+      'By downloading, installing, or using Taiwan Fare Finder, you accept these Terms in full. We may update these Terms from time to time; continuing to use the App after an update means you accept the revised Terms.';
+
+  @override
+  String get termsSection2Title => 'The Service';
+
+  @override
+  String get termsSection2Body =>
+      'Taiwan Fare Finder is an informational tool for searching, comparing, and saving public transportation fares across Taiwan. It does not sell tickets, process payments, or connect to any transit operator\'s booking system.';
+
+  @override
+  String get termsSection3Title => 'Fare Accuracy & Data Sources';
+
+  @override
+  String get termsSection3Body =>
+      'High Speed Rail (HSR) and Taiwan Railway (TRA) fares are retrieved from Taiwan\'s official TDX open-data platform when API mode is enabled. MRT, Bus, and YouBike fares use a consistent internal estimate, not official pricing. In all cases, fares and travel times may be outdated, cached, or inaccurate. Always confirm the actual fare with the relevant transit operator before you travel.';
+
+  @override
+  String get termsSection4Title => 'Acceptable Use';
+
+  @override
+  String get termsSection4Body =>
+      'The App is for your personal, non-commercial use. You agree not to misuse the App or its backend services — for example, by sending an excessive volume of automated requests, attempting to extract API credentials, or interfering with the App\'s normal operation.';
+
+  @override
+  String get termsSection5Title => 'No Warranty & Limitation of Liability';
+
+  @override
+  String get termsSection5Body =>
+      'The App is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we are not liable for any loss or damage arising from your use of the App, including missed trips or fare discrepancies.';
+
+  @override
+  String get termsSection6Title => 'Third-Party Services';
+
+  @override
+  String get termsSection6Body =>
+      'Live HSR and TRA fare data is sourced from Taiwan\'s TDX (Transport Data eXchange) open-data platform, operated by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). Use of that data is subject to TDX\'s own terms, which we do not control.';
+
+  @override
+  String get termsSection7Title => 'Changes to These Terms';
+
+  @override
+  String get termsSection7Body =>
+      'We may revise these Terms as the App evolves. The \"Last updated\" date above reflects the most recent revision. We encourage you to review these Terms periodically.';
+
+  @override
+  String get termsSection8Title => 'Contact';
+
+  @override
+  String get termsSection8Body =>
+      'Questions about these Terms can be sent to maxfelix05@gmail.com.';
+
+  @override
+  String get privacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get privacyLastUpdated => 'Last updated: September 21, 2026';
+
+  @override
+  String get privacyPolicyIntro =>
+      'Taiwan Fare Finder does not require an account, does not have a login, and does not operate a backend server of its own. This policy explains the little data the App does handle, and where it goes.';
+
+  @override
+  String get privacySection1Title => 'Information We Store On Your Device';
+
+  @override
+  String get privacySection1Body =>
+      'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode) are stored locally on your device using standard app storage. This data is never uploaded to a server we operate — we don\'t have one.';
+
+  @override
+  String get privacySection2Title => 'Information Sent To Third Parties';
+
+  @override
+  String get privacySection2Body =>
+      'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent — through our proxy server — to Taiwan\'s official TDX open-data platform to retrieve real fares. No name, account, or device identifier is attached to that request, because the App has none to send.';
+
+  @override
+  String get privacySection3Title => 'Analytics';
+
+  @override
+  String get privacySection3Body =>
+      'The App currently logs a few event names locally for debugging purposes only (visible in developer logs on your own device) and does not transmit them anywhere. If we ever add real analytics or tracking, we will ask for your consent first.';
+
+  @override
+  String get privacySection4Title => 'Children\'s Privacy';
+
+  @override
+  String get privacySection4Body =>
+      'The App does not knowingly collect personal information from anyone, including children, because it does not collect personal information from anyone. It is suitable for a general audience.';
+
+  @override
+  String get privacySection5Title => 'Your Choices & Data Deletion';
+
+  @override
+  String get privacySection5Body =>
+      'You can clear your cached fares, search history, or favorites at any time from Settings → Data management. Uninstalling the App removes all data it stored on your device.';
+
+  @override
+  String get privacySection6Title => 'Changes to This Policy';
+
+  @override
+  String get privacySection6Body =>
+      'We may update this Privacy Policy as the App evolves. The \"Last updated\" date above reflects the most recent revision.';
+
+  @override
+  String get privacySection7Title => 'Contact';
+
+  @override
+  String get privacySection7Body =>
+      'Questions about this Privacy Policy can be sent to maxfelix05@gmail.com.';
 }

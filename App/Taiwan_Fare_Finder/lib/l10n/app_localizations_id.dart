@@ -366,4 +366,140 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get aboutDataSource => 'Sumber data';
+
+  @override
+  String get notFoundTitle => 'Halaman tidak ditemukan';
+
+  @override
+  String get notFoundBody =>
+      'Halaman yang Anda cari tidak ada atau mungkin telah dipindahkan.';
+
+  @override
+  String get notFoundBackToSearch => 'Kembali ke pencarian';
+
+  @override
+  String get termsOfUse => 'Ketentuan Penggunaan';
+
+  @override
+  String get termsLastUpdated => 'Terakhir diperbarui: 21 September 2026';
+
+  @override
+  String get termsIntro =>
+      'Ketentuan Penggunaan ini (\"Ketentuan\") mengatur penggunaan Anda atas Taiwan Fare Finder (\"Aplikasi\"). Dengan menggunakan Aplikasi, Anda menyetujui Ketentuan ini. Jika Anda tidak setuju, mohon untuk tidak menggunakan Aplikasi.';
+
+  @override
+  String get termsSection1Title => 'Penerimaan Ketentuan Ini';
+
+  @override
+  String get termsSection1Body =>
+      'Dengan mengunduh, memasang, atau menggunakan Taiwan Fare Finder, Anda menerima sepenuhnya Ketentuan ini. Kami dapat memperbarui Ketentuan ini dari waktu ke waktu; melanjutkan penggunaan Aplikasi setelah pembaruan berarti Anda menerima Ketentuan yang telah direvisi.';
+
+  @override
+  String get termsSection2Title => 'Layanan Ini';
+
+  @override
+  String get termsSection2Body =>
+      'Taiwan Fare Finder adalah alat informasi untuk mencari, membandingkan, dan menyimpan tarif transportasi umum di Taiwan. Aplikasi ini tidak menjual tiket, tidak memproses pembayaran, dan tidak terhubung ke sistem pemesanan operator transportasi mana pun.';
+
+  @override
+  String get termsSection3Title => 'Akurasi Tarif & Sumber Data';
+
+  @override
+  String get termsSection3Body =>
+      'Tarif High Speed Rail (HSR) dan Taiwan Railway (TRA) diambil dari platform data terbuka resmi TDX Taiwan saat mode API diaktifkan. Tarif MRT, Bus, dan YouBike menggunakan estimasi internal yang konsisten, bukan harga resmi. Dalam semua kasus, tarif dan waktu tempuh dapat sudah usang, tersimpan dalam cache, atau tidak akurat. Selalu konfirmasi tarif sebenarnya kepada operator transportasi terkait sebelum bepergian.';
+
+  @override
+  String get termsSection4Title => 'Penggunaan yang Diizinkan';
+
+  @override
+  String get termsSection4Body =>
+      'Aplikasi ini ditujukan untuk penggunaan pribadi dan non-komersial. Anda setuju untuk tidak menyalahgunakan Aplikasi atau layanan backend-nya — misalnya dengan mengirim permintaan otomatis dalam jumlah berlebihan, mencoba mengambil kredensial API, atau mengganggu operasional normal Aplikasi.';
+
+  @override
+  String get termsSection5Title => 'Tanpa Jaminan & Batasan Tanggung Jawab';
+
+  @override
+  String get termsSection5Body =>
+      'Aplikasi ini disediakan \"apa adanya\" dan \"sebagaimana tersedia\", tanpa jaminan dalam bentuk apa pun, baik tersurat maupun tersirat, termasuk keakuratan, keandalan, atau kesesuaian untuk tujuan tertentu. Sejauh diizinkan oleh hukum, kami tidak bertanggung jawab atas kerugian atau kerusakan apa pun yang timbul dari penggunaan Aplikasi, termasuk keterlambatan perjalanan atau selisih tarif.';
+
+  @override
+  String get termsSection6Title => 'Layanan Pihak Ketiga';
+
+  @override
+  String get termsSection6Body =>
+      'Data tarif HSR dan TRA langsung bersumber dari platform data terbuka TDX (Transport Data eXchange) Taiwan, yang dioperasikan oleh Kementerian Perhubungan dan Komunikasi Taiwan (tdx.transportdata.tw). Penggunaan data tersebut tunduk pada ketentuan TDX sendiri, yang tidak kami kendalikan.';
+
+  @override
+  String get termsSection7Title => 'Perubahan Ketentuan Ini';
+
+  @override
+  String get termsSection7Body =>
+      'Kami dapat merevisi Ketentuan ini seiring perkembangan Aplikasi. Tanggal \"Terakhir diperbarui\" di atas mencerminkan revisi terbaru. Kami menyarankan Anda meninjau Ketentuan ini secara berkala.';
+
+  @override
+  String get termsSection8Title => 'Kontak';
+
+  @override
+  String get termsSection8Body =>
+      'Pertanyaan mengenai Ketentuan ini dapat dikirimkan ke maxfelix05@gmail.com.';
+
+  @override
+  String get privacyPolicyTitle => 'Kebijakan Privasi';
+
+  @override
+  String get privacyLastUpdated => 'Terakhir diperbarui: 21 September 2026';
+
+  @override
+  String get privacyPolicyIntro =>
+      'Taiwan Fare Finder tidak memerlukan akun, tidak memiliki sistem login, dan tidak mengoperasikan server backend miliknya sendiri. Kebijakan ini menjelaskan sedikit data yang ditangani Aplikasi, dan ke mana data tersebut pergi.';
+
+  @override
+  String get privacySection1Title =>
+      'Informasi yang Kami Simpan di Perangkat Anda';
+
+  @override
+  String get privacySection1Body =>
+      'Riwayat pencarian, rute favorit yang disimpan, hasil tarif yang di-cache, dan pengaturan aplikasi (bahasa, tema, mode offline) disimpan secara lokal di perangkat Anda menggunakan penyimpanan aplikasi standar. Data ini tidak pernah diunggah ke server yang kami operasikan — karena kami tidak memilikinya.';
+
+  @override
+  String get privacySection2Title => 'Informasi yang Dikirim ke Pihak Ketiga';
+
+  @override
+  String get privacySection2Body =>
+      'Dalam mode data Simulasi, tidak ada yang Anda cari yang pernah meninggalkan perangkat Anda. Dalam mode data API, ID stasiun asal dan tujuan untuk pencarian High Speed Rail dan Taiwan Railway dikirim — melalui server proxy kami — ke platform data terbuka resmi TDX Taiwan untuk mengambil tarif sebenarnya. Tidak ada nama, akun, atau ID perangkat yang disertakan dalam permintaan tersebut, karena Aplikasi memang tidak memilikinya untuk dikirim.';
+
+  @override
+  String get privacySection3Title => 'Analitik';
+
+  @override
+  String get privacySection3Body =>
+      'Saat ini Aplikasi hanya mencatat beberapa nama peristiwa secara lokal untuk tujuan debugging (terlihat di log developer pada perangkat Anda sendiri) dan tidak mengirimkannya ke mana pun. Jika suatu saat kami menambahkan analitik atau pelacakan sungguhan, kami akan meminta persetujuan Anda terlebih dahulu.';
+
+  @override
+  String get privacySection4Title => 'Privasi Anak-Anak';
+
+  @override
+  String get privacySection4Body =>
+      'Aplikasi ini tidak dengan sengaja mengumpulkan informasi pribadi dari siapa pun, termasuk anak-anak, karena Aplikasi memang tidak mengumpulkan informasi pribadi dari siapa pun. Aplikasi ini cocok untuk pengguna umum.';
+
+  @override
+  String get privacySection5Title => 'Pilihan Anda & Penghapusan Data';
+
+  @override
+  String get privacySection5Body =>
+      'Anda dapat menghapus tarif yang di-cache, riwayat pencarian, atau favorit kapan saja melalui Pengaturan → Kelola data. Menghapus instalasi Aplikasi akan menghapus semua data yang disimpannya di perangkat Anda.';
+
+  @override
+  String get privacySection6Title => 'Perubahan Kebijakan Ini';
+
+  @override
+  String get privacySection6Body =>
+      'Kami dapat memperbarui Kebijakan Privasi ini seiring perkembangan Aplikasi. Tanggal \"Terakhir diperbarui\" di atas mencerminkan revisi terbaru.';
+
+  @override
+  String get privacySection7Title => 'Kontak';
+
+  @override
+  String get privacySection7Body =>
+      'Pertanyaan mengenai Kebijakan Privasi ini dapat dikirimkan ke maxfelix05@gmail.com.';
 }

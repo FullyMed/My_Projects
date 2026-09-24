@@ -41,5 +41,10 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/icons/dreamflow_icon.jpg
+  image_path: assets/icons/app_icon.png
   remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/icons/app_icon.png
+    background_color: "#0F766E"
+    theme_color: "#0F766E"

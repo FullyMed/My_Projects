@@ -778,6 +778,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data source'**
   String get aboutDataSource;
+
+  /// No description provided for @notFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get notFoundTitle;
+
+  /// No description provided for @notFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The page you’re looking for doesn’t exist or may have moved.'**
+  String get notFoundBody;
+
+  /// No description provided for @notFoundBackToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to search'**
+  String get notFoundBackToSearch;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get termsOfUse;
+
+  /// No description provided for @termsLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: September 21, 2026'**
+  String get termsLastUpdated;
+
+  /// No description provided for @termsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These Terms of Use (\"Terms\") govern your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to these Terms. If you don\'t agree, please don\'t use the App.'**
+  String get termsIntro;
+
+  /// No description provided for @termsSection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Acceptance of These Terms'**
+  String get termsSection1Title;
+
+  /// No description provided for @termsSection1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'By downloading, installing, or using Taiwan Fare Finder, you accept these Terms in full. We may update these Terms from time to time; continuing to use the App after an update means you accept the revised Terms.'**
+  String get termsSection1Body;
+
+  /// No description provided for @termsSection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'The Service'**
+  String get termsSection2Title;
+
+  /// No description provided for @termsSection2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Taiwan Fare Finder is an informational tool for searching, comparing, and saving public transportation fares across Taiwan. It does not sell tickets, process payments, or connect to any transit operator\'s booking system.'**
+  String get termsSection2Body;
+
+  /// No description provided for @termsSection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare Accuracy & Data Sources'**
+  String get termsSection3Title;
+
+  /// No description provided for @termsSection3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'High Speed Rail (HSR) and Taiwan Railway (TRA) fares are retrieved from Taiwan\'s official TDX open-data platform when API mode is enabled. MRT, Bus, and YouBike fares use a consistent internal estimate, not official pricing. In all cases, fares and travel times may be outdated, cached, or inaccurate. Always confirm the actual fare with the relevant transit operator before you travel.'**
+  String get termsSection3Body;
+
+  /// No description provided for @termsSection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Acceptable Use'**
+  String get termsSection4Title;
+
+  /// No description provided for @termsSection4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The App is for your personal, non-commercial use. You agree not to misuse the App or its backend services — for example, by sending an excessive volume of automated requests, attempting to extract API credentials, or interfering with the App\'s normal operation.'**
+  String get termsSection4Body;
+
+  /// No description provided for @termsSection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'No Warranty & Limitation of Liability'**
+  String get termsSection5Title;
+
+  /// No description provided for @termsSection5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The App is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we are not liable for any loss or damage arising from your use of the App, including missed trips or fare discrepancies.'**
+  String get termsSection5Body;
+
+  /// No description provided for @termsSection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Third-Party Services'**
+  String get termsSection6Title;
+
+  /// No description provided for @termsSection6Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Live HSR and TRA fare data is sourced from Taiwan\'s TDX (Transport Data eXchange) open-data platform, operated by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). Use of that data is subject to TDX\'s own terms, which we do not control.'**
+  String get termsSection6Body;
+
+  /// No description provided for @termsSection7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes to These Terms'**
+  String get termsSection7Title;
+
+  /// No description provided for @termsSection7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We may revise these Terms as the App evolves. The \"Last updated\" date above reflects the most recent revision. We encourage you to review these Terms periodically.'**
+  String get termsSection7Body;
+
+  /// No description provided for @termsSection8Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get termsSection8Title;
+
+  /// No description provided for @termsSection8Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions about these Terms can be sent to maxfelix05@gmail.com.'**
+  String get termsSection8Body;
+
+  /// No description provided for @privacyPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicyTitle;
+
+  /// No description provided for @privacyLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: September 21, 2026'**
+  String get privacyLastUpdated;
+
+  /// No description provided for @privacyPolicyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Taiwan Fare Finder does not require an account, does not have a login, and does not operate a backend server of its own. This policy explains the little data the App does handle, and where it goes.'**
+  String get privacyPolicyIntro;
+
+  /// No description provided for @privacySection1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Information We Store On Your Device'**
+  String get privacySection1Title;
+
+  /// No description provided for @privacySection1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode) are stored locally on your device using standard app storage. This data is never uploaded to a server we operate — we don\'t have one.'**
+  String get privacySection1Body;
+
+  /// No description provided for @privacySection2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Information Sent To Third Parties'**
+  String get privacySection2Title;
+
+  /// No description provided for @privacySection2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent — through our proxy server — to Taiwan\'s official TDX open-data platform to retrieve real fares. No name, account, or device identifier is attached to that request, because the App has none to send.'**
+  String get privacySection2Body;
+
+  /// No description provided for @privacySection3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get privacySection3Title;
+
+  /// No description provided for @privacySection3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The App currently logs a few event names locally for debugging purposes only (visible in developer logs on your own device) and does not transmit them anywhere. If we ever add real analytics or tracking, we will ask for your consent first.'**
+  String get privacySection3Body;
+
+  /// No description provided for @privacySection4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Children\'s Privacy'**
+  String get privacySection4Title;
+
+  /// No description provided for @privacySection4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The App does not knowingly collect personal information from anyone, including children, because it does not collect personal information from anyone. It is suitable for a general audience.'**
+  String get privacySection4Body;
+
+  /// No description provided for @privacySection5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Choices & Data Deletion'**
+  String get privacySection5Title;
+
+  /// No description provided for @privacySection5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'You can clear your cached fares, search history, or favorites at any time from Settings → Data management. Uninstalling the App removes all data it stored on your device.'**
+  String get privacySection5Body;
+
+  /// No description provided for @privacySection6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes to This Policy'**
+  String get privacySection6Title;
+
+  /// No description provided for @privacySection6Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We may update this Privacy Policy as the App evolves. The \"Last updated\" date above reflects the most recent revision.'**
+  String get privacySection6Body;
+
+  /// No description provided for @privacySection7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get privacySection7Title;
+
+  /// No description provided for @privacySection7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions about this Privacy Policy can be sent to maxfelix05@gmail.com.'**
+  String get privacySection7Body;
 }
 
 class _AppLocalizationsDelegate
