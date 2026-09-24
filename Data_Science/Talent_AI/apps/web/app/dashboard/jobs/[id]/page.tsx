@@ -12,6 +12,7 @@ type Job = {
   raw_text: string;
   required_skills: string[];
   created_at: string;
+  email_reports_enabled: boolean;
 };
 type MatchResult = {
   candidate_id: string;
@@ -49,6 +50,24 @@ export default function JobDetailPage() {
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openInsights, setOpenInsights] = useState<Set<string>>(new Set());
+  const [emailReportsBusy, setEmailReportsBusy] = useState(false);
+
+  async function toggleEmailReports(enabled: boolean) {
+    setEmailReportsBusy(true);
+    setError(null);
+    try {
+      const updated = await apiFetch<Job>(`/jobs/${id}/email-reports`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      setJob((prev) => (prev ? { ...prev, email_reports_enabled: updated.email_reports_enabled } : prev));
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setEmailReportsBusy(false);
+    }
+  }
 
   function toggleInsights(candidateId: string) {
     setOpenInsights((prev) => {
@@ -183,6 +202,16 @@ export default function JobDetailPage() {
             ))}
           </div>
         )}
+        <label className="mt-4 flex items-center gap-2 border-t border-border pt-3 text-sm text-muted">
+          <input
+            type="checkbox"
+            checked={job.email_reports_enabled}
+            disabled={emailReportsBusy}
+            onChange={(e) => toggleEmailReports(e.target.checked)}
+            className="h-4 w-4 rounded border-border accent-accent"
+          />
+          Email me a weekly shortlist for this job
+        </label>
       </Card>
 
       {error && <ErrorText>{error}</ErrorText>}

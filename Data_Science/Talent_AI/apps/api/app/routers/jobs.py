@@ -77,7 +77,7 @@ async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) ->
     client = get_scoped_client(user.token)
     result = (
         client.table("job_descriptions")
-        .select("id, title, raw_text, required_skills, created_at")
+        .select("id, title, raw_text, required_skills, created_at, email_reports_enabled")
         .eq("id", job_id)
         .single()
         .execute()
@@ -85,6 +85,26 @@ async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) ->
     if not result.data:
         raise HTTPException(status_code=404, detail="Job description not found")
     return result.data
+
+
+class EmailReportsRequest(BaseModel):
+    enabled: bool
+
+
+@router.post("/{job_id}/email-reports")
+async def set_email_reports(
+    job_id: str, payload: EmailReportsRequest, user: CurrentUser = Depends(get_current_user)
+) -> dict:
+    client = get_scoped_client(user.token)
+    result = (
+        client.table("job_descriptions")
+        .update({"email_reports_enabled": payload.enabled})
+        .eq("id", job_id)
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Job description not found")
+    return result.data[0]
 
 
 @router.get("/{job_id}/results")

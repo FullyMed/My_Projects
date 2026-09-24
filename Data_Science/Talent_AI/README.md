@@ -173,12 +173,27 @@ assumed "one global file on disk, one tenant" did.
         **bulk resume upload** — `POST /candidates/upload/bulk` takes many
         PDFs, returns a per-file ok/error list, respects the trial
         candidate cap; multi-file picker on the candidates page.
-  - [ ] Part 2b — opt-in weekly shortlist email per job (per-job toggle →
-        scheduler-triggered semantic re-rank + emailed digest, never calls
-        OpenAI). Needs SMTP creds + a `REPORT_TRIGGER_SECRET` + a GCP Cloud
-        Scheduler job; migration `0012` for the toggle column + a
-        tenant-explicit ranking function. Introduces the 2nd (and last) use
-        of the `service_role` key (a scheduler run has no user JWT).
+  - [x] Part 2b — opt-in weekly shortlist email per job, **code-complete and
+        deployed**, awaiting Felix's SMTP creds + `REPORT_TRIGGER_SECRET` +
+        a GCP Cloud Scheduler job before it can actually send anything.
+        Per-job checkbox → `POST /jobs/{id}/email-reports`. A scheduler
+        (external, not built-in) hits `POST /internal/run-weekly-reports`
+        (guarded by a shared-secret `X-Report-Token` header — the one other
+        route besides the Stripe webhook with no user session) →
+        `report_service.run_weekly_reports()`: for every job with
+        `email_reports_enabled`, ranks that tenant's candidates via
+        `match_candidates_for_tenant` (migration `0012` — a tenant-explicit
+        twin of `match_candidates`, needed because the run has no RLS-scoped
+        client to lean on), builds a plain-text digest (rank/score/matched
+        skills + skill-gap summary), and emails the tenant owner via
+        `email_service.py` (stdlib `smtplib`, optional config, no-ops
+        cleanly when unset). Deliberately imports nothing from
+        `talent_ai_core.insights` — enforced by a test that parses the
+        module's own AST — so this path can never touch OpenAI or cost
+        money on a timer. `admin_client.get_admin_client()` (2nd and last
+        use of the `service_role` key, alongside the Stripe webhook) is now
+        the single shared source for it — refactored out of
+        `billing_service.py` rather than duplicated.
   - retired for good: the local folder watcher and `scripts/evaluate.py`'s
     Precision@K benchmark — neither fits a multi-tenant product.
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +

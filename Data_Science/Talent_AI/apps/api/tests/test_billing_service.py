@@ -113,7 +113,7 @@ def test_checkout_completed_sets_plan_pro_and_customer_id():
         {"customer": "cus_new", "metadata": {"tenant_id": "tenant-1"}},
     )
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", return_value=event
     ):
         bs.handle_stripe_event(payload=b"{}", sig_header="sig")
@@ -130,7 +130,7 @@ def test_subscription_updated_active_sets_plan_pro():
         {"customer": "cus_1", "status": "active", "metadata": {"tenant_id": "tenant-1"}},
     )
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", return_value=event
     ):
         bs.handle_stripe_event(payload=b"{}", sig_header="sig")
@@ -145,7 +145,7 @@ def test_subscription_updated_canceled_sets_plan_trial():
         {"customer": "cus_1", "status": "canceled", "metadata": {"tenant_id": "tenant-1"}},
     )
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", return_value=event
     ):
         bs.handle_stripe_event(payload=b"{}", sig_header="sig")
@@ -162,7 +162,7 @@ def test_subscription_deleted_sets_plan_trial_falling_back_to_customer_lookup():
     )
     event = _fake_event("customer.subscription.deleted", {"customer": "cus_9", "metadata": {}})
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", return_value=event
     ):
         bs.handle_stripe_event(payload=b"{}", sig_header="sig")
@@ -175,7 +175,7 @@ def test_unrecognized_event_type_is_ignored_without_error():
     admin = MagicMock()
     event = _fake_event("invoice.paid", {"customer": "cus_1"})
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", return_value=event
     ):
         bs.handle_stripe_event(payload=b"{}", sig_header="sig")  # no raise
@@ -186,7 +186,7 @@ def test_unrecognized_event_type_is_ignored_without_error():
 def test_bad_signature_raises_before_touching_the_database():
     admin = MagicMock()
 
-    with _configured(), patch.object(bs, "_admin_client", return_value=admin), patch.object(
+    with _configured(), patch.object(bs, "get_admin_client", return_value=admin), patch.object(
         bs.stripe.Webhook, "construct_event", side_effect=ValueError("bad payload")
     ):
         with pytest.raises(ValueError):

@@ -10,23 +10,26 @@ code tried to. Stripe creates the customer during Checkout if none exists
 yet (`customer_email=`, no `customer=`); the webhook is what persists the
 resulting id, once Stripe's signature has verified the event is genuine.
 
-This is the only module that touches the Supabase `service_role` key
-(`_admin_client`). Every other write in this codebase goes through the
-caller's own JWT-scoped client -- a webhook is the one place that's
-structurally different, because Stripe's call carries no Supabase user
-session to scope a client with. The trust boundary here is
-`stripe.Webhook.construct_event`'s HMAC signature check, not RLS -- the same
-way any webhook-based integration (GitHub, etc.) has to work. Nothing in
-this module reads `_admin_client()` before that signature check passes.
+This is one of two modules that touch the Supabase `service_role` key (via
+`admin_client.get_admin_client` -- see that module's docstring for why it
+exists at all and why it's kept to exactly two call sites). Every other
+write in this codebase goes through the caller's own JWT-scoped client -- a
+webhook is one of the two places that's structurally different, because
+Stripe's call carries no Supabase user session to scope a client with. The
+trust boundary here is `stripe.Webhook.construct_event`'s HMAC signature
+check, not RLS -- the same way any webhook-based integration (GitHub, etc.)
+has to work. Nothing in this module reads `get_admin_client()` before that
+signature check passes.
 """
 
 from __future__ import annotations
 
 import stripe
-from supabase import Client, create_client
+from supabase import Client
 
 from ..config import settings
 from ..deps import CurrentUser
+from .admin_client import get_admin_client
 
 PLAN_FOR_SUBSCRIPTION_STATUS = {
     "active": "pro",
@@ -39,12 +42,6 @@ def _require_configured() -> None:
     if not (settings.stripe_secret_key and settings.stripe_price_id):
         raise RuntimeError("Stripe is not configured on this service yet.")
     stripe.api_key = settings.stripe_secret_key
-
-
-def _admin_client() -> Client:
-    if not settings.supabase_service_role_key:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY is not set on this service.")
-    return create_client(settings.supabase_url, settings.supabase_service_role_key)
 
 
 def create_checkout_session(
@@ -106,7 +103,7 @@ def create_billing_portal_session(*, client: Client, user: CurrentUser, return_u
 
 
 def _set_tenant_plan(*, tenant_id: str, plan: str, stripe_customer_id: str | None = None) -> None:
-    admin = _admin_client()
+    admin = get_admin_client()
     update: dict = {"plan": plan}
     if stripe_customer_id:
         update["stripe_customer_id"] = stripe_customer_id
@@ -114,7 +111,7 @@ def _set_tenant_plan(*, tenant_id: str, plan: str, stripe_customer_id: str | Non
 
 
 def _tenant_id_for_customer(customer_id: str) -> str | None:
-    admin = _admin_client()
+    admin = get_admin_client()
     row = (
         admin.table("tenants")
         .select("id")

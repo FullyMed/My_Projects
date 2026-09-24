@@ -43,5 +43,18 @@ class Settings:
     # Used to build Stripe Checkout's success/cancel redirect URLs.
     frontend_url: str = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
+    # Weekly shortlist email digest (Phase E, Part 2b). All optional -- if
+    # unset, email_service.is_configured() is False and sends are skipped
+    # (logged, not crashed), same pattern as OPENAI_API_KEY.
+    smtp_host: str | None = os.environ.get("SMTP_HOST")
+    smtp_port: int = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_username: str | None = os.environ.get("SMTP_USERNAME")
+    smtp_password: str | None = os.environ.get("SMTP_PASSWORD")
+    smtp_from: str | None = os.environ.get("SMTP_FROM")
+    # Shared-secret guard for POST /internal/run-weekly-reports -- that route
+    # has no user session (a scheduler calls it, not a browser), so this
+    # header check is its only access control. See routers/internal.py.
+    report_trigger_secret: str | None = os.environ.get("REPORT_TRIGGER_SECRET")
+
 
 settings = Settings()
