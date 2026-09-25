@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Button, Card, EmptyState, ErrorText, Input } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, ErrorText, Input, Spinner } from "@/components/ui";
 
 const PAGE_SIZE = 20;
 
@@ -155,7 +155,7 @@ export default function CandidatesPage() {
 
       {loadingList ? (
         <div className="flex justify-center py-12">
-          <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
+          <Spinner className="h-6 w-6 text-muted" />
         </div>
       ) : candidates.length === 0 && offset === 0 ? (
         <EmptyState

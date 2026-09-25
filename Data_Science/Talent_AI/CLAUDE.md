@@ -187,6 +187,44 @@ the tab favicon via Next's generated `<link rel="icon">`, and the special
 "You cannot generate a `favicon` icon"). If the mark itself ever changes,
 edit `IconBadge` once — every size picks it up.
 
+### Custom 404 (`apps/web/app/not-found.tsx`)
+
+A single root-level `not-found.tsx` — since v13.3.0 Next.js also uses the
+root one for any unmatched URL app-wide, not just an explicit `notFound()`
+call, so one file is enough here (this app has a single root layout, no
+need for the experimental `global-not-found.js`). Renders inside
+`app/layout.tsx`, so it picks up `globals.css`'s light/dark theming for
+free. Styled to match `app/page.tsx` (the landing page) — same `Logo`,
+same plain-`<a>`-styled-as-button pattern (this app doesn't use
+`next/link` anywhere; matching that here is deliberate, not a missed
+lint fix). "Go home" always points at `/`, not the dashboard — a 404 can be
+hit by a signed-out visitor, and `/` is the one destination that's correct
+either way.
+
+### Loading states
+
+Two layers, don't conflate them:
+
+- **Route-level `loading.tsx`** (`app/loading.tsx`, `app/dashboard/loading.tsx`)
+  — Next.js's Suspense-boundary convention, shown while a route segment is
+  being rendered on the server (matters most for `candidates/[id]` and
+  `jobs/[id]`, which are dynamic/server-rendered per request, not
+  pre-built) and before the page's own client JS has mounted. Both are
+  intentionally the exact same markup as `dashboard/layout.tsx`'s own
+  `!ready` auth-check spinner (`<main class="flex min-h-screen
+  items-center justify-center"><Spinner .../></main>`) so there's no
+  visual jump between "route loading" and "layout mounted, checking auth" —
+  keep them in sync if that markup ever changes.
+- **Per-page data-loading state** — every page that fetches its own data
+  client-side (`useEffect` + `apiFetch`) tracks its own `loading` boolean
+  and renders a centered `<Spinner className="h-6 w-6 text-muted" />` (list
+  pages: `h-6 w-6` in a `py-8`/`py-12` block; full-page: centered in a
+  `min-h-screen`/`py-16` block). **Always reuse `Spinner` from
+  `components/ui.tsx` for this — don't reach for `animate-pulse` or a
+  bespoke dot.** Two list pages did that until 2026-09-25 and it read as an
+  inconsistent second loading language next to every other page's Spinner;
+  fixed by switching them to the same component.
+
 ## Known platform gotchas (not this project's bugs, still worth knowing)
 
 - **Vercel env var type**: `NEXT_PUBLIC_*` vars must be **Config** type, not

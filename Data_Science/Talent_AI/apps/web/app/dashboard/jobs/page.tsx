@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { Button, Card, EmptyState, ErrorText, Input, Textarea } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorText, Input, Spinner, Textarea } from "@/components/ui";
 import { SAMPLE_JDS } from "@/lib/sampleJds";
 
 const PAGE_SIZE = 20;
@@ -124,7 +124,7 @@ export default function JobsPage() {
         <h2 className="text-sm font-medium text-muted">Past jobs</h2>
         {loadingJobs ? (
           <div className="flex justify-center py-8">
-            <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
+            <Spinner className="h-6 w-6 text-muted" />
           </div>
         ) : jobs.length === 0 && offset === 0 ? (
           <EmptyState
