@@ -7,11 +7,15 @@ for and use, each with their own isolated candidate data (originally
 prototyped as a single-user Streamlit capstone; that version's public demo
 has since been retired — see git history for that era of the project).
 
-This is **Phase A** of a longer roadmap: a thin but real vertical slice that
-proves the multi-tenant architecture works end-to-end (signup -> upload a
-resume -> submit a job description -> get a ranking -> confirm another
-company can't see any of it), rather than a full rebuild of every feature
-the original Streamlit dashboard had.
+**Live in production**, multi-tenant, with billing. Phases A–D are done
+(signup/upload/rank/RLS-proven isolation, the full backend API,
+pgvector-native ranking at scale, AI candidate insights, per-tenant usage
+metering, and Stripe subscription billing) and most of Phase E (dashboard
+feature parity with the original Streamlit app, plus a bulk resume upload
+and an opt-in weekly shortlist email that reimagine what its local-only
+automation used to do). See the Roadmap section below for exactly what's
+done vs. still open, and `CLAUDE.md` for the practical "how to work in this
+codebase" notes (commands, architecture, gotchas).
 
 ## Live
 

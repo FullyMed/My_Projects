@@ -63,11 +63,15 @@ Then run `claude` to start Claude Code in that project.
   demo has been taken down.
 - **Key traits:** Postgres Row-Level Security (not app code) is the actual tenant
   isolation mechanism — every request carries the signed-in user's own Supabase JWT
-  through to PostgREST/Storage. Phase A (signup → upload → rank → RLS-proven
-  isolation) is built and live-verified against a real Supabase project, reusing the
-  original pipeline's storage-agnostic logic (parsing/anonymize/extract/embed/rank,
-  now in `apps/api/talent_ai_core/`) unchanged. AI insights, billing, and dashboard
-  feature parity with the original are later phases — see its own `README.md`.
+  through to PostgREST/Storage. **Live in production** (Vercel + Cloud Run +
+  Supabase). Phases A–D done (multi-tenant core, full API, pgvector-native
+  ranking, AI insights, usage metering, Stripe billing) plus most of Phase E
+  (dashboard parity + bulk upload + an opt-in weekly email digest). Reuses
+  the original single-user capstone's storage-agnostic pipeline logic
+  (parsing/anonymize/extract/embed/rank, `apps/api/talent_ai_core/`)
+  largely unchanged. Has its own `CLAUDE.md` — read it before editing
+  anything here, it covers a real deploy gotcha (prod-only env vars) among
+  others. Roadmap detail in its own `README.md`.
 - **Run:** `apps/api`: `uvicorn app.main:app --reload --port 8010` · `apps/web`: `npm run dev`
 
 ### Website / JourneySet
