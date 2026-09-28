@@ -225,6 +225,28 @@ Two layers, don't conflate them:
   inconsistent second loading language next to every other page's Spinner;
   fixed by switching them to the same component.
 
+### Terms of Use / Privacy Policy (`apps/web/app/terms/`, `apps/web/app/privacy/`)
+
+Public pages, shared chrome/prose styling via
+`components/LegalPageLayout.tsx` (same idea as the favicon/not-found
+sections above — one place owns the look, the page files are just content).
+Content is real and product-accurate (covers the multi-tenant model, the
+anonymize-then-send-to-OpenAI flow, Stripe billing, the sub-processor list,
+and — importantly — that an uploaded candidate is not a Service user and
+the uploading tenant is the data controller for that candidate's data), but
+**it's Claude-drafted, not lawyer-reviewed**. Both files have a
+`[PLACEHOLDER]` comment at the top for the legal entity name and governing
+jurisdiction — fill those in, and get an actual legal review before relying
+on this for paying customers whose candidate data might trigger GDPR/CCPA
+obligations. If a new sub-processor is ever added (different email
+provider, a second AI vendor, etc.), update Privacy Section 5 in the same
+change — don't let that list drift from what the code actually calls.
+Linked from the landing page footer and, more importantly, a consent line
+on the signup form (`By signing up, you agree to our Terms... and Privacy
+Policy`) — that consent line is the one place linking to these pages
+actually matters for enforceability, so don't remove it in a redesign
+without replacing it with an equivalent.
+
 ## Known platform gotchas (not this project's bugs, still worth knowing)
 
 - **Vercel env var type**: `NEXT_PUBLIC_*` vars must be **Config** type, not
