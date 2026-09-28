@@ -17,6 +17,7 @@ from fastapi import Header, HTTPException
 from supabase import Client, create_client
 
 from .config import settings
+from .services.db_utils import fetch_one
 
 
 @dataclass
@@ -50,15 +51,9 @@ async def get_current_user(authorization: str = Header(...)) -> CurrentUser:
     user_id = auth_response.user.id
 
     scoped_client = get_scoped_client(token)
-    profile = (
-        scoped_client.table("profiles")
-        .select("tenant_id")
-        .eq("id", user_id)
-        .single()
-        .execute()
-    )
-    if not profile.data:
+    profile = fetch_one(scoped_client.table("profiles").select("tenant_id").eq("id", user_id))
+    if not profile:
         # Shouldn't happen -- the handle_new_user trigger creates this row at signup.
         raise HTTPException(status_code=403, detail="No tenant profile found for this user")
 
-    return CurrentUser(user_id=user_id, tenant_id=profile.data["tenant_id"], token=token)
+    return CurrentUser(user_id=user_id, tenant_id=profile["tenant_id"], token=token)

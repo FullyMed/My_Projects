@@ -26,8 +26,9 @@ codebase" notes (commands, architecture, gotchas).
 ⚠️ **Supabase's free tier auto-pauses a project after ~1 week of inactivity.**
 If the live app starts failing with "Failed to fetch" on signup/login, this is
 almost certainly why — check the project's status in the Supabase dashboard
-and click **Restore** (or use the `restore_project` MCP tool) to wake it back
-up; it takes a few minutes to fully come back online. This isn't a code bug,
+and click **Restore** to wake it back up (the `restore_project` MCP tool is
+blocked by Claude Code's safety classifier, so this is a manual click); it
+takes a few minutes to fully come back online. This isn't a code bug,
 it's a free-tier limitation — moving to a paid Supabase plan removes it.
 
 ## Stack
@@ -156,8 +157,9 @@ assumed "one global file on disk, one tenant" did.
         route; trust is Stripe's HMAC, not RLS) that flips `tenants.plan`
         between `pro` and `trial` on subscription lifecycle events. No
         migration — reuses the `tenants.plan` / `tenants.stripe_customer_id`
-        columns from `0002`. The webhook is the **only** place the Supabase
-        `service_role` key is used (`billing_service._admin_client()`),
+        columns from `0002`. The webhook was the first place the Supabase
+        `service_role` key was used (now via `admin_client.get_admin_client()`,
+        shared with the Phase E weekly report — still the only two uses),
         because a webhook has no user JWT to scope an RLS client with, and
         `tenants` has no UPDATE policy for regular users — so a plan change
         is only reachable through that one signature-gated path. Trial caps
@@ -200,6 +202,26 @@ assumed "one global file on disk, one tenant" did.
         `billing_service.py` rather than duplicated.
   - retired for good: the local folder watcher and `scripts/evaluate.py`'s
     Precision@K benchmark — neither fits a multi-tenant product.
+- [x] **Security/robustness pass (2026-09-28)**, from a full-codebase review:
+  - `0013` — closed a cross-tenant hole: `profiles` was self-updatable, so a
+    user calling PostgREST directly could rewrite their own `tenant_id` and
+    read another tenant's data (needed that tenant's UUID, which appears in
+    resume Storage paths). `profiles` is now read-only to users. Same
+    migration makes `usage_events` append-only (a tenant could previously
+    delete its own rows to reset its OpenAI budget). Only one tenant existed
+    in production at the time.
+  - `0014` — `hnsw.iterative_scan = strict_order` on both ranking RPCs, so
+    tenant-filtered vector search still returns a full top-K once many
+    tenants share the HNSW index.
+  - API: missing/foreign ids now return 404 instead of an unhandled 500
+    (`.single()` → `db_utils.fetch_one`), PostgREST errors are answered
+    inside CORS, `top_k` is capped at 100, `GET /candidates/{id}` no longer
+    returns `raw_text`/`embedding`, an unparseable OpenAI response no longer
+    500s (tokens still metered), keyword ranking on stopword-only text
+    returns empty instead of "job not found".
+  - Web: signup shows "check your email" when confirmation is required
+    (previously bounced silently to `/login`), password minimum matches
+    Supabase's 8.
 - [x] **Phase F (partial)**: live production deployment (Vercel + Cloud Run +
       Supabase) — done early, ahead of B-E, so the current feature set could
       be shared with real colleagues. Observability and CI/CD still open.

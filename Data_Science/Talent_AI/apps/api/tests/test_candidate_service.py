@@ -75,7 +75,7 @@ def test_process_and_store_resume_rejects_empty_pdf_text():
     mock_client = MagicMock()
     # Under the trial candidate-count limit, so ensure_can_add_candidate
     # (which now runs first) doesn't itself block this call.
-    mock_client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+    mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = {
         "plan": "trial"
     }
     mock_client.table.return_value.select.return_value.execute.return_value.data = []
@@ -101,7 +101,7 @@ def test_process_and_store_resume_rejects_empty_pdf_text():
 def test_delete_candidate_removes_storage_object_then_db_row():
     user = CurrentUser(user_id="user-1", tenant_id="tenant-1", token="fake-token")
     mock_client = MagicMock()
-    mock_client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+    mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = {
         "source_path": "tenant-1/candidate-1.pdf"
     }
 
@@ -116,7 +116,7 @@ def test_delete_candidate_removes_storage_object_then_db_row():
 def test_delete_candidate_raises_when_not_found():
     user = CurrentUser(user_id="user-1", tenant_id="tenant-1", token="fake-token")
     mock_client = MagicMock()
-    mock_client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = None
+    mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = None
 
     with patch("app.services.candidate_service._delete_from_storage") as mock_delete_storage:
         try:

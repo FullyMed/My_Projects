@@ -15,6 +15,7 @@ from supabase import Client
 from talent_ai_core.insights.insight_generator import generate_insights
 from talent_ai_core.schemas import CandidateProfile, JobDescription
 
+from .db_utils import fetch_one
 from .usage_service import ensure_within_budget, record_usage
 from ..deps import CurrentUser
 
@@ -60,15 +61,11 @@ def generate_insight(
         if cached is not None:
             return cached
 
-    candidate_row = (
-        client.table("candidates").select("*").eq("id", candidate_id).single().execute().data
-    )
+    candidate_row = fetch_one(client.table("candidates").select("*").eq("id", candidate_id))
     if not candidate_row:
         raise ValueError("Candidate not found")
 
-    job_row = (
-        client.table("job_descriptions").select("*").eq("id", job_id).single().execute().data
-    )
+    job_row = fetch_one(client.table("job_descriptions").select("*").eq("id", job_id))
     if not job_row:
         raise ValueError("Job description not found")
 
@@ -99,8 +96,13 @@ def generate_insight(
         input_tokens=usage.input_tokens,
         output_tokens=usage.output_tokens,
     )
+    # A refusal or a response that didn't fit the schema parses to None. The
+    # tokens above were still really spent, so they stay recorded -- but
+    # there's nothing to cache.
+    if insights is None:
+        raise RuntimeError("The AI model returned no usable insight for this candidate. Try again.")
 
-    now = datetime.now(timezone.utc).isoformat()
+    now =datetime.now(timezone.utc).isoformat()
     payload = {
         "tenant_id": user.tenant_id,
         "candidate_id": candidate_id,

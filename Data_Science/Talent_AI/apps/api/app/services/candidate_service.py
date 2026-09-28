@@ -22,6 +22,7 @@ from talent_ai_core.schemas import CandidateProfile
 
 from ..config import settings
 from ..deps import CurrentUser
+from .db_utils import fetch_one
 from .usage_service import ensure_can_add_candidate
 
 
@@ -111,14 +112,8 @@ def _upload_to_storage(*, token: str, path: str, file_bytes: bytes) -> None:
 
 
 def delete_candidate(*, client: Client, user: CurrentUser, candidate_id: str) -> None:
-    row = (
-        client.table("candidates")
-        .select("source_path")
-        .eq("id", candidate_id)
-        .single()
-        .execute()
-    )
-    if not row.data:
+    row = fetch_one(client.table("candidates").select("source_path").eq("id", candidate_id))
+    if not row:
         raise ValueError("Candidate not found")
 
     # Storage first, then the DB row: if the Storage delete fails for any
@@ -127,7 +122,7 @@ def delete_candidate(*, client: Client, user: CurrentUser, candidate_id: str) ->
     # silently orphaning the file. match_results rows referencing this
     # candidate cascade-delete automatically (existing FK) -- no manual
     # cleanup needed here.
-    _delete_from_storage(token=user.token, path=row.data["source_path"])
+    _delete_from_storage(token=user.token, path=row["source_path"])
     client.table("candidates").delete().eq("id", candidate_id).execute()
 
 

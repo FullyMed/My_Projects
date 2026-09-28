@@ -1,12 +1,29 @@
-"""Small helpers for round-tripping pgvector columns through PostgREST.
+"""Small helpers for PostgREST round-trips.
 
-PostgREST has no native JSON mapping for Postgres's `vector` type, so it comes
-back over the wire as its text representation ("[0.01,0.02,...]") rather than
-a JSON array. Inserts go the other way fine -- PostgREST serializes a Python
-list to JSON, which happens to match pgvector's literal input syntax.
+`fetch_one` is the single-row read used everywhere in the app. pgvector
+helpers: PostgREST has no native JSON mapping for Postgres's `vector` type, so
+it comes back over the wire as its text representation ("[0.01,0.02,...]")
+rather than a JSON array. Inserts go the other way fine -- PostgREST
+serializes a Python list to JSON, which happens to match pgvector's literal
+input syntax.
 """
 
 from __future__ import annotations
+
+
+def fetch_one(query) -> dict | None:
+    """Run a filtered select expected to match at most one row; None if it
+    matches none.
+
+    Use this instead of `.single()`: supabase-py's `.single()` doesn't return
+    empty data on zero rows, it *raises* (PostgREST answers 406), so an
+    `if not result.data: 404` after it never runs and a missing -- or
+    another tenant's, which RLS makes look identical -- id surfaces as an
+    unhandled 500. `.maybe_single()` returns None instead of a response in
+    that case.
+    """
+    response = query.maybe_single().execute()
+    return response.data if response is not None else None
 
 
 def parse_embedding(value: object) -> list[float] | None:

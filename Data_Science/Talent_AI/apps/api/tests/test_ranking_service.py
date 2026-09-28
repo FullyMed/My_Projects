@@ -55,7 +55,7 @@ def test_rank_candidates_for_job_uses_rpc_and_records_tenant_scoped_matches():
     ]
 
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         job_row
     )
     client.rpc.return_value.execute.return_value = _resp(rpc_rows)
@@ -85,7 +85,7 @@ def test_rank_candidates_for_job_uses_rpc_and_records_tenant_scoped_matches():
 
 def test_rank_candidates_for_job_raises_when_job_missing():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         None
     )
 
@@ -116,7 +116,7 @@ def test_rank_candidates_tfidf_returns_ranking_without_persisting():
     ]
 
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         job_row
     )
     client.table.return_value.select.return_value.execute.return_value = _resp(candidate_rows)
@@ -133,9 +133,24 @@ def test_rank_candidates_tfidf_returns_ranking_without_persisting():
     client.rpc.assert_not_called()
 
 
+def test_rank_candidates_tfidf_empty_when_no_usable_text():
+    # sklearn raises "empty vocabulary" when every document is stop words --
+    # that must come back as an empty ranking, not a ValueError (which the
+    # router would report as "job not found").
+    client = MagicMock()
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
+        {"id": "job-1", "raw_text": "python engineer", "required_skills": []}
+    )
+    client.table.return_value.select.return_value.execute.return_value = _resp(
+        [{"id": "cand-1", "source_path": "t/c.pdf", "category": None, "skills": [], "anonymized_text": "the and of"}]
+    )
+
+    assert rank_candidates_tfidf(client=client, user=USER, job_id="job-1") == []
+
+
 def test_skill_gap_for_job_ranks_most_commonly_missing_first():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"id": "job-1", "required_skills": ["python", "aws", "docker"]}
     )
     client.table.return_value.select.return_value.eq.return_value.execute.return_value = _resp(
@@ -156,7 +171,7 @@ def test_skill_gap_for_job_ranks_most_commonly_missing_first():
 
 def test_skill_gap_for_job_empty_when_no_required_skills():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"id": "job-1", "required_skills": []}
     )
 
@@ -165,7 +180,7 @@ def test_skill_gap_for_job_empty_when_no_required_skills():
 
 def test_skill_gap_for_job_empty_when_never_ranked():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"id": "job-1", "required_skills": ["python"]}
     )
     client.table.return_value.select.return_value.eq.return_value.execute.return_value = _resp([])
@@ -175,7 +190,7 @@ def test_skill_gap_for_job_empty_when_never_ranked():
 
 def test_get_latest_ranking_returns_saved_matches_without_recomputing():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"id": "job-1"}
     )
     client.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value = _resp(
@@ -201,7 +216,7 @@ def test_get_latest_ranking_returns_saved_matches_without_recomputing():
 
 def test_get_latest_ranking_raises_when_job_missing():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         None
     )
 
@@ -214,7 +229,7 @@ def test_get_latest_ranking_raises_when_job_missing():
 
 def test_get_latest_ranking_returns_empty_list_when_never_ranked():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"id": "job-1"}
     )
     client.table.return_value.select.return_value.eq.return_value.order.return_value.execute.return_value = _resp(

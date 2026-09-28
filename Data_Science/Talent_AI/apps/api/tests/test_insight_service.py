@@ -38,13 +38,13 @@ def _cache_select(client):
 
 
 def _single_execute(client):
-    return client.table.return_value.select.return_value.eq.return_value.single.return_value.execute
+    return client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute
 
 
 def _usage_gte_execute(client):
     # usage_service.get_usage_summary's "tokens used this month" query --
     # distinct chain from the cache lookup (.limit) and candidate/job fetch
-    # (.single), so it needs its own stub whenever a test reaches the actual
+    # (.maybe_single), so it needs its own stub whenever a test reaches the actual
     # LLM-call path (ensure_within_budget runs before every real generation).
     return client.table.return_value.select.return_value.gte.return_value.execute
 
@@ -170,10 +170,40 @@ def test_generate_insight_refresh_bypasses_cache():
 def test_generate_insight_raises_when_candidate_missing():
     client = MagicMock()
     _cache_select(client).return_value = _resp([])
-    _single_execute(client).side_effect = [_resp(None)]
+    # What .maybe_single().execute() really returns on zero rows: None, not a
+    # response with empty data.
+    _single_execute(client).side_effect = [None]
 
     try:
         generate_insight(client=client, user=USER, candidate_id="missing", job_id="job-1")
         raise AssertionError("expected ValueError")
     except ValueError:
         pass
+
+
+def test_generate_insight_unparseable_response_records_usage_but_caches_nothing():
+    client = MagicMock()
+    _cache_select(client).return_value = _resp([])
+    _single_execute(client).side_effect = [
+        _resp({
+            "id": "cand-1", "source_path": "t/c.pdf", "category": None,
+            "raw_text": "raw", "anonymized_text": "anon", "skills": [],
+            "education": [], "experience": [],
+        }),
+        _resp({"id": "job-1", "title": "T", "raw_text": "JD", "required_skills": []}),
+        _resp({"plan": "trial"}),
+    ]
+    _usage_gte_execute(client).return_value = _resp([])
+    refused = (None, LLMUsage(model="gpt-4o-mini", input_tokens=500, output_tokens=10))
+
+    with patch("app.services.insight_service.generate_insights", return_value=refused):
+        try:
+            generate_insight(client=client, user=USER, candidate_id="cand-1", job_id="job-1")
+            raise AssertionError("expected RuntimeError")
+        except RuntimeError:
+            pass
+
+    # Tokens were really spent, so the ledger still gets them...
+    assert client.table.return_value.insert.call_args.args[0]["input_tokens"] == 500
+    # ...but there's no insight to cache.
+    client.table.return_value.upsert.assert_not_called()

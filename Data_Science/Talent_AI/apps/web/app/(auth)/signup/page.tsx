@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(event: FormEvent) {
@@ -21,7 +22,7 @@ export default function SignupPage() {
     const supabase = createClient();
     // tenant_name flows into raw_user_meta_data, consumed by the
     // private.handle_new_user trigger to create the tenants + profiles rows.
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { tenant_name: companyName } },
@@ -32,7 +33,37 @@ export default function SignupPage() {
       setError(signUpError.message);
       return;
     }
+    // With email confirmation on (as in production), signUp returns no
+    // session -- sending the user to the dashboard would just bounce them to
+    // /login with no explanation. Tell them to confirm first instead.
+    if (!data.session) {
+      setAwaitingConfirmation(true);
+      return;
+    }
     router.push("/dashboard/candidates");
+  }
+
+  if (awaitingConfirmation) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
+        <Logo />
+        <Card className="w-full max-w-sm p-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-lg font-semibold">Check your email</h1>
+            <p className="text-sm text-muted">
+              We sent a confirmation link to <span className="text-foreground">{email}</span>.
+              Click it to activate your account, then log in.
+            </p>
+          </div>
+        </Card>
+        <p className="text-sm text-muted">
+          Already confirmed?{" "}
+          <a className="font-medium text-accent hover:text-accent-hover" href="/login">
+            Log in
+          </a>
+        </p>
+      </main>
+    );
   }
 
   return (
@@ -59,11 +90,11 @@ export default function SignupPage() {
           />
           <Input
             type="password"
-            placeholder="Password"
+            placeholder="Password (at least 8 characters)"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            minLength={6}
+            minLength={8}
           />
           {error && <ErrorText>{error}</ErrorText>}
           <Button type="submit" loading={loading} className="mt-1 w-full">

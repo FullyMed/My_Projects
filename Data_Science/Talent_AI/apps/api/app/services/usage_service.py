@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from supabase import Client
 
 from ..deps import CurrentUser
+from .db_utils import fetch_one
 
 PLAN_TOKEN_LIMITS: dict[str, int] = {
     "trial": 200_000,
@@ -39,9 +40,7 @@ def _month_start_iso() -> str:
 
 
 def get_tenant_plan(*, client: Client, user: CurrentUser) -> str:
-    tenant_row = (
-        client.table("tenants").select("plan").eq("id", user.tenant_id).single().execute().data
-    )
+    tenant_row = fetch_one(client.table("tenants").select("plan").eq("id", user.tenant_id))
     return tenant_row["plan"] if tenant_row else "trial"
 
 

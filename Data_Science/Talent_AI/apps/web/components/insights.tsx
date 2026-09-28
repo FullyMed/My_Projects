@@ -85,7 +85,7 @@ export function InsightsPanel({
     } catch (err) {
       const msg = String(err);
       setError(
-        msg.includes("503")
+        msg.includes("OPENAI_API_KEY")
           ? "AI insights aren't configured on the server yet (missing OpenAI key)."
           : msg.includes("402")
             ? "Monthly AI usage limit reached for your workspace. It resets at the start of next month."

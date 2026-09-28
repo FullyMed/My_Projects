@@ -7,6 +7,7 @@ from talent_ai_core.embeddings.embedder import embed_text
 from talent_ai_core.extraction.nlp_extractor import extract_skills
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
+from ..services.db_utils import fetch_one
 from ..services.ranking_service import (
     get_latest_ranking,
     rank_candidates_for_job,
@@ -75,16 +76,14 @@ async def list_jobs(
 @router.get("/{job_id}")
 async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) -> dict:
     client = get_scoped_client(user.token)
-    result = (
+    job = fetch_one(
         client.table("job_descriptions")
         .select("id, title, raw_text, required_skills, created_at, email_reports_enabled")
         .eq("id", job_id)
-        .single()
-        .execute()
     )
-    if not result.data:
+    if not job:
         raise HTTPException(status_code=404, detail="Job description not found")
-    return result.data
+    return job
 
 
 class EmailReportsRequest(BaseModel):
@@ -132,7 +131,7 @@ async def get_job_skill_gap(
 @router.post("/{job_id}/rank")
 async def rank_job(
     job_id: str,
-    top_k: int = 10,
+    top_k: int = Query(10, ge=1, le=100),
     method: str = "semantic",
     user: CurrentUser = Depends(get_current_user),
 ) -> list[dict]:

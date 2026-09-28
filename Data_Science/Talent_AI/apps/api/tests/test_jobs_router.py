@@ -25,7 +25,7 @@ def test_create_job_merges_extracted_skills_with_typed_ones():
             inserted.update(row) or MagicMock(execute=lambda: MagicMock(data=[row]))
         )
         # ensure_can_add_job: plan lookup + candidate/job count -- let both pass.
-        scoped.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value.data = {
+        scoped.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = {
             "plan": "pro"
         }
 

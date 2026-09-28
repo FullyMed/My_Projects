@@ -26,15 +26,15 @@ from talent_ai_core.embeddings.embedder import embed_text
 from talent_ai_core.matching.baseline import TfidfRanker
 from talent_ai_core.schemas import CandidateProfile, JobDescription
 
-from .db_utils import format_embedding, parse_embedding
+from .db_utils import fetch_one, format_embedding, parse_embedding
 from ..deps import CurrentUser
 
 
 def _require_job(client: Client, job_id: str, columns: str = "*") -> dict:
-    row = client.table("job_descriptions").select(columns).eq("id", job_id).single().execute()
-    if not row.data:
+    row = fetch_one(client.table("job_descriptions").select(columns).eq("id", job_id))
+    if not row:
         raise ValueError("Job description not found")
-    return row.data
+    return row
 
 
 def _enrich(result_row: dict, candidate: dict) -> dict:
@@ -131,7 +131,13 @@ def rank_candidates_tfidf(
     ]
 
     ranker = TfidfRanker()
-    ranker.fit(candidates)
+    try:
+        ranker.fit(candidates)
+    except ValueError:
+        # sklearn's "empty vocabulary": every candidate's text is empty or
+        # stop words only, so there's nothing to keyword-match. Must not
+        # escape as ValueError -- the router maps that to "job not found".
+        return []
     results = ranker.rank(
         JobDescription(
             title="",

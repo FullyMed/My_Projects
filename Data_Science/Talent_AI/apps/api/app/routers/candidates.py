@@ -8,6 +8,7 @@ from ..services.candidate_service import (
     get_resume_signed_url,
     process_and_store_resume,
 )
+from ..services.db_utils import fetch_one
 from ..services.insight_service import generate_insight, get_insight
 
 router = APIRouter()
@@ -112,10 +113,17 @@ async def get_candidate(
     candidate_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
-    result = client.table("candidates").select("*").eq("id", candidate_id).single().execute()
-    if not result.data:
+    # Not `*`: raw_text (the unredacted resume, PII included) and the
+    # 384-float embedding are never shown by the UI, so they don't leave the
+    # server. The original PDF is still reachable via /resume-url.
+    candidate = fetch_one(
+        client.table("candidates")
+        .select("id, source_path, category, anonymized_text, skills, education, experience, created_at")
+        .eq("id", candidate_id)
+    )
+    if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    return result.data
+    return candidate
 
 
 @router.get("/{candidate_id}/resume-url")
@@ -123,16 +131,10 @@ async def get_candidate_resume_url(
     candidate_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
-    row = (
-        client.table("candidates")
-        .select("source_path")
-        .eq("id", candidate_id)
-        .single()
-        .execute()
-    )
-    if not row.data:
+    row = fetch_one(client.table("candidates").select("source_path").eq("id", candidate_id))
+    if not row:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    url = get_resume_signed_url(token=user.token, path=row.data["source_path"])
+    url = get_resume_signed_url(token=user.token, path=row["source_path"])
     return {"url": url, "expires_in": 3600}
 
 
@@ -179,5 +181,6 @@ async def create_candidate_insight(
         # Monthly OpenAI usage cap reached for this tenant.
         raise HTTPException(status_code=402, detail=str(exc)) from exc
     except RuntimeError as exc:
-        # OPENAI_API_KEY not configured on the service.
+        # OPENAI_API_KEY not configured on the service, or the model returned
+        # nothing usable (see insight_service.generate_insight).
         raise HTTPException(status_code=503, detail=str(exc)) from exc

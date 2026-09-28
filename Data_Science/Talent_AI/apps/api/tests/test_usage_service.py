@@ -29,7 +29,7 @@ def _resp(data):
 
 def _mock_client(*, plan: str, usage_rows: list[dict]):
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"plan": plan}
     )
     client.table.return_value.select.return_value.gte.return_value.execute.return_value = _resp(
@@ -77,11 +77,11 @@ def test_ensure_within_budget_uses_higher_limit_for_paid_plan():
 
 def _mock_client_for_count(*, plan: str, row_count: int):
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"plan": plan}
     )
     # ensure_can_add_candidate/job: plain select("id").execute() -- distinct
-    # chain from both the tenant-plan lookup (.eq().single()) and the usage
+    # chain from both the tenant-plan lookup (.eq().maybe_single()) and the usage
     # sum lookup (.gte()), so it needs its own stub.
     client.table.return_value.select.return_value.execute.return_value = _resp(
         [{"id": f"row-{i}"} for i in range(row_count)]

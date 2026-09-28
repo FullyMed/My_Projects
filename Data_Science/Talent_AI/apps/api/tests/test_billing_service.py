@@ -37,7 +37,7 @@ def _configured():
 
 def test_create_checkout_session_reuses_existing_customer():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"stripe_customer_id": "cus_existing"}
     )
     fake_session = MagicMock(url="https://checkout.stripe.com/session/abc")
@@ -57,7 +57,7 @@ def test_create_checkout_session_reuses_existing_customer():
 
 def test_create_checkout_session_falls_back_to_email_when_no_customer():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.side_effect = [
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.side_effect = [
         _resp({"stripe_customer_id": None}),
         _resp({"email": "jane@acme.com"}),
     ]
@@ -75,7 +75,7 @@ def test_create_checkout_session_falls_back_to_email_when_no_customer():
 
 def test_create_billing_portal_session_requires_existing_customer():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"stripe_customer_id": None}
     )
 
@@ -86,7 +86,7 @@ def test_create_billing_portal_session_requires_existing_customer():
 
 def test_create_billing_portal_session_succeeds_with_customer():
     client = MagicMock()
-    client.table.return_value.select.return_value.eq.return_value.single.return_value.execute.return_value = _resp(
+    client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = _resp(
         {"stripe_customer_id": "cus_existing"}
     )
     fake_session = MagicMock(url="https://billing.stripe.com/session/abc")

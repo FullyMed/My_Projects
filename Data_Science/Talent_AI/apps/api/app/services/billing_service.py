@@ -30,6 +30,7 @@ from supabase import Client
 from ..config import settings
 from ..deps import CurrentUser
 from .admin_client import get_admin_client
+from .db_utils import fetch_one
 
 PLAN_FOR_SUBSCRIPTION_STATUS = {
     "active": "pro",
@@ -49,21 +50,14 @@ def create_checkout_session(
 ) -> str:
     _require_configured()
 
-    tenant_row = (
-        client.table("tenants")
-        .select("stripe_customer_id")
-        .eq("id", user.tenant_id)
-        .single()
-        .execute()
-        .data
+    tenant_row = fetch_one(
+        client.table("tenants").select("stripe_customer_id").eq("id", user.tenant_id)
     )
     customer_id = (tenant_row or {}).get("stripe_customer_id")
 
     customer_kwargs: dict = {"customer": customer_id} if customer_id else {}
     if not customer_id:
-        profile = (
-            client.table("profiles").select("email").eq("id", user.user_id).single().execute().data
-        )
+        profile = fetch_one(client.table("profiles").select("email").eq("id", user.user_id))
         if profile and profile.get("email"):
             customer_kwargs["customer_email"] = profile["email"]
 
@@ -86,13 +80,8 @@ def create_checkout_session(
 def create_billing_portal_session(*, client: Client, user: CurrentUser, return_url: str) -> str:
     _require_configured()
 
-    tenant_row = (
-        client.table("tenants")
-        .select("stripe_customer_id")
-        .eq("id", user.tenant_id)
-        .single()
-        .execute()
-        .data
+    tenant_row = fetch_one(
+        client.table("tenants").select("stripe_customer_id").eq("id", user.tenant_id)
     )
     customer_id = (tenant_row or {}).get("stripe_customer_id")
     if not customer_id:

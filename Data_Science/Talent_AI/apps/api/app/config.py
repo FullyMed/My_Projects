@@ -33,12 +33,11 @@ class Settings:
     stripe_secret_key: str | None = os.environ.get("STRIPE_SECRET_KEY")
     stripe_webhook_secret: str | None = os.environ.get("STRIPE_WEBHOOK_SECRET")
     stripe_price_id: str | None = os.environ.get("STRIPE_PRICE_ID")
-    # service_role key -- deliberately narrow: used ONLY by
-    # billing_service._admin_client() to apply a Stripe webhook's verified
-    # plan change. Every other write in this app goes through the caller's
-    # own RLS-scoped client; a webhook has no user session to scope one with,
-    # so this is the one place that's structurally necessary. See
-    # billing_service.py's module docstring for the full reasoning.
+    # service_role key -- deliberately narrow: read ONLY by
+    # services/admin_client.get_admin_client(), whose two callers are the
+    # Stripe webhook and the scheduler-triggered weekly report run -- the two
+    # paths with no user session to scope an RLS client with. See
+    # admin_client.py's module docstring for the full reasoning.
     supabase_service_role_key: str | None = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     # Used to build Stripe Checkout's success/cancel redirect URLs.
     frontend_url: str = os.environ.get("FRONTEND_URL", "http://localhost:3000")

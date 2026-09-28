@@ -10,7 +10,6 @@ type CandidateDetail = {
   id: string;
   source_path: string;
   category: string | null;
-  raw_text: string;
   anonymized_text: string;
   skills: string[];
   education: string[];

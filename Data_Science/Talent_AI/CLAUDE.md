@@ -14,7 +14,7 @@ cd apps/api
 python -m venv .venv && .venv\Scripts\activate      # Windows
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8010
-pytest tests/                                         # full suite, ~70 tests, no network
+pytest tests/                                         # full suite, ~80 tests, no network
 
 # Frontend (apps/web)
 cd apps/web
@@ -78,7 +78,10 @@ execution policy complains.)
 Adding/removing DB objects needs a new numbered file in
 `supabase/migrations/` applied via the Supabase `apply_migration` MCP tool
 against project `ljtjlvyezkyakayetlod` (`TalentAI`) — migrations are
-additive, never rewrite an old one.
+additive, never rewrite an old one. `apply_migration` can itself be refused
+by Claude Code's auto-mode classifier as a production deploy (happened with
+`0014`); if so, the user applies it — paste the file into the Supabase SQL
+editor, or approve the tool call.
 
 **Before assuming a DB-touching failure is a code bug, check whether the
 Supabase project auto-paused** (free tier, pauses after ~1 week of
@@ -108,6 +111,35 @@ service function can't leak another tenant's rows, because the database
 itself refuses them regardless of what the query asks for. **When adding a
 new table, add its RLS policy in the same migration** — nothing reads as
 "tenant-scoped" by default; it's opt-in per table.
+
+**Any signed-in user can also call PostgREST directly** (publishable key +
+their own JWT), skipping FastAPI entirely — so an RLS policy is the whole
+rule, not a backstop behind the API's checks. Two policies got this wrong
+until `0013` (2026-09-28): `profiles` was self-updatable with no `WITH
+CHECK`, so a user could rewrite their own `tenant_id` and land inside another
+tenant (every isolation policy resolves the caller's tenant through that
+column); and `usage_events` was `for all`, so a tenant could delete its own
+ledger rows to reset its OpenAI budget. Now `profiles` is read-only to users
+(only the signup trigger writes it) and `usage_events` is SELECT + INSERT
+only. Before writing a `for all` / `for update` policy, ask what a user could
+do by writing that row by hand. Known, accepted gap: the trial
+candidate/job count caps are app-level only, so a direct insert can exceed
+them — cost-free, unlike the token budget.
+
+### Single-row reads: `fetch_one`, never `.single()`
+
+supabase-py's `.single()` **raises** on zero rows (PostgREST answers 406)
+rather than returning empty data — so the `if not result.data: 404` that
+naturally follows it never runs, and a missing (or another tenant's, which
+RLS makes identical) id becomes an unhandled 500. Use
+`services/db_utils.fetch_one(query)`, which wraps `.maybe_single()` and
+returns the row dict or `None`. In tests, mock
+`...maybe_single.return_value.execute` and return `None` (not `_resp(None)`)
+for "no row" — that's what the real client does. `main.py` also maps any
+`postgrest.APIError` to a JSON response (Postgres `22P02`, a non-UUID path
+id, → 404; anything else → 500) so it's answered inside `CORSMiddleware`;
+an unhandled exception is answered outside it, and the browser then only
+sees "Failed to fetch".
 
 ### The `service_role` key is deliberately rare
 
@@ -147,6 +179,13 @@ index) rather than loading candidates into the API process. The weekly
 report path needs a tenant-explicit twin, `match_candidates_for_tenant`
 (`0012`) — it runs under `get_admin_client()`, which bypasses RLS, so it
 can't rely on RLS to scope the search the way the normal request path does.
+
+The HNSW index spans every tenant, and the tenant filter (RLS or the explicit
+`tenant_id` predicate) is applied to what the index scan returns — without
+pgvector's iterative scan that's at most `hnsw.ef_search` (40) rows globally,
+so at multi-tenant scale a tenant could get fewer than `top_k` results or
+none. `0014` sets `hnsw.iterative_scan = strict_order` on both functions; any
+new vector-search function over a shared index needs the same `SET` clause.
 
 ### Anonymization is best-effort, not a guarantee
 
