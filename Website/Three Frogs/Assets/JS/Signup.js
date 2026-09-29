@@ -55,9 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      if (!csrfToken) {
-        await checkSession();
-      }
+      // Always re-fetch — see the matching comment in Login.js (parallel
+      // first-visit session checks can leave a token from a discarded session).
+      await checkSession();
 
       const formData = new FormData(signupForm);
       if (csrfToken) formData.append("csrf_token", csrfToken);

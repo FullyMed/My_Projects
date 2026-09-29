@@ -22,10 +22,9 @@ if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
     ]);
 }
 
-$inputJSON = file_get_contents("php://input");
-$input = json_decode($inputJSON, true);
+$input = json_decode(file_get_contents("php://input"), true);
 
-if ($input === null) {
+if (!is_array($input)) {
     respond(400, [
         "success" => false,
         "error" => "Invalid JSON input."
@@ -39,82 +38,113 @@ if (!verify_csrf_token(get_submitted_csrf_token($input))) {
     ]);
 }
 
-$email = $input['email'] ?? '';
-$date = $input['date'] ?? '';
-$start = $input['start'] ?? '';
-$end = $input['end'] ?? '';
+$email = $_SESSION['user']['email'];
+$bookingId = filter_var($input['id'] ?? '', FILTER_VALIDATE_INT);
+$cancelLimit = 2;
 
-if (!$email || !$date || !$start || !$end) {
+if ($bookingId === false || $bookingId < 1) {
     respond(400, [
         "success" => false,
-        "error" => "All fields are required."
+        "error" => "Invalid booking."
     ]);
 }
 
-// Double-check the email matches session
-if ($email !== $_SESSION['user']['email']) {
-    respond(403, [
+// Per-user lock so two parallel cancel requests can't both pass the monthly
+// limit check. (Lock names max out at 64 chars, hence the hash.)
+$lockName = "tf_cancel_" . sha1($email);
+$lockStmt = $conn->prepare("SELECT GET_LOCK(?, 10)");
+$lockStmt->bind_param("s", $lockName);
+$lockStmt->execute();
+$lockStmt->bind_result($locked);
+$lockStmt->fetch();
+$lockStmt->close();
+
+if ((int) $locked !== 1) {
+    respond(503, [
         "success" => false,
-        "error" => "Email does not match the logged-in user."
+        "error" => "Please try again in a moment."
     ]);
 }
 
-// Confirm booking exists
-$checkBooking = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE email = ? AND date = ? AND start_time = ? AND end_time = ?");
-$checkBooking->bind_param("ssss", $email, $date, $start, $end);
-$checkBooking->execute();
-$checkBooking->bind_result($bookingCount);
-$checkBooking->fetch();
-$checkBooking->close();
+function release_and_respond($conn, $lockName, $status, $data) {
+    $rel = $conn->prepare("SELECT RELEASE_LOCK(?)");
+    $rel->bind_param("s", $lockName);
+    $rel->execute();
+    $rel->close();
+    respond($status, $data);
+}
 
-if ($bookingCount === 0) {
-    respond(404, [
+// The booking must exist, be active, and belong to the logged-in user —
+// "not found" covers all three so IDs of other users' bookings aren't confirmed.
+$findStmt = $conn->prepare("
+    SELECT date, start_time, end_time,
+           TIMESTAMP(date, start_time) > NOW() AS not_started
+    FROM bookings
+    WHERE id = ? AND email = ? AND status = 'active'
+");
+$findStmt->bind_param("is", $bookingId, $email);
+$findStmt->execute();
+$booking = $findStmt->get_result()->fetch_assoc();
+$findStmt->close();
+
+if (!$booking) {
+    release_and_respond($conn, $lockName, 404, [
         "success" => false,
         "error" => "Booking not found."
     ]);
 }
 
+if (!(int) $booking['not_started']) {
+    release_and_respond($conn, $lockName, 400, [
+        "success" => false,
+        "error" => "This booking has already started and can no longer be cancelled."
+    ]);
+}
+
 // Check cancel count this month
-$cancelLimit = 2;
 $cancelStmt = $conn->prepare("
-    SELECT COUNT(*) AS cancel_count 
-    FROM cancellations 
+    SELECT COUNT(*)
+    FROM cancellations
     WHERE email = ? AND YEAR(cancel_time) = YEAR(CURDATE()) AND MONTH(cancel_time) = MONTH(CURDATE())
 ");
 $cancelStmt->bind_param("s", $email);
 $cancelStmt->execute();
-$cancelResult = $cancelStmt->get_result();
-$cancelCount = (int) $cancelResult->fetch_assoc()['cancel_count'];
+$cancelStmt->bind_result($cancelCount);
+$cancelStmt->fetch();
 $cancelStmt->close();
+$cancelCount = (int) $cancelCount;
 
 if ($cancelCount >= $cancelLimit) {
-    respond(403, [
+    release_and_respond($conn, $lockName, 403, [
         "success" => false,
-        "error" => "You have reached the monthly cancellation limit (2 per month)."
+        "error" => "You have reached the monthly cancellation limit ($cancelLimit per month)."
     ]);
 }
 
-// Delete booking
-$deleteStmt = $conn->prepare("DELETE FROM bookings WHERE email = ? AND date = ? AND start_time = ? AND end_time = ?");
-$deleteStmt->bind_param("ssss", $email, $date, $start, $end);
+$conn->begin_transaction();
 
-if ($deleteStmt->execute() && $deleteStmt->affected_rows > 0) {
-    $deleteStmt->close();
+$deleteStmt = $conn->prepare("DELETE FROM bookings WHERE id = ? AND email = ?");
+$deleteStmt->bind_param("is", $bookingId, $email);
+$deleteStmt->execute();
+$deleted = $deleteStmt->affected_rows;
+$deleteStmt->close();
 
-    $logStmt = $conn->prepare("INSERT INTO cancellations (email, date, start, end, cancel_time) VALUES (?, ?, ?, ?, NOW())");
-    $logStmt->bind_param("ssss", $email, $date, $start, $end);
-    $logStmt->execute();
-    $logStmt->close();
-
-    $remaining = max(0, $cancelLimit - ($cancelCount + 1));
-    respond(200, [
-        "success" => true,
-        "remaining_cancel" => $remaining
-    ]);
-} else {
-    respond(500, [
+if ($deleted !== 1) {
+    $conn->rollback();
+    release_and_respond($conn, $lockName, 404, [
         "success" => false,
-        "error" => "Failed to cancel booking."
+        "error" => "Booking not found."
     ]);
 }
-?>
+
+$logStmt = $conn->prepare("INSERT INTO cancellations (email, date, start, end, cancel_time) VALUES (?, ?, ?, ?, NOW())");
+$logStmt->bind_param("ssss", $email, $booking['date'], $booking['start_time'], $booking['end_time']);
+$logStmt->execute();
+$logStmt->close();
+
+$conn->commit();
+
+release_and_respond($conn, $lockName, 200, [
+    "success" => true,
+    "remaining_cancels" => max(0, $cancelLimit - ($cancelCount + 1))
+]);

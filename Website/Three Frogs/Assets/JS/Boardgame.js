@@ -2023,15 +2023,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Collection.html gates its content behind a login check further below —
   // render a loading state there instead of flashing the full, ungrouped,
   // unauthenticated game list before the check resolves.
+  // The index page renders its own 10-game sample below, so it's skipped here too.
   if (window.location.pathname.includes("Collection.html")) {
     container.innerHTML = `<div class="loading-state"><span class="spinner" aria-hidden="true"></span>Loading your boardgame collection…</div>`;
-  } else {
+  } else if (!(window.location.pathname === "/" || window.location.pathname.includes("index.html"))) {
     renderBoardgames(boardgames);
   }
 
   // 4. Event listeners
-  if (searchInput) searchInput.addEventListener("input", applyFilters);
-  if (categoryFilter) categoryFilter.addEventListener("change", applyFilters);
+  // Not on Collection.html: it wires its own grouped-view filter once the login
+  // check passes, and these would re-render a flat list underneath it.
+  if (!window.location.pathname.includes("Collection.html")) {
+    if (searchInput) searchInput.addEventListener("input", applyFilters);
+    if (categoryFilter) categoryFilter.addEventListener("change", applyFilters);
+  }
   
   // ================= Boardgame Page =================
   if (window.location.pathname === "/" || window.location.pathname.includes("index.html")) {
@@ -2148,9 +2153,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const category = categoryFilter.value;
             
             const filtered = boardgames.filter(game => {
-              const matchName = game.name.toLowerCase().includes(keyword);
+              const matchKeyword =
+                game.name.toLowerCase().includes(keyword) ||
+                game.tags.some(tag => tag.toLowerCase().includes(keyword));
               const matchCategory = category === "" || game.category === category;
-              return matchName && matchCategory;
+              return matchKeyword && matchCategory;
             });
             
             renderGroupedBoardgames(filtered);

@@ -62,7 +62,7 @@ if ($exists) {
     $ins->execute();
     $ins->close();
 
-    $resetLink = "https://threefrogsboardgame.com/Forgot-password.html?token=" . urlencode($token);
+    $resetLink = site_url() . "/Forgot-password.html?token=" . urlencode($token);
     $subject   = "Three Frogs - Password Reset Request";
     $body      = "Hello,\r\n\r\n"
                . "We received a request to reset your Three Frogs account password.\r\n\r\n"
@@ -70,13 +70,7 @@ if ($exists) {
                . $resetLink . "\r\n\r\n"
                . "If you did not request this, you can safely ignore this email.\r\n\r\n"
                . "-- Three Frogs Boardgame";
-    $headers   = implode("\r\n", [
-        "From: Three Frogs <noreply@threefrogsboardgame.com>",
-        "Reply-To: noreply@threefrogsboardgame.com",
-        "Content-Type: text/plain; charset=UTF-8",
-        "X-Mailer: PHP/" . phpversion()
-    ]);
-    mail($email, $subject, $body, $headers);
+    send_site_email($email, $subject, $body);
 }
 
 $conn->close();

@@ -36,9 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (!csrfToken) {
-        await fetchCsrfToken();
-      }
+      // Always re-fetch: on a first visit, this script's page-load call and
+      // Navbar.js's run in parallel without a cookie and can each start a
+      // different session — only one survives, so the token cached at page
+      // load may belong to the other one. By submit time the cookie is settled.
+      await fetchCsrfToken();
 
       const formData = new FormData(loginForm);
       if (csrfToken) formData.append("csrf_token", csrfToken);

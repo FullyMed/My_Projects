@@ -8,13 +8,12 @@ Website for **Three Frogs**, a boardgame café in Surabaya, Indonesia. Visitors 
 
 ## ⚠ Pending / Next Steps (as of 2026-09-29)
 
-Recent work (security hardening, 404 page, loading states, legal pages, image compression) is **not yet live and not fully verified**. Check items off or remove them as they're actually completed:
+Recent work (security hardening, 404 page, loading states, legal pages, image compression, the 2026-09-29 bug-fix pass) is **not yet live**. It **has** been tested end-to-end against a real local database (66 API checks + a full browser run-through of every page). Check items off or remove them as they're actually completed:
 
-- [ ] **Deploy to Hostinger.** All of the above only exists in this git repo so far — upload the changed files via FTP/File Manager (see [Deployment](#deployment)). Nothing has shipped to the live site yet.
-- [ ] **Run the `rate_limits` migration on the production DB** (SQL under [Database Schema](#database-schema)). Unknown whether it already exists there — check phpMyAdmin. Missing it fails *open*, so nothing breaks, it just means login/signup/reset abuse isn't throttled yet.
-- [ ] **Confirm/run the `password_reset_tokens` migration on the production DB.** If it's missing there, **forgot-password is currently broken on the live site** — unlike the table above, this one fails *closed*.
-- [ ] **Set up local dev DB.** The local `Assets/PHP/db_config.php` credentials don't match any database on this machine's MySQL (confirmed via a real connection error). Paused pending Hostinger domain/site work — options discussed were (a) fresh local-only credentials + schema (recommended) or (b) matching the existing `db_config.php` values with a local DB/user.
-- [ ] **End-to-end test with a real database** once local DB or staging exists — login, signup, booking, cancellation, avatar update, CSRF, and rate limiting have been code-reviewed and partially tested (error paths only) but never run through a full successful cycle.
+- [ ] **Run `Data/schema.sql` on the production DB** (phpMyAdmin → SQL). It only creates missing tables — `rate_limits` / `password_reset_tokens` status on production is unknown, and if `password_reset_tokens` is missing, **forgot-password is currently broken on the live site**.
+- [ ] **Confirm production `bookings` has an `id` column** (`SHOW COLUMNS FROM bookings;`). The new cancel flow identifies bookings by `id`. If missing, run `ALTER TABLE bookings ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST;` **before** uploading the new PHP.
+- [ ] **Deploy to Hostinger** — upload the changed files via FTP/File Manager (see [Deployment](#deployment)). Do **not** upload the local `Assets/PHP/db_config.php`.
+- [ ] **After deploying, make one real booking and one password reset on the live site** and confirm both emails arrive (check spam; the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM in Hostinger).
 - [ ] **Get a lawyer to review `Terms-of-Use.html` / `Privacy-Policy.html`** before relying on them as final/binding — written to be accurate to the site's actual behavior, but not reviewed against Indonesia's UU PDP or any other law.
 
 ---
@@ -23,7 +22,7 @@ Recent work (security hardening, 404 page, loading states, legal pages, image co
 
 | Layer | Technology |
 |---|---|
-| Frontend | Vanilla HTML, CSS, JavaScript + jQuery (CDN) |
+| Frontend | Vanilla HTML, CSS, JavaScript (no libraries) |
 | Backend | PHP 8 with MySQLi (OOP style) |
 | Database | MySQL (Hostinger) |
 | Hosting | Hostinger shared hosting |
@@ -35,14 +34,18 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 
 ## Local Setup
 
-**Requirements:** PHP 8+, MySQL, a local server (XAMPP / Laragon / Herd).
+**Requirements:** PHP 8+, MySQL/MariaDB, a local server (XAMPP / Laragon / Herd).
 
-1. Clone the repo and serve the project root from your local server's `htdocs` (or equivalent).
-2. Create a MySQL database and import the schema (see below).
-3. Copy `Assets/PHP/db_config.example.php` → `Assets/PHP/db_config.php` and fill in your local credentials. This file is gitignored and must never be committed.
-4. Open `http://localhost/` in your browser.
+1. Serve the project folder **as the document root** (e.g. an Apache vhost on port 8080 with `AllowOverride All`) — not as a subfolder of `htdocs`, or `.htaccess`/`404.html` won't behave like production.
+2. Create a database and run **`Data/schema.sql`** against it.
+3. Copy `Assets/PHP/db_config.example.php` → `Assets/PHP/db_config.php` and fill in your local credentials. Optional extras: `DB_PORT` (if not 3306) and `SITE_URL` (e.g. `http://localhost:8080`, so emailed reset links point at your local site). This file is gitignored and must never be committed.
+4. Open the site in your browser.
+
+**This machine's setup (2026-09-29):** XAMPP's MariaDB runs on **port 3307** (a separate `MySQL80` service holds 3306; `my.ini` and phpMyAdmin's `config.inc.php` were updated to match), with database `threefrogs_local` and user `threefrogs_dev`. Start MariaDB from the XAMPP Control Panel.
 
 > `db_config.php` is the single source of DB credentials. `db_connect.php` requires it at runtime — do not hardcode credentials anywhere else.
+>
+> Locally, PHP `mail()` has no mail server to talk to, so booking-confirmation and reset emails aren't delivered — the requests still succeed. Read reset tokens straight from the `password_reset_tokens` table when testing.
 
 ---
 
@@ -80,8 +83,8 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 │   ├── PHP/
 │   │   ├── db_config.php           GITIGNORED — holds DB credentials (copy from example)
 │   │   ├── db_config.example.php   Credential template (safe to commit)
-│   │   ├── db_connect.php          Opens MySQLi connection via db_config.php
-│   │   ├── security.php            CSRF tokens, hardened sessions, rate limiting — shared by every endpoint below
+│   │   ├── db_connect.php          Opens MySQLi via db_config.php; Surabaya timezone; JSON error handler
+│   │   ├── security.php            CSRF tokens, hardened sessions, rate limiting, email helper — shared by every endpoint below
 │   │   ├── check_session.php       Returns { loggedIn, user, csrfToken } — called on every page load
 │   │   ├── login.php
 │   │   ├── logout.php
@@ -97,6 +100,7 @@ No build step, no bundler, no npm. Every page is a plain `.html` file.
 │
 └── Data/
     ├── .htaccess                   Denies all direct web access to this folder
+    ├── schema.sql                  Full DB schema (all 5 tables), safe to re-run
     └── Three Frogs.xlsx            Offline reference spreadsheet for the game catalogue
 ```
 
@@ -196,15 +200,22 @@ Both card-rendering templates in `Boardgame.js` also carry `loading="lazy" decod
 
 | Column | Type | Notes |
 |---|---|---|
+| id | INT PK AUTO_INCREMENT | Used to identify a booking when cancelling |
 | name | VARCHAR | |
-| email | VARCHAR | |
+| email | VARCHAR | Always the logged-in user's email (taken from the session) |
 | date | DATE | Must not be in the past |
-| start_time | TIME | Must be ≥ 12:00 |
+| start_time | TIME | Must be ≥ 12:00 (and not already passed, if today) |
 | end_time | TIME | Must be ≤ 22:00, after start_time |
-| people | INT | |
+| people | INT | 1–8 |
 | status | VARCHAR | `'active'` |
 
-Overlap is checked server-side before every insert. Date and time rules are enforced both client- and server-side.
+**Booking rules** (constants at the top of `booking.php`, mirrored in `Booking.js`, `Booking.html`, and Terms of Use §4 — change them together):
+
+- **4 tables**, one booking = one table, **max 8 people** per booking. A new booking is rejected only if all 4 tables are in use at *some moment* inside its window (back-to-back bookings don't count as overlapping).
+- A user can't hold two overlapping bookings.
+- Check + insert run under a MySQL lock, so simultaneous requests can't overbook the last table.
+- A plain-text confirmation email is sent on success; the page only says "a confirmation has been sent" if it actually was.
+- Everything uses Surabaya time (`Asia/Jakarta`, UTC+7) for both PHP and MySQL, whatever the server's own timezone.
 
 ### `cancellations`
 
@@ -216,7 +227,7 @@ Overlap is checked server-side before every insert. Date and time rules are enfo
 | end | TIME | |
 | cancel_time | DATETIME | Set to `NOW()` on insert |
 
-Cancellations are capped at **2 per user per calendar month**, enforced in both `get_bookings.php` and `cancel_booking.php`.
+Cancellations are capped at **2 per user per calendar month**, enforced in `cancel_booking.php` (and reported by `get_bookings.php`). A booking can only be cancelled before its start time.
 
 ### `password_reset_tokens`
 
@@ -227,18 +238,7 @@ Cancellations are capped at **2 per user per calendar month**, enforced in both 
 | token | VARCHAR(64) UNIQUE | 64-char hex string from `random_bytes` |
 | expires_at | DATETIME | 1 hour from creation; stale tokens are rejected and deleted |
 
-Create this table before the forgot-password flow will work:
-
-```sql
-CREATE TABLE IF NOT EXISTS password_reset_tokens (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  email      VARCHAR(255) NOT NULL,
-  token      VARCHAR(64)  NOT NULL UNIQUE,
-  expires_at DATETIME     NOT NULL,
-  INDEX idx_token (token),
-  INDEX idx_email (email)
-);
-```
+Required for the forgot-password flow (created by `Data/schema.sql`).
 
 ### `rate_limits`
 
@@ -249,23 +249,15 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 | identifier | VARCHAR(255) | IP address or email being throttled |
 | created_at | DATETIME | Set to `NOW()` on each recorded attempt |
 
-Backs the brute-force/abuse throttling described below. Create it before deploying (rate limiting **fails open** — i.e. does nothing, not "locks everyone out" — if this table is missing):
+Backs the brute-force/abuse throttling described below (created by `Data/schema.sql`). Rate limiting **fails open** — i.e. does nothing, not "locks everyone out" — if this table is missing.
 
-```sql
-CREATE TABLE IF NOT EXISTS rate_limits (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  action     VARCHAR(50)  NOT NULL,
-  identifier VARCHAR(255) NOT NULL,
-  created_at DATETIME     NOT NULL,
-  INDEX idx_action_identifier_time (action, identifier, created_at)
-);
-```
+> All five tables are defined in **`Data/schema.sql`**. It uses `CREATE TABLE IF NOT EXISTS` throughout, so it's safe to run on a database that already has some of them.
 
 ---
 
 ## PHP API Endpoints
 
-All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0)`, and use a local `respond($status, $data)` helper that echoes JSON and exits. Auth-gated endpoints call `session_start()`.
+All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0)`, and use a local `respond($status, $data)` helper that echoes JSON and exits. Session endpoints call `secure_session_start()` (never raw `session_start()`). Any uncaught database error is logged and returned as a generic JSON 500 by the handler in `db_connect.php`.
 
 | Endpoint | Method | Auth required | Description |
 |---|---|---|---|
@@ -275,9 +267,9 @@ All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0
 | `signup.php` | POST (form) | — | Creates user, validates avatar against whitelist, sets session; 409 if email taken |
 | `request_reset.php` | POST (form) | — | Generates password-reset token and emails link; always returns 200 to prevent email enumeration |
 | `forgot_password.php` | POST (form) | — | Validates token from DB, resets password, deletes token |
-| `booking.php` | POST (JSON body) | Yes | Creates booking; enforces date/time rules and slot overlap |
-| `get_bookings.php` | POST (JSON body) | Yes | Returns user's active upcoming bookings + remaining cancel count |
-| `cancel_booking.php` | POST (JSON body) | Yes | Cancels booking; enforces monthly limit |
+| `booking.php` | POST (JSON body) | Yes | Creates booking; enforces date/time rules, 4-table capacity, 8-person limit, no self-overlap; emails a confirmation |
+| `get_bookings.php` | POST | Yes | Returns the user's upcoming + last-90-days bookings (with `id`) and remaining cancel count |
+| `cancel_booking.php` | POST (JSON body: `id`) | Yes | Cancels the user's own not-yet-started booking; enforces the monthly limit |
 | `update_avatar.php` | POST (form) | Yes | Updates avatar; validates against allowed set |
 
 ---
@@ -291,7 +283,7 @@ All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0
 | Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `security.php`'s `secure_session_start()` — used everywhere instead of raw `session_start()` |
 | Session fixation prevention | `session_regenerate_id(true)` in `login.php` and `signup.php` after authentication |
 | No internal error leakage | DB/statement errors are `error_log()`'d server-side, never echoed in JSON responses |
-| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect when `HTTP_HOST` is `localhost`/`127.0.0.1`, with or without a port, for local dev) |
+| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP with `script-src 'self'` only — no third-party scripts, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect when `HTTP_HOST` is `localhost`/`127.0.0.1`, with or without a port, for local dev) |
 | Sensitive files blocked from direct web access | `.htaccess` denies `db_config.php`, `*.xlsx`/`*.sql`/`*.log`/`*.md`, `.git*`; `Data/.htaccess` denies the whole folder |
 | Reverse-tabnabbing protection | `rel="noopener noreferrer"` on all `target="_blank"` links |
 

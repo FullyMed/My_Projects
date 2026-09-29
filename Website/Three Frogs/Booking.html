@@ -61,10 +61,11 @@
 
         <section class="booking-form hidden">
             <h2>Book Your Game Time</h2>
-            
+            <p class="booking-hint">Open daily 12:00–22:00 · up to 8 people per table</p>
+
             <form id="bookingForm">
                 <label for="name">Full Name</label>
-                <input type="text" id="name" required />
+                <input type="text" id="name" maxlength="100" autocomplete="name" required />
 
                 <label for="email">Email</label>
                 <input type="email" id="email" required />
@@ -73,13 +74,13 @@
                 <input type="date" id="date" required />
 
                 <label for="start-time">Start Time</label>
-                <input type="time" id="start-time" required />
+                <input type="time" id="start-time" min="12:00" max="22:00" required />
 
                 <label for="end-time">End Time</label>
-                <input type="time" id="end-time" required />
+                <input type="time" id="end-time" min="12:00" max="22:00" required />
 
                 <label for="people">Number of People</label>
-                <input type="number" id="people" min="1" required />
+                <input type="number" id="people" min="1" max="8" step="1" required />
 
                 <button type="submit">Book Now</button>
             </form>
@@ -94,7 +95,6 @@
 
         <button id="scrollTopBtn" title="Back to Top">⬆️</button>
         
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="Assets/JS/Loading.js"></script>
         <script src="Assets/JS/Booking.js"></script>
         <script src="Assets/JS/Navbar.js"></script>

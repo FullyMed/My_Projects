@@ -1,4 +1,13 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   async function checkSession() {
     try {
       const response = await fetch("Assets/PHP/check_session.php", {
@@ -42,9 +51,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         const formData = new FormData();
         formData.append("email", email);
-        await fetch("Assets/PHP/request_reset.php", { method: "POST", body: formData });
-        requestResult.innerHTML = `<p style="color:green;"><strong>If that email is registered, a reset link has been sent. Check your inbox.</strong></p>`;
-        requestForm.reset();
+        const response = await fetch("Assets/PHP/request_reset.php", { method: "POST", body: formData });
+        const result   = await response.json();
+        if (result.success) {
+          requestResult.innerHTML = `<p style="color:green;"><strong>If that email is registered, a reset link has been sent. Check your inbox.</strong></p>`;
+          requestForm.reset();
+        } else {
+          requestResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Something went wrong. Please try again later.")}</p>`;
+        }
       } catch (err) {
         requestResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
         console.error("Request reset error:", err);
@@ -86,7 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           setTimeout(() => { window.location.href = "Login.html"; }, 1500);
         } else {
-          forgotResult.innerHTML = `<p style="color:red;">${result.error}</p>`;
+          forgotResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Password reset failed.")}</p>`;
           clearButtonLoading(submitBtn);
         }
       } catch (err) {

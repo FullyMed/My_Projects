@@ -17,55 +17,42 @@ if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
     respond(401, ["success" => false, "error" => "You must be logged in to view bookings."]);
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-
 $email = $_SESSION['user']['email'];
+$cancelLimit = 2;
+$historyDays = 90;
 
+// Upcoming bookings plus the last $historyDays days of past ones (for the
+// Dashboard's "Booking history" list). The frontend splits them by end time.
 $stmt = $conn->prepare("
-    SELECT date, start_time, end_time, people 
-    FROM bookings 
-    WHERE email = ? AND date >= CURDATE() AND status = 'active'
+    SELECT id, date,
+           TIME_FORMAT(start_time, '%H:%i') AS start_time,
+           TIME_FORMAT(end_time, '%H:%i')   AS end_time,
+           people
+    FROM bookings
+    WHERE email = ? AND status = 'active' AND date >= (CURDATE() - INTERVAL ? DAY)
     ORDER BY date, start_time
 ");
-$stmt->bind_param("s", $email);
-
-$bookings = [];
-
-if ($stmt->execute()) {
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $bookings[] = $row;
-    }
-    $stmt->close();
-} else {
-    respond(500, ["success" => false, "error" => "Error fetching bookings: " . $conn->error]);
-}
-
-$currentYear = date("Y");
-$currentMonth = date("m");
-$cancelLimit = 2;
+$stmt->bind_param("si", $email, $historyDays);
+$stmt->execute();
+$bookings = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 $cancelStmt = $conn->prepare("
-    SELECT COUNT(*) AS cancel_count
+    SELECT COUNT(*)
     FROM cancellations
-    WHERE email = ? AND YEAR(cancel_time) = ? AND MONTH(cancel_time) = ?
+    WHERE email = ? AND YEAR(cancel_time) = YEAR(CURDATE()) AND MONTH(cancel_time) = MONTH(CURDATE())
 ");
-$cancelStmt->bind_param("sii", $email, $currentYear, $currentMonth);
-
-$remainingCancels = $cancelLimit;
-if ($cancelStmt->execute()) {
-    $result = $cancelStmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $used = (int) $row["cancel_count"];
-        $remainingCancels = max(0, $cancelLimit - $used);
-    }
-    $cancelStmt->close();
-}
+$cancelStmt->bind_param("s", $email);
+$cancelStmt->execute();
+$cancelStmt->bind_result($used);
+$cancelStmt->fetch();
+$cancelStmt->close();
 
 $conn->close();
 
 respond(200, [
     "success" => true,
     "bookings" => $bookings,
-    "remaining_cancels" => $remainingCancels
+    "remaining_cancels" => max(0, $cancelLimit - (int) $used),
+    "cancel_limit" => $cancelLimit
 ]);

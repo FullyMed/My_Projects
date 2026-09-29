@@ -642,6 +642,13 @@ textarea:focus {
   margin-bottom: 1.5rem;
 }
 
+.booking-form .booking-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: -1rem 0 0.5rem;
+}
+
 .booking-form label {
   display: block;
   margin-top: 1rem;

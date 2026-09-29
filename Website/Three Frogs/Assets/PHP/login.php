@@ -20,7 +20,9 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     ]);
 }
 
-$email = trim($_POST['email'] ?? '');
+// Lowercased to match signup.php, so the per-email rate limit can't be
+// sidestepped by changing letter case.
+$email = strtolower(trim($_POST['email'] ?? ''));
 $password = trim($_POST['password'] ?? '');
 
 if (!$email || !$password) {
@@ -64,7 +66,7 @@ if ($user = $result->fetch_assoc()) {
         $_SESSION['user'] = [
             "name" => $user['name'] ?? 'Unknown User',
             "email" => $user['email'],
-            "avatar" => $user['avatar'] ?? ''
+            "avatar" => $user['avatar'] ?: 'Assets/Images/Avatars/Clam.jpg'
         ];
         respond(200, [
             "success" => true

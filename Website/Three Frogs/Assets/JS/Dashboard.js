@@ -14,8 +14,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const avatarChangeContainer = document.getElementById("avatarChangeContainer");
 
   if (editAvatarBtn && avatarChangeContainer) {
-    editAvatarBtn.addEventListener("click", () => {
-      avatarChangeContainer.classList.toggle("hidden");
+    const toggleAvatarPicker = () => avatarChangeContainer.classList.toggle("hidden");
+    editAvatarBtn.addEventListener("click", toggleAvatarPicker);
+    editAvatarBtn.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleAvatarPicker();
+      }
     });
   }
 
@@ -24,10 +29,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const dashboardContainer = document.querySelector(".dashboard-container");
 
   let loggedInUser = null;
-  let allBookings = [];
+  let upcomingBookings = [];
   let selectedBooking = null;
   let remainingCancels = 2;
+  let cancelLimit = 2;
   let csrfToken = null;
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
   async function checkSession() {
     try {
@@ -59,12 +74,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   dashboardContainer?.classList.remove("hidden");
 
   function updateUserInfo() {
-    document.getElementById("currentAvatar").src = loggedInUser.avatar;
-    userInfo.innerHTML = `
-      <p><strong>Name:</strong> ${loggedInUser.name}</p>
-      <p><strong>Email:</strong> ${loggedInUser.email}</p>
-    `;
     if (currentAvatar) currentAvatar.src = loggedInUser.avatar;
+    userInfo.innerHTML = `
+      <p><strong>Name:</strong> ${escapeHtml(loggedInUser.name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(loggedInUser.email)}</p>
+    `;
+    // Pre-select the user's current avatar in the picker
+    const currentRadio = [...document.querySelectorAll('input[name="newAvatar"]')]
+      .find(radio => radio.value === loggedInUser.avatar);
+    if (currentRadio) currentRadio.checked = true;
+  }
+
+  function bookingCard(b, withCancel) {
+    return `
+      <div class="booking-card">
+        <p><strong>Date:</strong> ${escapeHtml(b.date)}</p>
+        <p><strong>Time:</strong> ${escapeHtml(b.start_time)} - ${escapeHtml(b.end_time)}</p>
+        <p><strong>People:</strong> ${escapeHtml(b.people)}</p>
+        ${withCancel ? `<button class="cancelBtn" data-id="${escapeHtml(b.id)}" style="margin-top:10px;">Cancel</button>` : ""}
+      </div>
+    `;
   }
 
   async function fetchBookingsFromServer() {
@@ -72,20 +101,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     historyContainer.innerHTML = "";
 
     try {
-
-      const response = await fetch("Assets/PHP/get_bookings.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: loggedInUser.email })
-      });      
-
+      const response = await fetch("Assets/PHP/get_bookings.php", { method: "POST" });
       const result = await response.json();
       if (result.success) {
-        allBookings = result.bookings;
-        remainingCancels = result.remaining_cancels ?? 2;
-        renderBookings();
+        remainingCancels = result.remaining_cancels ?? remainingCancels;
+        cancelLimit = result.cancel_limit ?? cancelLimit;
+        renderBookings(result.bookings);
       } else {
         upcomingContainer.innerHTML = "<p>Error fetching bookings.</p>";
         historyContainer.innerHTML = "";
@@ -97,54 +118,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function renderBookings() {
+  function renderBookings(bookings) {
     const now = new Date();
-    const userBookings = allBookings;
-    const upcoming = [], history = [];
+    const history = [];
+    upcomingBookings = [];
 
-    userBookings.forEach(b => {
-      const bookingDateTime = new Date(`${b.date}T${b.end_time}`);
-      if (bookingDateTime > now) upcoming.push(b);
+    bookings.forEach(b => {
+      const end = new Date(`${b.date}T${b.end_time}`);
+      if (end > now) upcomingBookings.push(b);
       else history.push(b);
     });
 
-    upcomingContainer.innerHTML = upcoming.length === 0 ? "<p>No upcoming bookings.</p>" : "";
-    upcoming.forEach((b, index) => {
-      const card = document.createElement("div");
-      card.className = "booking-card";
-      card.innerHTML = `
-        <p><strong>Date:</strong> ${b.date}</p>
-        <p><strong>Time:</strong> ${b.start_time} - ${b.end_time}</p>
-        <p><strong>People:</strong> ${b.people}</p>
-        <button class="cancelBtn" data-index="${index}" style="margin-top:10px;">Cancel</button>
-      `;
-      upcomingContainer.appendChild(card);
-    });
+    // Bookings that have already started stay in "Upcoming" until they end,
+    // but can no longer be cancelled (cancel_booking.php enforces the same rule).
+    upcomingContainer.innerHTML = upcomingBookings.length === 0
+      ? "<p>No upcoming bookings.</p>"
+      : upcomingBookings.map(b => bookingCard(b, new Date(`${b.date}T${b.start_time}`) > now)).join("");
 
-    document.querySelectorAll(".cancelBtn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.getAttribute("data-index"));
-        selectedBooking = upcoming[idx];
-
-        if (remainingCancels > 0) {
-          cancelText.textContent = `Are you sure? Cancel Remaining ${remainingCancels}/2`;
-          popup.classList.remove("hidden");
-        } else {
-          alert("You have reached the cancel limit (2/month). Cannot cancel more bookings.");
-        }
-      });
-    });
-
+    // Most recent first
     historyContainer.innerHTML = history.length === 0
       ? "<p>No past bookings found.</p>"
-      : history.map(b => `
-        <div class="booking-card">
-          <p><strong>Date:</strong> ${b.date}</p>
-          <p><strong>Time:</strong> ${b.start_time} - ${b.end_time}</p>
-          <p><strong>People:</strong> ${b.people}</p>
-        </div>
-      `).join("");
+      : history.reverse().map(b => bookingCard(b, false)).join("");
   }
+
+  // One delegated listener survives every re-render of the list
+  upcomingContainer.addEventListener("click", e => {
+    const btn = e.target.closest(".cancelBtn");
+    if (!btn) return;
+
+    selectedBooking = upcomingBookings.find(b => String(b.id) === btn.dataset.id);
+    if (!selectedBooking) return;
+
+    if (remainingCancels > 0) {
+      cancelText.textContent =
+        `Cancel your booking on ${selectedBooking.date}, ${selectedBooking.start_time} - ${selectedBooking.end_time}? ` +
+        `You have ${remainingCancels} of ${cancelLimit} cancellations left this month.`;
+      popup.classList.remove("hidden");
+    } else {
+      alert(`You have reached the cancel limit (${cancelLimit}/month). Cannot cancel more bookings.`);
+    }
+  });
 
   // Avatar change
   if (changeAvatarForm) {
@@ -175,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             avatarMsg.innerHTML = `<p style="color:green;">Avatar updated successfully!</p>`;
             setTimeout(() => avatarMsg.innerHTML = "", 3000);
           } else {
-            avatarMsg.innerHTML = `<p style="color:red;">${result.error}</p>`;
+            avatarMsg.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Failed to update avatar.")}</p>`;
           }
         } catch (err) {
           console.error("Avatar update error:", err);
@@ -189,6 +202,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Confirm Cancel
   if (confirmCancel) {
     confirmCancel.addEventListener("click", async () => {
+      if (!selectedBooking) return;
       if (!csrfToken) {
         await checkSession();
       }
@@ -200,24 +214,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            email: loggedInUser.email,
-            date: selectedBooking.date,
-            start: selectedBooking.start_time,
-            end: selectedBooking.end_time,
+            id: selectedBooking.id,
             csrf_token: csrfToken
           })
         });
 
         const result = await res.json();
         clearButtonLoading(confirmCancel);
+        popup.classList.add("hidden");
+        selectedBooking = null;
         if (result.success) {
-          popup.classList.add("hidden");
-          remainingCancels--;
-          fetchBookingsFromServer();
+          remainingCancels = result.remaining_cancels ?? Math.max(0, remainingCancels - 1);
           alert("Booking cancelled successfully.");
         } else {
-          alert("Failed to cancel booking: " + result.error);
+          alert("Failed to cancel booking: " + (result.error || "Unknown error."));
         }
+        fetchBookingsFromServer();
       } catch (err) {
         console.error("Cancel booking error:", err);
         clearButtonLoading(confirmCancel);
@@ -229,6 +241,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (closePopup) {
     closePopup.addEventListener("click", () => {
       popup.classList.add("hidden");
+      selectedBooking = null;
     });
   }
 

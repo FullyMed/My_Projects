@@ -9,8 +9,7 @@ if (!secure_session_start()) {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "Failed to start session.",
-        "debug" => "Session start failed"
+        "error" => "Failed to start session."
     ]);
     exit;
 }
