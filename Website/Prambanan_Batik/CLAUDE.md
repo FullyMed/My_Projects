@@ -6,6 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Prambanan Batik is a PHP/MySQL product catalog and review website for authentic Indonesian batik. No build step — plain PHP served by Apache/Nginx (XAMPP/WAMP locally, shared hosting in production).
 
+## Known Gaps / Next Steps
+
+Identified 2026-09-29 during a polish pass (404 page, SEO meta tags, loading states, legal pages, favicon set — all done). Not yet done — check here first when starting a new session on this project:
+
+- **Open Graph / Twitter Card meta tags** — `header.php` renders `<title>` and `<meta name="description">` from `$page_title`/`$meta_description` (see SEO Meta Tags below) but nothing for `og:*`/`twitter:*`. Adding these is mostly reusing the same two variables already set per page, plus deciding on an `og:image` (1200×630) — no social-preview image exists yet, would need to be designed.
+- **`CONTACT_EMAIL` is still the placeholder default** (`hello@prambananbatik.com` in `config.php`) — set the real address via the `CONTACT_EMAIL` env var before production deployment.
+- **No static-asset cache headers in `.htaccess`** — has security headers only, no `Cache-Control`/`mod_expires` for `assets/`. Low-priority perf polish.
+
 ## Local Development
 
 1. Install XAMPP or WAMP and start Apache + MySQL.

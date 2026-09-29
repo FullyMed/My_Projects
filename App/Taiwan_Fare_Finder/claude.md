@@ -192,3 +192,16 @@ To tweak the design, edit `scripts/gen_icon.py` (pure Pillow shape drawing, no e
 - **`AnalyticsService` is a stub**: it only `debugPrint`s. Do not add real tracking without also wiring a consent UI.
 - **Keep store listing copy in sync**: `store_listing/app_store.md` and `store_listing/play_store.md` hold per-locale (en, zh-Hant, id) title/description/keyword copy for App Store Connect and Play Console. When features, supported cities, or supported languages change, update these files in the same change.
 - **Loading states are shimmer skeletons, not spinners**: every list/card that loads async data (fare results, favorites, history) shows a `TffSkeleton` placeholder shaped like the real content while its controller's `isLoading` is true — not a bare `CircularProgressIndicator`. A small inline spinner (e.g. `_DangerAction` in `settings_page.dart`) is only appropriate for a short, in-place busy state on a button/row triggered by the user's own tap, not for initial page/list loads.
+
+---
+
+## Known TODOs / Open Items
+
+Carried over between chat sessions — read this before assuming the project is "done." Pick any of these up without needing prior conversation context:
+
+- **iOS bundle ID is still the Flutter template default.** `PRODUCT_BUNDLE_IDENTIFIER` in `ios/Runner.xcodeproj/project.pbxproj` is `com.mycompany.CounterApp`; Android's `applicationId`/`namespace` in `android/app/build.gradle` is already the correct `com.felix.taiwanfarefinder`. Fix the iOS side to match before setting up an App Store Connect record — will also need a matching App ID / provisioning profile in the Apple Developer account.
+- **Store listings need real hosted URLs, not just in-app pages.** `store_listing/app_store.md` and `store_listing/play_store.md` each have a "Fields not filled in" list — Privacy Policy URL (required by both stores) and Support URL (Apple) need to be real public URLs. Content to host is already written: `lib/pages/privacy_page.dart` + the `privacy*` ARB keys.
+- **Category / age rating / price are still just suggestions** in both `store_listing/*.md` files (Travel category, Everyone/4+, Free) — need explicit confirmation from Felix, not just left as-is, before submission.
+- **`assets/images/*` (3 files, ~496KB) are unused.** `metro_map_abstract_lines_lilac_*.png`, `Taipei_night_skyline_*.png`, `Taiwan_train_station_*.jpg` are declared under `flutter: assets:` in `pubspec.yaml` (so they ship in every build) but nothing in `lib/` references any of them (verified by grep). Either remove the files and the `assets/images/` line, or wire them into a screen — don't leave them as silent dead weight.
+- **`flutter test` has not been run** across the recent round of changes (404 page, loading-state rework, Terms/Privacy pages, new app icon). Run it before assuming everything is regression-free.
+- Not a TODO, just a note: the Terms/Privacy "Contact" sections intentionally use `maxfelix05@gmail.com` (Felix's own address, explicitly approved as a stand-in) — not a leftover placeholder to chase down, just something to eventually swap for a dedicated support address.

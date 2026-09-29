@@ -91,3 +91,5 @@ PX Mart Finder demonstrates how intelligent search and clear location data can r
 - Indoor navigation integration
 - Backend API and admin dashboard
 - Mobile application version
+- Code-splitting the page routes (`React.lazy` + `Suspense`) — main JS bundle is currently 629KB/199KB gzipped in one chunk (see `CLAUDE.md` → Pending / Future Improvements for detail)
+- `robots.txt` + `sitemap.xml` if real discoverability ever matters (per-page meta title/description already exist; per-page OG/social preview images would need SSR, out of scope for this stack)

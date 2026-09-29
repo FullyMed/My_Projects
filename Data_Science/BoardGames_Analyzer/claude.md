@@ -537,6 +537,32 @@ The project intentionally prioritizes transparency and interpretability over raw
 
 ---
 
+# 12. Open Items / Notes for Next Session
+
+Carried over from the 2026-09-18 → 2026-09-29 work adding the 404 page, per-page meta tags, loading states, and legal pages. Nothing here is blocking — read before starting new work so it isn't re-litigated or silently forgotten.
+
+## Legal pages need real info if this ever goes beyond a portfolio project
+`App/pages/4_Terms_of_Use.py` and `App/pages/5_Privacy_Policy.py` (see Section 6, "Legal Pages") currently say:
+- No specific software license is published for this repo
+- Contact is "via the project's GitHub repository" (`github.com/FullyMed/My_Projects`) — no dedicated email, because none was provided and a personal email wasn't published to a public, search-indexable page without being asked first
+- "Last updated: September 21, 2026" is a **hardcoded string** in both files — bump it manually if either page's content changes
+
+If Felix ever wants a real license (MIT, etc.) or a dedicated contact email on those pages, both files need editing directly (search for "6. Source Code" / "8. Contact").
+
+## `3_Not_Found.py`'s `?reason=` query param is unused
+The page reads an optional `?reason=` query param to customize its message, but nothing in the app currently links to it with that param set — no internal deep-linking feature exists yet to drive it. It's dormant, ready for a future feature (e.g. linking to it from a bad game-ID lookup), not broken.
+
+## Root `app.py` intentionally lacks the newer UX features
+The legacy single-page `app.py` / `recommender.py` at the project root do **not** have: the 404 page, `set_meta_description`, or loading-state spinners — only `recommender.py`'s logic is required to stay synced with `App/recommender.py` (Section 10). If UI parity there is ever wanted, those three features would need to be ported manually; this was a deliberate scope decision each time, not an oversight.
+
+## Image compression — considered and declined (2026-09-29)
+The app has no static images at all (every chart is generated live via matplotlib/`st.pyplot`). The only PNGs in the repo are `Reports/images/architecture.png` (468K) and `performance_chart.png` (116K), used solely in the LaTeX paper build — together under 600K with zero effect on the deployed app. Don't re-suggest this unless static images are actually added to the app later.
+
+## Still-open items from earlier sections (not new, just resurfaced here)
+- Known Paper vs. Code Inconsistencies (Section 8) — weight mismatch, missing baseline results, hand-written explainability example — none of these have been fixed yet.
+
+---
+
 # Final Development Philosophy
 
 This project should remain:

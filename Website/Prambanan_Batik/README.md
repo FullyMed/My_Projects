@@ -2,6 +2,14 @@
 
 A product catalog showcasing authentic Indonesian batik with an admin management panel and customer reviews, built with PHP and MySQL.
 
+## Known Gaps / Next Steps
+
+Identified 2026-09-29, not yet done — pick these up in a future session:
+
+- **Open Graph / Twitter Card meta tags** — pages have a unique `<title>` and `<meta name="description">` (see SEO Optimized below), but no `og:title` / `og:description` / `og:image` / `twitter:card`. Without these, links shared to WhatsApp/Facebook/Twitter/Discord render as a bare text link instead of a rich preview card. Would need `header.php` updated (same `$page_title`/`$meta_description` values can feed the OG tags) plus a social-preview image (1200×630) to use as `og:image` — none exists yet.
+- **`CONTACT_EMAIL` is still a placeholder** (`hello@prambananbatik.com`, set in `config.php`) — used by `terms.php` and `privacy.php`. Replace via the `CONTACT_EMAIL` env var (or the constant default) before this goes anywhere real.
+- **No static-asset cache headers** — `.htaccess` has security headers but no `Cache-Control` / `mod_expires` for `assets/css`, `assets/js`, `assets/favicon`. Minor performance polish, not urgent.
+
 ## Features
 
 - **Product Management**: Browse and filter batik products by category

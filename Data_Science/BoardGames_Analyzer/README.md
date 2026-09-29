@@ -263,6 +263,15 @@ The project includes a full IEEE-format research paper at `Reports/paper.tex` / 
 
 ---
 
+## Roadmap / Open Items
+
+- **Legal pages placeholder info** — Terms of Use / Privacy Policy currently list the GitHub repo as the only contact method and state no software license is published. Update both if a real license or dedicated contact email is added later.
+- **Paper vs. code inconsistencies** — the weight mismatch, missing baseline results, and the hand-written explainability example described in `CLAUDE.md` (Known Paper vs. Code Inconsistencies) are still unresolved.
+- **Root single-page app** (`app.py` / `recommender.py` at the project root) is kept only for reference and intentionally does not have the 404 page, SEO meta tags, or loading-state spinners that the `App/` version has.
+- Image compression was evaluated and skipped — the app has no static images (all charts render live via matplotlib); see `CLAUDE.md` for details.
+
+---
+
 ## Purpose
 
 Developed as an undergraduate Data Science and Recommender Systems research project to demonstrate:

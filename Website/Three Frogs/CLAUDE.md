@@ -8,6 +8,17 @@ Three Frogs is a static HTML + PHP website for a boardgame café in Surabaya, In
 
 **Live domain:** `threefrogsboardgame.com` (hosted on Hostinger)
 
+## ⚠ Pending / Next Steps (as of 2026-09-29)
+
+Read this before assuming recent work (security hardening, 404 page, loading states, legal pages, image compression) is live or fully verified — it isn't yet. Check items off or delete them as they're actually completed:
+
+- [ ] **Deploy to Hostinger.** All of the above work exists only in this git repo. Upload the changed files to the live site via FTP/File Manager (see Deployment below) — nothing has shipped yet.
+- [ ] **Run the `rate_limits` migration on the production DB** (SQL under [Database tables](#database-tables)). Status on production is unknown — check via phpMyAdmin. Missing it doesn't break anything (fails open), it just means login/signup/reset abuse isn't actually throttled yet.
+- [ ] **Confirm/run the `password_reset_tokens` migration on the production DB.** If it was never created there, **forgot-password is currently broken on the live site** — this one fails closed, not open.
+- [ ] **Set up local dev DB.** `Assets/PHP/db_config.php` holds credentials that don't match any database on this dev machine's MySQL (confirmed via a real connection error, not a guess) — paused mid-session pending Hostinger domain/site work. Two options were on the table: (a) fresh local-only credentials + fresh local schema (recommended — keeps local dev cleanly separate), or (b) create a local DB/user matching the existing `db_config.php` values exactly. Neither has been done.
+- [ ] **End-to-end test with a real database** once local DB or a staging copy exists. Login, signup, booking, cancellation, avatar update, CSRF, and rate limiting have all been code-reviewed and syntax-checked, and partially exercised live (error paths only, since no working DB connection existed locally) — but no full successful cycle has actually been run.
+- [ ] **Have a lawyer review `Terms-of-Use.html` / `Privacy-Policy.html`** before treating them as final/binding. They were written to accurately describe what the site actually does, but have not been reviewed against Indonesia's UU PDP or any other applicable law.
+
 ## Stack
 
 - **Frontend:** Vanilla HTML/CSS/JS + jQuery (CDN) — no build step, no bundler

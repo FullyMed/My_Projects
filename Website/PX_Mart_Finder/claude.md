@@ -433,6 +433,14 @@ Runtime: `npm run dev:client` → serves on port 5000, no CSS/PostCSS errors
 ### Real PX Mart Integration
 Currently NOT integrated with real PX Mart systems. All data is prototype/demo data.
 
+### Bundle Size / Code-Splitting (identified 2026-09-29, not yet done)
+`npm run build` reports the main JS chunk at **629KB (199KB gzipped)**, with Vite's "chunks larger than 500KB" warning. All pages/routes are eagerly imported in `App.tsx` (no `React.lazy`), and framer-motion + Fuse.js + all shadcn/ui components ship in one bundle regardless of which route is visited. Not urgent — the app still loads fine on typical connections — but a reasonable next step if bundle size becomes a concern:
+- Convert the page imports in `App.tsx` to `React.lazy()` + a `<Suspense>` fallback around the `<Switch>` (a small skeleton, consistent with the existing [Loading States](#loading-states) pattern), so `search-results.tsx` (Fuse.js) and other heavier pages aren't in the initial bundle for someone just landing on `/`.
+- Keep it simple — this is a route-level split, not a wholesale restructure. Don't reach for `manualChunks` tuning or a state-management rewrite; that would violate the "Do NOT Add Enterprise Complexity" rule below.
+
+### SEO Follow-ups (not yet done)
+Per-page `<title>`/`<meta name="description">` are in place ([Per-Page SEO Meta Tags](#per-page-seo-meta-tags)), but there's no `robots.txt` or `sitemap.xml` in `client/public/` yet, and the static `og:title`/`og:description`/`og:image` in `index.html` don't vary per page (expected for a client-only SPA without SSR — social link-unfurlers don't execute JS, so this is a known limitation, not a bug). If real discoverability/sharing ever matters for this prototype: add a minimal `robots.txt` + `sitemap.xml` listing the 9 routes, and note in `README.md` that per-page OG images would require SSR/prerendering (out of scope for the current stack).
+
 ---
 
 # 10. Important Rules for Claude Code

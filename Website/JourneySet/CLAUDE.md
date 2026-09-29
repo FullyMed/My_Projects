@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev       # Start dev server (Vite, http://localhost:5173)
 npm run build     # TypeScript check + production build
-npm run lint      # ESLint (0 errors expected; 3 context-file warnings are pre-existing and acceptable)
+npm run lint      # ESLint (0 errors, 0 warnings expected)
 npm run preview   # Serve the production build locally
 ```
 
@@ -180,3 +180,12 @@ The profile name is fetched with a fire-and-forget `.then()` after setting the u
 - **localStorage fallback**: API functions catch Supabase errors and return the cached value — don't remove the catch blocks.
 - **Dynamic Tailwind classes**: never build class strings by interpolation (e.g. `` `gap-${n}` ``). Tailwind's scanner can't detect them at build time; use full static class names in ternaries instead.
 - **404 handling**: `NotFoundPage` (`src/components/NotFoundPage.tsx`) is used at both catch-alls in `App.tsx` — the top-level `*` route (`fullPage={true}`, renders its own nav/footer since there's no layout wrapping it) and the nested `/app/*` catch-all inside `AppLayout` (`fullPage={false}`, renders just the centered content since the sidebar/header are already provided). It reads `useAuth()` itself to point "back home" at `/app/planner` when signed in or `/` when signed out — don't hardcode the home link.
+
+## Known gaps / possible next steps
+
+Not broken, not asked for yet — flagged here so a future session (or a fresh chat) has the context without re-deriving it:
+
+- **Open Graph / Twitter card meta tags** — `usePageMeta` only sets `document.title` and `<meta name="description">`. There's no `og:title`, `og:image`, `og:description`, or `twitter:card`, so links to JourneySet shared in Slack/iMessage/Twitter/Discord render as bare text, not a card with the logo. Would need: static OG tags in `index.html` (title/description/image, SPA can't vary these per-route without SSR or a prerender step) or, for real per-route OG tags, a prerendering solution — out of scope for a plain Vite SPA today. Lowest-effort version: add one static `og:image` (a rendered PNG of the landing hero or just the logo mark) plus `og:title`/`og:description` matching the default landing meta.
+- **Legal pages content review** — `TermsPage`/`PrivacyPage` (see above) were drafted by Claude, grounded in what the app actually does (Supabase, RLS, localStorage caching), but are not a substitute for actual legal review. Worth a human pass before treating them as binding, especially if the app ever gets real paying users or handles data from EU/UK users (GDPR) or California users (CCPA) — neither is addressed explicitly.
+- **Bundle size warning** — `npm run build` emits a "chunks are larger than 500 kB" warning (currently ~530 kB / 147 kB gzip for the main JS chunk). Not urgent at this size, but if the app keeps growing, revisit with `build.rollupOptions.output.manualChunks` or route-level `React.lazy()` code-splitting (e.g. splitting `PrintView`, which is only needed when exporting).
+- **Favicon regeneration path** — there's no `sharp`/`png-to-ico` dependency installed in the project; the PNG/ICO favicon files were generated once via a throwaway `npx` script (see Favicon set section above). If `favicon.svg` ever changes, that script isn't saved anywhere in the repo — it'll need to be recreated (it's a ~20-line Node script using `sharp` to rasterize + `png-to-ico` to bundle the `.ico`).

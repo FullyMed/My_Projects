@@ -6,6 +6,19 @@ Website for **Three Frogs**, a boardgame café in Surabaya, Indonesia. Visitors 
 
 ---
 
+## ⚠ Pending / Next Steps (as of 2026-09-29)
+
+Recent work (security hardening, 404 page, loading states, legal pages, image compression) is **not yet live and not fully verified**. Check items off or remove them as they're actually completed:
+
+- [ ] **Deploy to Hostinger.** All of the above only exists in this git repo so far — upload the changed files via FTP/File Manager (see [Deployment](#deployment)). Nothing has shipped to the live site yet.
+- [ ] **Run the `rate_limits` migration on the production DB** (SQL under [Database Schema](#database-schema)). Unknown whether it already exists there — check phpMyAdmin. Missing it fails *open*, so nothing breaks, it just means login/signup/reset abuse isn't throttled yet.
+- [ ] **Confirm/run the `password_reset_tokens` migration on the production DB.** If it's missing there, **forgot-password is currently broken on the live site** — unlike the table above, this one fails *closed*.
+- [ ] **Set up local dev DB.** The local `Assets/PHP/db_config.php` credentials don't match any database on this machine's MySQL (confirmed via a real connection error). Paused pending Hostinger domain/site work — options discussed were (a) fresh local-only credentials + schema (recommended) or (b) matching the existing `db_config.php` values with a local DB/user.
+- [ ] **End-to-end test with a real database** once local DB or staging exists — login, signup, booking, cancellation, avatar update, CSRF, and rate limiting have been code-reviewed and partially tested (error paths only) but never run through a full successful cycle.
+- [ ] **Get a lawyer to review `Terms-of-Use.html` / `Privacy-Policy.html`** before relying on them as final/binding — written to be accurate to the site's actual behavior, but not reviewed against Indonesia's UU PDP or any other law.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |

@@ -170,3 +170,16 @@ flutter build ios --release \
 ```
 
 A Play Store build also needs `android/key.properties` (see `android/key.properties.example`). Keep `build/symbols/` to de-obfuscate crash reports.
+
+---
+
+## Known TODOs / Open Items
+
+Carried over between chat sessions — pick any of these up without needing prior context:
+
+- [ ] **iOS bundle ID still the Flutter template default.** `ios/Runner.xcodeproj/project.pbxproj` has `com.mycompany.CounterApp` instead of `com.felix.taiwanfarefinder` (what Android already uses). Fix before creating an App Store Connect record / provisioning profile.
+- [ ] **Store listings need real hosted URLs.** Apple/Google require a public *URL* for Privacy Policy (and Apple wants a Support URL too) — an in-app screen alone doesn't satisfy the field. The content is ready to copy/host as-is: `lib/pages/privacy_page.dart` (and its ARB `privacy*` keys). See `store_listing/app_store.md` / `store_listing/play_store.md` for the full unfilled-fields list.
+- [ ] **Confirm category, age rating, and price for both stores.** Suggested defaults are already written into `store_listing/app_store.md` / `store_listing/play_store.md` (Travel / Everyone-4+ / Free) — just needs a final yes from Felix before submission.
+- [ ] **Remove the 3 unused illustration images** in `assets/images/` (`metro_map_abstract_lines_lilac_*.png`, `Taipei_night_skyline_*.png`, `Taiwan_train_station_*.jpg`, ~496KB total). They're bundled into every install via the `assets:` entry in `pubspec.yaml` but nothing in `lib/` references them — pure dead weight. Offered once already, not yet actioned.
+- [ ] **Run `flutter test`** — hasn't been run this session despite substantial changes (404 page, loading-state overhaul, Terms/Privacy pages, new app icon). Worth a pass to confirm nothing regressed.
+- Not urgent, just noting: the Terms/Privacy "Contact" sections use `maxfelix05@gmail.com` — Felix's own address, explicitly approved as a placeholder-for-now. Fine to leave until a dedicated support address exists.

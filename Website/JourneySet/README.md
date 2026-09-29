@@ -156,6 +156,15 @@ events            — date_iso (YYYY-MM-DD), time (HH:MM), category, title
 
 Every table enforces `auth.uid() = user_id` through RLS policies.
 
+## Roadmap / possible next steps
+
+Nothing here is broken — these are known gaps, noted so they aren't lost between sessions:
+
+- **Social share previews (Open Graph / Twitter cards)** — sharing a JourneySet link currently shows plain text, no card/image. Needs static `og:*`/`twitter:*` tags in `index.html` at minimum (a full per-route version would need SSR or prerendering, which this plain Vite SPA doesn't have).
+- **Legal page review** — Terms of Use and Privacy Policy exist (`/terms`, `/privacy`) but were drafted, not lawyer-reviewed; revisit before any real/paying user base, and consider explicit GDPR/CCPA language if that becomes relevant.
+- **Bundle size** — main JS chunk is ~530 kB (147 kB gzip), past Vite's default 500 kB warning threshold. Fine for now; code-splitting (e.g. lazy-loading `PrintView`) is the fix if it keeps growing.
+- **Favicon regen script** — the favicon PNG/ICO set was generated once via a throwaway `npx sharp` + `png-to-ico` script that isn't checked into the repo. If the logo mark ever changes, that script needs to be rewritten (see `CLAUDE.md` for the approach).
+
 ## License
 
 MIT
