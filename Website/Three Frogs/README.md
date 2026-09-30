@@ -18,6 +18,38 @@ Recent work (security hardening, 404 page, loading states, legal pages, image co
 
 ---
 
+## Recent Changes (2026-09-29 bug-fix pass — not yet deployed)
+
+**Bugs fixed:**
+- **Logged-in users saw a blank Booking page.** `Booking.js` revealed the `<form>`, but the `hidden` class sits on the wrapping `<section>`.
+- **Login, signup and password reset crashed** (empty 500) if the `rate_limits` table was missing, even though the docs said this "fails open". Strict mysqli mode threw an exception nobody caught; the helpers now catch it.
+- **The first login or signup in a fresh browser could fail with "Your session expired".** Two parallel session checks started separate sessions, so the token is now re-fetched at submit time.
+- **Duplicate bookings, and cancels that deleted both.** A user could book the same slot twice, and a cancel then deleted both rows while counting only one cancellation. Cancels are now by booking `id` and ownership-checked, and self-overlapping bookings are blocked.
+- **Dashboard "Booking history" was always empty.** The server now returns the last 90 days too.
+- **Start times that had already passed today** could be booked.
+- **Cancelling an already-started booking** was allowed.
+- **A DB error message was sent to the browser** by `get_bookings.php`.
+- **Dates and times depended on the server's timezone.** They are now pinned to Surabaya time (UTC+7).
+- **Smaller fixes:**
+  - Login email matching now ignores letter case.
+  - All game categories are filterable.
+  - Collection search matches tags.
+  - The home page no longer renders all 218 cards before showing 10.
+  - Output is HTML-escaped.
+  - The unused jQuery CDN script was removed, and the CSP tightened to `script-src 'self'`.
+
+**New behaviour (owner's decisions):**
+- 4 bookable tables, max 8 people per booking.
+- Emailed booking confirmations.
+- Terms of Use and Privacy Policy updated to match.
+
+**Tooling:**
+- `Data/schema.sql` (all tables, idempotent).
+- Optional `DB_PORT`/`SITE_URL` in `db_config.php`.
+- A working local dev DB (see [Local Setup](#local-setup)).
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |

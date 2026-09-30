@@ -93,16 +93,18 @@ Then run `claude` to start Claude Code in that project.
 - **Run:** `npm run dev:client` (use WSL2 for `npm ci`)
 
 ### Website / Three Frogs
-- **Type:** Vanilla HTML/CSS/JS + PHP 8 + MySQL, no build step
+- **Type:** Vanilla HTML/CSS/JS (no libraries) + PHP 8 + MySQL, no build step
 - **Purpose:** Boardgame café website (live: threefrogsboardgame.com) — game browsing, accounts, bookings
-- **Key traits:** Session-based auth, token-based password reset, booking system with cancellation limits
-- **Run:** Serve via XAMPP/Laragon — requires `Assets/PHP/db_config.php` (gitignored)
+- **Key traits:** Session-based auth with CSRF + rate limiting, token-based password reset, booking system (4 tables, max 8 people per booking, emailed confirmations, 2 cancellations/month). A 2026-09-29 bug-fix pass is tested locally but **not yet deployed** — see the Pending checklist at the top of its `CLAUDE.md` before deploying.
+- **Run:** Local DB is XAMPP MariaDB on **port 3307** (`threefrogs_local`, schema in `Data/schema.sql`); serve the project folder as the web server's document root. Requires `Assets/PHP/db_config.php` (gitignored).
 
 ---
 
 ## General Rules Across All Projects
 
 - Always read the project-level `CLAUDE.md` before editing any file.
+- **The owner commits and pushes himself.** Never run `git commit`/`git push`, and don't offer to; leave changes in the working tree and list the changed files. Only do it if he explicitly asks in that moment.
+- Update the project's `CLAUDE.md` and `README.md` in the same turn as any code change.
 - Never commit secrets or credentials (`db_config.php`, `.env` files, API keys).
 - Match the existing code style of each project — they differ significantly across the stack.
 - Do not add cross-project dependencies or shared abstractions; each project is fully self-contained.

@@ -18,6 +18,12 @@ Read this before assuming recent work (security hardening, 404 page, loading sta
 - [ ] **After deploying, make one real booking + one password reset on the live site** and confirm both emails arrive (PHP `mail()` on Hostinger; locally it only reaches a test mail catcher). Check spam too — if they land there, the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM set up in Hostinger.
 - [ ] **Have a lawyer review `Terms-of-Use.html` / `Privacy-Policy.html`** before treating them as final/binding. They were written to accurately describe what the site actually does, but have not been reviewed against Indonesia's UU PDP or any other applicable law.
 
+## Working rules
+
+- **Never commit or push.** The owner does that himself. Leave changes uncommitted and list the changed files.
+- **Update this file and `README.md` in the same turn as any code change**, including the Pending checklist above. If booking rules, emails, stored data or third-party scripts change, also update `Terms-of-Use.html` §4 / `Privacy-Policy.html` so they stay truthful (see [Legal pages](#legal-pages)).
+- **Verify for real before calling something done.** Run it against the local DB (see [Local development](#local-development)) and click through it in a browser; a syntax check alone isn't enough. The 2026-09-29 pass found a blank Booking page and a login crash that way, and code review had missed both.
+
 ## Stack
 
 - **Frontend:** Vanilla HTML/CSS/JS — no build step, no bundler, no JS libraries (jQuery was loaded from a CDN but never used; removed 2026-09-29 along with its CSP allowance)
