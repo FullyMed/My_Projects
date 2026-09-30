@@ -4,11 +4,12 @@ A product catalog showcasing authentic Indonesian batik with an admin management
 
 ## Known Gaps / Next Steps
 
-Identified 2026-09-29, not yet done — pick these up in a future session:
+Updated 2026-09-30 (the Open Graph tags and static-asset cache headers from the 2026-09-29 list are now done — see v2.10.0). Still open:
 
-- **Open Graph / Twitter Card meta tags** — pages have a unique `<title>` and `<meta name="description">` (see SEO Optimized below), but no `og:title` / `og:description` / `og:image` / `twitter:card`. Without these, links shared to WhatsApp/Facebook/Twitter/Discord render as a bare text link instead of a rich preview card. Would need `header.php` updated (same `$page_title`/`$meta_description` values can feed the OG tags) plus a social-preview image (1200×630) to use as `og:image` — none exists yet.
-- **`CONTACT_EMAIL` is still a placeholder** (`hello@prambananbatik.com`, set in `config.php`) — used by `terms.php` and `privacy.php`. Replace via the `CONTACT_EMAIL` env var (or the constant default) before this goes anywhere real.
-- **No static-asset cache headers** — `.htaccess` has security headers but no `Cache-Control` / `mod_expires` for `assets/css`, `assets/js`, `assets/favicon`. Minor performance polish, not urgent.
+- **`CONTACT_EMAIL` is still a placeholder** (`hello@prambananbatik.com`) — used by `terms.php` and `privacy.php`. Set the real address via the `CONTACT_EMAIL` env var (or `.env`) before this goes anywhere real.
+- **Sample product photos are stock images** — `seed.sql` and the preview sample data use free Unsplash photos that genuinely show batik, but they aren't your products. Replace them with real product photos (Admin → Products → Images) before launch.
+- **Production deploy checklist** — set `BASE_URL` to the real domain (drives canonical/Open Graph URLs, `robots.txt` and the sitemap), and change `.htaccess`'s `ErrorDocument 404` to `/404.php` when deploying at the domain root (see Production Deployment).
+- **Logout is a plain GET link** — any site could log an admin out by embedding the URL. Harmless (it can't do anything else), but turning it into a CSRF-protected POST button would close it off.
 
 ## Features
 
@@ -18,13 +19,16 @@ Identified 2026-09-29, not yet done — pick these up in a future session:
 - **Admin Dashboard**: At-a-glance stats (product count, categories, reviews, outbound clicks) with recent review feed
 - **CSV Import**: Bulk import products with upsert by SKU
 - **Responsive Design**: Mobile-friendly interface with warm batik-inspired styling, scroll-reveal animations
-- **SEO Optimized**: XML sitemap, robots.txt, and a unique meta title + meta description per page (static on Home/404, dynamic by category on the collection page, dynamic by product on product pages)
-- **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`)
+- **SEO Optimized**: XML sitemap, a generated `robots.txt`, canonical URLs, and a unique meta title + meta description per page (static on Home/404, dynamic by category on the collection page, dynamic by product on product pages)
+- **Social Previews**: Open Graph + Twitter Card tags on every public page, so links shared to WhatsApp/Facebook/X/Discord show a rich card — product pages use the product's own photo, everything else a branded 1200×630 image
+- **Custom 404 Page**: Styled not-found page served for any unmatched URL (wired up via `.htaccess`) and for unknown product IDs
+- **Graceful Images**: Products without an image — or whose external image URL has died — show an on-brand kawung placeholder instead of a broken image
+- **Empty States**: A category with no products shows a friendly "No batik here yet" message instead of an empty grid
 - **Loading States**: Top-of-page progress bar on navigation, shimmer skeletons on product images while they load, and a spinner + disabled state on form submit buttons — across both the public site and admin panel
 - **Legal Pages**: Terms of Use and Privacy Policy, linked from the footer and listed in the sitemap
 - **Favicon Set**: A custom batik-motif icon (SVG source + ICO/PNG fallbacks, `apple-touch-icon`, Android/manifest icons, Safari mask icon) across the public site and admin panel
 - **Outbound Click Tracking**: Analytics for affiliate/shop links (Shopee, Tokopedia, etc.)
-- **Preview Mode**: Sample data shown automatically when the database is unavailable
+- **Preview Mode**: Sample data shown automatically when the database is unavailable or has no products yet
 - **Brute-Force Protection**: Admin login locks out an IP after 5 failed attempts within 15 minutes
 
 ## Technology Stack
@@ -44,8 +48,8 @@ Identified 2026-09-29, not yet done — pick these up in a future session:
 ## Local Development
 
 1. Install XAMPP or WAMP and start Apache + MySQL.
-2. Clone/copy the project into your web root (e.g. `htdocs/Prambanan_Batik`).
-3. Copy `.env.example` to `.env` and fill in your credentials — **or** set environment variables directly in your Apache config (`SetEnv DB_PASSWORD yourpassword`).
+2. Put the project in your web root (e.g. `htdocs/Prambanan_Batik`). If the project lives elsewhere, link it instead of copying, so the served site never goes stale — on Windows: `mklink /J C:\xampp\htdocs\Prambanan_Batik "C:\path\to\Prambanan_Batik"`.
+3. Copy `.env.example` to `.env` and fill in your credentials — `config.php` loads it automatically. (Real environment variables, e.g. `SetEnv DB_PASSWORD yourpassword` in Apache, take precedence over `.env`.) If your MySQL/MariaDB isn't on the default port, set `DB_PORT` (e.g. `3307`).
 4. Create the database and run the schema:
    ```sql
    CREATE DATABASE prambanan_batik CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -57,7 +61,7 @@ Identified 2026-09-29, not yet done — pick these up in a future session:
    ```
 5. Access via `http://localhost/Prambanan_Batik/`.
 
-> **Never commit credentials.** `config.php` reads credentials from environment variables first. The `.env` file is gitignored — use `.env.example` as a template.
+> **Never commit credentials.** `config.php` reads real environment variables first, then the gitignored `.env` file, then built-in defaults. Use `.env.example` as a template.
 
 ## Production Deployment
 
@@ -73,17 +77,20 @@ Upload all project files via FTP to `public_html`, maintaining folder structure.
 
 ### Step 3: Configure Credentials
 
-Set environment variables in `.htaccess` or in the hosting control panel. Do **not** hard-code credentials in `config.php`.
+Either upload a `.env` file (same keys as `.env.example`; `.htaccess` blocks it from being downloaded — **only rely on this on Apache with `.htaccess` enabled**, e.g. not on Nginx) or set environment variables in the VirtualHost / hosting control panel. Do **not** hard-code credentials in `config.php`.
 
 ```apacheconf
-# .htaccess or VirtualHost block
+# VirtualHost block or hosting control panel
 SetEnv BASE_URL     https://yourdomain.com
 SetEnv DB_HOST      localhost
+SetEnv DB_PORT      3306
 SetEnv DB_NAME      your_db_name
 SetEnv DB_USER      your_db_user
 SetEnv DB_PASSWORD  your_db_password
 SetEnv CONTACT_EMAIL hello@yourdomain.com
 ```
+
+`BASE_URL` must be the real public URL: it's used for redirects, canonical and Open Graph URLs, the generated `robots.txt`, and the sitemap.
 
 When `BASE_URL` is set to the domain root (no subdirectory path), `SITE_PATH` resolves to an empty string automatically — no other code changes needed for deployment.
 
@@ -122,8 +129,8 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── terms.php                    # Terms of Use
 ├── privacy.php                  # Privacy Policy
 ├── favicon.ico                  # Root fallback for browsers that ignore <link> tags (domain-root deployments only)
-├── robots.txt                   # Search engine directives
-├── config.php                   # Site constants — BASE_URL, SITE_PATH, DB_*, SESSION_TIMEOUT, etc.
+├── robots.php                   # Generates robots.txt (served at /robots.txt via a .htaccess rewrite) from BASE_URL/SITE_PATH
+├── config.php                   # Loads .env, defines BASE_URL, SITE_PATH, DB_* (incl. DB_PORT), SESSION_TIMEOUT, etc.
 ├── db_connect.php               # Returns PDO instance (or null on failure)
 ├── functions.php                # Utility functions
 ├── header.php                   # Shared page header (uses SITE_PATH for CSS/nav links)
@@ -133,7 +140,8 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 ├── .env.example                 # Template for environment variables
 ├── assets/
 │   ├── css/styles.css           # Main stylesheet (warm batik palette; .reveal/.product-card start at opacity:0)
-│   ├── js/main.js               # Scroll reveal, sticky header, avatar initials, image loading skeletons, form-submit spinners, nav progress bar (also loaded on admin pages)
+│   ├── js/main.js               # Scroll reveal, sticky header, avatar initials, image loading skeletons + dead-image fallback, form-submit spinners, nav progress bar (also loaded on admin pages)
+│   ├── images/                  # og-image.png (1200×630 social preview) + its HTML source, product-placeholder.svg
 │   └── favicon/                 # favicon.svg (canonical source) + exported ICO/PNGs, apple-touch-icon, Android icons, mask-icon, site.webmanifest
 └── admin/
     ├── admin.css                # Admin panel styles
@@ -181,7 +189,7 @@ Once logged in, additional admin accounts can be added, have their passwords cha
 Stores image URLs and a `sort_order`; the first image (lowest `sort_order`) is the product thumbnail.
 
 ### `reviews`
-Rating is `INT CHECK (rating >= 1 AND rating <= 5)`. Fields include `reviewer_name`, `rating`, `content`, `verified_purchase`, `review_source`.
+Rating is `INT CHECK (rating >= 1 AND rating <= 5)`. Fields include `reviewer_name`, `rating`, `title` (shown above the review text when set), `content`, `reviewer_email` (never shown publicly), `verified_purchase`, `review_source`. Reviews are entered by admins — there is no public review form.
 
 ### `outbound_clicks`
 Logs every click on a buy link: `product_id`, `platform`, `user_ip`, `user_agent`, `referrer`.
@@ -201,6 +209,7 @@ Tracks failed admin login attempts by IP for brute-force protection. Columns: `i
 | `/product.php?id=<id>` | Product detail |
 | `/go.php?id=<id>&platform=<shopee\|tokopedia\|other>` | Tracked redirect |
 | `/sitemap.php` | XML sitemap |
+| `/robots.txt` | Crawler rules (generated by `robots.php`) |
 | `/404.php` | Custom not-found page (also served for any unmatched URL via `.htaccess`) |
 | `/terms.php` | Terms of Use |
 | `/privacy.php` | Privacy Policy |
@@ -216,7 +225,12 @@ BATIK-001,Mega Mendung Batik,350000,Hand-drawn cloud patterns,1,https://example.
 
 **Required**: `sku`, `name`, `price` — **Optional**: `description`, `category_id`, `image_url`
 
-Products are upserted by `sku` — existing products with the same SKU are updated.
+- Products are upserted by `sku` — an existing SKU gets its name and price updated, plus description/category when those cells aren't empty.
+- `price` must be plain digits in Rupiah (`350000`). Indonesian-formatted values like `350.000` are rejected rather than silently imported as Rp 350.
+- Header names are case-insensitive, and Excel's "CSV UTF-8" byte-order mark is handled. Wrap values containing commas in double quotes; rows with the wrong number of columns are reported and skipped.
+- New products get a slug from their name; if another product already has it, `-2`, `-3`, … is appended.
+- Re-importing the same file doesn't add duplicate copies of an `image_url` that's already on the product.
+- Each row is saved in its own transaction, and the summary lists every skipped row with the reason.
 
 ## Security
 
@@ -224,7 +238,9 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 - **Output escaping**: all dynamic content passed through `escape()` (htmlspecialchars)
 - **Passwords**: bcrypt via `password_hash()` (cost 12) / `password_verify()`
 - **Timing-safe login**: `password_verify()` always runs (against a dummy hash when the email doesn't exist) so "unknown email" and "wrong password" take the same time — prevents email enumeration via response timing
-- **CSRF protection**: all admin POST forms carry a per-session token validated server-side with `hash_equals()`
+- **CSRF protection**: all admin POST forms — including the login form — carry a per-session token validated server-side with `hash_equals()`
+- **Account removal takes effect immediately**: every admin request re-checks that the signed-in account still exists, so a deleted admin is signed out on their next click instead of when their session times out
+- **Admin never indexed**: admin responses send `X-Robots-Tag: noindex, nofollow`, independent of `robots.txt`
 - **Brute-force protection**: admin login blocked after 5 failed attempts per IP within 15 minutes, tracked in `login_attempts` table
 - **Session security**: `HttpOnly`, `SameSite=Lax`, and (over HTTPS) `Secure` cookie flags; session ID is regenerated on login (prevents session fixation); 30-minute idle timeout (sliding window); logout clears the session cookie explicitly, not just server-side state
 - **Open redirect / SSRF-of-links protection**: `go.php`, `product_images.php`, admin product buy-links (`product_edit.php`), and the CSV importer all validate that URLs start with `http://` or `https://` before they're stored or redirected to
@@ -232,7 +248,8 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 - **File upload validation**: MIME type checked via `finfo`, extension allow-listed
 - **Security headers**: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Content-Security-Policy`, and (over HTTPS) `Strict-Transport-Security` are sent on every response from `config.php`, reinforced at the web-server level in `.htaccess`
 - **Error handling**: `display_errors` is forced off whenever `DEBUG_MODE` is false — admin CRUD pages log exception details server-side via `error_log()` and show only a generic message, so database schema/internals are never exposed in the UI
-- **Hardened `.htaccess`**: blocks direct HTTP access to `config.php` / `db_connect.php` / `functions.php` (require/include-only files), `.env*`, `.sql`, `.log`, `.md`, lockfiles, and any stray `.git` directory; disables directory listing; force-redirects to HTTPS in production (skipped on `localhost`/`127.0.0.1` for local dev)
+- **Hardened `.htaccess`**: blocks direct HTTP access to `config.php` / `db_connect.php` / `functions.php` (require/include-only files), `.env*`, `.sql`, `.log`, `.md`, `.bak`, lockfiles, and every dot-file/dot-folder (`.git`, `.claude`, `.htaccess`, …) except `.well-known`; disables directory listing; force-redirects to HTTPS in production (skipped on `localhost`/`127.0.0.1` for local dev)
+- **Malformed input**: admin handlers read POST fields through `post_string()`, so crafted array inputs (`name[]=x`) are treated as empty instead of crashing PHP 8
 
 ### Recommendations
 
@@ -242,21 +259,23 @@ Products are upserted by `sku` — existing products with the same SKU are updat
 4. Keep PHP updated
 5. If `.env` was ever committed to this repository's git history, treat any values in it as compromised and rotate them — removing it from tracking (`git rm --cached`) does not remove it from history; use `git filter-repo` or BFG Repo-Cleaner if it must be scrubbed
 6. The current `Content-Security-Policy` allows `'unsafe-inline'` for scripts and styles because a few admin pages use inline `<script>`/`<style>` blocks. Moving those to external files (or nonces) would allow tightening the policy further.
-5. Monitor server error logs regularly
+7. Monitor server error logs regularly
 
 ## Troubleshooting
 
-**Database connection error** — check env vars or `config.php` defaults, confirm MySQL is running and the user has full privileges.
+**Database connection error** — check `.env` / env vars (including `DB_PORT` if MySQL isn't on 3306), confirm MySQL is running and the user has full privileges. The admin panel shows a "can't reach the database" page (HTTP 503) instead of crashing; the public site falls back to preview mode.
+
+**Site shows old code** — make sure the web root serves *this* folder (a junction/symlink), not an old copy of it.
 
 **Admin login fails** — ensure the password was hashed with `password_hash()` (bcrypt), not SHA2. See admin user creation instructions above.
 
 **Admin login locked out** — if you (or a bot) triggered the rate limit, wait 15 minutes or manually clear the `login_attempts` table: `DELETE FROM login_attempts;`
 
-**Products / content invisible** — `main.js` must be loaded by `footer.php`. If the script tag is missing, `.reveal` and `.product-card` elements stay at `opacity: 0`. Check that `footer.php` ends with `<script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>`.
+**Products / content invisible** — `main.js` must be loaded by `footer.php`. If the script tag is missing, `.reveal` and `.product-card` elements stay at `opacity: 0`. Check that `footer.php` ends with `<script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>`. (With JavaScript disabled, a `<noscript>` rule in `header.php` shows the content anyway.)
 
 **"Not Found" after login or any redirect** — if the site lives in a subdirectory (e.g. `localhost/Prambanan_Batik`), confirm `BASE_URL` includes the subdirectory. All PHP redirects use `BASE_URL`; all HTML links use `SITE_PATH`.
 
-**Preview mode shown** — the site shows sample data when the DB is unavailable. A yellow banner appears at the top. Check DB credentials.
+**Preview mode shown** — the site shows sample data when the DB is unavailable or the `products` table is empty. A yellow banner ("Preview Mode (no live product data)") appears at the top. Check DB credentials, or add products. (A category with no products is *not* preview mode — it shows an empty state.)
 
 **Rating not updating after review changes** — ratings are denormalized and recalculated in PHP on every review create/edit/delete. If ratings appear stale, you can force a recalculation by running:
 ```sql
@@ -265,7 +284,7 @@ UPDATE products p SET
     rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = p.id);
 ```
 
-**CSV import errors** — verify UTF-8 encoding, required columns present, `category_id` exists, and file is under 5 MB.
+**CSV import errors** — the import summary lists each skipped row with its reason. Common causes: prices written as `350.000` (use `350000`), a `category_id` that doesn't exist (the valid IDs are listed on the import page), unquoted commas inside a value, or a file over 5 MB.
 
 **Sitemap blank** — no products in DB, or DB connection failed (sitemap gracefully omits product URLs).
 
@@ -280,6 +299,21 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version History
+
+- **v2.10.0** (2026-09-30): Full bug-fix + polish pass, verified end to end against a real local database
+  - `.env` is now actually loaded by `config.php` (previously nothing read it); new `DB_PORT` setting
+  - Social previews: Open Graph + Twitter Card tags and canonical URLs on every public page, a branded `assets/images/og-image.png`, product pages use their own photo
+  - Static-asset caching in `.htaccess` (1 year for versioned CSS/JS via `asset_url()`'s `?v=<mtime>`, 30 days for images/icons)
+  - `robots.txt` is now generated by `robots.php` from `BASE_URL` (the old static file pointed its sitemap at `example.com`); also disallows `go.php`
+  - Unknown product IDs return a real 404 (previously showed a fake sample product under a "Database unavailable" banner); an empty category shows an empty state instead of fake products; the category filter also works in preview mode
+  - Product images: on-brand placeholder when a product has no image or its URL is dead; image alt text from the admin is used; seed/sample photos replaced with free Unsplash photos that actually show batik (the old ones were unrelated stock photos, and one link was dead)
+  - Reviews: moving a review to another product now recalculates *both* products' ratings; review titles are shown publicly; line breaks kept; "1 review" pluralization; `seed.sql` now derives `rating_avg`/`rating_count` from its actual reviews
+  - Admin: friendly 503 page instead of a fatal error when the DB is down; CSRF on the login form; deleted admins are signed out immediately; fixed an XSS in the admin-delete confirm dialog (email with an apostrophe); product/review forms keep what you typed after a validation error; clear duplicate-SKU/slug, price and category messages; slugs auto-normalised (blank = from the name); image deletes scoped to their product; 72-byte bcrypt password limit enforced; "not found" feedback instead of false success messages
+  - CSV import rewritten: handles Excel's BOM and mixed-case headers, long lines, rows with the wrong column count (previously a fatal error), `350.000`-style prices, unknown categories, duplicate names (unique slugs), and no duplicate images on re-import
+  - `.htaccess` blocks every dot-folder (e.g. `.claude/`), not just `.git`; admin pages send `X-Robots-Tag: noindex`
+  - Content without JavaScript: `<noscript>` fallback makes scroll-reveal content visible
+  - Privacy policy corrected (reviews are entered by staff — there's no public review form; mentions Google Fonts / external image hosts); legal pages show a fixed "Last updated" date instead of always the current month
+  - Removed dead Bolt.new scaffold files (`.bolt/`, empty `package-lock.json`)
 
 - **v2.9.0** (2026-09): Favicon set
   - New `assets/favicon/` — a custom four-petal batik-motif icon in the site's own espresso/copper-gold palette, with `favicon.svg` as the hand-authored canonical source

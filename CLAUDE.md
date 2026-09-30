@@ -83,8 +83,8 @@ Then run `claude` to start Claude Code in that project.
 ### Website / Prambanan Batik
 - **Type:** PHP 7.4 + MySQL, no build step
 - **Purpose:** Product catalog and admin panel for Indonesian batik
-- **Key traits:** PDO prepared statements, CSRF protection, brute-force login protection, preview mode
-- **Run:** Serve via XAMPP/WAMP — `http://localhost/Prambanan_Batik/`
+- **Key traits:** PDO prepared statements, CSRF protection, brute-force login protection, preview mode, Open Graph tags. A 2026-09-30 fix pass was verified end to end against a real local DB but is uncommitted, for the owner to review; see "Known Gaps" in its `CLAUDE.md`.
+- **Run:** `http://localhost/Prambanan_Batik/` via XAMPP Apache. `htdocs\Prambanan_Batik` is a junction to the project folder. The DB is XAMPP MariaDB on **port 3307** (`prambanan_batik`); credentials are in the project's gitignored `.env`, which `config.php` loads.
 
 ### Website / PX Mart Finder
 - **Type:** React + TypeScript + Vite SPA

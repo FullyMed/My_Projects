@@ -5,6 +5,7 @@ require_once __DIR__ . '/functions.php';
 
 $page_title = 'Terms of Use';
 $meta_description = 'The terms that govern your use of Prambanan Batik, including our partner marketplace links and customer review guidelines.';
+$canonical_url = BASE_URL . '/terms.php';
 
 ?>
 <?php include __DIR__ . '/header.php'; ?>
@@ -13,7 +14,7 @@ $meta_description = 'The terms that govern your use of Prambanan Batik, includin
         <div class="container legal-content">
             <span class="hero-eyebrow">Legal</span>
             <h2>Terms of Use</h2>
-            <p class="legal-updated">Last updated: <?php echo date('F Y'); ?></p>
+            <p class="legal-updated">Last updated: September 2026</p>
 
             <p>Welcome to <?php echo escape(SITE_NAME); ?>. By accessing or using this website, you agree to the following terms. If you do not agree with any part of these terms, please do not use the site.</p>
 

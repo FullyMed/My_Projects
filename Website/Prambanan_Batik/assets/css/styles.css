@@ -490,6 +490,26 @@ p:last-child { margin-bottom: 0; }
   font-weight: var(--font-weight-normal);
 }
 
+/* ── Empty state (e.g. a category with no products yet) ───── */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background: var(--color-surface-warm);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.empty-state h3 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+  color: var(--color-neutral-500);
+  margin-bottom: var(--spacing-lg);
+}
+
 /* ── Legal pages (Terms / Privacy) ────────────────────────── */
 .legal-page {
   padding: 4rem var(--spacing-xl) 5rem;
@@ -960,6 +980,14 @@ p:last-child { margin-bottom: 0; }
   color: var(--color-neutral-400);
   font-size: var(--font-size-xs);
   letter-spacing: 0.03em;
+}
+
+.review-title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-xs);
 }
 
 .review-text {

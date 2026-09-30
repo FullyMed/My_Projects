@@ -5,12 +5,29 @@ require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
 $error = '';
 $report = null;
+
+/**
+ * A slug not used by any other product: the slugified name, or name-2, name-3, … on a clash
+ * (two products with the same name would otherwise fail on the UNIQUE slug index).
+ */
+function uniqueProductSlug($pdo, $base) {
+    $stmt = $pdo->prepare('SELECT 1 FROM products WHERE slug = ? LIMIT 1');
+    $slug = $base;
+    for ($i = 2; ; $i++) {
+        $stmt->execute([$slug]);
+        if (!$stmt->fetchColumn()) {
+            return $slug;
+        }
+        $slug = $base . '-' . $i;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -18,24 +35,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'import' && isset($_FILES['csv_file'])) {
+    if ($action === 'import' && isset($_FILES['csv_file']) && is_array($_FILES['csv_file']) && !is_array($_FILES['csv_file']['error'])) {
         $file = $_FILES['csv_file'];
-        $error = '';
 
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            $error = 'Failed to upload file';
+            $error = $file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE
+                ? 'File is too large for the server upload limit'
+                : 'Failed to upload file';
         } elseif ($file['size'] === 0) {
             $error = 'File is empty';
         } elseif ($file['size'] > 5 * 1024 * 1024) {
             $error = 'File is too large (max 5MB)';
-        } else {
-            $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if ($fileExt !== 'csv') {
-                $error = 'File must be a CSV file';
-            }
+        } elseif (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'csv') {
+            $error = 'File must be a CSV file';
         }
 
-        if (!$error) {
+        $handle = $error ? false : fopen($file['tmp_name'], 'r');
+        if (!$error && !$handle) {
+            $error = 'Could not open file';
+        }
+
+        if ($handle) {
             $report = [
                 'inserted' => 0,
                 'updated' => 0,
@@ -44,133 +64,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'rows_processed' => 0,
             ];
 
-            $handle = fopen($file['tmp_name'], 'r');
-            if (!$handle) {
-                $error = 'Could not open file';
-            } else {
-                $headers = null;
-                $rowNum = 0;
+            $categoryStmt = $pdo->prepare('SELECT 1 FROM categories WHERE id = ? LIMIT 1');
+            $imageExistsStmt = $pdo->prepare('SELECT 1 FROM product_images WHERE product_id = ? AND image_url = ? LIMIT 1');
+            $imageInsertStmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, 0)');
 
-                while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                    $rowNum++;
+            $headers = null;
+            $rowNum = 0;
 
-                    if ($headers === null) {
-                        $headers = array_map('trim', $row);
-                        continue;
+            // Length 0 = no line-length limit, so long descriptions aren't split into bogus rows.
+            while (($row = fgetcsv($handle, 0, ',')) !== false) {
+                $rowNum++;
+
+                // fgetcsv() returns [null] for a blank line.
+                if ($row === [null] || (count($row) === 1 && trim((string)$row[0]) === '')) {
+                    continue;
+                }
+
+                if ($headers === null) {
+                    // Strip a UTF-8 BOM (Excel's "CSV UTF-8" adds one) and match headers case-insensitively.
+                    $row[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string)$row[0]);
+                    $headers = array_map(function ($h) {
+                        return strtolower(trim((string)$h));
+                    }, $row);
+                    $missing = array_diff(['sku', 'name', 'price'], $headers);
+                    if ($missing) {
+                        $error = 'CSV header row is missing required column(s): ' . implode(', ', $missing);
+                        $report = null;
+                        break;
                     }
+                    continue;
+                }
 
-                    $report['rows_processed']++;
-                    $data = array_combine($headers, $row);
-                    $data = array_map('trim', $data);
+                $report['rows_processed']++;
 
-                    $sku = $data['sku'] ?? '';
-                    $name = $data['name'] ?? '';
-                    $description = $data['description'] ?? '';
-                    $price = $data['price'] ?? '';
-                    $categoryId = $data['category_id'] ?? '';
-                    $imageUrl = $data['image_url'] ?? '';
+                if (count($row) !== count($headers)) {
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum: Has " . count($row) . ' columns but the header has ' . count($headers) . ' — check for unquoted commas';
+                    continue;
+                }
 
-                    if (empty($sku) || empty($name) || empty($price)) {
+                $data = array_map(function ($v) {
+                    return trim((string)$v);
+                }, array_combine($headers, $row));
+
+                $sku = $data['sku'] ?? '';
+                $name = $data['name'] ?? '';
+                $description = $data['description'] ?? '';
+                $price = $data['price'] ?? '';
+                $categoryId = $data['category_id'] ?? '';
+                $imageUrl = $data['image_url'] ?? '';
+
+                if ($sku === '' || $name === '' || $price === '') {
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum: Missing required fields (sku, name, price)";
+                    continue;
+                }
+
+                // Reject Indonesian thousands separators ("350.000" would otherwise import as Rp 350).
+                if (!is_numeric($price) || (float)$price < 0 || (float)$price > 99999999.99 || preg_match('/^\d{1,3}(\.\d{3})+$/', $price)) {
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum (SKU: $sku): Invalid price \"$price\" — use plain digits, e.g. 350000";
+                    continue;
+                }
+
+                if ($categoryId !== '') {
+                    $categoryExists = false;
+                    if (ctype_digit($categoryId)) {
+                        $categoryStmt->execute([(int)$categoryId]);
+                        $categoryExists = (bool)$categoryStmt->fetchColumn();
+                    }
+                    if (!$categoryExists) {
                         $report['failed']++;
-                        $report['errors'][] = "Row $rowNum: Missing required fields (sku, name, price)";
+                        $report['errors'][] = "Row $rowNum (SKU: $sku): category_id \"$categoryId\" does not exist";
                         continue;
-                    }
-
-                    if (!is_numeric($price)) {
-                        $report['failed']++;
-                        $report['errors'][] = "Row $rowNum (SKU: $sku): Invalid price format";
-                        continue;
-                    }
-
-                    if ($imageUrl && !preg_match('/^https?:\/\//i', $imageUrl)) {
-                        $report['errors'][] = "Row $rowNum (SKU: $sku): image_url ignored — must start with http:// or https://";
-                        $imageUrl = '';
-                    }
-
-                    try {
-                        $price = (float) $price;
-
-                        $stmt = $pdo->prepare('SELECT id FROM products WHERE sku = ? LIMIT 1');
-                        $stmt->execute([$sku]);
-                        $existingProduct = $stmt->fetch();
-
-                        if ($existingProduct) {
-                            $productId = $existingProduct['id'];
-
-                            $updateFields = [];
-                            $updateValues = [];
-
-                            if ($name) {
-                                $updateFields[] = 'name = ?';
-                                $updateValues[] = $name;
-                            }
-
-                            if ($description) {
-                                $updateFields[] = 'description = ?';
-                                $updateValues[] = $description;
-                            }
-
-                            if ($price) {
-                                $updateFields[] = 'price_display = ?';
-                                $updateValues[] = $price;
-                            }
-
-                            if ($categoryId) {
-                                $updateFields[] = 'category_id = ?';
-                                $updateValues[] = $categoryId;
-                            }
-
-                            $updateFields[] = 'updated_at = NOW()';
-
-                            $updateValues[] = $productId;
-
-                            $updateQuery = 'UPDATE products SET ' . implode(', ', $updateFields) . ' WHERE id = ?';
-                            $stmt = $pdo->prepare($updateQuery);
-                            $stmt->execute($updateValues);
-
-                            if ($imageUrl) {
-                                $imgStmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, 0)');
-                                $imgStmt->execute([$productId, $imageUrl]);
-                            }
-
-                            $report['updated']++;
-                        } else {
-                            $slug = slugify($name);
-                            if (empty($slug)) {
-                                $slug = slugify($sku);
-                            }
-
-                            $stmt = $pdo->prepare(
-                                'INSERT INTO products (sku, slug, name, description, price_display, category_id) VALUES (?, ?, ?, ?, ?, ?)'
-                            );
-                            $stmt->execute([
-                                $sku,
-                                $slug,
-                                $name,
-                                $description ?: null,
-                                $price,
-                                $categoryId ?: null,
-                            ]);
-
-                            if ($imageUrl) {
-                                $newProductId = $pdo->lastInsertId();
-                                $imgStmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, sort_order) VALUES (?, ?, 0)');
-                                $imgStmt->execute([$newProductId, $imageUrl]);
-                            }
-
-                            $report['inserted']++;
-                        }
-                    } catch (Exception $e) {
-                        error_log("CSV import row $rowNum (SKU: $sku) failed: " . $e->getMessage());
-                        $report['failed']++;
-                        $report['errors'][] = "Row $rowNum (SKU: $sku): Import failed — check that the SKU/slug is unique and category_id exists";
                     }
                 }
 
-                fclose($handle);
-                $message = 'CSV import completed successfully';
+                if ($imageUrl !== '' && (!preg_match('/^https?:\/\//i', $imageUrl) || strlen($imageUrl) > 500)) {
+                    $report['errors'][] = "Row $rowNum (SKU: $sku): image_url ignored — must start with http:// or https:// (max 500 characters)";
+                    $imageUrl = '';
+                }
+
+                try {
+                    $pdo->beginTransaction();
+
+                    $stmt = $pdo->prepare('SELECT id FROM products WHERE sku = ? LIMIT 1');
+                    $stmt->execute([$sku]);
+                    $existingProduct = $stmt->fetch();
+
+                    if ($existingProduct) {
+                        $productId = (int)$existingProduct['id'];
+
+                        $updateFields = ['name = ?', 'price_display = ?'];
+                        $updateValues = [$name, $price];
+
+                        if ($description !== '') {
+                            $updateFields[] = 'description = ?';
+                            $updateValues[] = $description;
+                        }
+
+                        if ($categoryId !== '') {
+                            $updateFields[] = 'category_id = ?';
+                            $updateValues[] = (int)$categoryId;
+                        }
+
+                        $updateFields[] = 'updated_at = NOW()';
+                        $updateValues[] = $productId;
+
+                        $stmt = $pdo->prepare('UPDATE products SET ' . implode(', ', $updateFields) . ' WHERE id = ?');
+                        $stmt->execute($updateValues);
+
+                        $report['updated']++;
+                    } else {
+                        $baseSlug = slugify($name) !== '' ? slugify($name) : slugify($sku);
+                        if ($baseSlug === '') {
+                            $baseSlug = 'product';
+                        }
+
+                        $stmt = $pdo->prepare(
+                            'INSERT INTO products (sku, slug, name, description, price_display, category_id) VALUES (?, ?, ?, ?, ?, ?)'
+                        );
+                        $stmt->execute([
+                            $sku,
+                            uniqueProductSlug($pdo, $baseSlug),
+                            $name,
+                            $description !== '' ? $description : null,
+                            $price,
+                            $categoryId !== '' ? (int)$categoryId : null,
+                        ]);
+                        $productId = (int)$pdo->lastInsertId();
+
+                        $report['inserted']++;
+                    }
+
+                    // Re-importing the same CSV must not stack duplicate copies of the same image.
+                    if ($imageUrl !== '') {
+                        $imageExistsStmt->execute([$productId, $imageUrl]);
+                        if (!$imageExistsStmt->fetchColumn()) {
+                            $imageInsertStmt->execute([$productId, $imageUrl]);
+                        }
+                    }
+
+                    $pdo->commit();
+                } catch (Exception $e) {
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    error_log("CSV import row $rowNum (SKU: $sku) failed: " . $e->getMessage());
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum (SKU: $sku): Import failed — check the values in this row";
+                }
+            }
+
+            fclose($handle);
+
+            if ($report !== null) {
+                if ($report['rows_processed'] === 0) {
+                    $error = 'The CSV has a header row but no product rows';
+                    $report = null;
+                } elseif ($report['failed'] === 0) {
+                    $message = 'CSV import completed successfully';
+                } elseif ($report['inserted'] + $report['updated'] > 0) {
+                    $message = 'CSV import completed with some errors — see the list below';
+                } else {
+                    $error = 'No rows were imported — see the errors below';
+                }
             }
         }
+    } elseif ($action === 'import') {
+        $error = 'Please choose a CSV file to upload';
     }
     } // end CSRF else
 }
@@ -193,7 +255,7 @@ $categories = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -261,8 +323,8 @@ $categories = $stmt->fetchAll();
                             <div>
                                 <h4 style="margin-bottom: 1rem; color: #c53030;">Errors</h4>
                                 <ul class="errors-list">
-                                    <?php foreach ($report['errors'] as $error): ?>
-                                        <li><?php echo htmlspecialchars($error); ?></li>
+                                    <?php foreach ($report['errors'] as $rowError): ?>
+                                        <li><?php echo htmlspecialchars($rowError); ?></li>
                                     <?php endforeach; ?>
                                 </ul>
                             </div>
@@ -296,8 +358,8 @@ $categories = $stmt->fetchAll();
                                 </tr>
                                 <tr>
                                     <td><strong>price</strong> <span class="required">*</span></td>
-                                    <td>Decimal</td>
-                                    <td>Product price (e.g., 29.99)</td>
+                                    <td>Number</td>
+                                    <td>Price in Rupiah, plain digits (e.g., 350000 — not 350.000 or Rp 350.000)</td>
                                 </tr>
                                 <tr>
                                     <td><strong>description</strong> <span class="optional">(optional)</span></td>
@@ -307,7 +369,7 @@ $categories = $stmt->fetchAll();
                                 <tr>
                                     <td><strong>category_id</strong> <span class="optional">(optional)</span></td>
                                     <td>Integer</td>
-                                    <td>Category ID (must exist in system)</td>
+                                    <td>Category ID (must exist in system)<?php if ($categories): ?><br><small><?php echo htmlspecialchars(implode(' · ', array_map(function ($c) { return $c['id'] . ' = ' . $c['name']; }, $categories))); ?></small><?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <td><strong>image_url</strong> <span class="optional">(optional)</span></td>
@@ -319,9 +381,10 @@ $categories = $stmt->fetchAll();
 
                         <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">Example CSV</h4>
                         <pre style="background: white; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.75rem;">sku,name,price,description,category_id,image_url
-PROD-001,Widget A,29.99,High quality widget,1,https://example.com/image1.jpg
-PROD-002,Widget B,39.99,Premium widget,1,https://example.com/image2.jpg
-PROD-003,Gadget X,49.99,,2,</pre>
+PRMB-101,Sogan Parang Batik Tulis,650000,"Hand-drawn parang motif, natural sogan dye",1,https://example.com/parang.jpg
+PRMB-102,Kawung Batik Shirt,275000,Cotton shirt with kawung motif,2,https://example.com/kawung.jpg
+PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
+                        <p style="color: #666; font-size: 0.8125rem; margin-top: 0.75rem;">Rows whose SKU already exists update that product (name, price, and any non-empty description/category). Wrap values that contain commas in double quotes. Files saved as "CSV UTF-8" from Excel work as-is.</p>
                     </div>
 
                     <form method="POST" enctype="multipart/form-data">
@@ -352,7 +415,7 @@ PROD-003,Gadget X,49.99,,2,</pre>
         </div>
     </div>
 
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
     <script>
         const fileInput = document.getElementById('csv_file');
         const fileLabel = document.querySelector('.file-input-label');

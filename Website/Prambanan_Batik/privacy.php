@@ -4,7 +4,8 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
 $page_title = 'Privacy Policy';
-$meta_description = 'How Prambanan Batik collects and uses information, including review submissions, outbound marketplace click tracking, and cookies.';
+$meta_description = 'How Prambanan Batik collects and uses information, including customer reviews, outbound marketplace click tracking, and cookies.';
+$canonical_url = BASE_URL . '/privacy.php';
 
 ?>
 <?php include __DIR__ . '/header.php'; ?>
@@ -13,14 +14,15 @@ $meta_description = 'How Prambanan Batik collects and uses information, includin
         <div class="container legal-content">
             <span class="hero-eyebrow">Legal</span>
             <h2>Privacy Policy</h2>
-            <p class="legal-updated">Last updated: <?php echo date('F Y'); ?></p>
+            <p class="legal-updated">Last updated: September 2026</p>
 
             <p>This policy explains what information <?php echo escape(SITE_NAME); ?> collects, how we use it, and the choices you have. We collect only what's needed to run a product catalog and review site — we do not sell your data.</p>
 
             <h3>1. Information We Collect</h3>
-            <p><strong>Reviews you submit.</strong> If you leave a review, we store the reviewer name, an optional email address, your rating, and the review text. Your email is never shown publicly and is used only if we need to follow up about your review.</p>
+            <p><strong>Customer reviews.</strong> Reviews shown on product pages are added by our staff from feedback customers send us (for example by message or email) or from marketplace reviews — the site itself has no public review form. For each review we store the reviewer's name, an optional email address, the rating, an optional title, and the review text. The email is never shown publicly and is used only if we need to follow up about that review.</p>
             <p><strong>Outbound click data.</strong> When you click a "Buy" link to Shopee, Tokopedia, or another marketplace, we log which product and platform you clicked, along with your IP address, browser user agent, and the page you came from. This is used in aggregate to understand which products and marketplaces are popular — it is not linked to any account, since the public site has no customer accounts.</p>
             <p><strong>Cookies.</strong> We set one strictly necessary session cookie to keep the site working correctly (for example, to keep an admin signed in). It is <code>HttpOnly</code> and marked <code>SameSite=Lax</code>. We do not use advertising or third-party tracking cookies.</p>
+            <p><strong>Third-party content.</strong> Our pages load fonts from Google Fonts, and some product photos may be hosted on external image services. Like any website, those providers receive your IP address and browser details when your browser requests those files.</p>
             <p><strong>Admin accounts.</strong> Store staff who manage this catalog have their own login (email + a securely hashed password). This is separate from anything collected about site visitors.</p>
 
             <h3>2. How We Use Information</h3>

@@ -1,11 +1,15 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
+requireDatabase($pdo);
+
 $error = '';
 $success = '';
+$email = '';
 
 if (isAdminLoggedIn()) {
     header('Location: ' . BASE_URL . '/admin/index.php');
@@ -17,10 +21,12 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 if (isLoginRateLimited($pdo, $ip)) {
     $error = 'Too many failed login attempts. Please try again in ' . LOGIN_LOCKOUT_MINUTES . ' minutes.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email = is_string($_POST['email'] ?? null) ? trim($_POST['email']) : '';
+    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
-    if (empty($email) || empty($password)) {
+    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Your session expired. Please try again.';
+    } elseif ($email === '' || $password === '') {
         $error = 'Email and password are required';
     } else {
         $result = loginAdmin($pdo, $email, $password);
@@ -48,7 +54,7 @@ if (isLoginRateLimited($pdo, $ip)) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
     <style>
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -197,15 +203,18 @@ if (isLoginRateLimited($pdo, $ip)) {
             <?php endif; ?>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
+                        value="<?php echo escape($email ?? ''); ?>"
                         placeholder="admin@example.com"
+                        autocomplete="username"
                         required
-                        autofocus
+                        <?php echo empty($email) ? 'autofocus' : ''; ?>
                     >
                 </div>
 
@@ -216,7 +225,9 @@ if (isLoginRateLimited($pdo, $ip)) {
                         id="password"
                         name="password"
                         placeholder="Enter your password"
+                        autocomplete="current-password"
                         required
+                        <?php echo !empty($email) ? 'autofocus' : ''; ?>
                     >
                 </div>
 
@@ -224,6 +235,6 @@ if (isLoginRateLimited($pdo, $ip)) {
             </form>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

@@ -115,11 +115,28 @@ function initImageLoading() {
       img.classList.add('img-loaded');
     }
 
-    if (img.complete) {
+    // A dead external image URL swaps to the local placeholder (data-fallback) instead of
+    // showing a broken-image icon. Only once, so a missing placeholder can't loop.
+    function onError() {
+      const fallback = img.dataset.fallback;
+      if (fallback && !img.dataset.fellBack) {
+        img.dataset.fellBack = '1';
+        img.src = fallback;
+        return;
+      }
       markDone();
-    } else {
-      img.addEventListener('load', markDone, { once: true });
-      img.addEventListener('error', markDone, { once: true });
+    }
+
+    img.addEventListener('load', markDone);
+    img.addEventListener('error', onError);
+
+    // Already settled before this script ran (cached, or failed early).
+    if (img.complete) {
+      if (img.naturalWidth > 0) {
+        markDone();
+      } else {
+        onError();
+      }
     }
   });
 }
@@ -181,9 +198,16 @@ function initNavProgressBar() {
     if (!e.defaultPrevented) start();
   });
 
-  // Restore the bar if the page is reached via back/forward cache.
-  window.addEventListener('pageshow', function () {
+  // Restore the bar — and any submit buttons initFormLoadingStates() disabled — if the
+  // page is reached via the back/forward cache, so the restored page is usable again.
+  window.addEventListener('pageshow', function (e) {
     bar.classList.remove('is-active');
     started = false;
+    if (e.persisted) {
+      document.querySelectorAll('.is-loading').forEach(function (btn) {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+      });
+    }
   });
 }

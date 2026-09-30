@@ -1,10 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
@@ -17,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
 
         if ($action === 'delete') {
-            $id = trim($_POST['id'] ?? '');
+            $id = (int)post_string('id');
 
-            if (empty($id)) {
+            if ($id < 1) {
                 $error = 'Review ID is required';
             } else {
                 try {
@@ -27,6 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $prodStmt = $pdo->prepare('SELECT product_id FROM reviews WHERE id = ? LIMIT 1');
                     $prodStmt->execute([$id]);
                     $deletedProductId = $prodStmt->fetchColumn();
+
+                    if ($deletedProductId === false) {
+                        throw new RuntimeException('Review not found');
+                    }
 
                     $stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
                     $stmt->execute([$id]);
@@ -69,7 +75,7 @@ $reviews = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -165,6 +171,6 @@ $reviews = $stmt->fetchAll();
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

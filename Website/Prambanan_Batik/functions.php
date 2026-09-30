@@ -1,10 +1,41 @@
 <?php
 
 /**
- * Escape and sanitize string for SQL queries (using prepared statements is preferred)
+ * Escape a value for HTML output. Null (e.g. an optional DB column) renders as an empty string.
  */
 function escape($string) {
-    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string)$string, ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * SITE_PATH-prefixed URL for a local static asset, with a cache-busting ?v=<mtime> so the
+ * long-lived browser caching set in .htaccess never serves a stale file after a deploy.
+ */
+function asset_url($path) {
+    $path = '/' . ltrim($path, '/');
+    $file = __DIR__ . $path;
+    return SITE_PATH . $path . (is_file($file) ? '?v=' . filemtime($file) : '');
+}
+
+/**
+ * Turn a root-relative URL (e.g. SITE_PATH . '/page.php') into an absolute one using BASE_URL's
+ * origin. Already-absolute http(s) URLs are returned unchanged. Used for canonical/Open Graph tags.
+ */
+function absolute_url($url) {
+    if (preg_match('/^https?:\/\//i', $url)) {
+        return $url;
+    }
+    $parts = parse_url(BASE_URL);
+    $origin = ($parts['scheme'] ?? 'http') . '://' . ($parts['host'] ?? 'localhost') . (isset($parts['port']) ? ':' . $parts['port'] : '');
+    return $origin . '/' . ltrim($url, '/');
+}
+
+/**
+ * Product image URL, or the local placeholder when a product has no image yet.
+ */
+function product_image_url($url) {
+    $url = trim((string)$url);
+    return $url !== '' ? $url : SITE_PATH . '/assets/images/product-placeholder.svg';
 }
 
 /**
@@ -23,7 +54,7 @@ function slugify($string) {
  */
 function get_pagination($current_page, $total_items, $items_per_page = ITEMS_PER_PAGE) {
     $current_page = max(1, (int)$current_page);
-    $total_pages = ceil($total_items / $items_per_page);
+    $total_pages = (int)ceil($total_items / $items_per_page);
     $current_page = min($current_page, max(1, $total_pages));
 
     return [
@@ -69,6 +100,14 @@ function get_star_rating($rating) {
     $stars .= str_repeat('☆', $empty_stars);
 
     return $stars;
+}
+
+/**
+ * "1 review" / "12 reviews" (optionally with a different noun, e.g. "customer review").
+ */
+function review_count_label($count, $noun = 'review') {
+    $count = (int)$count;
+    return number_format($count, 0, ',', '.') . ' ' . $noun . ($count === 1 ? '' : 's');
 }
 
 /**
@@ -144,6 +183,18 @@ function get_query_param($key, $default = null, $filter = FILTER_DEFAULT) {
 }
 
 /**
+ * A POST field as a string ('' when missing, or when a crafted request sends an array
+ * like name[]=x, which would otherwise make trim()/strlen() throw a TypeError).
+ */
+function post_string($key, $trim = true) {
+    $value = $_POST[$key] ?? '';
+    if (!is_string($value)) {
+        return '';
+    }
+    return $trim ? trim($value) : $value;
+}
+
+/**
  * Get POST parameter safely
  */
 function get_post_param($key, $default = null, $filter = FILTER_DEFAULT) {
@@ -204,7 +255,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.8,
             'rating_count' => 342,
             'price_display' => 350000,
-            'image_url' => 'https://images.pexels.com/photos/3921857/pexels-photo-3921857.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1616125162686-770bf85622b9?auto=format&fit=crop&w=600&q=80',
             'description' => 'Premium traditional Mega Mendung batik with intricate cloud patterns. Hand-drawn designs on premium cotton fabric. Perfect for formal occasions and collections.',
         ],
         [
@@ -215,7 +266,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.6,
             'rating_count' => 218,
             'price_display' => 450000,
-            'image_url' => 'https://images.pexels.com/photos/2220316/pexels-photo-2220316.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1630929436231-91f4c6fe4884?auto=format&fit=crop&w=600&q=80',
             'description' => 'Contemporary Pekalongan batik dress combining traditional patterns with modern silhouette. Comfortable breathable fabric suitable for daily wear and special events.',
         ],
         [
@@ -226,7 +277,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.7,
             'rating_count' => 289,
             'price_display' => 280000,
-            'image_url' => 'https://images.pexels.com/photos/5632399/pexels-photo-5632399.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1444362408440-274ecb6fc730?auto=format&fit=crop&w=600&q=80',
             'description' => 'Authentic Cirebon batik fabric with distinctive motifs featuring celestial and floral elements. Premium quality suitable for custom tailoring and collection.',
         ],
         [
@@ -237,7 +288,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.5,
             'rating_count' => 156,
             'price_display' => 320000,
-            'image_url' => 'https://images.pexels.com/photos/4534200/pexels-photo-4534200.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1680345575812-2f6878d7d775?auto=format&fit=crop&w=600&q=80',
             'description' => 'Traditional Javanese sarong featuring authentic batik patterns. Versatile wrap suitable for casual wear, beach outings, and cultural events.',
         ],
         [
@@ -248,7 +299,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.9,
             'rating_count' => 405,
             'price_display' => 520000,
-            'image_url' => 'https://images.pexels.com/photos/3622613/pexels-photo-3622613.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1680345575909-99633d4b6f46?auto=format&fit=crop&w=600&q=80',
             'description' => 'Distinctive Lasem red batik featuring bold red and indigo colors. Signature design from Lasem region with intricate maritime motifs.',
         ],
         [
@@ -259,7 +310,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.9,
             'rating_count' => 178,
             'price_display' => 850000,
-            'image_url' => 'https://images.pexels.com/photos/3962286/pexels-photo-3962286.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1604973104381-870c92f10343?auto=format&fit=crop&w=600&q=80',
             'description' => 'Premium batik tulis (hand-drawn) masterpiece created by master artisans. Limited edition with unique artistic value and exceptional craftsmanship.',
         ],
         [
@@ -270,7 +321,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.4,
             'rating_count' => 97,
             'price_display' => 185000,
-            'image_url' => 'https://images.pexels.com/photos/2018994/pexels-photo-2018994.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1672716912554-c23ba8fac4ce?auto=format&fit=crop&w=600&q=80',
             'description' => 'Elegant Yogyakarta batik scarf with traditional motifs. Lightweight and versatile for various styling occasions.',
         ],
         [
@@ -281,7 +332,7 @@ function get_sample_batik_products($limit = null) {
             'rating_avg' => 4.6,
             'rating_count' => 134,
             'price_display' => 420000,
-            'image_url' => 'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg?auto=compress&cs=tinysrgb&w=500',
+            'image_url' => 'https://images.unsplash.com/photo-1586319826907-1ff4aadbaddc?auto=format&fit=crop&w=600&q=80',
             'description' => 'Beautiful indigo batik wall hanging featuring traditional geometric patterns. Perfect for adding cultural charm to any interior space.',
         ],
     ];

@@ -1,10 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
@@ -28,11 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
 
         if ($action === 'create') {
-            $name = trim($_POST['name'] ?? '');
-            $slug = trim($_POST['slug'] ?? '');
-            $description = trim($_POST['description'] ?? '');
+            $name = post_string('name');
+            // Normalise the slug (lowercase, hyphens); if left blank, derive it from the name.
+            $slug = slugify(post_string('slug') !== '' ? post_string('slug') : $name);
+            $description = post_string('description');
 
-            if (empty($name) || empty($slug)) {
+            if ($name === '' || $slug === '') {
                 $error = 'Name and slug are required';
             } else {
                 try {
@@ -45,12 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'update') {
-            $id = trim($_POST['id'] ?? '');
-            $name = trim($_POST['name'] ?? '');
-            $slug = trim($_POST['slug'] ?? '');
-            $description = trim($_POST['description'] ?? '');
+            $id = (int)post_string('id');
+            $name = post_string('name');
+            $slug = slugify(post_string('slug') !== '' ? post_string('slug') : $name);
+            $description = post_string('description');
 
-            if (empty($id) || empty($name) || empty($slug)) {
+            if ($id < 1 || $name === '' || $slug === '') {
                 $error = 'ID, name and slug are required';
             } else {
                 try {
@@ -65,15 +68,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'delete') {
-            $id = trim($_POST['id'] ?? '');
+            $id = (int)post_string('id');
 
-            if (empty($id)) {
+            if ($id < 1) {
                 $error = 'Category ID is required';
             } else {
                 try {
+                    // Products in this category are kept; the FK sets their category_id to NULL.
+                    $countStmt = $pdo->prepare('SELECT COUNT(*) FROM products WHERE category_id = ?');
+                    $countStmt->execute([$id]);
+                    $orphaned = (int)$countStmt->fetchColumn();
+
                     $stmt = $pdo->prepare('DELETE FROM categories WHERE id = ?');
                     $stmt->execute([$id]);
-                    $message = 'Category deleted successfully';
+                    $message = 'Category deleted successfully' . ($orphaned > 0 ? " ({$orphaned} product" . ($orphaned === 1 ? '' : 's') . ' now uncategorized)' : '');
+                    if ($edit_id === $id) {
+                        $edit_category = null;
+                        $edit_id = null;
+                    }
                 } catch (Exception $e) {
                     error_log('Failed to delete category: ' . $e->getMessage());
                     $error = 'Failed to delete category';
@@ -101,7 +113,7 @@ $categories = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -154,7 +166,7 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="edit_slug">Slug</label>
-                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" required>
+                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" placeholder="Leave blank to generate from the name">
                             </div>
 
                             <div class="form-group">
@@ -182,7 +194,7 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="slug">Slug</label>
-                                <input type="text" id="slug" name="slug" required>
+                                <input type="text" id="slug" name="slug" placeholder="Leave blank to generate from the name">
                             </div>
 
                             <div class="form-group">
@@ -211,7 +223,7 @@ $categories = $stmt->fetchAll();
                                 <tr>
                                     <td><?php echo htmlspecialchars($category['name']); ?></td>
                                     <td><?php echo htmlspecialchars($category['slug']); ?></td>
-                                    <td><?php echo htmlspecialchars(substr($category['description'] ?? '', 0, 50)); ?></td>
+                                    <td><?php echo htmlspecialchars(truncate_text($category['description'] ?? '', 50)); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($category['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
@@ -220,7 +232,7 @@ $categories = $stmt->fetchAll();
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($category['id']); ?>">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category?')">Delete</button>
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category? Its products are kept but become uncategorized.')">Delete</button>
                                             </form>
                                         </div>
                                     </td>
@@ -232,6 +244,6 @@ $categories = $stmt->fetchAll();
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

@@ -22,14 +22,14 @@ INSERT INTO products (id, category_id, sku, slug, name, description, price_displ
 
 -- Insert product images
 INSERT INTO product_images (id, product_id, image_url, alt_text, sort_order) VALUES
-  (1, 1, 'https://images.pexels.com/photos/3921857/pexels-photo-3921857.jpeg?auto=compress&cs=tinysrgb&w=400', 'Traditional Mega Mendung Batik', 0),
-  (2, 2, 'https://images.pexels.com/photos/2220316/pexels-photo-2220316.jpeg?auto=compress&cs=tinysrgb&w=400', 'Modern Pekalongan Batik Dress', 0),
-  (3, 3, 'https://images.pexels.com/photos/5632399/pexels-photo-5632399.jpeg?auto=compress&cs=tinysrgb&w=400', 'Authentic Cirebon Batik Fabric', 0),
-  (4, 4, 'https://images.pexels.com/photos/4534200/pexels-photo-4534200.jpeg?auto=compress&cs=tinysrgb&w=400', 'Javanese Sarong with Batik Motifs', 0),
-  (5, 5, 'https://images.pexels.com/photos/3622613/pexels-photo-3622613.jpeg?auto=compress&cs=tinysrgb&w=400', 'Lasem Red Batik Collection', 0),
-  (6, 6, 'https://images.pexels.com/photos/3962286/pexels-photo-3962286.jpeg?auto=compress&cs=tinysrgb&w=400', 'Batik Tulis Hand-drawn Masterpiece', 0),
-  (7, 7, 'https://images.pexels.com/photos/2018994/pexels-photo-2018994.jpeg?auto=compress&cs=tinysrgb&w=400', 'Yogyakarta Batik Scarf', 0),
-  (8, 8, 'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg?auto=compress&cs=tinysrgb&w=400', 'Indigo Batik Wall Hanging', 0);
+  (1, 1, 'https://images.unsplash.com/photo-1616125162686-770bf85622b9?auto=format&fit=crop&w=600&q=80', 'Traditional Mega Mendung Batik', 0),
+  (2, 2, 'https://images.unsplash.com/photo-1630929436231-91f4c6fe4884?auto=format&fit=crop&w=600&q=80', 'Modern Pekalongan Batik Dress', 0),
+  (3, 3, 'https://images.unsplash.com/photo-1444362408440-274ecb6fc730?auto=format&fit=crop&w=600&q=80', 'Authentic Cirebon Batik Fabric', 0),
+  (4, 4, 'https://images.unsplash.com/photo-1680345575812-2f6878d7d775?auto=format&fit=crop&w=600&q=80', 'Javanese Sarong with Batik Motifs', 0),
+  (5, 5, 'https://images.unsplash.com/photo-1680345575909-99633d4b6f46?auto=format&fit=crop&w=600&q=80', 'Lasem Red Batik Collection', 0),
+  (6, 6, 'https://images.unsplash.com/photo-1604973104381-870c92f10343?auto=format&fit=crop&w=600&q=80', 'Batik Tulis Hand-drawn Masterpiece', 0),
+  (7, 7, 'https://images.unsplash.com/photo-1672716912554-c23ba8fac4ce?auto=format&fit=crop&w=600&q=80', 'Yogyakarta Batik Scarf', 0),
+  (8, 8, 'https://images.unsplash.com/photo-1586319826907-1ff4aadbaddc?auto=format&fit=crop&w=600&q=80', 'Indigo Batik Wall Hanging', 0);
 
 -- Insert reviews for Prambanan Batik products
 INSERT INTO reviews (id, product_id, reviewer_name, rating, content, review_source, verified_purchase, created_at) VALUES
@@ -43,3 +43,9 @@ INSERT INTO reviews (id, product_id, reviewer_name, rating, content, review_sour
   (8, 6, 'Hendra', 5, 'Hand-drawn batik tulis - exceptional quality and artistry. Limited edition feels exclusive.', NULL, true, NOW()),
   (9, 7, 'Wati', 4, 'Elegant scarf with traditional Yogyakarta patterns. Great for everyday wear.', NULL, true, NOW()),
   (10, 8, 'Suryanto', 5, 'Wall hanging adds cultural charm to my living room. Indigo colors are mesmerizing.', NULL, true, NOW());
+
+-- rating_avg / rating_count are denormalized (see CLAUDE.md): derive them from the reviews
+-- actually inserted above, exactly as the admin panel does on every review change.
+UPDATE products SET
+  rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+  rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id);

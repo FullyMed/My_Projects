@@ -2,10 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "prambanan-batik-php",
-      "runtimeExecutable": "C:\\XAMPP\\php\\php.exe",
-      "runtimeArgs": ["-S", "localhost:8091"],
-      "port": 8091
+      "name": "prambanan-batik-apache",
+      "url": "http://localhost",
+      "port": 80
     }
   ]
 }

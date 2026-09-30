@@ -5,7 +5,8 @@ require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $stats = [
@@ -59,7 +60,7 @@ if ($pdo !== null) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
     <style>
         .stats-grid {
             display: grid;
@@ -186,6 +187,6 @@ if ($pdo !== null) {
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

@@ -38,9 +38,11 @@ try {
 
         if ($buy_url) {
             try {
-                $user_ip = $_SERVER['REMOTE_ADDR'] ?? '';
-                $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-                $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+                // Trim to the column sizes (user_ip VARCHAR(45), referrer VARCHAR(500)) so an
+                // unusually long header can't make a strict-mode MySQL reject the log insert.
+                $user_ip = substr($_SERVER['REMOTE_ADDR'] ?? '', 0, 45);
+                $user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 1000);
+                $referrer = mb_substr($_SERVER['HTTP_REFERER'] ?? '', 0, 500, 'UTF-8');
 
                 $log_stmt = $db->prepare('INSERT INTO outbound_clicks (product_id, platform, user_ip, user_agent, referrer, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
                 $log_stmt->execute([$product_id, $platform, $user_ip, $user_agent, $referrer]);

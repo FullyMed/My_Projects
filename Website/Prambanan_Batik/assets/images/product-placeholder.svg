@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="No product image yet">
+  <!-- Shown when a product has no image. Same kawung motif as assets/favicon/favicon.svg, tiled faintly on cream. -->
+  <defs>
+    <pattern id="kawung" width="50" height="50" patternUnits="userSpaceOnUse">
+      <g fill="#ecddd0">
+        <ellipse cx="25" cy="17.6" rx="7.5" ry="11.5"/>
+        <ellipse cx="25" cy="17.6" rx="7.5" ry="11.5" transform="rotate(90 25 25)"/>
+        <ellipse cx="25" cy="17.6" rx="7.5" ry="11.5" transform="rotate(180 25 25)"/>
+        <ellipse cx="25" cy="17.6" rx="7.5" ry="11.5" transform="rotate(270 25 25)"/>
+      </g>
+      <circle cx="25" cy="25" r="5.5" fill="#f5ecdf"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="400" fill="#faf3e8"/>
+  <rect width="400" height="400" fill="url(#kawung)"/>
+  <g transform="translate(200 200)">
+    <circle r="62" fill="#2a1a0e"/>
+    <g fill="#c4872c">
+      <ellipse cy="-9.2" rx="9.3" ry="14.3"/>
+      <ellipse cy="-9.2" rx="9.3" ry="14.3" transform="rotate(90)"/>
+      <ellipse cy="-9.2" rx="9.3" ry="14.3" transform="rotate(180)"/>
+      <ellipse cy="-9.2" rx="9.3" ry="14.3" transform="rotate(270)"/>
+    </g>
+    <circle r="6.8" fill="#e8c47a"/>
+  </g>
+</svg>

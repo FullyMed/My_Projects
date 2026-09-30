@@ -1,10 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
@@ -17,16 +19,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
 
         if ($action === 'create') {
-            $email    = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $confirm  = $_POST['confirm'] ?? '';
+            $email    = post_string('email');
+            $password = post_string('password', false);
+            $confirm  = post_string('confirm', false);
 
             if (empty($email) || empty($password)) {
                 $error = 'Email and password are required';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
                 $error = 'Invalid email address';
             } elseif (strlen($password) < 8) {
                 $error = 'Password must be at least 8 characters';
+            } elseif (strlen($password) > 72) {
+                // bcrypt silently ignores everything after 72 bytes.
+                $error = 'Password must be at most 72 characters';
             } elseif ($password !== $confirm) {
                 $error = 'Passwords do not match';
             } else {
@@ -64,7 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     try {
                         $stmt = $pdo->prepare('DELETE FROM admin_users WHERE id = ?');
                         $stmt->execute([$id]);
-                        $message = 'Admin account deleted';
+                        if ($stmt->rowCount() > 0) {
+                            $message = 'Admin account deleted';
+                        } else {
+                            $error = 'Admin account not found';
+                        }
                     } catch (Exception $e) {
                         error_log('Failed to delete admin: ' . $e->getMessage());
                         $error = 'Failed to delete admin account';
@@ -74,13 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } elseif ($action === 'change_password') {
             $id       = (int)($_POST['id'] ?? 0);
-            $password = $_POST['new_password'] ?? '';
-            $confirm  = $_POST['confirm_password'] ?? '';
+            $password = post_string('new_password', false);
+            $confirm  = post_string('confirm_password', false);
 
             if ($id < 1) {
                 $error = 'Invalid admin ID';
             } elseif (strlen($password) < 8) {
                 $error = 'Password must be at least 8 characters';
+            } elseif (strlen($password) > 72) {
+                $error = 'Password must be at most 72 characters';
             } elseif ($password !== $confirm) {
                 $error = 'Passwords do not match';
             } else {
@@ -88,7 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                     $stmt = $pdo->prepare('UPDATE admin_users SET password_hash = ? WHERE id = ?');
                     $stmt->execute([$hash, $id]);
-                    $message = 'Password updated successfully';
+                    // A fresh bcrypt hash always differs from the old one, so 0 rows means no such admin.
+                    if ($stmt->rowCount() > 0) {
+                        $message = 'Password updated successfully';
+                    } else {
+                        $error = 'Admin account not found';
+                    }
                 } catch (Exception $e) {
                     error_log('Failed to update admin password: ' . $e->getMessage());
                     $error = 'Failed to update password';
@@ -116,7 +132,7 @@ $admins = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
     <style>
         .admin-card {
             background: #fff;
@@ -211,7 +227,7 @@ $admins = $stmt->fetchAll();
                 <div style="margin-bottom: 2rem;">
                     <?php foreach ($admins as $a):
                         $isSelf = (int)$a['id'] === (int)$admin['id'];
-                        $initial = strtoupper(substr($a['email'], 0, 1));
+                        $initial = mb_strtoupper(mb_substr($a['email'], 0, 1, 'UTF-8'), 'UTF-8');
                     ?>
                     <div class="admin-card <?php echo $isSelf ? 'is-self' : ''; ?>">
                         <div style="width:100%; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
@@ -227,16 +243,16 @@ $admins = $stmt->fetchAll();
                             </div>
 
                             <div class="admin-actions">
-                                <button type="button" class="btn" onclick="togglePwForm(<?php echo $a['id']; ?>)">
+                                <button type="button" class="btn" onclick="togglePwForm(<?php echo (int)$a['id']; ?>)">
                                     Change Password
                                 </button>
                                 <?php if (!$isSelf): ?>
                                 <form method="POST" style="display:inline;">
                                     <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<?php echo $a['id']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo (int)$a['id']; ?>">
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('Delete admin <?php echo htmlspecialchars($a['email']); ?>?')">
+                                            onclick="return confirm(<?php echo htmlspecialchars(json_encode('Delete admin ' . $a['email'] . '?'), ENT_QUOTES, 'UTF-8'); ?>)">
                                         Delete
                                     </button>
                                 </form>
@@ -245,9 +261,9 @@ $admins = $stmt->fetchAll();
                         </div>
 
                         <!-- Inline password change form -->
-                        <form method="POST" class="pw-form" id="pw-form-<?php echo $a['id']; ?>">
+                        <form method="POST" class="pw-form" id="pw-form-<?php echo (int)$a['id']; ?>">
                             <input type="hidden" name="action" value="change_password">
-                            <input type="hidden" name="id" value="<?php echo $a['id']; ?>">
+                            <input type="hidden" name="id" value="<?php echo (int)$a['id']; ?>">
                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                             <div class="pw-row">
                                 <div class="form-group">
@@ -260,7 +276,7 @@ $admins = $stmt->fetchAll();
                                 </div>
                                 <div>
                                     <button type="submit" class="btn">Save</button>
-                                    <button type="button" class="btn btn-secondary" onclick="togglePwForm(<?php echo $a['id']; ?>)">Cancel</button>
+                                    <button type="button" class="btn btn-secondary" onclick="togglePwForm(<?php echo (int)$a['id']; ?>)">Cancel</button>
                                 </div>
                             </div>
                         </form>
@@ -279,7 +295,7 @@ $admins = $stmt->fetchAll();
                             <div class="form-group">
                                 <label for="email">Email <span class="required">*</span></label>
                                 <input type="email" id="email" name="email"
-                                       value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
+                                       value="<?php echo htmlspecialchars($error !== '' ? post_string('email') : ''); ?>"
                                        placeholder="newadmin@example.com" required>
                             </div>
 
@@ -306,7 +322,7 @@ $admins = $stmt->fetchAll();
         </div>
     </div>
 
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
     <script>
         function togglePwForm(id) {
             const form = document.getElementById('pw-form-' + id);

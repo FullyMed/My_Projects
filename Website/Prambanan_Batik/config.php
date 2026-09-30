@@ -1,19 +1,53 @@
 <?php
 
+// Load KEY=VALUE pairs from the gitignored .env file next to this one. Real environment
+// variables (e.g. Apache SetEnv or the host's control panel) always win over .env values.
+// Stored in $_ENV rather than putenv(), which isn't thread-safe under threaded Apache (XAMPP).
+if (is_readable(__DIR__ . '/.env')) {
+    foreach (file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $env_line) {
+        $env_line = trim($env_line);
+        if ($env_line === '' || $env_line[0] === '#' || strpos($env_line, '=') === false) {
+            continue;
+        }
+        list($env_key, $env_value) = array_map('trim', explode('=', $env_line, 2));
+        $env_quote = $env_value !== '' ? $env_value[0] : '';
+        if (strlen($env_value) >= 2 && ($env_quote === '"' || $env_quote === "'") && substr($env_value, -1) === $env_quote) {
+            $env_value = substr($env_value, 1, -1);
+        }
+        if ($env_key !== '' && !array_key_exists($env_key, $_ENV)) {
+            $_ENV[$env_key] = $env_value;
+        }
+    }
+    unset($env_line, $env_key, $env_value, $env_quote);
+}
+
+/**
+ * Read a config value: real environment variable first, then .env, then the default.
+ * Empty values fall back to the default, matching the old `getenv('X') ?: 'default'` pattern.
+ */
+function config_env($key, $default = '') {
+    $value = getenv($key);
+    if ($value === false || $value === '') {
+        $value = $_ENV[$key] ?? '';
+    }
+    return $value !== '' ? $value : $default;
+}
+
 // Site Configuration
 define('SITE_NAME', 'Prambanan Batik');
 define('SITE_TAGLINE', 'Authentic Indonesian Batik Craftsmanship');
 define('DEFAULT_META_DESCRIPTION', 'Shop authentic Indonesian batik at Prambanan Batik — premium handcrafted pieces with trusted customer reviews.');
-define('CONTACT_EMAIL', getenv('CONTACT_EMAIL') ?: 'hello@prambananbatik.com');
-define('BASE_URL', getenv('BASE_URL') ?: 'http://localhost/Prambanan_Batik');
+define('CONTACT_EMAIL', config_env('CONTACT_EMAIL', 'hello@prambananbatik.com'));
+define('BASE_URL', rtrim(config_env('BASE_URL', 'http://localhost/Prambanan_Batik'), '/'));
 define('SITE_PATH', rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?: '', '/'));
 define('SITE_TIMEZONE', 'Asia/Jakarta');
 
 // Database Configuration - MySQL
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'prambanan_batik');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASSWORD', getenv('DB_PASSWORD') ?: '');
+define('DB_HOST', config_env('DB_HOST', 'localhost'));
+define('DB_PORT', (int)config_env('DB_PORT', '3306'));
+define('DB_NAME', config_env('DB_NAME', 'prambanan_batik'));
+define('DB_USER', config_env('DB_USER', 'root'));
+define('DB_PASSWORD', config_env('DB_PASSWORD', ''));
 
 // Application Settings
 define('ITEMS_PER_PAGE', 12);

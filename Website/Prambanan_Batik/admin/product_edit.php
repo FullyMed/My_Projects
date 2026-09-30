@@ -5,13 +5,14 @@ require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
 $error = '';
 $product = null;
-$productId = $_GET['id'] ?? '';
+$productId = get_query_param('id', 0, FILTER_VALIDATE_INT) ?: 0;
 
 if ($productId) {
     $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
@@ -23,69 +24,94 @@ if ($productId) {
     }
 }
 
+if (isset($_GET['created']) && $product) {
+    $message = 'Product created successfully. Add images from the Products list (Images button).';
+}
+
+// Values shown in the form: the saved product, or what was just submitted if saving failed.
+$form = $product ?: [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid request token';
     } else {
-    $action = $_POST['action'] ?? '';
+        $action = post_string('action');
 
-    if ($action === 'create') {
-        $categoryId = trim($_POST['category_id'] ?? '');
-        $sku = trim($_POST['sku'] ?? '');
-        $slug = trim($_POST['slug'] ?? '');
-        $name = trim($_POST['name'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $priceDisplay = trim($_POST['price_display'] ?? '');
-        $buyLinkShopee = trim($_POST['buy_link_shopee'] ?? '');
-        $buyLinkTokopedia = trim($_POST['buy_link_tokopedia'] ?? '');
-        $buyLinkOther = trim($_POST['buy_link_other'] ?? '');
+        $form = [
+            'category_id'        => post_string('category_id'),
+            'sku'                => post_string('sku'),
+            'slug'               => post_string('slug'),
+            'name'               => post_string('name'),
+            'description'        => post_string('description'),
+            'price_display'      => post_string('price_display'),
+            'buy_link_shopee'    => post_string('buy_link_shopee'),
+            'buy_link_tokopedia' => post_string('buy_link_tokopedia'),
+            'buy_link_other'     => post_string('buy_link_other'),
+        ];
+        // Normalise the slug (lowercase, hyphens); if left blank, derive it from the name.
+        $form['slug'] = slugify($form['slug'] !== '' ? $form['slug'] : $form['name']);
 
-        if (empty($categoryId) || empty($sku) || empty($slug) || empty($name) || empty($priceDisplay)) {
-            $error = 'Category, SKU, slug, name, and price are required';
-        } elseif (!is_valid_buy_link($buyLinkShopee) || !is_valid_buy_link($buyLinkTokopedia) || !is_valid_buy_link($buyLinkOther)) {
+        if (!in_array($action, ['create', 'update'], true) || ($action === 'update') !== (bool)$product) {
+            $error = 'Invalid action';
+        } elseif ($form['category_id'] === '' || $form['sku'] === '' || $form['name'] === '' || $form['price_display'] === '') {
+            $error = 'Category, SKU, name, and price are required';
+        } elseif ($form['slug'] === '') {
+            $error = 'Slug must contain at least one letter or number';
+        } elseif (!is_numeric($form['price_display']) || (float)$form['price_display'] < 0 || (float)$form['price_display'] > 99999999.99) {
+            $error = 'Price must be a number between 0 and 99,999,999 (plain digits, e.g. 350000)';
+        } elseif (!is_valid_buy_link($form['buy_link_shopee']) || !is_valid_buy_link($form['buy_link_tokopedia']) || !is_valid_buy_link($form['buy_link_other'])) {
             $error = 'Buy links must start with http:// or https://';
         } else {
-            try {
-                $stmt = $pdo->prepare('INSERT INTO products (category_id, sku, slug, name, description, price_display, buy_link_shopee, buy_link_tokopedia, buy_link_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                $stmt->execute([$categoryId, $sku, $slug, $name, $description ?: null, $priceDisplay, $buyLinkShopee ?: null, $buyLinkTokopedia ?: null, $buyLinkOther ?: null]);
-                $message = 'Product created successfully';
-                header('Location: ' . BASE_URL . '/admin/products.php');
-                exit;
-            } catch (Exception $e) {
-                error_log('Failed to create product: ' . $e->getMessage());
-                $error = 'Failed to create product. Check that the SKU and slug are unique.';
-            }
-        }
-    } elseif ($action === 'update') {
-        $id = trim($_POST['id'] ?? '');
-        $categoryId = trim($_POST['category_id'] ?? '');
-        $sku = trim($_POST['sku'] ?? '');
-        $slug = trim($_POST['slug'] ?? '');
-        $name = trim($_POST['name'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $priceDisplay = trim($_POST['price_display'] ?? '');
-        $buyLinkShopee = trim($_POST['buy_link_shopee'] ?? '');
-        $buyLinkTokopedia = trim($_POST['buy_link_tokopedia'] ?? '');
-        $buyLinkOther = trim($_POST['buy_link_other'] ?? '');
+            $currentId = $product ? (int)$product['id'] : 0;
 
-        if (empty($id) || empty($categoryId) || empty($sku) || empty($slug) || empty($name) || empty($priceDisplay)) {
-            $error = 'All required fields must be filled';
-        } elseif (!is_valid_buy_link($buyLinkShopee) || !is_valid_buy_link($buyLinkTokopedia) || !is_valid_buy_link($buyLinkOther)) {
-            $error = 'Buy links must start with http:// or https://';
-        } else {
-            try {
-                $stmt = $pdo->prepare('UPDATE products SET category_id = ?, sku = ?, slug = ?, name = ?, description = ?, price_display = ?, buy_link_shopee = ?, buy_link_tokopedia = ?, buy_link_other = ?, updated_at = NOW() WHERE id = ?');
-                $stmt->execute([$categoryId, $sku, $slug, $name, $description ?: null, $priceDisplay, $buyLinkShopee ?: null, $buyLinkTokopedia ?: null, $buyLinkOther ?: null, $id]);
-                $message = 'Product updated successfully';
-                $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
-                $stmt->execute([$id]);
-                $product = $stmt->fetch();
-            } catch (Exception $e) {
-                error_log('Failed to update product: ' . $e->getMessage());
-                $error = 'Failed to update product. Check that the SKU and slug are unique.';
+            $catStmt = $pdo->prepare('SELECT 1 FROM categories WHERE id = ? LIMIT 1');
+            $catStmt->execute([(int)$form['category_id']]);
+
+            $dupStmt = $pdo->prepare('SELECT sku, slug FROM products WHERE (sku = ? OR slug = ?) AND id <> ? LIMIT 1');
+            $dupStmt->execute([$form['sku'], $form['slug'], $currentId]);
+            $duplicate = $dupStmt->fetch();
+
+            if (!$catStmt->fetchColumn()) {
+                $error = 'Selected category does not exist';
+            } elseif ($duplicate) {
+                $error = strcasecmp($duplicate['sku'], $form['sku']) === 0
+                    ? 'Another product already uses this SKU'
+                    : 'Another product already uses this slug';
+            } else {
+                $values = [
+                    (int)$form['category_id'],
+                    $form['sku'],
+                    $form['slug'],
+                    $form['name'],
+                    $form['description'] !== '' ? $form['description'] : null,
+                    $form['price_display'],
+                    $form['buy_link_shopee'] !== '' ? $form['buy_link_shopee'] : null,
+                    $form['buy_link_tokopedia'] !== '' ? $form['buy_link_tokopedia'] : null,
+                    $form['buy_link_other'] !== '' ? $form['buy_link_other'] : null,
+                ];
+
+                try {
+                    if ($action === 'create') {
+                        $stmt = $pdo->prepare('INSERT INTO products (category_id, sku, slug, name, description, price_display, buy_link_shopee, buy_link_tokopedia, buy_link_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        $stmt->execute($values);
+                        header('Location: ' . BASE_URL . '/admin/product_edit.php?id=' . (int)$pdo->lastInsertId() . '&created=1');
+                        exit;
+                    }
+
+                    $values[] = $currentId;
+                    $stmt = $pdo->prepare('UPDATE products SET category_id = ?, sku = ?, slug = ?, name = ?, description = ?, price_display = ?, buy_link_shopee = ?, buy_link_tokopedia = ?, buy_link_other = ?, updated_at = NOW() WHERE id = ?');
+                    $stmt->execute($values);
+                    $message = 'Product updated successfully';
+                    $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
+                    $stmt->execute([$currentId]);
+                    $product = $stmt->fetch();
+                    $form = $product;
+                } catch (Exception $e) {
+                    error_log('Failed to save product: ' . $e->getMessage());
+                    $error = 'Failed to save product. Please try again.';
+                }
             }
         }
-    }
     }
 }
 
@@ -107,7 +133,7 @@ $categories = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -160,17 +186,17 @@ $categories = $stmt->fetchAll();
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="name">Product Name <span class="required">*</span></label>
-                                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name'] ?? ''); ?>" required>
+                                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($form['name'] ?? ''); ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="sku">SKU <span class="required">*</span></label>
-                                <input type="text" id="sku" name="sku" value="<?php echo htmlspecialchars($product['sku'] ?? ''); ?>" required>
+                                <input type="text" id="sku" name="sku" value="<?php echo htmlspecialchars($form['sku'] ?? ''); ?>" required>
                             </div>
 
                             <div class="form-group">
-                                <label for="slug">Slug <span class="required">*</span></label>
-                                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars($product['slug'] ?? ''); ?>" required>
+                                <label for="slug">Slug</label>
+                                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars($form['slug'] ?? ''); ?>" placeholder="Leave blank to generate from the name">
                             </div>
 
                             <div class="form-group">
@@ -178,7 +204,7 @@ $categories = $stmt->fetchAll();
                                 <select id="category_id" name="category_id" required>
                                     <option value="">Select Category</option>
                                     <?php foreach ($categories as $category): ?>
-                                        <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ($product && (int)$product['category_id'] === (int)$category['id']) ? 'selected' : ''; ?>>
+                                        <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ((int)($form['category_id'] ?? 0) === (int)$category['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($category['name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -186,28 +212,28 @@ $categories = $stmt->fetchAll();
                             </div>
 
                             <div class="form-group">
-                                <label for="price_display">Price <span class="required">*</span></label>
-                                <input type="number" id="price_display" name="price_display" step="0.01" value="<?php echo htmlspecialchars($product['price_display'] ?? ''); ?>" required>
+                                <label for="price_display">Price (Rp) <span class="required">*</span></label>
+                                <input type="number" id="price_display" name="price_display" min="0" max="99999999" step="1" value="<?php echo htmlspecialchars(isset($form['price_display']) && is_numeric($form['price_display']) ? (string)(0 + $form['price_display']) : ($form['price_display'] ?? '')); ?>" required>
                             </div>
 
                             <div class="form-group full">
                                 <label for="description">Description</label>
-                                <textarea id="description" name="description"><?php echo htmlspecialchars($product['description'] ?? ''); ?></textarea>
+                                <textarea id="description" name="description"><?php echo htmlspecialchars($form['description'] ?? ''); ?></textarea>
                             </div>
 
                             <div class="form-group full">
                                 <label for="buy_link_shopee">Shopee Link</label>
-                                <input type="url" id="buy_link_shopee" name="buy_link_shopee" value="<?php echo htmlspecialchars($product['buy_link_shopee'] ?? ''); ?>">
+                                <input type="url" id="buy_link_shopee" name="buy_link_shopee" value="<?php echo htmlspecialchars($form['buy_link_shopee'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="buy_link_tokopedia">Tokopedia Link</label>
-                                <input type="url" id="buy_link_tokopedia" name="buy_link_tokopedia" value="<?php echo htmlspecialchars($product['buy_link_tokopedia'] ?? ''); ?>">
+                                <input type="url" id="buy_link_tokopedia" name="buy_link_tokopedia" value="<?php echo htmlspecialchars($form['buy_link_tokopedia'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="buy_link_other">Other Link</label>
-                                <input type="url" id="buy_link_other" name="buy_link_other" value="<?php echo htmlspecialchars($product['buy_link_other'] ?? ''); ?>">
+                                <input type="url" id="buy_link_other" name="buy_link_other" value="<?php echo htmlspecialchars($form['buy_link_other'] ?? ''); ?>">
                             </div>
                         </div>
 
@@ -220,6 +246,6 @@ $categories = $stmt->fetchAll();
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

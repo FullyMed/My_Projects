@@ -1,47 +1,54 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
 $error = '';
-$productId = $_GET['product_id'] ?? '';
+$product = null;
+$productId = get_query_param('product_id', 0, FILTER_VALIDATE_INT) ?: 0;
 
 if (!$productId) {
     $error = 'Product ID is required';
 } else {
     $stmt = $pdo->prepare('SELECT id, name FROM products WHERE id = ? LIMIT 1');
     $stmt->execute([$productId]);
-    $product = $stmt->fetch();
+    $product = $stmt->fetch() ?: null;
 
     if (!$product) {
         $error = 'Product not found';
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product) {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid request token';
     } else {
         $action = $_POST['action'] ?? '';
 
         if ($action === 'upload') {
-            $imageUrl = trim($_POST['image_url'] ?? '');
-            $altText = trim($_POST['alt_text'] ?? '');
-            $sortOrder = intval($_POST['sort_order'] ?? 0);
+            $imageUrl = post_string('image_url');
+            $altText = post_string('alt_text');
+            $sortOrder = (int)post_string('sort_order');
 
-            if (empty($productId) || empty($imageUrl)) {
-                $error = 'Product and image URL are required';
+            if ($imageUrl === '') {
+                $error = 'Image URL is required';
             } elseif (!preg_match('/^https?:\/\//i', $imageUrl)) {
                 $error = 'Image URL must start with http:// or https://';
+            } elseif (strlen($imageUrl) > 500) {
+                $error = 'Image URL is too long (max 500 characters)';
             } else {
                 try {
                     $stmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (?, ?, ?, ?)');
-                    $stmt->execute([$productId, $imageUrl, $altText ?: null, $sortOrder]);
+                    $stmt->execute([$productId, $imageUrl, $altText !== '' ? mb_substr($altText, 0, 255, 'UTF-8') : null, $sortOrder]);
+                    // Bump updated_at so the sitemap's <lastmod> reflects the image change.
+                    $pdo->prepare('UPDATE products SET updated_at = NOW() WHERE id = ?')->execute([$productId]);
                     $message = 'Image added successfully';
                 } catch (Exception $e) {
                     error_log('Failed to add product image: ' . $e->getMessage());
@@ -49,15 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'delete') {
-            $imageId = trim($_POST['id'] ?? '');
+            $imageId = (int)post_string('id');
 
-            if (empty($imageId)) {
+            if ($imageId < 1) {
                 $error = 'Image ID is required';
             } else {
                 try {
-                    $stmt = $pdo->prepare('DELETE FROM product_images WHERE id = ?');
-                    $stmt->execute([$imageId]);
-                    $message = 'Image deleted successfully';
+                    // Scoped to this product so a stray id can't delete another product's image.
+                    $stmt = $pdo->prepare('DELETE FROM product_images WHERE id = ? AND product_id = ?');
+                    $stmt->execute([$imageId, $productId]);
+                    if ($stmt->rowCount() > 0) {
+                        $pdo->prepare('UPDATE products SET updated_at = NOW() WHERE id = ?')->execute([$productId]);
+                        $message = 'Image deleted successfully';
+                    } else {
+                        $error = 'Image not found';
+                    }
                 } catch (Exception $e) {
                     error_log('Failed to delete product image: ' . $e->getMessage());
                     $error = 'Failed to delete image';
@@ -68,8 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $images = [];
-if ($productId) {
-    $stmt = $pdo->prepare('SELECT id, image_url, alt_text, sort_order FROM product_images WHERE product_id = ? ORDER BY sort_order ASC');
+if ($product) {
+    $stmt = $pdo->prepare('SELECT id, image_url, alt_text, sort_order FROM product_images WHERE product_id = ? ORDER BY sort_order ASC, id ASC');
     $stmt->execute([$productId]);
     $images = $stmt->fetchAll();
 }
@@ -88,7 +101,7 @@ if ($productId) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -153,7 +166,7 @@ if ($productId) {
                                 </div>
 
                                 <div class="form-group full">
-                                    <label for="sort_order">Sort Order</label>
+                                    <label for="sort_order">Sort Order <span class="optional">(lowest number is the main product photo)</span></label>
                                     <input type="number" id="sort_order" name="sort_order" value="0">
                                 </div>
                             </div>
@@ -198,6 +211,6 @@ if ($productId) {
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

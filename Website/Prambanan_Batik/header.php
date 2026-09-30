@@ -6,14 +6,34 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Social-preview (Open Graph / Twitter Card) values. Pages may set $canonical_url,
+// $og_image and $og_type before including this file; otherwise these defaults apply.
+$full_title = isset($page_title) ? $page_title . ' - ' . SITE_NAME : SITE_NAME;
+$page_description = $meta_description ?? DEFAULT_META_DESCRIPTION;
+$og_image_url = absolute_url($og_image ?? SITE_PATH . '/assets/images/og-image.png');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? escape($page_title) . ' - ' . SITE_NAME : SITE_NAME; ?></title>
-    <meta name="description" content="<?php echo escape($meta_description ?? DEFAULT_META_DESCRIPTION); ?>">
+    <title><?php echo escape($full_title); ?></title>
+    <meta name="description" content="<?php echo escape($page_description); ?>">
+    <?php if (isset($canonical_url)): ?>
+    <link rel="canonical" href="<?php echo escape($canonical_url); ?>">
+    <meta property="og:url" content="<?php echo escape($canonical_url); ?>">
+    <?php endif; ?>
+    <meta property="og:site_name" content="<?php echo escape(SITE_NAME); ?>">
+    <meta property="og:type" content="<?php echo escape($og_type ?? 'website'); ?>">
+    <meta property="og:title" content="<?php echo escape($full_title); ?>">
+    <meta property="og:description" content="<?php echo escape($page_description); ?>">
+    <meta property="og:image" content="<?php echo escape($og_image_url); ?>">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo escape($full_title); ?>">
+    <meta name="twitter:description" content="<?php echo escape($page_description); ?>">
+    <meta name="twitter:image" content="<?php echo escape($og_image_url); ?>">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon-32x32.png">
@@ -25,12 +45,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/assets/css/styles.css">
+    <link rel="stylesheet" href="<?php echo asset_url('assets/css/styles.css'); ?>">
+    <?php // Without JS, main.js never adds .is-visible — show the scroll-reveal content anyway. ?>
+    <noscript><style>.reveal, .product-card { opacity: 1 !important; transform: none !important; }</style></noscript>
 </head>
 <body>
     <?php if (is_preview_mode()): ?>
         <div class="preview-banner">
-            ⚠ Preview Mode (Database unavailable) - Sample data displayed
+            ⚠ Preview Mode (no live product data) - Sample data displayed
         </div>
     <?php endif; ?>
 

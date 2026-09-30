@@ -6,8 +6,9 @@ $pdo = null;
 
 try {
     $dsn = sprintf(
-        'mysql:host=%s;dbname=%s;charset=utf8mb4',
+        'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
         DB_HOST,
+        DB_PORT,
         DB_NAME
     );
 

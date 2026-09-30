@@ -1,16 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../functions.php';
 $pdo = require __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/auth.php';
 
-requireAdminLogin();
+requireDatabase($pdo);
+requireAdminLogin($pdo);
 $admin = getAdminSession();
 
 $message = '';
 $error = '';
 $review = null;
-$reviewId = $_GET['id'] ?? '';
+$reviewId = get_query_param('id', 0, FILTER_VALIDATE_INT) ?: 0;
 
 if ($reviewId) {
     $stmt = $pdo->prepare('SELECT * FROM reviews WHERE id = ? LIMIT 1');
@@ -22,75 +24,95 @@ if ($reviewId) {
     }
 }
 
+/**
+ * Recalculate the denormalized rating_avg / rating_count for one product (see CLAUDE.md).
+ */
+function recalculateProductRating($pdo, $productId) {
+    $stmt = $pdo->prepare('
+        UPDATE products SET
+            rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
+            rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
+        WHERE id = ?
+    ');
+    $stmt->execute([$productId]);
+}
+
+// Values shown in the form: the saved review, or what was just submitted if saving failed.
+$form = $review ?: [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Invalid request token';
     } else {
-    $action = $_POST['action'] ?? '';
+        $action = post_string('action');
 
-    if ($action === 'create') {
-        $productId = trim($_POST['product_id'] ?? '');
-        $rating = intval($_POST['rating'] ?? 0);
-        $title = trim($_POST['title'] ?? '');
-        $content = trim($_POST['content'] ?? '');
-        $reviewerName = trim($_POST['reviewer_name'] ?? '');
-        $reviewerEmail = trim($_POST['reviewer_email'] ?? '');
-        $verifiedPurchase = isset($_POST['verified_purchase']) ? true : false;
+        $form = [
+            'product_id'        => (int)post_string('product_id'),
+            'rating'            => (int)post_string('rating'),
+            'title'             => post_string('title'),
+            'content'           => post_string('content'),
+            'reviewer_name'     => post_string('reviewer_name'),
+            'reviewer_email'    => post_string('reviewer_email'),
+            'verified_purchase' => isset($_POST['verified_purchase']) ? 1 : 0,
+        ];
 
-        if (empty($productId) || $rating < 1 || $rating > 5) {
+        $productStmt = $pdo->prepare('SELECT 1 FROM products WHERE id = ? LIMIT 1');
+        $productStmt->execute([$form['product_id']]);
+
+        if (!in_array($action, ['create', 'update'], true) || ($action === 'update') !== (bool)$review) {
+            $error = 'Invalid action';
+        } elseif ($form['product_id'] < 1 || $form['rating'] < 1 || $form['rating'] > 5) {
             $error = 'Product and rating (1-5) are required';
+        } elseif (!$productStmt->fetchColumn()) {
+            $error = 'Selected product does not exist';
+        } elseif ($form['reviewer_email'] !== '' && !is_valid_email($form['reviewer_email'])) {
+            $error = 'Reviewer email is not a valid email address';
         } else {
-            try {
-                $stmt = $pdo->prepare('INSERT INTO reviews (product_id, rating, title, content, reviewer_name, reviewer_email, verified_purchase) VALUES (?, ?, ?, ?, ?, ?, ?)');
-                $stmt->execute([$productId, $rating, $title ?: null, $content ?: null, $reviewerName ?: null, $reviewerEmail ?: null, $verifiedPurchase]);
-                $ratingStmt = $pdo->prepare('
-                    UPDATE products SET
-                        rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
-                        rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
-                    WHERE id = ?
-                ');
-                $ratingStmt->execute([$productId]);
-                $message = 'Review created successfully';
-                header('Location: ' . BASE_URL . '/admin/reviews.php');
-                exit;
-            } catch (Exception $e) {
-                error_log('Failed to create review: ' . $e->getMessage());
-                $error = 'Failed to create review';
-            }
-        }
-    } elseif ($action === 'update') {
-        $id = trim($_POST['id'] ?? '');
-        $productId = trim($_POST['product_id'] ?? '');
-        $rating = intval($_POST['rating'] ?? 0);
-        $title = trim($_POST['title'] ?? '');
-        $content = trim($_POST['content'] ?? '');
-        $reviewerName = trim($_POST['reviewer_name'] ?? '');
-        $reviewerEmail = trim($_POST['reviewer_email'] ?? '');
-        $verifiedPurchase = isset($_POST['verified_purchase']) ? true : false;
+            $values = [
+                $form['product_id'],
+                $form['rating'],
+                $form['title'] !== '' ? mb_substr($form['title'], 0, 255, 'UTF-8') : null,
+                $form['content'] !== '' ? $form['content'] : null,
+                $form['reviewer_name'] !== '' ? mb_substr($form['reviewer_name'], 0, 255, 'UTF-8') : null,
+                $form['reviewer_email'] !== '' ? $form['reviewer_email'] : null,
+                $form['verified_purchase'],
+            ];
 
-        if (empty($id) || empty($productId) || $rating < 1 || $rating > 5) {
-            $error = 'All required fields must be filled';
-        } else {
             try {
+                $pdo->beginTransaction();
+
+                if ($action === 'create') {
+                    $stmt = $pdo->prepare('INSERT INTO reviews (product_id, rating, title, content, reviewer_name, reviewer_email, verified_purchase) VALUES (?, ?, ?, ?, ?, ?, ?)');
+                    $stmt->execute($values);
+                    recalculateProductRating($pdo, $form['product_id']);
+                    $pdo->commit();
+                    header('Location: ' . BASE_URL . '/admin/reviews.php');
+                    exit;
+                }
+
+                $values[] = (int)$review['id'];
                 $stmt = $pdo->prepare('UPDATE reviews SET product_id = ?, rating = ?, title = ?, content = ?, reviewer_name = ?, reviewer_email = ?, verified_purchase = ?, updated_at = NOW() WHERE id = ?');
-                $stmt->execute([$productId, $rating, $title ?: null, $content ?: null, $reviewerName ?: null, $reviewerEmail ?: null, $verifiedPurchase, $id]);
-                $ratingStmt = $pdo->prepare('
-                    UPDATE products SET
-                        rating_avg   = COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id), 0),
-                        rating_count = (SELECT COUNT(*) FROM reviews r WHERE r.product_id = products.id)
-                    WHERE id = ?
-                ');
-                $ratingStmt->execute([$productId]);
+                $stmt->execute($values);
+                recalculateProductRating($pdo, $form['product_id']);
+                // If the review was moved to a different product, the old product's rating changes too.
+                if ((int)$review['product_id'] !== $form['product_id']) {
+                    recalculateProductRating($pdo, (int)$review['product_id']);
+                }
+                $pdo->commit();
+
                 $message = 'Review updated successfully';
                 $stmt = $pdo->prepare('SELECT * FROM reviews WHERE id = ? LIMIT 1');
-                $stmt->execute([$id]);
+                $stmt->execute([(int)$review['id']]);
                 $review = $stmt->fetch();
+                $form = $review;
             } catch (Exception $e) {
-                error_log('Failed to update review: ' . $e->getMessage());
-                $error = 'Failed to update review';
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                error_log('Failed to save review: ' . $e->getMessage());
+                $error = 'Failed to save review';
             }
         }
-    }
     }
 }
 
@@ -112,7 +134,7 @@ $products = $stmt->fetchAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo SITE_PATH; ?>/admin/admin.css">
+    <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
     <div class="admin-container">
@@ -168,7 +190,7 @@ $products = $stmt->fetchAll();
                                 <select id="product_id" name="product_id" required>
                                     <option value="">Select Product</option>
                                     <?php foreach ($products as $product): ?>
-                                        <option value="<?php echo htmlspecialchars($product['id']); ?>" <?php echo ($review && (int)$review['product_id'] === (int)$product['id']) ? 'selected' : ''; ?>>
+                                        <option value="<?php echo htmlspecialchars($product['id']); ?>" <?php echo ((int)($form['product_id'] ?? 0) === (int)$product['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($product['name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -179,37 +201,37 @@ $products = $stmt->fetchAll();
                                 <label for="rating">Rating <span class="required">*</span></label>
                                 <select id="rating" name="rating" required>
                                     <option value="">Select Rating</option>
-                                    <option value="5" <?php echo ($review && $review['rating'] == 5) ? 'selected' : ''; ?>>5 - Excellent</option>
-                                    <option value="4" <?php echo ($review && $review['rating'] == 4) ? 'selected' : ''; ?>>4 - Good</option>
-                                    <option value="3" <?php echo ($review && $review['rating'] == 3) ? 'selected' : ''; ?>>3 - Average</option>
-                                    <option value="2" <?php echo ($review && $review['rating'] == 2) ? 'selected' : ''; ?>>2 - Poor</option>
-                                    <option value="1" <?php echo ($review && $review['rating'] == 1) ? 'selected' : ''; ?>>1 - Terrible</option>
+                                    <option value="5" <?php echo (int)($form['rating'] ?? 0) === 5 ? 'selected' : ''; ?>>5 - Excellent</option>
+                                    <option value="4" <?php echo (int)($form['rating'] ?? 0) === 4 ? 'selected' : ''; ?>>4 - Good</option>
+                                    <option value="3" <?php echo (int)($form['rating'] ?? 0) === 3 ? 'selected' : ''; ?>>3 - Average</option>
+                                    <option value="2" <?php echo (int)($form['rating'] ?? 0) === 2 ? 'selected' : ''; ?>>2 - Poor</option>
+                                    <option value="1" <?php echo (int)($form['rating'] ?? 0) === 1 ? 'selected' : ''; ?>>1 - Terrible</option>
                                 </select>
                             </div>
 
                             <div class="form-group full">
                                 <label for="title">Title</label>
-                                <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($review['title'] ?? ''); ?>">
+                                <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($form['title'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="reviewer_name">Reviewer Name</label>
-                                <input type="text" id="reviewer_name" name="reviewer_name" value="<?php echo htmlspecialchars($review['reviewer_name'] ?? ''); ?>">
+                                <input type="text" id="reviewer_name" name="reviewer_name" value="<?php echo htmlspecialchars($form['reviewer_name'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="reviewer_email">Reviewer Email</label>
-                                <input type="email" id="reviewer_email" name="reviewer_email" value="<?php echo htmlspecialchars($review['reviewer_email'] ?? ''); ?>">
+                                <input type="email" id="reviewer_email" name="reviewer_email" value="<?php echo htmlspecialchars($form['reviewer_email'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="content">Review Content</label>
-                                <textarea id="content" name="content"><?php echo htmlspecialchars($review['content'] ?? ''); ?></textarea>
+                                <textarea id="content" name="content"><?php echo htmlspecialchars($form['content'] ?? ''); ?></textarea>
                             </div>
 
                             <div class="form-group full">
                                 <div class="checkbox-group">
-                                    <input type="checkbox" id="verified_purchase" name="verified_purchase" <?php echo ($review && $review['verified_purchase']) ? 'checked' : ''; ?>>
+                                    <input type="checkbox" id="verified_purchase" name="verified_purchase" <?php echo !empty($form['verified_purchase']) ? 'checked' : ''; ?>>
                                     <label for="verified_purchase" style="margin-bottom: 0;">Verified Purchase</label>
                                 </div>
                             </div>
@@ -224,6 +246,6 @@ $products = $stmt->fetchAll();
             </div>
         </div>
     </div>
-    <script src="<?php echo SITE_PATH; ?>/assets/js/main.js"></script>
+    <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>
