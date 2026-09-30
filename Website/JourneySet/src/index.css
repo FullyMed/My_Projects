@@ -183,6 +183,12 @@
     box-sizing: border-box;
   }
 
+  /* PrintView is portalled to <body>; hide the app (sidebar, header, the page
+     underneath) so only the report prints. */
+  body.print-view-open > #root {
+    display: none !important;
+  }
+
   /* Apply color-accurate printing only to elements with intentional backgrounds.
      Keeping this off the universal selector prevents dark-mode Tailwind classes
      (e.g. dark:bg-slate-950 on the PrintView wrapper) from bleeding into print. */

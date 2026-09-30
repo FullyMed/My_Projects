@@ -3,6 +3,28 @@ import { CalendarEvent } from '../types';
 import { storage } from '../utils/storage';
 import { recordSync } from './plannerApi';
 
+interface EventRow {
+  id: string;
+  date_iso: string;
+  time: string | null;
+  title: string;
+  description: string | null;
+  category: CalendarEvent['category'] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const toEvent = (row: EventRow): CalendarEvent => ({
+  id: row.id,
+  dateISO: row.date_iso,
+  time: row.time ?? undefined,
+  title: row.title,
+  description: row.description ?? undefined,
+  category: row.category ?? 'other',
+  createdAt: row.created_at,
+  updatedAt: row.updated_at
+});
+
 export const getEvents = async (userId: string): Promise<CalendarEvent[]> => {
   try {
     const { data, error } = await supabase
@@ -13,18 +35,8 @@ export const getEvents = async (userId: string): Promise<CalendarEvent[]> => {
 
     if (error) throw error;
 
-    const events = (data || []).map(e => ({
-      id: e.id,
-      dateISO: e.date_iso,
-      time: e.time,
-      title: e.title,
-      description: e.description,
-      category: e.category,
-      createdAt: e.created_at,
-      updatedAt: e.updated_at
-    }));
-
-    updateLocalCache(userId, events);
+    const events = (data || []).map(toEvent);
+    saveLocalCache(userId, events);
     return events;
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -39,9 +51,9 @@ export const createEvent = async (userId: string, event: Omit<CalendarEvent, 'id
       .insert({
         user_id: userId,
         date_iso: event.dateISO,
-        time: event.time,
+        time: event.time || null,
         title: event.title,
-        description: event.description,
+        description: event.description || null,
         category: event.category
       })
       .select()
@@ -49,17 +61,8 @@ export const createEvent = async (userId: string, event: Omit<CalendarEvent, 'id
 
     if (error) throw error;
 
-    const newEvent = {
-      id: data.id,
-      dateISO: data.date_iso,
-      time: data.time,
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
-    };
-
+    const newEvent = toEvent(data);
+    saveLocalCache(userId, [...getLocalCache(userId), newEvent]);
     recordSync();
     return newEvent;
   } catch (err) {
@@ -68,13 +71,18 @@ export const createEvent = async (userId: string, event: Omit<CalendarEvent, 'id
   }
 };
 
+/**
+ * `time` and `description` are only touched when their key is present in
+ * `updates`; an empty value clears them.
+ */
 export const updateEvent = async (userId: string, eventId: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent | null> => {
   try {
-    const updateData: { title?: string; time?: string; description?: string; category?: string } = {};
-    if (updates.title) updateData.title = updates.title;
-    if (updates.time !== undefined) updateData.time = updates.time;
-    if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.category) updateData.category = updates.category;
+    const updateData: { title?: string; date_iso?: string; time?: string | null; description?: string | null; category?: string } = {};
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.dateISO !== undefined) updateData.date_iso = updates.dateISO;
+    if ('time' in updates) updateData.time = updates.time || null;
+    if ('description' in updates) updateData.description = updates.description || null;
+    if (updates.category !== undefined) updateData.category = updates.category;
 
     const { data, error } = await supabase
       .from('events')
@@ -86,17 +94,8 @@ export const updateEvent = async (userId: string, eventId: string, updates: Part
 
     if (error) throw error;
 
-    const updated = {
-      id: data.id,
-      dateISO: data.date_iso,
-      time: data.time,
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
-    };
-
+    const updated = toEvent(data);
+    saveLocalCache(userId, getLocalCache(userId).map(e => (e.id === eventId ? updated : e)));
     recordSync();
     return updated;
   } catch (err) {
@@ -115,6 +114,7 @@ export const deleteEvent = async (userId: string, eventId: string): Promise<bool
 
     if (error) throw error;
 
+    saveLocalCache(userId, getLocalCache(userId).filter(e => e.id !== eventId));
     recordSync();
     return true;
   } catch (err) {
@@ -123,12 +123,11 @@ export const deleteEvent = async (userId: string, eventId: string): Promise<bool
   }
 };
 
-const updateLocalCache = (userId: string, events: CalendarEvent[]) => {
-  const key = storage.getUserKey('events', userId);
-  storage.save(key, events);
+const saveLocalCache = (userId: string, events: CalendarEvent[]) => {
+  storage.save(storage.getUserKey('events', userId), events);
 };
 
 const getLocalCache = (userId: string): CalendarEvent[] => {
-  const key = storage.getUserKey('events', userId);
-  return storage.load(key, []);
+  const cached = storage.load<CalendarEvent[]>(storage.getUserKey('events', userId), []);
+  return Array.isArray(cached) ? cached : [];
 };

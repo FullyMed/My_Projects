@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { PlannerTask } from '../types';
 import { useModalFocus } from '../hooks/useModalFocus';
 
 interface EditTaskModalProps {
   task: PlannerTask;
   days: string[];
-  onSave: (updatedTask: Partial<PlannerTask>) => void;
+  /** Resolves to true when the change was saved; the modal stays open otherwise. */
+  onSave: (updatedTask: Partial<PlannerTask>) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -19,21 +20,35 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
     completed: task.completed,
     recurring: task.recurring,
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      title: formData.title,
+    const title = formData.title.trim();
+    if (!title) {
+      setError('Title is required.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    const ok = await onSave({
+      title,
       dayKey: formData.dayKey,
       time: formData.time || undefined,
       completed: formData.completed,
       recurring: formData.recurring as 'none' | 'weekly',
     });
-    onClose();
+    if (ok) {
+      onClose();
+    } else {
+      setSaving(false);
+      setError("Couldn't save your changes — check your connection and try again.");
+    }
   };
 
   const inputClass =
@@ -137,6 +152,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Mark as completed</span>
           </label>
 
+          {error && (
+            <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+          )}
+
           <div className="flex gap-3 pt-2">
             <button
               type="button"
@@ -147,8 +166,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer shadow-sm shadow-indigo-500/20"
+              disabled={saving}
+              className="flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-60 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Save changes
             </button>
           </div>

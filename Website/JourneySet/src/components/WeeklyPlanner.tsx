@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
 import { format, startOfWeek, addDays, isToday, subWeeks, addWeeks, getISOWeek, getISOWeekYear } from 'date-fns';
 import EditTaskModal from './EditTaskModal';
+import ErrorBanner from './ErrorBanner';
+import { SAVE_ERROR } from '../constants/messages';
 import { getPlannerTasks, createPlannerTask, updatePlannerTask, deletePlannerTask } from '../api/plannerApi';
 
 interface WeeklyPlannerProps {
@@ -21,7 +23,11 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
   const [tasksLoading, setTasksLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const userId = user?.id;
   const { isCompact } = useCompactMode();
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -35,60 +41,71 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
   const currentWeekKey = getWeekKey(currentWeek);
 
   useEffect(() => {
-    if (user) {
-      setTasksLoading(true);
-      const loadTasks = async () => {
-        const weekTasks = await getPlannerTasks(user.id, currentWeekKey);
-        setTasks(weekTasks);
-        setTasksLoading(false);
-      };
-      loadTasks();
-    }
-  }, [user, currentWeekKey]);
+    if (!userId) return;
+    // Ignore a response that arrives after the user has already moved to
+    // another week, so a slow request can't overwrite the visible week.
+    let cancelled = false;
+    setTasksLoading(true);
+    getPlannerTasks(userId, currentWeekKey).then(weekTasks => {
+      if (cancelled) return;
+      setTasks(weekTasks);
+      setTasksLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, currentWeekKey]);
 
   const addTask = async () => {
-    if (!newTask.trim() || !selectedDay || !user) return;
+    const title = newTask.trim();
+    if (!title || !selectedDay || !userId || adding) return;
 
-    const task = await createPlannerTask(user.id, {
-      title: newTask.trim(),
+    setAdding(true);
+    const task = await createPlannerTask(userId, {
+      title,
       dayKey: selectedDay,
       weekKey: currentWeekKey,
       time: selectedTime || undefined,
       completed: false,
       recurring: selectedRecurring,
     });
+    setAdding(false);
 
     if (task) {
-      setTasks([...tasks, task]);
+      setTasks(prev => [...prev, task]);
       setNewTask('');
       setSelectedDay('');
       setSelectedTime('');
       setSelectedRecurring('none');
+      setError(null);
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
-  const toggleTask = async (taskId: string) => {
-    if (!user) return;
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    const updated = await updatePlannerTask(user.id, taskId, { completed: !task.completed });
+  const toggleTask = async (task: PlannerTask) => {
+    if (!userId) return;
+    const updated = await updatePlannerTask(userId, task.id, { completed: !task.completed });
     if (updated) {
-      setTasks(tasks.map(t => (t.id === taskId ? updated : t)));
+      setTasks(prev => prev.map(t => (t.id === task.id ? updated : t)));
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    if (!user) return;
-    const success = await deletePlannerTask(user.id, taskId);
+    if (!userId) return;
+    const success = await deletePlannerTask(userId, taskId);
     if (success) {
-      setTasks(tasks.filter(task => task.id !== taskId));
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
   const duplicateTask = async (task: PlannerTask) => {
-    if (!user) return;
-    const dup = await createPlannerTask(user.id, {
+    if (!userId) return;
+    const dup = await createPlannerTask(userId, {
       title: task.title,
       dayKey: task.dayKey,
       weekKey: task.weekKey,
@@ -97,17 +114,20 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       recurring: 'none',
     });
     if (dup) {
-      setTasks([...tasks, dup]);
+      setTasks(prev => [...prev, dup]);
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
-  const updateTask = async (taskId: string, updates: Partial<PlannerTask>) => {
-    if (!user) return;
-    const updated = await updatePlannerTask(user.id, taskId, updates);
-    if (updated) {
-      setTasks(tasks.map(t => (t.id === taskId ? updated : t)));
-      setEditingTaskData(null);
-    }
+  /** Resolves to true on success so the edit modal knows whether to close. */
+  const updateTask = async (taskId: string, updates: Partial<PlannerTask>): Promise<boolean> => {
+    if (!userId) return false;
+    const updated = await updatePlannerTask(userId, taskId, updates);
+    if (!updated) return false;
+    setTasks(prev => prev.map(t => (t.id === taskId ? updated : t)));
+    setEditingTaskData(null);
+    return true;
   };
 
   const getTasksForDay = (day: string) =>
@@ -126,47 +146,59 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       });
 
   const handlePreviousWeek = () => {
+    if (navigating) return;
     const prevWeek = subWeeks(currentWeek, 1);
     setCurrentWeek(prevWeek);
     onWeekChange?.(getWeekKey(prevWeek));
   };
 
   const handleNextWeek = async () => {
+    // Recurring tasks are copied from the loaded week, so it must be loaded
+    // (and not already mid-navigation) or they'd be silently skipped.
+    if (navigating || tasksLoading) return;
     const nextWeek = addWeeks(currentWeek, 1);
     const nextWeekKey = getWeekKey(nextWeek);
 
-    if (user) {
-      const recurringTasks = tasks.filter(
-        task => task.recurring === 'weekly' && task.weekKey === currentWeekKey
-      );
-
-      if (recurringTasks.length > 0) {
-        // Skip any recurring task that already exists in the target week, so
-        // navigating forward → back → forward doesn't create duplicates.
-        const existing = await getPlannerTasks(user.id, nextWeekKey);
-        const seen = new Set(
-          existing.map(t => `${t.dayKey}|${t.time ?? ''}|${t.title}`)
+    setNavigating(true);
+    try {
+      if (userId) {
+        const recurringTasks = tasks.filter(
+          task => task.recurring === 'weekly' && task.weekKey === currentWeekKey
         );
 
-        await Promise.all(
-          recurringTasks
-            .filter(task => !seen.has(`${task.dayKey}|${task.time ?? ''}|${task.title}`))
-            .map(task =>
-              createPlannerTask(user.id, {
-                title: task.title,
-                dayKey: task.dayKey,
-                weekKey: nextWeekKey,
-                time: task.time,
-                completed: false,
-                recurring: 'weekly',
-              })
-            )
-        );
+        if (recurringTasks.length > 0) {
+          // Skip any recurring task that already exists in the target week, so
+          // navigating forward → back → forward doesn't create duplicates.
+          const existing = await getPlannerTasks(userId, nextWeekKey);
+          const seen = new Set(
+            existing.map(t => `${t.dayKey}|${t.time ?? ''}|${t.title}`)
+          );
+
+          const results = await Promise.all(
+            recurringTasks
+              .filter(task => !seen.has(`${task.dayKey}|${task.time ?? ''}|${task.title}`))
+              .map(task =>
+                createPlannerTask(userId, {
+                  title: task.title,
+                  dayKey: task.dayKey,
+                  weekKey: nextWeekKey,
+                  time: task.time,
+                  completed: false,
+                  recurring: 'weekly',
+                })
+              )
+          );
+          if (results.some(r => r === null)) {
+            setError("Some weekly tasks couldn't be carried over — check your connection.");
+          }
+        }
       }
-    }
 
-    setCurrentWeek(nextWeek);
-    onWeekChange?.(nextWeekKey);
+      setCurrentWeek(nextWeek);
+      onWeekChange?.(nextWeekKey);
+    } finally {
+      setNavigating(false);
+    }
   };
 
   const exportTasks = () => {
@@ -204,7 +236,8 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
     a.href = url;
     a.download = `weekly-plan-${currentWeekKey}.txt`;
     a.click();
-    URL.revokeObjectURL(url);
+    // Revoking synchronously can cancel the download in some browsers.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const getDayDate = (dayIndex: number) => addDays(currentWeek, dayIndex);
@@ -220,7 +253,8 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
         <div className="flex items-center gap-1 xs:gap-2 min-w-0">
           <button
             onClick={handlePreviousWeek}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+            disabled={navigating}
+            className="disabled:opacity-40 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
             aria-label="Previous week"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -231,12 +265,13 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
               <span className="hidden xs:inline">{format(currentWeek, ', yyyy')}</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {tasksLoading ? 'Loading…' : `${currentWeekKey} · ${weekTaskCount} task${weekTaskCount !== 1 ? 's' : ''}`}
+              {tasksLoading || navigating ? 'Loading…' : `${currentWeekKey} · ${weekTaskCount} task${weekTaskCount !== 1 ? 's' : ''}`}
             </p>
           </div>
           <button
             onClick={handleNextWeek}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+            disabled={navigating || tasksLoading}
+            className="disabled:opacity-40 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
             aria-label="Next week"
           >
             <ChevronRight className="h-5 w-5" />
@@ -251,6 +286,8 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           <span className="xs:hidden">Export</span>
         </button>
       </div>
+
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
       {/* Filter Buttons — horizontal scroll on small screens */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
@@ -310,10 +347,11 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             </select>
             <button
               onClick={addTask}
-              disabled={!newTask.trim() || !selectedDay}
+              disabled={!newTask.trim() || !selectedDay || adding}
+              aria-label="Add task"
               className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
-              <Plus className="h-5 w-5" />
+              {adding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -371,7 +409,8 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                   >
                     <div className="flex items-start gap-2.5">
                       <button
-                        onClick={() => toggleTask(task.id)}
+                        onClick={() => toggleTask(task)}
+                        aria-label={task.completed ? 'Mark as not completed' : 'Mark as completed'}
                         className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 cursor-pointer ${
                           task.completed
                             ? 'bg-emerald-500 border-emerald-500'
@@ -382,7 +421,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                       </button>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className={`text-sm leading-snug ${
+                          <p className={`text-sm leading-snug break-words min-w-0 ${
                             task.completed
                               ? 'text-slate-400 dark:text-slate-500 line-through'
                               : 'text-slate-800 dark:text-slate-200'
@@ -407,6 +446,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                           onClick={() => setEditingTaskData(task)}
                           className="p-1 text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
                           title="Edit"
+                          aria-label="Edit task"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
@@ -414,6 +454,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                           onClick={() => duplicateTask(task)}
                           className="p-1 text-slate-300 dark:text-slate-600 hover:text-sky-500 dark:hover:text-sky-400 transition-colors cursor-pointer"
                           title="Duplicate"
+                          aria-label="Duplicate task"
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </button>
@@ -421,6 +462,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                           onClick={() => deleteTask(task.id)}
                           className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
                           title="Delete"
+                          aria-label="Delete task"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>

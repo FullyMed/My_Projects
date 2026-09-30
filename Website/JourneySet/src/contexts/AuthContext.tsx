@@ -1,11 +1,17 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { supabase } from '../utils/supabaseClient';
+import { storage } from '../utils/storage';
+import { clearLastSync } from '../api/plannerApi';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  register: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
   logout: () => Promise<void>;
   loading: boolean;
   isLoading: boolean;
@@ -23,6 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let settled = false;
+    let currentUserId: string | null = null;
 
     const resolve = () => {
       if (!settled) {
@@ -33,39 +40,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const timer = setTimeout(resolve, 5000);
 
+    const loadProfileName = (userId: string, email: string, metadataName: string) => {
+      supabase
+        .from('profiles')
+        .select('name')
+        .eq('user_id', userId)
+        .maybeSingle()
+        .then(({ data: profile }) => {
+          if (profile?.name) {
+            setUser(prev => (prev && prev.id === userId ? { ...prev, name: profile.name } : prev));
+          } else {
+            supabase
+              .from('profiles')
+              .upsert({ user_id: userId, email, name: metadataName }, { onConflict: 'user_id' })
+              .then(() => {
+                setUser(prev => (prev && prev.id === userId ? { ...prev, name: metadataName } : prev));
+              });
+          }
+        });
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          const tempName = session.user.email?.split('@')[0] ?? 'User';
-          const metadataName = (session.user.user_metadata?.name as string | undefined) || tempName;
-          setUser({
-            id: session.user.id,
-            email: session.user.email ?? '',
-            name: metadataName,
-            createdAt: session.user.created_at,
-          });
-
-          supabase
-            .from('profiles')
-            .select('name')
-            .eq('user_id', session.user.id)
-            .maybeSingle()
-            .then(({ data: profile }) => {
-              if (profile?.name) {
-                setUser(prev => (prev ? { ...prev, name: profile.name } : prev));
-              } else {
-                supabase
-                  .from('profiles')
-                  .upsert(
-                    { user_id: session.user.id, email: session.user.email ?? '', name: metadataName },
-                    { onConflict: 'user_id' }
-                  )
-                  .then(() => {
-                    setUser(prev => (prev ? { ...prev, name: metadataName } : prev));
-                  });
-              }
+          // Token refreshes and tab re-focus fire this callback with the same
+          // user — keep the existing object so data-loading effects keyed on
+          // the user don't refetch (and flash their spinners) every time.
+          if (session.user.id !== currentUserId) {
+            currentUserId = session.user.id;
+            const tempName = session.user.email?.split('@')[0] ?? 'User';
+            const metadataName = (session.user.user_metadata?.name as string | undefined) || tempName;
+            setUser({
+              id: session.user.id,
+              email: session.user.email ?? '',
+              name: metadataName,
+              createdAt: session.user.created_at,
             });
+
+            // Supabase advises against calling other supabase methods inside
+            // this callback (it runs while the auth lock is held), so defer.
+            const { id, email } = session.user;
+            setTimeout(() => loadProfileName(id, email ?? '', metadataName), 0);
+          }
         } else {
+          currentUserId = null;
           setUser(null);
         }
 
@@ -100,27 +118,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     email: string,
     password: string,
     name: string,
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }> => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name } },
+        options: { data: { name }, emailRedirectTo: window.location.origin },
       });
       if (error) return { success: false, error: error.message };
-      return { success: true };
+      // With email confirmation enabled, signUp succeeds without a session.
+      return { success: true, needsConfirmation: !data.session };
     } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const logout = async () => {
+    const userId = user?.id;
     try {
-      await supabase.auth.signOut();
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      // If the server call fails (offline, project paused), still end the
+      // session on this device rather than leaving the user stuck signed in.
+      if (error) await supabase.auth.signOut({ scope: 'local' });
     } catch (err) {
       console.error('Logout error:', err);
     }
+    // Don't leave this user's cached data readable on a shared device.
+    if (userId) storage.clearUserCache(userId);
+    clearLastSync();
+    setUser(null);
   };
 
   return (

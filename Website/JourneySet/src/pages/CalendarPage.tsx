@@ -11,6 +11,8 @@ const CalendarPage: React.FC = () => {
     "Manage appointments and events with conflict detection in JourneySet's monthly Event Calendar."
   );
   const [printView, setPrintView] = useState(false);
+  // Month currently shown in EventCalendar, so Export prints that month.
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date());
 
   return (
     <>
@@ -18,8 +20,8 @@ const CalendarPage: React.FC = () => {
         <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Event Calendar</h1>
         <ExportButton onPrint={() => setPrintView(true)} label="Export" />
       </div>
-      <EventCalendar />
-      {printView && <PrintView view="calendar" onClose={() => setPrintView(false)} />}
+      <EventCalendar onMonthChange={setVisibleMonth} />
+      {printView && <PrintView view="calendar" month={visibleMonth} onClose={() => setPrintView(false)} />}
     </>
   );
 };

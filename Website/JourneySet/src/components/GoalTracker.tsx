@@ -4,6 +4,8 @@ import { Goal, GoalStatus } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
 import { getGoals, createGoal, updateGoal, deleteGoal } from '../api/goalsApi';
+import ErrorBanner from './ErrorBanner';
+import { SAVE_ERROR } from '../constants/messages';
 
 const GoalTracker: React.FC = () => {
   const { isCompact } = useCompactMode();
@@ -17,7 +19,13 @@ const GoalTracker: React.FC = () => {
   });
   const [resetConfirmId, setResetConfirmId] = useState<string | null>(null);
   const [goalsLoading, setGoalsLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  // Goals with an update in flight — their controls are disabled so rapid
+  // clicks can't send two writes computed from the same stale value.
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const userId = user?.id;
 
   const units = [
     { value: 'times', label: 'times' },
@@ -30,82 +38,102 @@ const GoalTracker: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (user) {
-      setGoalsLoading(true);
-      const loadGoals = async () => {
-        const userGoals = await getGoals(user.id);
-        setGoals(userGoals);
-        setGoalsLoading(false);
-      };
-      loadGoals();
-    }
-  }, [user]);
+    if (!userId) return;
+    let cancelled = false;
+    setGoalsLoading(true);
+    getGoals(userId).then(userGoals => {
+      if (cancelled) return;
+      setGoals(userGoals);
+      setGoalsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const parsedTarget = Number(newGoal.target);
+  const targetValid = newGoal.target.trim() !== '' && Number.isFinite(parsedTarget) && parsedTarget > 0;
 
   const addGoal = async () => {
-    if (!newGoal.title.trim() || !newGoal.target || !user) return;
+    if (!newGoal.title.trim() || !targetValid || !userId || adding) return;
 
-    const goal = await createGoal(user.id, {
+    setAdding(true);
+    const goal = await createGoal(userId, {
       title: newGoal.title.trim(),
       description: newGoal.description.trim() || undefined,
-      targetValue: parseInt(newGoal.target),
+      targetValue: parsedTarget,
       currentValue: 0,
       unit: newGoal.unit,
       allowExceedTarget: newGoal.allowExceedTarget,
     });
+    setAdding(false);
 
     if (goal) {
-      setGoals([...goals, goal]);
+      setGoals(prev => [...prev, goal]);
       setNewGoal({ title: '', description: '', target: '', unit: 'times', allowExceedTarget: false });
+      setError(null);
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
-  const updateGoalProgress = async (goalId: string, increment: number) => {
-    if (!user) return;
-    const goal = goals.find(g => g.id === goalId);
-    if (!goal) return;
+  const setPending = (goalId: string, pending: boolean) =>
+    setPendingIds(prev => {
+      const next = new Set(prev);
+      if (pending) next.add(goalId);
+      else next.delete(goalId);
+      return next;
+    });
 
+  /** Runs one update for a goal, locking its controls until it settles. */
+  const runGoalUpdate = async (goalId: string, updates: Partial<Goal>): Promise<boolean> => {
+    if (!userId || pendingIds.has(goalId)) return false;
+    setPending(goalId, true);
+    const updated = await updateGoal(userId, goalId, updates);
+    setPending(goalId, false);
+    if (updated) {
+      setGoals(prev => prev.map(g => (g.id === goalId ? updated : g)));
+      return true;
+    }
+    setError(SAVE_ERROR);
+    return false;
+  };
+
+  const updateGoalProgress = (goal: Goal, increment: number) => {
     let newCurrentValue = goal.currentValue + increment;
     if (!goal.allowExceedTarget) {
       newCurrentValue = Math.max(0, Math.min(newCurrentValue, goal.targetValue));
     } else {
       newCurrentValue = Math.max(0, newCurrentValue);
     }
-
-    const updated = await updateGoal(user.id, goalId, { currentValue: newCurrentValue });
-    if (updated) {
-      setGoals(goals.map(g => (g.id === goalId ? updated : g)));
-    }
+    if (newCurrentValue === goal.currentValue) return;
+    runGoalUpdate(goal.id, { currentValue: newCurrentValue });
   };
 
-  const toggleAllowExceed = async (goalId: string) => {
-    if (!user) return;
-    const goal = goals.find(g => g.id === goalId);
-    if (!goal) return;
-
-    const updated = await updateGoal(user.id, goalId, { allowExceedTarget: !goal.allowExceedTarget });
-    if (updated) {
-      setGoals(goals.map(g => (g.id === goalId ? updated : g)));
-    }
+  const toggleAllowExceed = (goal: Goal) => {
+    runGoalUpdate(goal.id, { allowExceedTarget: !goal.allowExceedTarget });
   };
 
   const resetProgress = async (goalId: string) => {
-    if (!user) return;
-    const updated = await updateGoal(user.id, goalId, { currentValue: 0 });
-    if (updated) {
-      setGoals(goals.map(g => (g.id === goalId ? updated : g)));
+    if (await runGoalUpdate(goalId, { currentValue: 0 })) {
       setResetConfirmId(null);
     }
   };
 
   const deleteGoalHandler = async (goalId: string) => {
-    if (!user) return;
-    const success = await deleteGoal(user.id, goalId);
+    if (!userId || pendingIds.has(goalId)) return;
+    setPending(goalId, true);
+    const success = await deleteGoal(userId, goalId);
+    setPending(goalId, false);
     if (success) {
-      setGoals(goals.filter(goal => goal.id !== goalId));
+      setGoals(prev => prev.filter(goal => goal.id !== goalId));
+    } else {
+      setError(SAVE_ERROR);
     }
   };
 
   const getProgressPercentage = (current: number, target: number, allowExceed: boolean) => {
+    if (target <= 0) return 0;
     if (allowExceed) return (current / target) * 100;
     return Math.min((current / target) * 100, 100);
   };
@@ -146,6 +174,8 @@ const GoalTracker: React.FC = () => {
         </div>
       )}
 
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
+
       {/* Add Goal Form */}
       <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 ${isCompact ? 'p-4' : 'p-5'}`}>
         <h3 className={`font-semibold text-slate-900 dark:text-white ${isCompact ? 'text-sm mb-3' : 'text-sm mb-4'}`}>Create new goal</h3>
@@ -170,7 +200,9 @@ const GoalTracker: React.FC = () => {
               value={newGoal.target}
               onChange={e => setNewGoal({ ...newGoal, target: e.target.value })}
               placeholder="Target"
-              min="1"
+              min="0"
+              step="any"
+              aria-invalid={newGoal.target !== '' && !targetValid}
               className={`${inputClass} flex-1`}
             />
             <select
@@ -195,10 +227,10 @@ const GoalTracker: React.FC = () => {
             </label>
             <button
               onClick={addGoal}
-              disabled={!newGoal.title.trim() || !newGoal.target}
+              disabled={!newGoal.title.trim() || !targetValid || adding}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
-              <Plus className="h-4 w-4" />
+              {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Add goal
             </button>
           </div>
@@ -217,6 +249,7 @@ const GoalTracker: React.FC = () => {
             const progressPercentage = getProgressPercentage(goal.currentValue, goal.targetValue, goal.allowExceedTarget);
             const status = getGoalStatus(goal);
             const isComplete = goal.currentValue >= goal.targetValue;
+            const isPending = pendingIds.has(goal.id);
 
             return (
               <div
@@ -240,6 +273,7 @@ const GoalTracker: React.FC = () => {
                   <div className="flex gap-0.5 flex-shrink-0 ml-2">
                     <button
                       onClick={() => setResetConfirmId(goal.id)}
+                      aria-label="Reset progress"
                       className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-amber-500 transition-colors cursor-pointer"
                       title="Reset progress"
                     >
@@ -247,6 +281,8 @@ const GoalTracker: React.FC = () => {
                     </button>
                     <button
                       onClick={() => deleteGoalHandler(goal.id)}
+                      disabled={isPending}
+                      aria-label="Delete goal"
                       className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors cursor-pointer"
                       title="Delete"
                     >
@@ -256,7 +292,7 @@ const GoalTracker: React.FC = () => {
                 </div>
 
                 {goal.description && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">{goal.description}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed break-words">{goal.description}</p>
                 )}
 
                 {/* Status badge */}
@@ -290,15 +326,18 @@ const GoalTracker: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => updateGoalProgress(goal.id, -1)}
-                      disabled={goal.currentValue <= 0}
+                      onClick={() => updateGoalProgress(goal, -1)}
+                      disabled={goal.currentValue <= 0 || isPending}
+                      aria-label="Decrease progress by 1"
                       className="px-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 text-slate-700 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
                     >
                       −1
                     </button>
                     <button
-                      onClick={() => updateGoalProgress(goal.id, 1)}
-                      className="px-3 py-1.5 text-xs font-medium bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg transition-colors cursor-pointer"
+                      onClick={() => updateGoalProgress(goal, 1)}
+                      disabled={isPending || (!goal.allowExceedTarget && goal.currentValue >= goal.targetValue)}
+                      aria-label="Increase progress by 1"
+                      className="disabled:opacity-40 px-3 py-1.5 text-xs font-medium bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg transition-colors cursor-pointer"
                     >
                       +1
                     </button>
@@ -313,7 +352,8 @@ const GoalTracker: React.FC = () => {
 
                 {/* Allow exceed toggle */}
                 <button
-                  onClick={() => toggleAllowExceed(goal.id)}
+                  onClick={() => toggleAllowExceed(goal)}
+                  disabled={isPending}
                   className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     goal.allowExceedTarget
                       ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50'
@@ -331,6 +371,7 @@ const GoalTracker: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => resetProgress(goal.id)}
+                        disabled={isPending}
                         className="flex-1 px-2 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
                       >
                         Reset

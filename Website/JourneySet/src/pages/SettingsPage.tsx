@@ -8,6 +8,7 @@ import { storage } from '../utils/storage';
 import { getLastSync } from '../api/plannerApi';
 import { formatDistanceToNow } from 'date-fns';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useModalFocus } from '../hooks/useModalFocus';
 
 const SettingsPage: React.FC = () => {
   usePageMeta(
@@ -19,12 +20,11 @@ const SettingsPage: React.FC = () => {
   const { isCompact, toggleCompact } = useCompactMode();
   const [showResetModal, setShowResetModal] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
+  const { modalRef: resetModalRef } = useModalFocus(showResetModal, () => setShowResetModal(false));
 
   const handleResetData = () => {
     if (user) {
-      localStorage.removeItem(storage.getUserKey('planner', user.id));
-      localStorage.removeItem(storage.getUserKey('goals', user.id));
-      localStorage.removeItem(storage.getUserKey('events', user.id));
+      storage.clearUserCache(user.id);
       setShowResetModal(false);
     }
   };
@@ -193,12 +193,22 @@ const SettingsPage: React.FC = () => {
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20">
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          role="presentation"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowResetModal(false); }}
+        >
+          <div
+            ref={resetModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-modal-title"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
+          >
             <div className="w-12 h-12 bg-rose-100 dark:bg-rose-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
             </div>
-            <h3 className="text-base font-bold text-center text-slate-900 dark:text-white mb-2">
+            <h3 id="reset-modal-title" className="text-base font-bold text-center text-slate-900 dark:text-white mb-2">
               Reset all data?
             </h3>
             <p className="text-sm text-center text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">

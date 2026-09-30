@@ -1,8 +1,14 @@
 import { useEffect, useRef } from 'react';
 
+const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export const useModalFocus = (isOpen: boolean, onClose: () => void) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  // Held in a ref so an inline `onClose` (new function every parent render)
+  // doesn't re-run the effect and steal focus back to the first field.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -14,13 +20,11 @@ export const useModalFocus = (isOpen: boolean, onClose: () => void) => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
       }
 
       if (e.key === 'Tab') {
-        const focusableElements = modal.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
+        const focusableElements = modal.querySelectorAll(FOCUSABLE);
         const firstElement = focusableElements[0] as HTMLElement;
         const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
@@ -38,12 +42,9 @@ export const useModalFocus = (isOpen: boolean, onClose: () => void) => {
       }
     };
 
-    const focusableElements = modal.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusableElements.length > 0) {
-      (focusableElements[0] as HTMLElement).focus();
-    }
+    // Prefer an element marked `data-autofocus`, else the first focusable one.
+    const initial = modal.querySelector<HTMLElement>('[data-autofocus]') ?? modal.querySelector<HTMLElement>(FOCUSABLE);
+    initial?.focus();
 
     modal.addEventListener('keydown', handleKeyDown);
 
@@ -51,7 +52,7 @@ export const useModalFocus = (isOpen: boolean, onClose: () => void) => {
       modal.removeEventListener('keydown', handleKeyDown);
       previousActiveElement?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return { triggerRef, modalRef };
 };

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Eye, EyeOff, Compass, Loader2 } from 'lucide-react';
+import { X, Eye, EyeOff, Compass, Loader2, MailCheck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useModalFocus } from '../hooks/useModalFocus';
 
@@ -17,8 +17,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirmationSentTo, setConfirmationSentTo] = useState<string | null>(null);
   const { login, register } = useAuth();
   const { modalRef } = useModalFocus(true, onClose);
+
+  // The modal stays mounted when switching between sign-in and sign-up, so
+  // clear any message left over from the other mode.
+  useEffect(() => {
+    setError('');
+    setConfirmationSentTo(null);
+  }, [mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,21 +35,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
 
     try {
       if (mode === 'login') {
-        const result = await login(email, password);
+        const result = await login(email.trim(), password);
         if (!result.success) {
           setError(result.error || 'Invalid email or password');
         } else {
           onClose();
         }
       } else {
-        if (name.length < 2) {
+        if (name.trim().length < 2) {
           setError('Name must be at least 2 characters long');
           setLoading(false);
           return;
         }
-        const result = await register(email, password, name);
+        const result = await register(email.trim(), password, name.trim());
         if (!result.success) {
           setError(result.error || 'Failed to create account');
+        } else if (result.needsConfirmation) {
+          setConfirmationSentTo(email.trim());
         } else {
           onClose();
         }
@@ -117,6 +127,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               : 'Start your productivity journey today'}
           </p>
 
+          {confirmationSentTo ? (
+            <div className="text-center space-y-3 py-2" role="status">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center">
+                <MailCheck className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Check your email</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                We sent a confirmation link to <span className="font-medium text-slate-700 dark:text-slate-300 break-all">{confirmationSentTo}</span>.
+                Open it to activate your account, then sign in.
+              </p>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'register' && (
               <div>
@@ -166,7 +188,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   className={`${inputClass} pr-12`}
                   placeholder="Enter your password"
                   required
-                  minLength={8}
+                  minLength={mode === 'register' ? 8 : undefined}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 />
                 <button
@@ -205,6 +227,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               </p>
             )}
           </form>
+          )}
 
           <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
             {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}

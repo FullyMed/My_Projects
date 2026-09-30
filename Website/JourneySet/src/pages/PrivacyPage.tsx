@@ -9,7 +9,7 @@ const PrivacyPage: React.FC = () => {
   );
 
   return (
-    <LegalPageLayout title="Privacy Policy" lastUpdated="September 21, 2026">
+    <LegalPageLayout title="Privacy Policy" lastUpdated="September 30, 2026">
       <section>
         <h2>1. Overview</h2>
         <p>
@@ -78,7 +78,8 @@ const PrivacyPage: React.FC = () => {
         <p>
           We retain your account and content data for as long as your account is active. You can
           delete individual tasks, goals, and events at any time from within the app. You can also
-          clear your local cache from <strong>Settings → Reset all local data</strong>. To request
+          clear your local cache from <strong>Settings → Reset all local data</strong>; signing out
+          clears it automatically. To request
           full deletion of your account and associated data, reach out via the channel in the
           Contact section below.
         </p>
@@ -91,7 +92,7 @@ const PrivacyPage: React.FC = () => {
           <li>View and edit any data you've entered directly within the app.</li>
           <li>Export a copy of your planner, goals, or calendar using the <strong>Export &amp; Print</strong> feature.</li>
           <li>Delete individual items, or clear your local cache from Settings.</li>
-          <li>Sign out, which ends your session on this device.</li>
+          <li>Sign out, which ends your session on this device and removes the local cache of your data from this browser.</li>
           <li>Request deletion of your account and all associated data.</li>
         </ul>
       </section>

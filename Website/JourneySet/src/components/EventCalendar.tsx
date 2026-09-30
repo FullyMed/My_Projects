@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useModalFocus } from '../hooks/useModalFocus';
+import ErrorBanner from './ErrorBanner';
+import { SAVE_ERROR } from '../constants/messages';
 import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X, Loader2 } from 'lucide-react';
 import { Event } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -15,11 +18,17 @@ import {
   addMonths,
   subMonths,
   isToday,
+  parseISO,
 } from 'date-fns';
 import { EVENT_CATEGORIES, getCategoryColor, getCategoryLabel } from '../constants/categories';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../api/eventsApi';
 
-const EventCalendar: React.FC = () => {
+interface EventCalendarProps {
+  /** Called with the first day of the visible month whenever it changes (used by Export). */
+  onMonthChange?: (month: Date) => void;
+}
+
+const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -33,38 +42,59 @@ const EventCalendar: React.FC = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [modalError, setModalError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const userId = user?.id;
   const { isCompact } = useCompactMode();
 
+  const closeModal = () => {
+    setShowEventModal(false);
+    setEditingEvent(null);
+    setModalError('');
+  };
+  const { modalRef } = useModalFocus(showEventModal, closeModal);
+
   useEffect(() => {
-    if (user) {
-      setEventsLoading(true);
-      const loadEvents = async () => {
-        const userEvents = await getEvents(user.id);
-        setEvents(userEvents);
-        setEventsLoading(false);
-      };
-      loadEvents();
-    }
-  }, [user]);
+    if (!userId) return;
+    let cancelled = false;
+    setEventsLoading(true);
+    getEvents(userId).then(userEvents => {
+      if (cancelled) return;
+      setEvents(userEvents);
+      setEventsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    onMonthChange?.(startOfMonth(currentDate));
+  }, [currentDate, onMonthChange]);
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
     setShowEventModal(true);
     setEditingEvent(null);
+    setModalError('');
     setNewEvent({ title: '', description: '', category: 'personal', time: '' });
   };
 
-  const handleEventClick = (event: Event, e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation();
+  const handleEventClick = (event: Event, e?: React.MouseEvent | React.KeyboardEvent) => {
+    e?.stopPropagation();
     setEditingEvent(event);
+    setModalError('');
     setNewEvent({
       title: event.title,
       description: event.description || '',
       category: event.category,
       time: event.time || '',
     });
-    setSelectedDate(new Date(event.dateISO));
+    // parseISO treats a bare YYYY-MM-DD as local midnight; `new Date()` would
+    // read it as UTC and land on the previous day west of Greenwich.
+    setSelectedDate(parseISO(event.dateISO));
     setShowEventModal(true);
   };
 
@@ -76,70 +106,71 @@ const EventCalendar: React.FC = () => {
   };
 
   const saveEvent = async () => {
-    if (!newEvent.title.trim() || !selectedDate || !user) return;
+    if (!newEvent.title.trim() || !selectedDate || !userId || saving) return;
 
     const dateISO = format(selectedDate, 'yyyy-MM-dd');
+    const fields = {
+      title: newEvent.title.trim(),
+      description: newEvent.description.trim() || undefined,
+      category: newEvent.category,
+      time: newEvent.time || undefined,
+      dateISO,
+    };
 
-    if (editingEvent) {
-      const updated = await updateEvent(user.id, editingEvent.id, {
-        title: newEvent.title.trim(),
-        description: newEvent.description.trim() || undefined,
-        category: newEvent.category,
-        time: newEvent.time || undefined,
-        dateISO,
-      });
-      if (updated) {
-        setEvents(events.map(e => (e.id === editingEvent.id ? updated : e)));
-      }
-    } else {
-      const event = await createEvent(user.id, {
-        title: newEvent.title.trim(),
-        description: newEvent.description.trim() || undefined,
-        category: newEvent.category,
-        time: newEvent.time || undefined,
-        dateISO,
-      });
-      if (event) {
-        setEvents([...events, event]);
-      }
+    setSaving(true);
+    const saved = editingEvent
+      ? await updateEvent(userId, editingEvent.id, fields)
+      : await createEvent(userId, fields);
+    setSaving(false);
+
+    if (!saved) {
+      setModalError("Couldn't save this event — check your connection and try again.");
+      return;
     }
-
-    setShowEventModal(false);
-    setEditingEvent(null);
+    setEvents(prev =>
+      editingEvent ? prev.map(e => (e.id === editingEvent.id ? saved : e)) : [...prev, saved]
+    );
+    closeModal();
   };
 
   const deleteEventHandler = async (eventId: string) => {
-    if (!user) return;
-    const success = await deleteEvent(user.id, eventId);
+    if (!userId) return;
+    const success = await deleteEvent(userId, eventId);
     if (success) {
-      setEvents(events.filter(event => event.id !== eventId));
-      setShowEventModal(false);
-      setEditingEvent(null);
+      setEvents(prev => prev.filter(event => event.id !== eventId));
+      if (editingEvent?.id === eventId) closeModal();
+    } else if (showEventModal) {
+      setModalError("Couldn't delete this event — check your connection and try again.");
+    } else {
+      setError(SAVE_ERROR);
     }
+  };
+
+  const byDateThenTime = (a: Event, b: Event) => {
+    if (a.dateISO !== b.dateISO) return a.dateISO.localeCompare(b.dateISO);
+    if (!a.time && !b.time) return 0;
+    if (!a.time) return 1;
+    if (!b.time) return -1;
+    return a.time.localeCompare(b.time);
   };
 
   const getEventsForDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return events
-      .filter(event => event.dateISO === dateStr)
-      .sort((a, b) => {
-        if (!a.time && !b.time) return 0;
-        if (!a.time) return 1;
-        if (!b.time) return -1;
-        return a.time.localeCompare(b.time);
-      });
+    return events.filter(event => event.dateISO === dateStr).sort(byDateThenTime);
   };
 
   const getSelectedDateEvents = () => (selectedDate ? getEventsForDate(selectedDate) : []);
 
   const getFilteredEvents = () => {
     if (!searchQuery.trim()) return events;
-    const query = searchQuery.toLowerCase();
-    return events.filter(
-      event =>
-        event.title.toLowerCase().includes(query) ||
-        event.description?.toLowerCase().includes(query)
-    );
+    const query = searchQuery.trim().toLowerCase();
+    return events
+      .filter(
+        event =>
+          event.title.toLowerCase().includes(query) ||
+          event.description?.toLowerCase().includes(query)
+      )
+      .sort(byDateThenTime);
   };
 
   const monthStart = startOfMonth(currentDate);
@@ -149,8 +180,9 @@ const EventCalendar: React.FC = () => {
   const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  const isSearching = searchQuery.trim() !== '';
   const filteredEvents = getFilteredEvents();
-  const selectedDateEvents = searchQuery.trim() ? filteredEvents : getSelectedDateEvents();
+  const selectedDateEvents = isSearching ? filteredEvents : getSelectedDateEvents();
   const dateISO = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
   const timeConflicts = newEvent.time ? checkConflicts(dateISO, newEvent.time, editingEvent?.id) : [];
 
@@ -164,6 +196,7 @@ const EventCalendar: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+            aria-label="Previous month"
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 cursor-pointer"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -173,6 +206,7 @@ const EventCalendar: React.FC = () => {
           </h2>
           <button
             onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+            aria-label="Next month"
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 cursor-pointer"
           >
             <ChevronRight className="h-5 w-5" />
@@ -187,10 +221,13 @@ const EventCalendar: React.FC = () => {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search events…"
+            aria-label="Search events"
             className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors"
           />
         </div>
       </div>
+
+      <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
       <div className={`flex flex-col lg:flex-row ${isCompact ? 'gap-4' : 'gap-5'}`}>
         {/* Calendar grid */}
@@ -308,7 +345,8 @@ const EventCalendar: React.FC = () => {
                         </div>
                         <div className="flex gap-0.5 flex-shrink-0 ml-2">
                           <button
-                            onClick={() => handleEventClick(event, { stopPropagation: () => {} } as React.MouseEvent)}
+                            onClick={() => handleEventClick(event)}
+                            aria-label="Edit event"
                             className="p-1 text-slate-300 dark:text-slate-600 hover:text-indigo-500 transition-colors cursor-pointer"
                             title="Edit"
                           >
@@ -316,6 +354,7 @@ const EventCalendar: React.FC = () => {
                           </button>
                           <button
                             onClick={() => deleteEventHandler(event.id)}
+                            aria-label="Delete event"
                             className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors cursor-pointer"
                             title="Delete"
                           >
@@ -323,11 +362,15 @@ const EventCalendar: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      {event.time && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 ml-4">{event.time}</p>
+                      {(isSearching || event.time) && (
+                        <p className="text-xs text-slate-400 dark:text-slate-500 ml-4">
+                          {isSearching && format(parseISO(event.dateISO), 'EEE, MMM d, yyyy')}
+                          {isSearching && event.time && ' · '}
+                          {event.time}
+                        </p>
                       )}
                       {event.description && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 ml-4 mt-0.5">{event.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 ml-4 mt-0.5 break-words">{event.description}</p>
                       )}
                       <span className="ml-4 mt-1.5 inline-block text-[10px] font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full">
                         {getCategoryLabel(event.category)}
@@ -344,7 +387,7 @@ const EventCalendar: React.FC = () => {
                 </div>
               )}
               <button
-                onClick={() => handleDateClick(selectedDate)}
+                onClick={() => handleDateClick(selectedDate ?? new Date())}
                 className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
               >
                 <Plus className="h-4 w-4" />
@@ -359,9 +402,15 @@ const EventCalendar: React.FC = () => {
       {showEventModal && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowEventModal(false); }}
+          role="presentation"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-md max-h-[92dvh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter xs:animate-none">
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-modal-title"
+            className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-md max-h-[92dvh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter xs:animate-none">
             {/* Mobile drag handle */}
             <div className="flex justify-center pt-3 pb-1 xs:hidden">
               <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
@@ -369,11 +418,12 @@ const EventCalendar: React.FC = () => {
             <div className="hidden xs:block h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-t-2xl" />
             <div className="p-5 xs:p-6">
               <div className="flex items-center justify-between mb-4 xs:mb-5">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 id="event-modal-title" className="text-base font-bold text-slate-900 dark:text-white">
                   {editingEvent ? 'Edit event' : 'New event'}
                 </h3>
                 <button
-                  onClick={() => setShowEventModal(false)}
+                  onClick={closeModal}
+                  aria-label="Close"
                   className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 cursor-pointer"
                 >
                   <X className="h-4 w-4" />
@@ -390,24 +440,27 @@ const EventCalendar: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="event-title" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
                     Title
                   </label>
                   <input
+                    id="event-title"
                     type="text"
                     value={newEvent.title}
                     onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
+                    onKeyDown={e => e.key === 'Enter' && saveEvent()}
                     placeholder="Event title"
                     className={inputClass}
-                    autoFocus
+                    data-autofocus
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="event-time" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
                     Time <span className="font-normal text-slate-400 normal-case">(optional)</span>
                   </label>
                   <input
+                    id="event-time"
                     type="time"
                     value={newEvent.time}
                     onChange={e => setNewEvent({ ...newEvent, time: e.target.value })}
@@ -426,10 +479,11 @@ const EventCalendar: React.FC = () => {
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="event-category" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
                     Category
                   </label>
                   <select
+                    id="event-category"
                     value={newEvent.category}
                     onChange={e => setNewEvent({ ...newEvent, category: e.target.value as Event['category'] })}
                     className={inputClass}
@@ -443,10 +497,11 @@ const EventCalendar: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label htmlFor="event-description" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
                     Description <span className="font-normal text-slate-400 normal-case">(optional)</span>
                   </label>
                   <textarea
+                    id="event-description"
                     value={newEvent.description}
                     onChange={e => setNewEvent({ ...newEvent, description: e.target.value })}
                     placeholder="Add a note…"
@@ -455,6 +510,10 @@ const EventCalendar: React.FC = () => {
                   />
                 </div>
               </div>
+
+              {modalError && (
+                <p role="alert" className="mt-4 text-sm text-rose-600 dark:text-rose-400">{modalError}</p>
+              )}
 
               <div className="flex justify-between mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                 {editingEvent ? (
@@ -470,16 +529,17 @@ const EventCalendar: React.FC = () => {
                 )}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setShowEventModal(false)}
+                    onClick={closeModal}
                     className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={saveEvent}
-                    disabled={!newEvent.title.trim()}
-                    className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+                    disabled={!newEvent.title.trim() || saving}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
                   >
+                    {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                     {editingEvent ? 'Update' : 'Create'}
                   </button>
                 </div>

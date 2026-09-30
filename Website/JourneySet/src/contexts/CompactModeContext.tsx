@@ -17,7 +17,11 @@ export const CompactModeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   });
 
   useEffect(() => {
-    localStorage.setItem('journeyset_compact_mode', JSON.stringify(isCompact));
+    try {
+      localStorage.setItem('journeyset_compact_mode', JSON.stringify(isCompact));
+    } catch {
+      // Storage unavailable (private mode / quota) — the setting just won't persist.
+    }
   }, [isCompact]);
 
   return (

@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Prambanan Batik is a PHP/MySQL product catalog and review website for authentic Indonesian batik. No build step — plain PHP served by Apache/Nginx (XAMPP/WAMP locally, shared hosting in production).
 
+## Working Agreement
+
+- **The owner commits and pushes himself.** Never run `git commit`/`git push` and don't offer to. Leave changes in the working tree and list the changed files at the end.
+- **Docs are part of every change.** Update this `CLAUDE.md`, `README.md` (features/setup/troubleshooting + a Version History entry), and the Claude memory notes in the same turn. Update the root `C:\CSIE\My Projects\CLAUDE.md` project summary when setup or run details change.
+- **Verify for real.** Exercise changes against the local DB and in the browser (see Local Development), not just by reading the code.
+
 ## Known Gaps / Next Steps
 
 Check here first when starting a new session on this project. A full bug-fix pass on 2026-09-30 (README v2.10.0) closed the 2026-09-29 items (Open Graph tags, static-asset cache headers). It was verified against a real local DB with a 67-check scripted run of every admin/public flow, a DB-down run, an empty-catalog run, and browser checks. Still open:

@@ -9,10 +9,11 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Weekly Planner** — schedule tasks by day with optional time slots; weekly-recurring tasks carry forward automatically
 - **Goal Tracker** — set numeric targets with any unit, track progress with gradient bars, lock or allow exceeding the target
 - **Event Calendar** — full monthly calendar with category colour-coding and time-conflict detection
-- **Export & Print** — generate print-ready views of the planner, goals, or calendar
+- **Export & Print** — generate print-ready views of the planner (the week you're viewing), goals, or calendar (the month you're viewing); only the report prints, not the app around it
 - **Five themes** — Light, Dark, Sky, Gold, Forest (each a light/dark base + accent); persisted per-device, respects `prefers-color-scheme` on first visit
 - **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
-- **Offline-resilient** — all reads fall back to a localStorage cache when Supabase is unreachable
+- **Offline-resilient** — all reads fall back to a per-user localStorage cache when Supabase is unreachable (the planner cache is per week); failed saves show a dismissible error instead of silently doing nothing
+- **Private on shared devices** — signing out clears that user's cached data from the browser
 - **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
 - **Per-page meta** — each route sets its own `<title>` and meta description for SEO/sharing
 - **Loading states** — a themed full-page loader while auth resolves, plus per-feature spinners so the Planner, Goals, and Calendar lists never flash an empty state while their data is still loading
@@ -65,7 +66,10 @@ supabase/migrations/
   20260405053918_create_planner_tasks_table.sql
   20260405053928_create_goals_table.sql
   20260405053937_create_events_table.sql
+  20260930063000_add_updated_at_triggers.sql   # keeps updated_at current on every UPDATE
 ```
+
+> **Free-tier note**: Supabase pauses free projects after about a week without activity. While paused, nobody can sign in. Restore it from the Supabase dashboard.
 
 All tables have Row Level Security enabled — users can only read and write their own data.
 
@@ -73,7 +77,8 @@ All tables have Row Level Security enabled — users can only read and write the
 
 ```bash
 npm run dev        # http://localhost:5173
-npm run build      # production build
+npm run typecheck  # TypeScript check (tsc --noEmit)
+npm run build      # typecheck + production build (fails on type errors)
 npm run preview    # preview production build
 npm run lint       # ESLint
 ```
@@ -93,16 +98,17 @@ src/
 │   ├── WeeklyPlanner.tsx     # Planner feature
 │   ├── GoalTracker.tsx       # Goals feature
 │   ├── EventCalendar.tsx     # Calendar feature
-│   ├── AuthModal.tsx         # Login / register
+│   ├── AuthModal.tsx         # Login / register (shows "check your email" when confirmation is required)
+│   ├── ErrorBanner.tsx       # Dismissible error shown when a save fails
 │   ├── LandingPage.tsx       # Marketing page
 │   ├── NotFoundPage.tsx      # Custom 404 (standalone or embedded in AppLayout)
 │   ├── LoadingScreen.tsx     # Full-page loading state (auth resolving)
 │   ├── LegalPageLayout.tsx   # Shared nav/footer + prose chrome for Terms/Privacy
-│   └── PrintView.tsx         # Print-ready layout
+│   └── PrintView.tsx         # Print-ready layout (portalled to <body>)
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components)
 ├── hooks/            # useModalFocus (trap + Escape handling), usePageMeta (per-route title/description)
-├── constants/        # EVENT_CATEGORIES + THEMES (the 5 theme definitions)
+├── constants/        # EVENT_CATEGORIES, THEMES (the 5 theme definitions), shared messages
 ├── data/             # Static quotes array
 ├── types/            # Shared TypeScript interfaces
 └── utils/            # storage.ts (localStorage), supabaseClient.ts
@@ -126,8 +132,9 @@ Each theme is a light-or-dark base **plus** an accent hue. The accent is a set o
 CSS variables (`--accent-*` / `--accent2-*`) that `tailwind.config.js` maps onto the
 `indigo` / `violet` class names, so every existing `indigo-*` class follows the theme
 with no per-component work. `ThemeContext` writes `data-theme` on `<html>` and stores
-the theme name in `localStorage`; a tiny script in `index.html` applies it before
-first paint to avoid a flash. Definitions live in `src/constants/themes.ts`; the
+the theme name in `localStorage`; a tiny script, `public/theme-init.js` (external
+because the Content Security Policy forbids inline scripts), applies it before first
+paint to avoid a flash. Definitions live in `src/constants/themes.ts`; the
 per-theme variable blocks are in `src/index.css`.
 
 ## Responsive design
@@ -154,7 +161,11 @@ goals             — target_value, current_value, unit, allow_exceed_target
 events            — date_iso (YYYY-MM-DD), time (HH:MM), category, title
 ```
 
-Every table enforces `auth.uid() = user_id` through RLS policies.
+Every table enforces `auth.uid() = user_id` through RLS policies, and a shared trigger keeps `updated_at` current.
+
+## Deployment
+
+Hosted on Vercel. `vercel.json` rewrites every route to `index.html`, so deep links and page refreshes (`/app/planner`, `/terms`, ...) load the app instead of Vercel's 404. It also sets the security headers (CSP, HSTS, etc.). The CSP is mirrored in a `<meta>` tag in `index.html`, so change both together.
 
 ## Roadmap / possible next steps
 
@@ -163,6 +174,9 @@ Nothing here is broken — these are known gaps, noted so they aren't lost betwe
 - **Social share previews (Open Graph / Twitter cards)** — sharing a JourneySet link currently shows plain text, no card/image. Needs static `og:*`/`twitter:*` tags in `index.html` at minimum (a full per-route version would need SSR or prerendering, which this plain Vite SPA doesn't have).
 - **Legal page review** — Terms of Use and Privacy Policy exist (`/terms`, `/privacy`) but were drafted, not lawyer-reviewed; revisit before any real/paying user base, and consider explicit GDPR/CCPA language if that becomes relevant.
 - **Bundle size** — main JS chunk is ~530 kB (147 kB gzip), past Vite's default 500 kB warning threshold. Fine for now; code-splitting (e.g. lazy-loading `PrintView`) is the fix if it keeps growing.
+- **Landing-page stats** — the "10K+ / 95% / 5K+" figures on the landing page are placeholders, not real usage numbers.
+- **Password reset** — there's no "Forgot password?" flow yet.
+- **Supabase hardening** — turn on leaked-password protection, and check that Auth → URL Configuration lists the production URL so confirmation emails link to the live site. Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
 - **Favicon regen script** — the favicon PNG/ICO set was generated once via a throwaway `npx sharp` + `png-to-ico` script that isn't checked into the repo. If the logo mark ever changes, that script needs to be rewritten (see `CLAUDE.md` for the approach).
 
 ## License

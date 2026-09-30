@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, addDays, parseISO } from 'date-fns';
+import { createPortal } from 'react-dom';
+import { format, startOfMonth, endOfMonth, addDays, parseISO, setISOWeek, startOfISOWeek } from 'date-fns';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import { Printer, X, Loader2 } from 'lucide-react';
 import { PlannerTask, Goal, Event } from '../types';
@@ -14,18 +15,20 @@ interface PrintViewProps {
   onClose: () => void;
   /** ISO week key (YYYY-Www) of the week currently shown in WeeklyPlanner */
   weekKey?: string;
+  /** Any date inside the month currently shown in EventCalendar (defaults to today) */
+  month?: Date;
 }
 
-/** Convert an ISO week key (YYYY-Www) to the Monday of that week */
+/**
+ * Convert an ISO week key (YYYY-Www) to the Monday of that week.
+ * Uses date-fns calendar arithmetic rather than adding 86 400 000 ms per day,
+ * which lands on Sunday 23:00 across a daylight-saving change.
+ */
 const weekKeyToMonday = (weekKey: string): Date => {
   const [yearStr, weekStr] = weekKey.split('-W');
-  const year = parseInt(yearStr, 10);
-  const week = parseInt(weekStr, 10);
-  // ISO week 1 contains Jan 4th
-  const jan4 = new Date(year, 0, 4);
-  const dayOfWeek = (jan4.getDay() + 6) % 7; // 0 = Mon
-  const week1Monday = new Date(jan4.getTime() - dayOfWeek * 86400000);
-  return new Date(week1Monday.getTime() + (week - 1) * 7 * 86400000);
+  // ISO week 1 always contains Jan 4th, so Jan 4th is in the right ISO year.
+  const jan4 = new Date(parseInt(yearStr, 10), 0, 4);
+  return startOfISOWeek(setISOWeek(jan4, parseInt(weekStr, 10)));
 };
 
 /** Build the ISO week key for a given date */
@@ -35,15 +38,31 @@ const dateToWeekKey = (date: Date): string => {
   return `${year}-W${String(week).padStart(2, '0')}`;
 };
 
-const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
+const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<PlannerTask[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentDate] = useState(new Date());
+  const [today] = useState(new Date());
+  const currentDate = month ?? today;
 
-  const activeWeekKey = weekKey ?? dateToWeekKey(currentDate);
+  const activeWeekKey = weekKey ?? dateToWeekKey(today);
+
+  // The preview is portalled to <body>; this class lets the print stylesheet
+  // hide the app (#root) so only the report is printed.
+  useEffect(() => {
+    document.body.classList.add('print-view-open');
+    return () => document.body.classList.remove('print-view-open');
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
 
   useEffect(() => {
     if (!user) return;
@@ -273,8 +292,13 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
     calendar: 'Event Calendar',
   };
 
-  return (
-    <div className="fixed inset-0 bg-white dark:bg-slate-950 z-50 overflow-y-auto print:static print:overflow-visible">
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${titles[view]} print preview`}
+      className="fixed inset-0 bg-white dark:bg-slate-950 z-50 overflow-y-auto print:static print:overflow-visible print:bg-white"
+    >
       {/* ── Toolbar (hidden on print) ── */}
       <div className="print:hidden sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 xs:px-6 py-3 flex items-center justify-between gap-4 z-10 pt-safe">
         <div className="flex items-center gap-3 min-w-0">
@@ -317,7 +341,8 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey }) => {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
