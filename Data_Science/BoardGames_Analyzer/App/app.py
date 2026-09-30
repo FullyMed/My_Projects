@@ -118,8 +118,8 @@ with h2:
     st.markdown("""
     <div class="info-box">
         <b>Sentiment Analysis</b><br><br>
-        DistilBERT SST-2 sentiment scores aggregated from user reviews add
-        qualitative community perception signals beyond raw numerical ratings.
+        DistilBERT SST-2 scores a sample of each game's user reviews (up to 10),
+        adding a community-perception signal beyond raw numerical ratings.
     </div>
     """, unsafe_allow_html=True)
 

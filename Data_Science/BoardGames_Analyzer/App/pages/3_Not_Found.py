@@ -30,7 +30,7 @@ st.markdown(
 st.markdown("---")
 
 # Optional ?reason=... query param lets internal links explain what went missing
-reason = st.query_params.get("reason", "").strip()
+reason = st.query_params.get("reason", "").strip()[:200]  # rendered escaped by render_not_found
 message = reason if reason else "It may have been moved, renamed, or never existed. Use the links below to keep exploring."
 
 theme.render_not_found(

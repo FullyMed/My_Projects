@@ -93,7 +93,7 @@ Instead, it focuses on:
 BoardGames_Analyzer/
 │
 ├── App/                            ← Multi-page Streamlit app (MAIN APP)
-│   ├── app.py                      ← Home / landing page
+│   ├── app.py                      ← Home / landing page (the sidebar labels it "app"; see "Deployment" in Section 4)
 │   ├── recommender.py              ← Self-contained copy of the engine
 │   ├── theme.py                    ← Shared CSS (light/dark) + chart color helpers
 │   ├── requirements.txt            ← Minimal deps for Streamlit Cloud deployment
@@ -107,13 +107,15 @@ BoardGames_Analyzer/
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
 │   ├── 02_Preprocessing.ipynb
+│   ├── 02b_sentiment_full_coverage.py   ← Current sentiment pipeline (replaces NB02's 20-game pilot)
 │   ├── 03_EDA.ipynb
 │   ├── 04_Modeling_CF.ipynb
 │   ├── 05_Modeling_Content_NLP.ipynb
+│   ├── 05b_embeddings_full_coverage.py  ← Current MiniLM embedding matrix (replaces NB05's 20-game one)
 │   ├── 06_Hybrid_Model.ipynb
-│   ├── 07_Evaluation_Metrics.ipynb
+│   ├── 07_Evaluation_Metrics.ipynb      ← Superseded by 09 (kept as a record; see its top cell)
 │   ├── 08_Discovery_Engine.ipynb
-│   └── 09_Evaluation.ipynb
+│   └── 09_Evaluation.ipynb              ← Evaluates the deployed App/recommender.py (source of all reported numbers)
 │
 ├── Dataset/
 │   ├── Raw/
@@ -127,8 +129,10 @@ BoardGames_Analyzer/
 │   └── Processed/
 │       ├── desc_topk_csr.joblib    ← TF-IDF description similarity (sparse CSR)
 │       ├── content_topk_csr.joblib ← Combined content similarity (sparse CSR)
-│       ├── emb_topk_csr.joblib     ← MiniLM embedding similarity (sparse CSR)
-│       ├── sentiment_summary.csv   ← Per-game aggregated sentiment scores
+│       ├── emb_topk_csr.joblib     ← MiniLM name+description embedding similarity (sparse CSR, from 05b)
+│       ├── sentiment_summary.csv   ← Per-game mean P(positive) review sentiment (from 02b)
+│       ├── sentiment_review_sample.parquet / sentiment_review_scored.parquet ← 02b working files (gitignored)
+│       ├── game_description_embeddings.npy ← 05b embedding cache (gitignored)
 │       ├── merged_clean_sample.csv
 │       └── ...
 │
@@ -136,8 +140,9 @@ BoardGames_Analyzer/
 │   ├── paper.tex                   ← IEEE research paper (main document)
 │   ├── references.bib
 │   ├── paper.pdf                   ← Compiled output
-│   ├── eval_metrics_results.csv
-│   ├── notebook09_summary_metrics.csv
+│   ├── eval_metrics_results.csv    ← Legacy NB07 output (pre-NDCG-fix; not used anywhere)
+│   ├── notebook09_summary_metrics.csv ← Table I numbers (3 modes + 2 baselines + sentiment ablation)
+│   ├── notebook09_user_level_results.csv
 │   └── images/
 │       ├── architecture.png
 │       └── performance_chart.png
@@ -154,7 +159,7 @@ BoardGames_Analyzer/
 ## Important Files
 
 ### `App/app.py`
-Home / landing page of the multi-page Streamlit app.
+Home / landing page of the multi-page Streamlit app. Streamlit's `pages/` convention labels the main page after its filename, so the sidebar shows "app". Renaming it (e.g. to `Home.py`) was considered on 2026-10-01 and declined: see "Deployment" in Section 4.
 
 Displays:
 - Project title and description
@@ -169,11 +174,13 @@ Contains:
 - `_BASE_CSS` — responsive layout CSS with breakpoints for mobile (≤640px), tablet (641–1024px), desktop (≥1025px)
 - `_DARK_CSS` — dark theme colour definitions
 - `_LIGHT_CSS` — light theme (indigo/lavender background gradient, gradient text titles, indigo accent borders on cards)
+- Both theme blocks **pin every colour Streamlit would otherwise take from its own base theme** (alerts, widget labels, captions, links, metric values, slider ticks, sidebar icons). Streamlit's base theme follows the visitor's OS light/dark setting, not this app's toggle, so anything left unpinned becomes unreadable in the mismatched combination (see Bug 13). If you add a new native widget, check it in both themes with the OS in both modes.
+- Result cards are `st.container(key="result_card_N")`, styled via `[class*="st-key-result_card_"]` alongside `.result-card` — a `st.markdown('<div class="result-card">')` / `st.markdown('</div>')` pair can't wrap widgets (see Bug 11)
 - `sidebar_theme()` — renders the theme toggle and returns selected mode
 - `apply_theme(mode)` — injects both base + theme CSS
 - `chart_colors(mode)` — returns a matplotlib colour palette dict
 - `style_ax(ax, fig, colors, title)` — applies consistent chart styling
-- `render_not_found(title, message, icon, show_links)` — themed "not found" card (see Section 6, "Custom 404 / Not Found")
+- `render_not_found(title, message, icon, show_links)` — themed "not found" card (see Section 6, "Custom 404 / Not Found"). Escapes `title`/`message` and collapses whitespace, because the 404 page feeds it the user-controllable `?reason=` query param (see Bug 12)
 - `set_meta_description(description)` — injects `<meta name="description">` into the real document head per page (see Section 6, "Per-Page Meta Title / Description")
 
 ### `App/recommender.py`
@@ -191,7 +198,8 @@ Features:
 - Three modes: Title-Based, Trait-Based, Combined
 - Sidebar: theme, mode, top-N slider, difficulty filter
 - "Try Example" button pre-fills Splendor/Azul query
-- System Interpretation section shows expanded categories/mechanics
+- System Interpretation section shows which catalog game each typed title matched ("catan → Catan") plus expanded categories/mechanics; a warning lists any title that matched nothing
+- Input placeholders are real BGG values that return results (families are "Group: Name" strings such as `Components: Miniatures`; the publisher is `CMON Global Limited`, not `CMON`)
 - Full results dataframe + top-5 styled result cards with "Why recommended" reasons
 
 ### `App/pages/2_Analytics.py`
@@ -201,10 +209,10 @@ Six chart sections:
 1. Overview metrics (total games, avg rating, avg complexity, filtered count)
 2. Rating distribution + Complexity distribution (histograms)
 3. Top N highest-rated games (horizontal bar, min-vote threshold)
-4. Top N most reviewed games (horizontal bar)
+4. Top N most-rated games (horizontal bar, by `usersrated`)
 5. Top N mechanics + categories (side by side)
 6. Games published per year (line chart with area fill)
-7. Community sentiment distribution (if sentiment data exists)
+7. Community sentiment distribution (if sentiment data exists) — mean P(positive) per game from `02b_sentiment_full_coverage.py`, with a caption explaining the sampling
 
 All charts use `width='stretch'` and are responsive to the container width.
 
@@ -218,7 +226,10 @@ Static legal pages, styled with the existing `.section-title` / `.info-box` them
 Main recommendation system notebook.
 
 ### `Notebooks/09_Evaluation.ipynb`
-Evaluation notebook with Recall@K and NDCG@K results.
+Evaluation notebook with Recall@K and NDCG@K results. Since 2026-10-01 it **imports `App/recommender.py`** instead of carrying its own copy of the engine, so the numbers describe the deployed app. Also evaluates a popularity baseline, a content-only baseline and a no-sentiment ablation, saves the CSVs in `Reports/`, prints the verbatim case-study explanations used in the paper's Table II, and regenerates `Reports/images/performance_chart.png` from the computed numbers.
+
+### `Notebooks/02b_sentiment_full_coverage.py` / `Notebooks/05b_embeddings_full_coverage.py`
+Standalone, resumable scripts (run from the project root with the venv's python) that rebuild `sentiment_summary.csv` and `emb_topk_csr.joblib`. They exist because Notebooks 02 and 05 built both signals from a 500,000-row slice of the reviews file that covered only 20 games (see Bugs 14 and 15). The docstring at the top of each explains the method.
 
 ### `Reports/paper.tex`
 Main IEEE research paper.
@@ -239,7 +250,26 @@ streamlit run App/app.py
 
 # Run the original single-page app (root)
 streamlit run app.py
+
+# Rebuild the review-sentiment signal (~1.5 h on CPU; resumable)
+.venv\Scripts\python.exe Notebooks\02b_sentiment_full_coverage.py
+
+# Rebuild the MiniLM embedding similarity (~20 min on CPU)
+.venv\Scripts\python.exe Notebooks\05b_embeddings_full_coverage.py
+
+# Re-run the evaluation (~30 min; writes Reports/notebook09_*.csv + performance_chart.png)
+cd Notebooks
+..\.venv\Scripts\jupyter.exe nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=-1 09_Evaluation.ipynb
+
+# Recompile the paper (MiKTeX)
+cd Reports
+latexmk -pdf paper.tex
 ```
+
+In Claude Code's desktop app, the `boardgames-analyzer` entry in `.claude/launch.json` starts the App on port 8501.
+
+## Deployment (Streamlit Community Cloud)
+The live app's entrypoint is `Data_Science/BoardGames_Analyzer/App/app.py` in the `FullyMed/My_Projects` repo. **Community Cloud cannot change an existing app's entrypoint path**: it identifies an app by repo + branch + entrypoint, so renaming or moving `App/app.py` and pushing leaves the live app broken and "view-only". The documented procedure is delete the app → push the change → redeploy, and the docs don't guarantee the same `*.streamlit.app` URL. That's why the sidebar's "app" label was kept (2026-10-01). Dependencies come from `App/requirements.txt`. The deployed data files are the git-tracked ones: `games_detailed_info.csv`, the three `*_topk_csr.joblib` matrices and `sentiment_summary.csv`.
 
 ---
 
@@ -470,6 +500,69 @@ Table II shows polished natural-language explanations (e.g. "Shared engine-build
 **What was wrong:** The title-only and combined return paths in `discover()` both called `_apply_difficulty_filter()` as a post-processing step, but the trait-only path did not — difficulty filtering only happened inside `build_type_candidates()`, making the architecture inconsistent with the documented design.
 
 **Fix:** Added `out = self._apply_difficulty_filter(out, difficulty_label)` before the `return` in the trait-only path in both `App/recommender.py` and root `recommender.py`. The call is safe (no double-filtering side effects) because `_apply_difficulty_filter()` returns the dataframe unchanged when `difficulty_label is None`, and the data is already filtered when it is set.
+
+---
+
+## 2026-10-01 fix pass (Bugs 10–20)
+Found by an engine stress test (17 normal and edge-case queries), driving the real app in a browser in both themes with the OS in both light and dark mode plus a 375 px mobile viewport, and a data audit of the processed files. Every item below was re-verified after the fix.
+
+## Bug 10 — Title-Based + difficulty filter returned fewer rows than requested (`App/recommender.py`)
+**What was wrong:** The difficulty filter runs after ranking, on only the top `max(top_n * 5, 100)` title candidates. A narrow band far from the seed (e.g. "high" for Splendor) left 7 of 10 rows.
+
+**Fix:** `discover()` uses a deeper pool, `max(top_n * 100, 2000)`, when `difficulty_label` is set. It's still a post-processing filter (Section 10 rule unchanged); the evaluation never sets a difficulty, so its numbers are unaffected.
+
+## Bug 11 — Result cards drew an empty box above their content (`App/pages/1_Recommendation.py`, root `app.py`)
+**What was wrong:** `st.markdown('<div class="result-card">')` … `st.markdown('</div>')`: each `st.markdown` is its own element, so the div closed immediately (measured: all 5 `.result-card` divs had empty innerHTML) and the card styling applied to a thin empty bar.
+
+**Fix:** Each card is `with st.container(key=f"result_card_{rank}")`; `theme.py` (and root `app.py`'s inline CSS) style `[class*="st-key-result_card_"]` with the same rules as `.result-card`.
+
+## Bug 12 — HTML injection through the 404 page's `?reason=` param (`App/theme.py`, `App/pages/3_Not_Found.py`)
+**What was wrong:** `render_not_found()` put `message` into HTML unescaped, and `3_Not_Found.py` passes the URL's `?reason=` straight in. A crafted link rendered arbitrary markup on the live site; verified with an injected "Click to log in" link to an external domain. Streamlit stripped `onerror` handlers, but links and images got through.
+
+**Fix:** `html.escape` on `icon`/`title`/`message`, whitespace collapsed (a blank line would otherwise end the HTML block and let Markdown links render), and `reason` capped at 200 chars. Re-verified with both an HTML payload and a `%0A%0A[link](url)` Markdown payload: both render as inert text.
+
+## Bug 13 — Text unreadable when the visitor's OS theme differs from the app's toggle (`App/theme.py`)
+**What was wrong:** Streamlit colours its native widgets from its own base theme, which follows the OS/browser, not this app's Light/Dark radio. Light theme + OS dark mode: `st.warning` text was `rgb(255,255,194)` on pale yellow. Dark theme + OS light mode: sidebar title, every widget label, captions, slider ticks, metric values and links came out at a ~1.4:1 contrast ratio.
+
+**Fix:** Both `_LIGHT_CSS` and `_DARK_CSS` now pin those colours explicitly, with per-kind alert colours via `[data-testid="stAlertContainer"]:has([data-testid="stAlertContent{Warning,Info,Error,Success}"])`. Button labels (markdown `<p>`s) are pinned to white in `_BASE_CSS` so the themes' paragraph colour can't bleed into the gradient buttons. A contrast audit script over every page, in all four theme × OS combinations, now reports nothing below 3:1. **Known cosmetic leftover:** `st.dataframe` draws on a canvas using Streamlit's base theme, so in a mismatched combination the table renders in the other theme's colours (still readable).
+
+## Bug 14 — Sentiment covered 20 games and measured confidence, not positivity (`Notebooks/02_Preprocessing.ipynb` → `02b_sentiment_full_coverage.py`)
+**What was wrong:** NB02 read `nrows=500000` of `large_bgg-26m-reviews.csv`, which is sorted by game, so only 20 very popular games were scored. It also averaged the pipeline's `score`, which is the confidence in *whichever* label was predicted (a confidently negative review counted as ~0.99), so all 20 values sat at 0.965–0.975 and the Analytics page showed "100% positive".
+
+**Fix:** `02b_sentiment_full_coverage.py` samples up to 10 random non-empty comments for every game (chunked, fits in 8 GB RAM), scores them with the same model (128-token truncation, length-sorted batches), converts to P(positive), and writes `sentiment_summary.csv` for games with ≥ 3 scored comments. Resumable via a checkpoint parquet.
+
+## Bug 15 — MiniLM embedding similarity covered only the same 20 games (`Notebooks/05_Modeling_Content_NLP.ipynb` → `05b_embeddings_full_coverage.py`)
+**What was wrong:** NB05 embedded review comments from that same 500K-row slice, so `emb_topk_csr.joblib` had neighbours for 20 games only (380 non-zeros). With a 0.35 weight in title mode, those 20 popular games recommended each other regardless of the seed: Splendor + Azul returned Carcassonne, Catan, Pandemic, Ticket to Ride and 7 Wonders. The paper also described the embeddings as coming from descriptions.
+
+**Fix:** `05b_embeddings_full_coverage.py` embeds every catalog game's `name + description` (HTML-unescaped) with all-MiniLM-L6-v2 and keeps each game's top 50 cosine neighbours, in the engine's exact row order.
+
+## Bug 16 — Notebook 09 evaluated a copy of the engine, not the deployed one
+**What was wrong:** NB09 re-implemented the engine in notebook cells and computed popularity from `large_user_ratings.csv` rating counts, while the app uses `usersrated`. The published numbers didn't describe the deployed ranking.
+
+**Fix:** NB09 now `import`s `App/recommender.py`. Same 300-user protocol; adds popularity / content-only baselines and a no-sentiment ablation; regenerates `performance_chart.png` from the computed numbers instead of hard-coded ones.
+
+## Bug 17 — Notebook 07: `np.asfarray` and inflated NDCG
+**What was wrong:** `np.asfarray` was removed in NumPy 2.0. `ndcg_at_k` computed the ideal DCG by sorting the *retrieved* relevance list, so one hit at rank 1 scored NDCG = 1.0 even with 20 held-out items (visible in `Reports/eval_metrics_results.csv`: Recall 0.15 with NDCG 0.97).
+
+**Fix:** `np.asarray(rels, dtype=float)`; IDCG now comes from `min(n_relevant, k)`. NB07 is superseded by NB09 and was **not re-run**; a markdown cell at its top says its saved outputs and `eval_metrics_results.csv` predate the fix.
+
+## Bug 18 — UI examples that returned nothing (`App/pages/1_Recommendation.py`, root `app.py`)
+**What was wrong:** The Families placeholder "Family Games" and the Publishers placeholder "CMON" match no BGG value (families are "Group: Name" strings; the publisher is "CMON Global Limited"), so following the examples gave zero results.
+
+**Fix:** Placeholders are now `Components: Miniatures, Crowdfunding: Kickstarter` and `Asmodee, CMON Global Limited`; every placeholder example was verified to return results.
+
+## Bug 19 — Stale Streamlit 1.52 selectors in `App/theme.py`
+**What was wrong:** `[data-testid="column"]` (the mobile column-stacking rule), `stDeployButton` and `stThumbValue` no longer exist in 1.52's DOM.
+
+**Fix:** Retargeted to `stColumn` and `stAppDeployButton` (verified at 375 px: card metric columns stack full-width, no horizontal scroll). The `stThumbValue` selector was **removed**, not retargeted: its rule paints an indigo background with dark text, which would make the slider's value label unreadable on `stSliderThumbValue`.
+
+## Bug 20 — Smaller engine and page fixes
+- **Silent title resolution:** titles resolve by exact name, then by substring (most-voted match), and unmatched titles were silently dropped. The page now shows "typed → matched" for every seed and warns about unmatched ones (`describe_seed_matches()` in `1_Recommendation.py`).
+- **Expanded traits listed case duplicates** ("Strategy … strategy"): `expand_traits()` now de-duplicates case-insensitively (`_dedupe_casefold`). Scoring was already case-insensitive, so rankings are unchanged.
+- **Title-mode explanations were lowercase** while trait-mode ones were Title Case: `recommend_by_titles()` now reports matched values in the catalog's own spelling (`_seed_values` / `_meta_overlap`).
+- **Combined mode excluded seeds by typed name only:** it now also excludes the resolved seed ids. This is defensive: a leak into the top 20 was *not* reproducible even with the old code, because title-similarity scores always outrank trait-only rows.
+- **pandas FutureWarning** (`fillna` downcasting on the object-dtype `score_like` of an empty title result): coerced with `pd.to_numeric` first.
+- **Analytics "Most Reviewed Games"** actually charts `usersrated`: renamed "Most-Rated Games".
 
 ---
 

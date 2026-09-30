@@ -77,8 +77,8 @@ Then run `claude` to start Claude Code in that project.
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA
 - **Purpose:** Personal productivity planner (weekly tasks, goal tracker, event calendar)
-- **Key traits:** Supabase auth + RLS, localStorage offline fallback, dark mode, Tailwind CSS
-- **Run:** `npm run dev`
+- **Key traits:** Supabase auth + RLS, localStorage offline fallback, 5 themes, Tailwind CSS. Live at https://journeyset.vercel.app/. Vercel auto-deploys on push to `main` (verified 2026-09-30). The Supabase project is free tier and **pauses after ~1 week idle**, which breaks sign-in; if login fails everywhere, restore it first. A 2026-09-30 fix pass is committed, pushed and deployed, but its signed-in flows still need a browser run with the owner signing in; see "Known gaps" in its `CLAUDE.md`.
+- **Run:** `npm run dev` (`npm run build` now type-checks first)
 
 ### Website / Prambanan Batik
 - **Type:** PHP 7.4 + MySQL, no build step

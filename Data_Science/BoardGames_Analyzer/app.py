@@ -59,7 +59,7 @@ def apply_theme(theme_mode: str):
             box-shadow: 0 8px 20px rgba(0,0,0,0.18);
         }
 
-        .result-card {
+        .result-card, [class*="st-key-result_card_"] {
             background: rgba(15, 23, 42, 0.96);
             border: 1px solid rgba(148, 163, 184, 0.18);
             border-radius: 18px;
@@ -162,7 +162,7 @@ def apply_theme(theme_mode: str):
             box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
         }
 
-        .result-card {
+        .result-card, [class*="st-key-result_card_"] {
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 18px;
@@ -382,7 +382,7 @@ with col4:
     family_input = st.text_input(
         "Preferred Families (optional)",
         value=st.session_state["family_input"],
-        placeholder="Example: Family Games",
+        placeholder="Example: Components: Miniatures, Crowdfunding: Kickstarter",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["family_input"] = family_input
@@ -390,7 +390,7 @@ with col4:
 publisher_input = st.text_input(
     "Preferred Publishers (optional)",
     value=st.session_state["publisher_input"],
-    placeholder="Example: Asmodee, CMON",
+    placeholder="Example: Asmodee, CMON Global Limited",
     max_chars=INPUT_MAX_CHARS,
 )
 st.session_state["publisher_input"] = publisher_input
@@ -499,23 +499,23 @@ if run_btn:
             st.markdown("---")
             st.markdown('<div class="section-title">🎯 Recommendations</div>', unsafe_allow_html=True)
 
-            for _, row in formatted.head(5).iterrows():
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown(f'<div class="card-title">🎲 {html.escape(str(row.get("name", "-")))}</div>', unsafe_allow_html=True)
+            for rank, (_, row) in enumerate(formatted.head(5).iterrows()):
+                # A keyed container actually wraps the widgets; a markdown "<div>" / "</div>" pair can't
+                with st.container(key=f"result_card_{rank}"):
+                    st.markdown(f'<div class="card-title">🎲 {html.escape(str(row.get("name", "-")))}</div>', unsafe_allow_html=True)
 
-                metric_col1, metric_col2, metric_col3 = st.columns(3)
-                with metric_col1:
-                    st.metric("Final Score", row.get("final_score", "-"))
-                with metric_col2:
-                    st.metric("Rating", row.get("avg_rating", "-"))
-                with metric_col3:
-                    st.metric("Votes", row.get("num_votes", "-"))
+                    metric_col1, metric_col2, metric_col3 = st.columns(3)
+                    with metric_col1:
+                        st.metric("Final Score", row.get("final_score", "-"))
+                    with metric_col2:
+                        st.metric("Rating", row.get("avg_rating", "-"))
+                    with metric_col3:
+                        st.metric("Votes", row.get("num_votes", "-"))
 
-                st.markdown(
-                    f'<div class="card-reason"><b>Reason:</b> {html.escape(shorten_reason(row.get("reason", "-")))}</div>',
-                    unsafe_allow_html=True
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(
+                        f'<div class="card-reason"><b>Reason:</b> {html.escape(shorten_reason(row.get("reason", "-")))}</div>',
+                        unsafe_allow_html=True
+                    )
 
         elif formatted is not None and len(formatted) == 0:
             st.info("No results found for the given inputs.")

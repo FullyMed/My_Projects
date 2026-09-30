@@ -1,3 +1,4 @@
+import html
 import json
 
 import streamlit as st
@@ -57,6 +58,9 @@ img, [data-testid="stImage"] img,
     font-weight: 700 !important;
     touch-action: manipulation !important;
 }
+/* Both themes use a gradient button with white text; the label is a markdown <p>,
+   so pin it or the themes' general paragraph colour would bleed into it */
+.stButton > button [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
 
 /* ── Inputs: ≥ 16 px prevents iOS auto-zoom on focus ── */
 input, textarea, select,
@@ -89,7 +93,7 @@ div[data-baseweb="select"] > div {
     .stat-label  { font-size: 0.82rem !important; }
 
     .info-box   { padding: 12px 14px !important; font-size: 0.95rem !important; }
-    .result-card { padding: 16px !important; }
+    .result-card, [class*="st-key-result_card_"] { padding: 16px !important; }
     .card-title  { font-size: 1.2rem !important; }
     .card-reason { font-size: 0.92rem !important; }
 }
@@ -103,7 +107,7 @@ div[data-baseweb="select"] > div {
         flex-wrap: wrap !important;
         gap: 0.5rem !important;
     }
-    [data-testid="column"] {
+    [data-testid="stColumn"] {
         width: 100% !important;
         min-width: 100% !important;
         flex: 0 0 100% !important;
@@ -131,7 +135,7 @@ div[data-baseweb="select"] > div {
         border-radius: 10px !important;
         margin-bottom: 10px !important;
     }
-    .result-card {
+    .result-card, [class*="st-key-result_card_"] {
         padding: 14px !important;
         border-radius: 14px !important;
         margin-bottom: 12px !important;
@@ -168,7 +172,7 @@ div[data-baseweb="select"] > div {
 @media screen and (max-width: 390px) {
     .main-title  { font-size: 1.5rem !important; }
     .stat-number { font-size: 1.2rem !important; line-height: 1.2 !important; }
-    .result-card { padding: 11px !important; }
+    .result-card, [class*="st-key-result_card_"] { padding: 11px !important; }
     .section-title { padding-left: 8px !important; border-left-width: 3px !important; }
 }
 </style>
@@ -239,7 +243,7 @@ _DARK_CSS = """
     color: #e2e8f0; margin-bottom: 14px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.18);
 }
-.result-card {
+.result-card, [class*="st-key-result_card_"] {
     background: rgba(15,23,42,0.96);
     border: 1px solid rgba(148,163,184,0.18);
     border-radius: 18px; padding: 18px; margin-bottom: 16px;
@@ -268,6 +272,52 @@ input, textarea { color: #f8fafc !important; }
 .stButton > button { border: 1px solid rgba(148,163,184,0.18); background: linear-gradient(90deg,#2563eb,#7c3aed); color: white; }
 .stButton > button:hover { color: white; border: 1px solid rgba(148,163,184,0.35); }
 hr { border: none; border-top: 1px solid rgba(148,163,184,0.18); margin: 1.2rem 0; }
+
+/* ── Text Streamlit colours from its own light/dark base ──
+   That base follows the OS, not this toggle, so with an OS in light mode these came out
+   as dark grey on navy. Pin them the same way _LIGHT_CSS does for its palette. ── */
+[data-testid="stWidgetLabel"] p,
+[data-testid="stWidgetLabel"] span,
+[data-testid="stWidgetLabel"] label,
+[data-baseweb="form-control-label"] { color: #cbd5e1 !important; }
+[data-testid="stCaptionContainer"] p,
+[data-testid="stCaptionContainer"] span { color: #94a3b8 !important; }
+[data-testid="stSliderTickBar"],
+[data-testid="stSliderTickBar"] * { color: #94a3b8 !important; }
+[data-testid="stMetricValue"],
+[data-testid="stMetricValue"] > div { color: #a5b4fc !important; font-weight: 700 !important; }
+[data-testid="stMetricLabel"],
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] div { color: #94a3b8 !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] li { color: #e2e8f0; }
+[data-testid="stMarkdownContainer"] a { color: #a5b4fc !important; }
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 { color: #f8fafc !important; }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #cbd5e1 !important; }
+[data-testid="stSidebar"] [data-testid="stIconMaterial"],
+[data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] { color: #94a3b8 !important; }
+input, textarea { color: #f8fafc !important; }
+[data-baseweb="select"] span { color: #f8fafc !important; }
+hr { border: none; border-top: 1px solid rgba(148,163,184,0.2); }
+
+/* ── Alerts (dark) ──
+   Streamlit colours st.warning/info/error/success from its own light/dark base,
+   which follows the OS, not this toggle, so pin them to readable colours here ── */
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) { background-color: rgba(250,204,21,0.12) !important; border: 1px solid rgba(250,204,21,0.35) !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) p, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) li, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) span { color: #fde68a !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) svg { fill: #fde68a !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) { background-color: rgba(99,102,241,0.16) !important; border: 1px solid rgba(129,140,248,0.35) !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) p, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) li, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) span { color: #c7d2fe !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) svg { fill: #c7d2fe !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) { background-color: rgba(239,68,68,0.14) !important; border: 1px solid rgba(248,113,113,0.35) !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) p, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) li, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) span { color: #fecaca !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) svg { fill: #fecaca !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) { background-color: rgba(34,197,94,0.14) !important; border: 1px solid rgba(74,222,128,0.35) !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) p, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) li, [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) span { color: #bbf7d0 !important; }
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) svg { fill: #bbf7d0 !important; }
 </style>
 """
 
@@ -334,7 +384,7 @@ _LIGHT_CSS = """
 }
 
 /* ── Result cards: white + colored left stripe ── */
-.result-card {
+.result-card, [class*="st-key-result_card_"] {
     background: #ffffff;
     border: 1px solid #e0e7ff;
     border-left: 4px solid #6366f1;
@@ -405,6 +455,16 @@ _LIGHT_CSS = """
 /* ── Caption text (e.g. below Try Example button) ── */
 [data-testid="stCaptionContainer"] p,
 [data-testid="stCaptionContainer"] span { color: #64748b !important; }
+
+/* ── Text Streamlit colours from its own (OS-driven) base theme ──
+   With an OS in dark mode these would otherwise come out light-on-light ── */
+[data-testid="stMarkdownContainer"] a { color: #4338ca !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] li { color: #1e293b; }
+[data-testid="stSliderTickBar"],
+[data-testid="stSliderTickBar"] * { color: #64748b !important; }
+[data-testid="stSidebar"] [data-testid="stIconMaterial"],
+[data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] { color: #64748b !important; }
 
 /* ── Inputs: indigo-tinted border ── */
 div[data-baseweb="input"] > div,
@@ -479,7 +539,7 @@ hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
 [data-testid="stHeader"] button svg { fill: #4338ca !important; }
 [data-testid="stHeader"] button:hover svg { fill: #7c3aed !important; }
 /* "Deploy" text button */
-[data-testid="stHeader"] [data-testid="stDeployButton"],
+[data-testid="stHeader"] [data-testid="stAppDeployButton"],
 [data-testid="stHeader"] button[kind="header"] { color: #4338ca !important; }
 
 /* ── Colored decoration stripe at the very top ── */
@@ -556,8 +616,7 @@ hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
 }
 
 /* ── Slider ── */
-[data-testid="stSidebar"] [data-baseweb="slider"] div[role="slider"],
-[data-testid="stSidebar"] [data-baseweb="slider"] [data-testid="stThumbValue"] {
+[data-testid="stSidebar"] [data-baseweb="slider"] div[role="slider"] {
     background-color: #6366f1 !important;
     border-color: #6366f1 !important;
     color: #1e293b !important;
@@ -565,6 +624,22 @@ hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
 [data-testid="stSidebar"] [data-baseweb="slider"] div[data-testid="stSliderTrackFill"] {
     background-color: #6366f1 !important;
 }
+
+/* ── Alerts (light) ──
+   Streamlit colours st.warning/info/error/success from its own light/dark base,
+   which follows the OS, not this toggle, so pin them to readable colours here ── */
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) { background-color: #fef3c7 !important; border: 1px solid #fcd34d !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) p, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) li, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) span { color: #92400e !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) svg { fill: #92400e !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) { background-color: #e0e7ff !important; border: 1px solid #c7d2fe !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) p, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) li, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) span { color: #3730a3 !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) svg { fill: #3730a3 !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) { background-color: #fee2e2 !important; border: 1px solid #fca5a5 !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) p, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) li, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) span { color: #991b1b !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) svg { fill: #991b1b !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) { background-color: #dcfce7 !important; border: 1px solid #86efac !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) p, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) li, [data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) span { color: #166534 !important; }
+[data-testid="stMainBlockContainer"] [data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) svg { fill: #166534 !important; }
 </style>
 """
 
@@ -643,13 +718,20 @@ def chart_colors(theme_mode: str) -> dict:
 
 
 def render_not_found(title: str, message: str, icon: str = "🔍", show_links: bool = False):
-    """Themed 'not found' card — reused for empty results and the dedicated 404 page."""
+    """Themed 'not found' card — reused for empty results and the dedicated 404 page.
+
+    title/message are escaped because the 404 page fills message from the ?reason=
+    query param, which anyone can put in a link. Whitespace is collapsed too: a blank
+    line would end the HTML block and let the rest render as Markdown (e.g. links).
+    """
+    title = " ".join(str(title).split())
+    message = " ".join(str(message).split())
     st.markdown(
         f'''
         <div class="result-card" style="text-align:center;">
-            <div class="home-card-icon">{icon}</div>
-            <div class="card-title">{title}</div>
-            <div class="card-reason">{message}</div>
+            <div class="home-card-icon">{html.escape(icon)}</div>
+            <div class="card-title">{html.escape(title)}</div>
+            <div class="card-reason">{html.escape(message)}</div>
         </div>
         ''',
         unsafe_allow_html=True,

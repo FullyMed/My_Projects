@@ -67,6 +67,20 @@ def shorten_reason(text, limit=200):
     return text if len(text) <= limit else text[:limit].rstrip() + "..."
 
 
+def describe_seed_matches(titles):
+    """Pair each typed title with the catalog game it resolved to (None if nothing matched).
+
+    Title lookup falls back to substring matching, so showing the resolved game keeps the
+    seed choice as transparent as the recommendations themselves.
+    """
+    _, candidates_info = engine.resolve_titles_to_ids(titles)
+    matches = []
+    for typed, ids in candidates_info:
+        name = engine.df_meta_clean.loc[ids[0], "name"] if ids else None
+        matches.append((typed, name))
+    return matches
+
+
 # Session state defaults
 for key in ["title_input", "category_input", "mechanic_input", "family_input", "publisher_input"]:
     if key not in st.session_state:
@@ -136,7 +150,8 @@ with col4:
     family_input = st.text_input(
         "Preferred Families (optional)",
         value=st.session_state["family_input"],
-        placeholder="Example: Family Games",
+        # Families are exact BGG family names ("Group: Name"), so the example must be a real one
+        placeholder="Example: Components: Miniatures, Crowdfunding: Kickstarter",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["family_input"] = family_input
@@ -144,7 +159,7 @@ with col4:
 publisher_input = st.text_input(
     "Preferred Publishers (optional)",
     value=st.session_state["publisher_input"],
-    placeholder="Example: Asmodee, CMON",
+    placeholder="Example: Asmodee, CMON Global Limited",
     max_chars=INPUT_MAX_CHARS,
 )
 st.session_state["publisher_input"] = publisher_input
@@ -164,11 +179,13 @@ if run_btn:
         formatted = None
         expanded_categories = wanted_categories
         expanded_mechanics = wanted_mechanics
+        seed_matches = []
 
         if mode == "Title-Based":
             if not query_titles:
                 st.warning("Please enter at least one game title.")
             else:
+                seed_matches = describe_seed_matches(query_titles)
                 with st.spinner("Finding recommendations..."):
                     results = engine.discover(
                         query_titles=query_titles,
@@ -200,6 +217,7 @@ if run_btn:
             if not any([query_titles, wanted_categories, wanted_mechanics, wanted_families, wanted_publishers]):
                 st.warning("Please enter at least one title or one trait.")
             else:
+                seed_matches = describe_seed_matches(query_titles) if query_titles else []
                 expanded_categories, expanded_mechanics = engine.expand_traits(
                     wanted_categories=wanted_categories,
                     wanted_mechanics=wanted_mechanics,
@@ -216,15 +234,30 @@ if run_btn:
                     )
                     formatted = engine.format_results(results)
 
+        unmatched_titles = [typed for typed, name in seed_matches if name is None]
+        if unmatched_titles:
+            st.warning(
+                f"No game found for: {', '.join(unmatched_titles)}. "
+                "Check the spelling or try the full title; unmatched titles are ignored."
+            )
+
         if formatted is not None and len(formatted) > 0:
             # System interpretation summary
             st.markdown("---")
             st.markdown('<div class="section-title">System Interpretation</div>', unsafe_allow_html=True)
 
+            if seed_matches:
+                seed_lines = "<br>".join(
+                    f'{html.escape(typed)} → {html.escape(name) if name else "<i>no match</i>"}'
+                    for typed, name in seed_matches
+                )
+            else:
+                seed_lines = "—"
+
             ic1, ic2 = st.columns(2)
             with ic1:
                 st.markdown(
-                    f'<div class="info-box"><b>Input Titles:</b><br>{html.escape(", ".join(query_titles)) if query_titles else "—"}</div>',
+                    f'<div class="info-box"><b>Seed Games (typed → matched):</b><br>{seed_lines}</div>',
                     unsafe_allow_html=True,
                 )
             with ic2:
@@ -254,28 +287,29 @@ if run_btn:
             st.markdown("---")
             st.markdown('<div class="section-title">Top Recommendations</div>', unsafe_allow_html=True)
 
-            for _, row in formatted.head(5).iterrows():
-                st.markdown('<div class="result-card">', unsafe_allow_html=True)
-                st.markdown(
-                    f'<div class="card-title">🎲 {html.escape(str(row.get("name", "—")))}</div>',
-                    unsafe_allow_html=True,
-                )
+            for rank, (_, row) in enumerate(formatted.head(5).iterrows()):
+                # Each st.markdown call is its own element, so an opening/closing <div> pair
+                # can't wrap widgets; a keyed container can (theme.py styles .st-key-result_card_*)
+                with st.container(key=f"result_card_{rank}"):
+                    st.markdown(
+                        f'<div class="card-title">🎲 {html.escape(str(row.get("name", "—")))}</div>',
+                        unsafe_allow_html=True,
+                    )
 
-                # 3 equal columns — on mobile the CSS stacks them vertically
-                mc1, mc2, mc3 = st.columns(3)
-                with mc1:
-                    st.metric("Final Score", row.get("final_score", "—"))
-                with mc2:
-                    st.metric("Rating", row.get("avg_rating", "—"))
-                with mc3:
-                    votes = row.get("num_votes", 0)
-                    st.metric("Votes", f'{int(votes):,}' if votes else "—")
+                    # 3 equal columns — on mobile the CSS stacks them vertically
+                    mc1, mc2, mc3 = st.columns(3)
+                    with mc1:
+                        st.metric("Final Score", row.get("final_score", "—"))
+                    with mc2:
+                        st.metric("Rating", row.get("avg_rating", "—"))
+                    with mc3:
+                        votes = row.get("num_votes", 0)
+                        st.metric("Votes", f'{int(votes):,}' if votes else "—")
 
-                st.markdown(
-                    f'<div class="card-reason"><b>Why recommended:</b> {html.escape(shorten_reason(row.get("reason", "—")))}</div>',
-                    unsafe_allow_html=True,
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown(
+                        f'<div class="card-reason"><b>Why recommended:</b> {html.escape(shorten_reason(row.get("reason", "—")))}</div>',
+                        unsafe_allow_html=True,
+                    )
 
         elif formatted is not None and len(formatted) == 0:
             theme.render_not_found(

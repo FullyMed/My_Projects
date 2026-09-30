@@ -165,7 +165,7 @@ Every table enforces `auth.uid() = user_id` through RLS policies, and a shared t
 
 ## Deployment
 
-Hosted on Vercel. `vercel.json` rewrites every route to `index.html`, so deep links and page refreshes (`/app/planner`, `/terms`, ...) load the app instead of Vercel's 404. It also sets the security headers (CSP, HSTS, etc.). The CSP is mirrored in a `<meta>` tag in `index.html`, so change both together.
+Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json` rewrites every route to `index.html`, so deep links and page refreshes (`/app/planner`, `/terms`, ...) load the app instead of Vercel's 404. It also sets the security headers (CSP, HSTS, etc.). The CSP is mirrored in a `<meta>` tag in `index.html`, so change both together.
 
 ## Roadmap / possible next steps
 

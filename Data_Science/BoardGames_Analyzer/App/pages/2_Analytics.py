@@ -245,10 +245,10 @@ _rating_hbar(
 st.markdown("---")
 
 # ─────────────────────────────────────────────────────────────────
-# Row 3 — Most reviewed games
+# Row 3 — Most-rated games (by number of user ratings)
 # ─────────────────────────────────────────────────────────────────
 st.markdown(
-    f'<div class="section-title">Top {top_n_bars} Most Reviewed Games</div>',
+    f'<div class="section-title">Top {top_n_bars} Most-Rated Games</div>',
     unsafe_allow_html=True,
 )
 top_reviewed = df.nlargest(top_n_bars, "usersrated")[["game_name", "usersrated"]].copy()
@@ -336,6 +336,11 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────
 if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
     st.markdown('<div class="section-title">Community Sentiment Distribution</div>', unsafe_allow_html=True)
+    st.caption(
+        "Per game: the average probability that a review is positive, from DistilBERT SST-2 run on up to "
+        "10 randomly sampled review comments. Games with fewer than 3 scored comments are not shown "
+        "(the recommender uses the dataset mean for them)."
+    )
 
     sent_scores = sent_df["avg_sentiment_score"].dropna()
     s1, s2 = st.columns([3, 1])

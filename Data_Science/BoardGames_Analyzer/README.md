@@ -9,8 +9,8 @@ The system helps users discover board games through three complementary recommen
 ## Features
 
 - **Three recommendation modes** — Title-Based, Trait-Based, and Combined
-- **Explainable results** — every recommendation shows matched mechanics, categories, and contributing signals
-- **Sentiment-enhanced ranking** — DistilBERT SST-2 scores aggregated from user reviews
+- **Explainable results** — every recommendation lists the mechanics, categories, families and publishers it shares with your seeds or requested traits, plus its component scores; the page also shows which game each typed title was matched to
+- **Sentiment signal** — DistilBERT SST-2 run on a random sample of each game's user reviews (up to 10 per game)
 - **Analytics dashboard** — interactive EDA with rating distributions, top games, mechanic/category frequency, and publication trends
 - **Responsive UI** — works on mobile (iOS/Android), tablet (iPad), and desktop
 - **Light / Dark theme** — toggleable from the sidebar on every page
@@ -52,9 +52,11 @@ BoardGames_Analyzer/
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
 │   ├── 02_Preprocessing.ipynb
+│   ├── 02b_sentiment_full_coverage.py   ← Builds sentiment_summary.csv
 │   ├── 03_EDA.ipynb
 │   ├── 04_Modeling_CF.ipynb
 │   ├── 05_Modeling_Content_NLP.ipynb
+│   ├── 05b_embeddings_full_coverage.py  ← Builds emb_topk_csr.joblib
 │   ├── 06_Hybrid_Model.ipynb
 │   ├── 07_Evaluation_Metrics.ipynb
 │   ├── 08_Discovery_Engine.ipynb
@@ -135,7 +137,7 @@ Data sourced from the [BoardGameGeek (BGG)](https://boardgamegeek.com/) platform
 |---|---|
 | Game metadata | 21,631 board games with descriptions, mechanics, categories, complexity |
 | User ratings | ~18.7 million valid ratings after preprocessing |
-| User reviews | Millions of text reviews (used for sentiment analysis) |
+| User reviews | ~26 million ratings with optional comments; a random sample of up to 10 comments per game is used for sentiment |
 
 ### Precomputed Artifacts
 
@@ -145,8 +147,8 @@ The `Dataset/Processed/` folder contains precomputed artifacts required by the a
 |---|---|
 | `desc_topk_csr.joblib` | TF-IDF description similarity (sparse CSR matrix) |
 | `content_topk_csr.joblib` | Combined content similarity (sparse CSR matrix) |
-| `emb_topk_csr.joblib` | MiniLM sentence-embedding similarity (sparse CSR matrix) |
-| `sentiment_summary.csv` | Per-game aggregated DistilBERT sentiment scores |
+| `emb_topk_csr.joblib` | MiniLM (all-MiniLM-L6-v2) name + description embedding similarity (sparse CSR matrix), built by `Notebooks/05b_embeddings_full_coverage.py` |
+| `sentiment_summary.csv` | Per-game mean probability that a review is positive (DistilBERT SST-2), built by `Notebooks/02b_sentiment_full_coverage.py` |
 
 ---
 
@@ -154,20 +156,29 @@ The `Dataset/Processed/` folder contains precomputed artifacts required by the a
 
 ### Hybrid Signals
 
+Each mode has its own fixed weights (all signals min-max normalized to 0–1):
+
 ```
-Final Score = w₁ × Content Similarity
-            + w₂ × Trait Overlap
-            + w₃ × Sentiment Score
-            + w₄ × Popularity Signal
+Title-Based:  0.35 × keyword similarity (TF-IDF description + mechanics/themes, averaged)
+            + 0.35 × semantic similarity (MiniLM embeddings)
+            + 0.10 × sentiment
+            + 0.20 × popularity (number of ratings)
+
+Trait score:  0.40 × category overlap + 0.35 × mechanic overlap
+            + 0.15 × family overlap   + 0.10 × publisher overlap
+Trait-Based:  0.70 × trait score + 0.15 × rating + 0.10 × log(votes) + 0.05 × sentiment
+
+Combined:     0.65 × Title-Based score + 0.35 × trait score
+            + 0.08 × rating + 0.04 × log(votes) + 0.03 × sentiment
 ```
 
-**Content Similarity** — TF-IDF keyword similarity and MiniLM L6 sentence-transformer semantic embeddings, combined via cosine similarity.
+**Keyword / semantic similarity** — each game's 50 nearest neighbours under description TF-IDF, mechanic/theme/subcategory vectors, and all-MiniLM-L6-v2 embeddings of its name and description.
 
-**Trait Overlap** — Soft Jaccard overlap across mechanics, categories, families, and publishers. Includes trait expansion (e.g. "strategy" → expands to related mechanics automatically).
+**Trait Overlap** — the share of your requested categories / mechanics / families / publishers that a game has. Includes trait expansion (e.g. "strategy" → expands to related categories and mechanics automatically).
 
-**Sentiment** — DistilBERT SST-2 sentiment probabilities aggregated per game from user review text, normalized before blending.
+**Sentiment** — mean probability that a review is positive (DistilBERT SST-2) over up to 10 randomly sampled comments per game; games with fewer than 3 scored comments use the dataset mean.
 
-**Popularity** — Min-max normalized user rating count and Bayes average rating, weighted to surface quality without overwhelming niche titles.
+**Popularity** — min-max normalized number of user ratings (plus Bayes average rating in the Trait-Based and Combined modes).
 
 ### Difficulty Filter
 
@@ -189,7 +200,7 @@ The filter is applied as a post-processing step across all three recommendation 
 Landing page with project overview, key stats, and navigation cards.
 
 ### Recommendation Engine
-- Enter up to several game titles (comma-separated) and/or trait preferences
+- Enter up to several game titles (comma-separated) and/or trait preferences; the page shows which game each title matched and warns about titles it couldn't find
 - Choose mode: **Title-Based**, **Trait-Based**, or **Combined**
 - Optionally filter by difficulty level
 - Results include a full ranked table and top-5 styled cards with explanation text
@@ -206,10 +217,10 @@ Interactive dataset explorer with sidebar controls (min-vote threshold, year ran
 
 - Rating and complexity distributions
 - Top N highest-rated games
-- Top N most reviewed games
+- Top N most-rated games
 - Most common mechanics and categories
 - Games published per year trend
-- Community sentiment distribution
+- Community sentiment distribution (mean P(positive) per game)
 
 ---
 
@@ -218,14 +229,16 @@ Interactive dataset explorer with sidebar controls (min-vote threshold, year ran
 | Notebook | Purpose |
 |---|---|
 | `01_Data_Inspection` | Initial data exploration and schema review |
-| `02_Preprocessing` | Cleaning, filtering, feature extraction |
+| `02_Preprocessing` | Cleaning, filtering, feature extraction (its sentiment step was a 20-game pilot, replaced by `02b`) |
+| `02b_sentiment_full_coverage.py` | Review sentiment for every game (script) |
 | `03_EDA` | Exploratory data analysis and visualizations |
 | `04_Modeling_CF` | Collaborative filtering experiments |
-| `05_Modeling_Content_NLP` | TF-IDF and embedding similarity computation |
+| `05_Modeling_Content_NLP` | TF-IDF and attribute similarity (its embedding step covered only 20 games, replaced by `05b`) |
+| `05b_embeddings_full_coverage.py` | MiniLM embedding similarity for every game (script) |
 | `06_Hybrid_Model` | Hybrid scoring construction |
-| `07_Evaluation_Metrics` | Metric definitions and validation |
+| `07_Evaluation_Metrics` | Early metric experiments (superseded by `09`) |
 | `08_Discovery_Engine` | Full recommendation engine implementation |
-| `09_Evaluation` | Holdout-based Recall@K and NDCG@K evaluation |
+| `09_Evaluation` | Recall@K / NDCG@K of the deployed engine, baselines and a no-sentiment ablation |
 
 ---
 
@@ -258,7 +271,7 @@ The project includes a full IEEE-format research paper at `Reports/paper.tex` / 
 
 - **No personalization** — the system does not maintain user profiles or collaborative filtering
 - **Trait-Based mode is exploratory** — low quantitative performance by design; intended for preference exploration rather than precise retrieval
-- **Sentiment coverage** — less popular games have fewer reviews, reducing sentiment signal reliability
+- **Sentiment is sampled** — at most 10 review comments per game are scored, so values for individual games are noisy
 - **No statistical significance testing** — evaluation uses single runs without p-values
 
 ---

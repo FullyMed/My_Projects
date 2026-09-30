@@ -405,10 +405,19 @@ class BoardGameDiscoveryEngine:
                 cat_out.extend(self.TRAIT_EXPANSIONS[key].get("categories", []))
                 mech_out.extend(self.TRAIT_EXPANSIONS[key].get("mechanics", []))
 
-        cat_out = list(dict.fromkeys([str(x).strip() for x in cat_out if str(x).strip()]))
-        mech_out = list(dict.fromkeys([str(x).strip() for x in mech_out if str(x).strip()]))
+        return self._dedupe_casefold(cat_out), self._dedupe_casefold(mech_out)
 
-        return cat_out, mech_out
+    def _dedupe_casefold(self, items):
+        # "Strategy" and the expansion's "strategy" are the same trait; keep the first spelling seen
+        out = []
+        seen = set()
+        for item in items:
+            text = str(item).strip()
+            norm = self.normalize_token(text)
+            if text and norm not in seen:
+                out.append(text)
+                seen.add(norm)
+        return out
 
     # -----------------------------
     # Core recommenders
@@ -481,26 +490,38 @@ class BoardGameDiscoveryEngine:
 
         rec_ids = score_like.sort_values(ascending=False).head(top_n).index.astype(int).tolist()
 
-        seed_mech = set().union(*[set(self.mech_tokens.loc[sid]) for sid in seed_ids if sid in self.mech_tokens.index]) if len(seed_ids) > 0 else set()
-        seed_cat = set().union(*[set(self.cat_tokens.loc[sid]) for sid in seed_ids if sid in self.cat_tokens.index]) if len(seed_ids) > 0 else set()
-        seed_pub = set().union(*[set(self.pub_tokens.loc[sid]) for sid in seed_ids if sid in self.pub_tokens.index]) if len(seed_ids) > 0 else set()
+        seed_mech = self._seed_values(seed_ids, self.MECH_COL)
+        seed_cat = self._seed_values(seed_ids, self.THEME_COL)
+        seed_pub = self._seed_values(seed_ids, self.PUB_COL)
 
         out = []
         for gid in rec_ids:
-            m = set(self.mech_tokens.loc[gid]) if gid in self.mech_tokens.index else set()
-            c = set(self.cat_tokens.loc[gid]) if gid in self.cat_tokens.index else set()
-            p = set(self.pub_tokens.loc[gid]) if gid in self.pub_tokens.index else set()
-
+            known = gid in self.df_meta_clean.index
+            # overlap_items keeps the candidate's own spelling, so explanations read
+            # "Tile Placement" here just like they do in trait mode
             out.append({
                 "id": gid,
-                "name": self.df_meta_clean.loc[gid, "name"] if gid in self.df_meta_clean.index else "",
+                "name": self.df_meta_clean.loc[gid, "name"] if known else "",
                 "score_like": float(score_like.loc[gid]),
-                "matched_mechanics": sorted(list(m & seed_mech))[:8],
-                "matched_categories": sorted(list(c & seed_cat))[:8],
-                "matched_publishers": sorted(list(p & seed_pub))[:6],
+                "matched_mechanics": sorted(self._meta_overlap(gid, self.MECH_COL, seed_mech))[:8],
+                "matched_categories": sorted(self._meta_overlap(gid, self.THEME_COL, seed_cat))[:8],
+                "matched_publishers": sorted(self._meta_overlap(gid, self.PUB_COL, seed_pub))[:6],
             })
 
         return pd.DataFrame(out).sort_values("score_like", ascending=False).reset_index(drop=True)
+
+    def _seed_values(self, seed_ids, col):
+        values = []
+        if col in self.df_meta_clean.columns:
+            for sid in seed_ids:
+                if sid in self.df_meta_clean.index:
+                    values.extend(self.to_list_safe(self.df_meta_clean.loc[sid, col]))
+        return values
+
+    def _meta_overlap(self, gid, col, seed_values):
+        if not seed_values or col not in self.df_meta_clean.columns or gid not in self.df_meta_clean.index:
+            return []
+        return self.overlap_items(self.df_meta_clean.loc[gid, col], seed_values)
 
     def build_type_candidates(
         self,
@@ -638,10 +659,15 @@ class BoardGameDiscoveryEngine:
             raise ValueError("Provide at least one title or one trait.")
 
         title_df = None
+        seed_ids = []
         if has_title:
+            seed_ids, _ = self.resolve_titles_to_ids(query_titles)
+            # The difficulty filter runs after ranking, so a narrow band (e.g. "high" for a
+            # light seed game) needs a deeper candidate pool to still fill top_n
+            title_pool = max(top_n * 5, 100) if difficulty_label is None else max(top_n * 100, 2000)
             title_df = self.recommend_by_titles(
                 query_titles=query_titles,
-                top_n=max(top_n * 5, 100)
+                top_n=title_pool
             ).copy()
 
         trait_df = None
@@ -712,7 +738,8 @@ class BoardGameDiscoveryEngine:
 
         if "score_like" not in out.columns:
             out["score_like"] = 0.0
-        out["score_like"] = out["score_like"].fillna(0.0)
+        # An empty title_df has object dtype, so coerce before filling
+        out["score_like"] = pd.to_numeric(out["score_like"], errors="coerce").fillna(0.0)
 
         for col in ["matched_categories", "matched_mechanics", "matched_families", "matched_publishers"]:
             out = self.coalesce_list_columns(out, col)
@@ -732,8 +759,11 @@ class BoardGameDiscoveryEngine:
         out = out.merge(self.games[meta_cols].drop_duplicates("id"), on=["id", "name"], how="left")
 
         if exclude_query_titles:
+            # Match on the resolved seed ids too: typing "ticket" seeds Ticket to Ride,
+            # which the trait side would otherwise happily recommend back
             query_titles_norm = {str(t).strip().lower() for t in query_titles}
-            out = out[~out["name"].astype(str).str.strip().str.lower().isin(query_titles_norm)].copy()
+            is_query_name = out["name"].astype(str).str.strip().str.lower().isin(query_titles_norm)
+            out = out[~is_query_name & ~out["id"].isin(seed_ids)].copy()
 
         out["rating_norm"] = self.safe_minmax(pd.to_numeric(out["avg_rating"], errors="coerce").fillna(0.0), out.index)
         out["votes_norm"] = self.safe_minmax(np.log1p(pd.to_numeric(out["num_votes"], errors="coerce").fillna(0.0)), out.index)

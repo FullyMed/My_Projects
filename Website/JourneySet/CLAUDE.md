@@ -33,7 +33,7 @@ VITE_SUPABASE_ANON_KEY=...
 
 ## Deployment (Vercel)
 
-Live at https://journeyset.vercel.app/. `vercel.json` has two parts:
+Live at https://journeyset.vercel.app/ (Vercel project `journeyset`, team `fullymeds-projects`). **Pushing to `main` auto-deploys to production.** Verified on 2026-09-30: commit `e5fe82d` went to production READY within minutes, and the deep-link fix was then live. The owner commits and pushes himself. `vercel.json` has two parts:
 - **`rewrites`**: every path → `/index.html`, so deep links and refreshes (`/app/planner`, `/terms`, …) reach the SPA router. Vercel serves real static files (`/assets/*`, favicons) before applying rewrites. **Don't remove this.** Without it Vercel returns its own plain-text 404 for every route except `/`. That was the live behaviour until 2026-09-30.
 - **`headers`**: CSP + security headers. The CSP is **duplicated** as a `<meta http-equiv>` tag in `index.html` (the meta copy can't carry `frame-ancestors`). Allowing a new external host means editing **both**.
 
@@ -225,6 +225,8 @@ A **5 s safety timer** also ends the loading state if `INITIAL_SESSION` never ar
 ## Known gaps / possible next steps
 
 Not broken, not asked for yet — flagged here so a future session (or a fresh chat) has the context without re-deriving it:
+
+- **2026-09-30 fix pass: signed-in flows not yet browser-verified.** The pass (see Data layer, Write failures, Modals, Print, Auth above) is committed, pushed and deployed. Type-check, lint, build, the signed-out pages, the auth modal and live deep links were all verified. What still needs a signed-in session: add/edit/delete in all three features, clearing a task/event time, changing a task's day, goal ±1 rapid clicks, next-week with a recurring task, print preview hiding the app, and sign-out removing `journeyset:v1:{planner,goals,events}:{userId}` from localStorage. Claude can't type passwords into the real Supabase sign-in, so the owner signs in in the browser pane (dev server: `.claude/launch.json` → `journeyset-dev`) and Claude drives the rest.
 
 - **Open Graph / Twitter card meta tags** — `usePageMeta` only sets `document.title` and `<meta name="description">`. There's no `og:title`, `og:image`, `og:description`, or `twitter:card`, so links to JourneySet shared in Slack/iMessage/Twitter/Discord render as bare text, not a card with the logo. Would need: static OG tags in `index.html` (title/description/image, SPA can't vary these per-route without SSR or a prerender step) or, for real per-route OG tags, a prerendering solution — out of scope for a plain Vite SPA today. Lowest-effort version: add one static `og:image` (a rendered PNG of the landing hero or just the logo mark) plus `og:title`/`og:description` matching the default landing meta.
 - **Legal pages content review** — `TermsPage`/`PrivacyPage` (see above) were drafted by Claude, grounded in what the app actually does (Supabase, RLS, localStorage caching), but are not a substitute for actual legal review. Worth a human pass before treating them as binding, especially if the app ever gets real paying users or handles data from EU/UK users (GDPR) or California users (CCPA) — neither is addressed explicitly.
