@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES } from "@/lib/data";
+import { CATEGORIES, countProducts } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
 import { useRecentSearches } from "@/lib/storage";
 import { usePageMeta } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   Apple,
@@ -72,9 +73,10 @@ export default function Home() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      addSearch(query.trim());
-      setLocation(`/search?q=${encodeURIComponent(query)}`);
+    const trimmed = query.trim();
+    if (trimmed) {
+      addSearch(trimmed);
+      setLocation(`/search?q=${encodeURIComponent(trimmed)}`);
     }
   };
 
@@ -92,7 +94,7 @@ export default function Home() {
           className="relative z-10"
         >
           <h2 className="text-2xl font-bold mb-6 text-center pt-2">
-            {language === 'en' ? 'Find products quickly' : '快速查找商品'}
+            {t("heroTitle")}
           </h2>
 
           <form onSubmit={handleSearch} className="relative max-w-md mx-auto mb-4">
@@ -144,6 +146,7 @@ export default function Home() {
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {CATEGORIES.map((cat, index) => {
             const Icon = iconMap[cat.icon] || Utensils;
+            const count = countProducts(cat);
             return (
               <motion.div
                 key={cat.id}
@@ -160,9 +163,19 @@ export default function Home() {
               >
                 <Button
                   variant="outline"
-                  className="w-full h-auto aspect-square flex flex-col items-center justify-center gap-2 border-border/50 bg-card dark:bg-secondary/20 hover:bg-primary/5 hover:border-primary/20 hover:shadow-md transition-colors duration-200 shadow-sm group rounded-2xl p-2"
+                  className="relative w-full h-auto aspect-square flex flex-col items-center justify-center gap-2 border-border/50 bg-card dark:bg-secondary/20 hover:bg-primary/5 hover:border-primary/20 hover:shadow-md transition-colors duration-200 shadow-sm group rounded-2xl p-2"
                   onClick={() => setLocation(`/category/${cat.id}`)}
+                  aria-label={`${language === "en" ? cat.en : cat.zh} (${count} ${count === 1 ? t("itemCount") : t("itemsCount")})`}
                 >
+                  <span
+                    className={cn(
+                      "absolute top-1.5 right-1.5 min-w-5 h-5 px-1.5 rounded-full text-[10px] font-bold leading-5 text-center",
+                      count > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground/60"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {count}
+                  </span>
                   <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 shadow-sm shrink-0">
                     <Icon className="w-5 h-5" strokeWidth={2} />
                   </div>

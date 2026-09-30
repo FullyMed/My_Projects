@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { readFile, rm } from "fs/promises";
 import { build as viteBuild } from "vite";
+import { writeSitemap } from "./sitemap";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -37,6 +38,7 @@ async function buildAll() {
 
   console.log("building client...");
   await viteBuild();
+  await writeSitemap("dist/public/sitemap.xml");
 
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));

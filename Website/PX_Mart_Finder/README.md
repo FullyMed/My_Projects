@@ -1,5 +1,7 @@
 # PX Mart Finder
 
+**Live demo:** https://px-mart-finder.netlify.app/
+
 ## Project Description
 
 PX Mart Finder is a retail product discovery and in-store navigation prototype designed for PX Mart (全聯福利中心) stores in Taiwan. It helps shoppers quickly locate products by aisle and shelf, browse by category, and save favorites — all through a fast, responsive interface.
@@ -17,9 +19,26 @@ npm ci
 # Start the development server
 npm run dev:client
 # → http://localhost:5000
+
+# Type-check and production build (output: dist/public, deployed to Netlify)
+npx tsc --noEmit
+npm run build
 ```
 
 > **Windows / WSL2 note:** Always run `npm ci` from within WSL2. Installing `node_modules` on Windows and then running in WSL2 will cause native binary errors (esbuild, rollup).
+
+---
+
+## Deployment
+
+Hosted on Netlify (`netlify.toml`): the build command is `npm run build`, the publish directory is `dist/public`, and it runs on Node 22 with strict security headers and a CSP. The build also generates `sitemap.xml`, covering every product and category page, from the JSON data. If the domain changes, update it in `script/sitemap.ts`, `client/public/robots.txt`, and the `og:image`/`twitter:image` tags in `client/index.html`.
+
+To check a production build locally:
+
+```bash
+npm run build
+npx vite preview --port 5001
+```
 
 ---
 
@@ -28,20 +47,22 @@ npm run dev:client
 - Fast product search with fuzzy matching and typo tolerance
 - Synonym expansion (e.g. searching "tissue" also finds 衛生紙, 面紙)
 - Aisle and shelf location per product, per store
-- Category and subcategory browsing
-- Brand filtering and multi-sort (relevance, name, aisle order)
+- Category and subcategory browsing, with product counts on every category/subcategory and a friendly "No products here yet" state for categories the demo data doesn't cover yet
+- Brand filtering and multi-sort (relevance, name, aisle order) — kept in the URL, so back/forward and shared links restore them
 - "Did you mean?" suggestions when no results are found
 - Favorites with localStorage persistence — shared context keeps all toggles in sync
 - Store selection (Wufeng branch + demo placeholders)
 - Store map placeholder with aisle highlighting
 - Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
-- Per-page meta title and meta description (bilingual, updates live with the page and language)
+- Per-page meta title and meta description (bilingual, updates live with the page and language), plus `robots.txt` and a `sitemap.xml` generated at build time from the product/category data
 - Loading states: image skeletons with fade-in and error fallback, an initial app-boot spinner, and a search-debounce indicator
 - Terms of Use and Privacy Policy pages, with a non-affiliation disclaimer (independent portfolio project, not affiliated with PX Mart)
 - Product images compressed to WebP (9.9MB → ~0.8MB, 93% smaller) via `script/compress-images.ts`
-- Full bilingual support — English and Traditional Chinese (繁體中文)
-- Light and dark mode
-- Fully responsive — mobile, tablet, and desktop layouts
+- Route-level code-splitting (`React.lazy` + `Suspense`) — only Home ships in the main bundle
+- Full bilingual support — English and Traditional Chinese (繁體中文), including `<html lang>` for screen readers
+- Light and dark mode (follows the OS setting live until you pick one)
+- Fully responsive — mobile (down to 320px), tablet, and desktop layouts
+- Resilient to corrupt or blocked `localStorage` — bad saved values fall back to defaults instead of crashing
 
 ---
 
@@ -91,5 +112,5 @@ PX Mart Finder demonstrates how intelligent search and clear location data can r
 - Indoor navigation integration
 - Backend API and admin dashboard
 - Mobile application version
-- Code-splitting the page routes (`React.lazy` + `Suspense`) — main JS bundle is currently 629KB/199KB gzipped in one chunk (see `CLAUDE.md` → Pending / Future Improvements for detail)
-- `robots.txt` + `sitemap.xml` if real discoverability ever matters (per-page meta title/description already exist; per-page OG/social preview images would need SSR, out of scope for this stack)
+- Products for the 15 categories that are currently empty in the demo data
+- Per-page OG/social preview images (would need SSR/prerendering, out of scope for this stack)

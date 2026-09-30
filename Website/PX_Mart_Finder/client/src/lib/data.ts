@@ -76,3 +76,17 @@ export type Category = {
 
 export const CATEGORIES: Category[] = categoriesJson as Category[];
 export const PRODUCTS: Product[] = productsJson as Product[];
+
+export function isInCategory(product: Product, category: Category): boolean {
+  return product.category_en === category.en || product.category_zh === category.zh;
+}
+
+export function isInSubCategory(product: Product, subCategoryName: string): boolean {
+  return product.sub_category_en === subCategoryName || product.sub_category_zh === subCategoryName;
+}
+
+export function countProducts(category: Category, subCategory?: SubCategory): number {
+  return PRODUCTS.filter(
+    (p) => isInCategory(p, category) && (!subCategory || isInSubCategory(p, subCategory.en))
+  ).length;
+}

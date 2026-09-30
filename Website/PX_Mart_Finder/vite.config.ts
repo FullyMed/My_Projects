@@ -39,6 +39,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Routes are already lazy-loaded (App.tsx); the ~506KB (162KB gzip) main chunk left is
+    // react-dom + framer-motion + the Radix store picker, all needed on the landing page.
+    chunkSizeWarningLimit: 600,
   },
   server: {
     host: "0.0.0.0",

@@ -9,32 +9,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORIES, PRODUCTS, SYNONYMS } from "@/lib/data";
+import { CATEGORIES, PRODUCTS, SYNONYMS, countProducts, isInCategory, isInSubCategory } from "@/lib/data";
 import type { Product } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { normalizeAisle } from "@/lib/normalize";
 import { usePageMeta } from "@/lib/seo";
+import { useRecentSearches } from "@/lib/storage";
 import Fuse from "fuse.js";
 import { motion } from "framer-motion";
 import {
   ArrowUpDown,
   Filter,
   Loader2,
+  PackageOpen,
   Search,
   Sparkles,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
 
 export default function SearchResults() {
   const { t, language } = useLanguage();
   const { selectedStore } = useStore();
+  const { addSearch } = useRecentSearches();
   const [, setLocation] = useLocation();
 
-  const searchParams = new URLSearchParams(window.location.search);
+  // useSearch (not window.location.search) so query-string-only navigations
+  // like changing sort/brand re-render; wouter's useLocation only tracks the pathname.
+  const search = useSearch();
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const q = searchParams.get("q") || "";
   const categoryId = searchParams.get("category");
   const subcategoryName = searchParams.get("subcategory");
@@ -87,18 +93,12 @@ export default function SearchResults() {
     if (categoryId) {
       const category = CATEGORIES.find((c) => c.id === categoryId);
       if (category) {
-        filtered = filtered.filter(
-          (p) => p.category_en === category.en || p.category_zh === category.zh
-        );
+        filtered = filtered.filter((p) => isInCategory(p, category));
       }
     }
 
     if (subcategoryName) {
-      filtered = filtered.filter(
-        (p) =>
-          p.sub_category_en === subcategoryName ||
-          p.sub_category_zh === subcategoryName
-      );
+      filtered = filtered.filter((p) => isInSubCategory(p, subcategoryName));
     }
 
     if (q) {
@@ -185,18 +185,12 @@ export default function SearchResults() {
     if (categoryId) {
       const cat = CATEGORIES.find((c) => c.id === categoryId);
       if (cat) {
-        baseResults = baseResults.filter(
-          (p) => p.category_en === cat.en || p.category_zh === cat.zh
-        );
+        baseResults = baseResults.filter((p) => isInCategory(p, cat));
       }
     }
 
     if (subcategoryName) {
-      baseResults = baseResults.filter(
-        (p) =>
-          p.sub_category_en === subcategoryName ||
-          p.sub_category_zh === subcategoryName
-      );
+      baseResults = baseResults.filter((p) => isInSubCategory(p, subcategoryName));
     }
 
     if (q) {
@@ -208,8 +202,12 @@ export default function SearchResults() {
       baseResults = baseResults.filter((p) => fuseIds.has(p.id));
     }
 
-    return Array.from(new Set(baseResults.map((p) => p.brand))).sort();
-  }, [q, expandedTerms, categoryId, subcategoryName, fuse]);
+    const brands = new Set(baseResults.map((p) => p.brand));
+    // Keep the active brand selectable even if the new query no longer matches it,
+    // otherwise the Select renders a blank trigger with no way to see what's filtering.
+    if (brandFilter) brands.add(brandFilter);
+    return Array.from(brands).sort();
+  }, [q, expandedTerms, categoryId, subcategoryName, brandFilter, fuse]);
 
   const suggestions = useMemo(() => {
     if (!q || results.length > 0) return [];
@@ -242,8 +240,10 @@ export default function SearchResults() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed) addSearch(trimmed);
     const params = new URLSearchParams(window.location.search);
-    if (query) params.set("q", query);
+    if (trimmed) params.set("q", trimmed);
     else params.delete("q");
     setLocation(`/search?${params.toString()}`);
   };
@@ -258,12 +258,17 @@ export default function SearchResults() {
     [setLocation]
   );
 
+  // Only clears the text query — category/subcategory/brand/sort filters stay applied.
   const clearSearch = () => {
     setQuery("");
-    setLocation("/search");
+    updateParam("q", null);
   };
 
   const activeCategory = categoryId ? CATEGORIES.find((c) => c.id === categoryId) : undefined;
+  const isEmptyCategory = !q && !brandFilter && (!!categoryId || !!subcategoryName);
+  const shortcutCategories = CATEGORIES.filter(
+    (c) => c.id !== categoryId && countProducts(c) > 0
+  ).slice(0, 4);
   const metaTitle = q
     ? language === "en"
       ? `"${q}" search results`
@@ -300,6 +305,7 @@ export default function SearchResults() {
             <button
               type="button"
               onClick={clearSearch}
+              aria-label={t("clearSearch")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />
@@ -310,7 +316,7 @@ export default function SearchResults() {
         {expandedTerms.length > 1 && (
           <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             <span className="text-[10px] uppercase font-bold text-muted-foreground shrink-0">
-              {language === "en" ? "Including" : "包含"}:
+              {t("including")}:
             </span>
             {expandedTerms.slice(1).map((term, i) => (
               <Badge
@@ -326,7 +332,7 @@ export default function SearchResults() {
 
         {(categoryId || subcategoryName) && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted-foreground">{t("results")}:</span>
+            <span className="text-xs text-muted-foreground">{t("filters")}:</span>
 
             {categoryId && (
               <Button
@@ -335,9 +341,11 @@ export default function SearchResults() {
                 className="h-6 text-xs rounded-full px-2 font-normal bg-primary/10 text-primary hover:bg-primary/20"
                 onClick={() => updateParam("category", null)}
               >
-                {language === "en"
-                  ? CATEGORIES.find((c) => c.id === categoryId)?.en
-                  : CATEGORIES.find((c) => c.id === categoryId)?.zh}
+                {activeCategory
+                  ? language === "en"
+                    ? activeCategory.en
+                    : activeCategory.zh
+                  : categoryId}
                 <X className="w-3 h-3 ml-1" />
               </Button>
             )}
@@ -350,8 +358,7 @@ export default function SearchResults() {
                 onClick={() => updateParam("subcategory", null)}
               >
                 {(() => {
-                  const category = CATEGORIES.find((c) => c.id === categoryId);
-                  const sub = category?.subCategories.find(
+                  const sub = CATEGORIES.flatMap((c) => c.subCategories).find(
                     (s) => s.en === subcategoryName || s.zh === subcategoryName
                   );
                   return sub
@@ -375,12 +382,10 @@ export default function SearchResults() {
           >
             <SelectTrigger className="h-8 text-xs w-auto min-w-[100px] rounded-full bg-muted/50 border-transparent">
               <Filter className="w-3 h-3 mr-1" />
-              <SelectValue placeholder={language === "en" ? "Brand" : "品牌"} />
+              <SelectValue placeholder={t("brand")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                {language === "en" ? "All Brands" : "所有品牌"}
-              </SelectItem>
+              <SelectItem value="all">{t("allBrands")}</SelectItem>
               {uniqueBrands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
                   {brand}
@@ -392,20 +397,12 @@ export default function SearchResults() {
           <Select value={sortBy} onValueChange={(val) => updateParam("sort", val)}>
             <SelectTrigger className="h-8 text-xs w-auto min-w-[100px] rounded-full bg-muted/50 border-transparent">
               <ArrowUpDown className="w-3 h-3 mr-1" />
-              <SelectValue
-                placeholder={language === "en" ? "Sort By" : "排序"}
-              />
+              <SelectValue placeholder={t("sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="relevance">
-                {language === "en" ? "Relevance" : "相關性"}
-              </SelectItem>
-              <SelectItem value="name">
-                {language === "en" ? "Name A-Z" : "名稱 A-Z"}
-              </SelectItem>
-              <SelectItem value="aisle">
-                {language === "en" ? "Aisle Order" : "走道順序"}
-              </SelectItem>
+              <SelectItem value="relevance">{t("sortRelevance")}</SelectItem>
+              <SelectItem value="name">{t("sortName")}</SelectItem>
+              <SelectItem value="aisle">{t("sortAisle")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -451,12 +448,21 @@ export default function SearchResults() {
             className="py-12 px-4 flex flex-col items-center text-center overflow-y-auto h-full"
           >
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-muted-foreground/40" />
+              {isEmptyCategory ? (
+                <PackageOpen className="w-8 h-8 text-muted-foreground/40" />
+              ) : (
+                <Search className="w-8 h-8 text-muted-foreground/40" />
+              )}
             </div>
 
             <h3 className="text-lg font-bold text-foreground mb-2">
-              {t("noResults")}
+              {isEmptyCategory ? t("emptyCategoryTitle") : t("noResults")}
             </h3>
+            {isEmptyCategory && (
+              <p className="text-sm text-muted-foreground max-w-sm">
+                {t("emptyCategoryDesc")}
+              </p>
+            )}
 
             {suggestions.length > 0 && (
               <div className="mt-8 w-full max-w-sm">
@@ -488,7 +494,7 @@ export default function SearchResults() {
                 {t("tryOneOfThese")}
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {CATEGORIES.slice(0, 4).map((cat) => (
+                {shortcutCategories.map((cat) => (
                   <Button
                     key={cat.id}
                     variant="ghost"
@@ -500,7 +506,7 @@ export default function SearchResults() {
                         {language === "en" ? cat.en : cat.zh}
                       </span>
                       <span className="text-[10px] opacity-60">
-                        {cat.subCategories.length} {language === "en" ? "subcategories" : "個子分類"}
+                        {cat.subCategories.length} {t("subcategoriesCount")}
                       </span>
                     </div>
                   </Button>

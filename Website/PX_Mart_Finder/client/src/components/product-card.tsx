@@ -98,6 +98,8 @@ export function ProductCard({ product }: ProductCardProps) {
           e.stopPropagation();
           toggleFavorite(product.id);
         }}
+        aria-label={favorited ? t("removeFromFavorites") : t("addToFavorites")}
+        aria-pressed={favorited}
       >
         <Heart className={cn("w-4 h-4 transition-transform duration-200", favorited && "fill-current scale-110")} />
       </Button>

@@ -108,6 +108,15 @@ Use CSS `active:scale-*` for press feedback on elements nested inside a `motion.
 ### FavoritesContext — shared state, not per-component hook
 `useFavorites()` reads from `FavoritesContext`, not a local `useState`. **Never** revert this to a standalone hook. Previously each `ProductCard` called `useFavorites()` internally, creating isolated state per instance — toggling multiple products overwrote each other in localStorage because every instance wrote from its own stale `prev`. The fix: `FavoritesProvider` (in `favorites-provider.tsx`) holds the single `useState`; all components share it via context. Follow the same pattern as `LanguageContext` if adding other app-wide state.
 
+### Read query params with wouter's `useSearch()`, never `window.location.search`
+wouter's `useLocation()` only re-renders when the **pathname** changes. A navigation that only changes the query string (e.g. `/search?sort=name` → `/search?sort=aisle`, or back/forward between two searches) does not re-render a component that reads `window.location.search` during render — this is exactly why the brand filter and sort dropdown silently did nothing until 2026-09-30 (URL changed, list didn't). `search-results.tsx` and `store-map.tsx` now read params via `useSearch()`. Reading `window.location.search` inside an event handler (to build the *next* URL, as `updateParam` does) is fine; reading it to decide what to *render* is not.
+
+### Route-level code-splitting
+`App.tsx` imports `Home` and `NotFound` eagerly and every other page via `React.lazy()` inside one `<Suspense>` (small spinner fallback) wrapped by `Layout`, so the header/nav never flash. This took the main chunk from 629KB to ~506KB (162KB gzip); the rest is react-dom + framer-motion + the Radix store-picker dropdown, all needed on the landing page, so `vite.config.ts` sets `chunkSizeWarningLimit: 600` with a comment saying so. Don't reach for `manualChunks` tuning. `QueryClientProvider`, `TooltipProvider` and `<Toaster />` were removed from the tree — nothing used them (the shadcn `ui/` files and `lib/queryClient.ts` are still on disk, unused).
+
+### localStorage access goes through `storage.ts` helpers
+`readStored` / `readStoredList` / `writeStored` in `lib/storage.ts` wrap every read/write in `try/catch` and validate shape (`readStoredList` drops non-string entries; `App.tsx` only accepts `"en"`/`"zh"`; `theme-provider.tsx` only accepts `light`/`dark`/`system`). Corrupt JSON, a hand-edited value, or storage blocked by the browser falls back to defaults instead of white-screening the app. Use these helpers for any new persisted state.
+
 ---
 
 # 3. Project Structure
@@ -154,10 +163,10 @@ Core app logic and shared frontend utilities.
 
 | File | Purpose |
 |------|---------|
-| `data.ts` | All product, category, store data + exported types |
+| `data.ts` | All product, category, store data + exported types; `isInCategory` / `isInSubCategory` / `countProducts` helpers (single source for category matching — used by search filters and the count badges) |
 | `i18n.ts` | All translation strings (EN + ZH), context hooks |
 | `normalize.ts` | Aisle/shelf value normalization |
-| `storage.ts` | `FavoritesContext` + `useFavorites()` hook + `useRecentSearches()` hook |
+| `storage.ts` | `FavoritesContext` + `useFavorites()` hook + `useRecentSearches()` hook + safe `readStored` / `readStoredList` / `writeStored` localStorage helpers |
 | `favorites-provider.tsx` | `FavoritesProvider` component — holds single shared favorites `useState` |
 | `validateData.ts` | Data integrity checks (DEV mode only) |
 | `seo.ts` | `usePageMeta(title, description)` hook — sets `document.title` and the `<meta name="description">` tag per page |
@@ -309,14 +318,18 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 - Debounced input with URL sync
 
 ## Category Browsing
-- Category grid on home page with animated entrance
-- Subcategory filtering per category
+- Category grid on home page with animated entrance and a product-count pill on each tile (muted `0` for empty ones)
+- Subcategory filtering per category; each subcategory row shows "N items" or "Coming soon" as a caption under its name
+- Only 8 of the 23 categories have products in the demo data. Empty ones stay visible (it's the real store layout) and lead to a dedicated "No products here yet" state in `search-results.tsx` (`isEmptyCategory`: category/subcategory filter with no query and no brand filter) instead of the generic "No products found" — its shortcut tiles only offer non-empty categories
 
 ## Product Detail Pages
 - Product image, category badge, brand
 - Location pill (aisle + shelf) with store-map link
 - Two-column layout on desktop
 - Similar products section (checks both `category_en` and `category_zh`)
+- When the selected store has no location for the product, "Show similar items with known locations" only appears if such items exist; otherwise a `noSimilarWithLocation` message is shown (previously the button emptied the list with no feedback)
+- `showOnlyWithLocation` resets on `/product/:id` change, since wouter keeps the component mounted
+- Unknown product/category IDs render the branded `<NotFound />` (the page still sets its own not-found meta title)
 
 ## Favorites System
 - Toggle via heart button on `ProductCard` and on `product-detail.tsx`
@@ -335,6 +348,7 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 ## Store Map
 - Demo placeholder aisle map
 - Highlights the target aisle when navigated from product detail
+- The `?store=` param is applied once per link (effect depends on `storeId` only); switching branch in the header afterwards sticks, and the aisle highlight hides because that aisle belongs to the linked store
 
 ## Custom 404 Page
 - Branded not-found page (`not-found.tsx`) matching the app's design system — primary/secondary color icon badge, large "404", heading + description, `Search Products` (primary) and `Back to Home` (secondary) CTAs, plus a `Go Back` link using `window.history.back()`
@@ -354,7 +368,9 @@ Only comment when the WHY is non-obvious. No redundant or task-tracking comments
 
 ## Loading States
 Since all data (`data.ts`/JSON) is static and rendered synchronously, there is no real "fetching" state to show. The genuine async gaps in this app are: remote product images (several `image_url`s point to Unsplash, not local `/Images/`), the initial JS bundle/font load, and the search input's debounce window — each gets a real loading indicator rather than a decorative one:
-- **Product images** — `components/product-image.tsx` (`<ProductImage>`) shows a `Skeleton` overlay while the image loads, cross-fades in the `<img>` via `onLoad` (`transition-opacity duration-300`), and falls back to a muted `ImageOff` icon on `onError`. Resets to `"loading"` on `src` change (via `useEffect`) since wouter keeps the `ProductDetail` component instance mounted across `/product/:id` param changes (e.g. clicking into a "Similar Products" card) — without this reset, a stale `"loaded"` status would skip the skeleton for the new image
+- **Product images** — `components/product-image.tsx` (`<ProductImage>`) shows a `Skeleton` overlay while the image loads, cross-fades in the `<img>` via `onLoad` (`transition-opacity duration-300`), and falls back to a muted `ImageOff` icon on `onError`. The status is stored together with the `src` it belongs to (`{ src, status }`), so a `src` change reads as `"loading"` on the very same render — wouter keeps `ProductDetail` mounted across `/product/:id` changes. This replaced an earlier `useEffect` reset, which could run *after* a cached image's `onLoad` and leave the new image stuck at `opacity-0`
+- **Lazy route chunks** — `App.tsx`'s `<Suspense>` shows a small centered `Loader2` spinner while a page chunk loads (see [Route-level code-splitting](#route-level-code-splitting))
+- **Remote images must stay alive** — 5 Unsplash photos (f4, 100, 101, 103, 110) had been deleted upstream (HTTP 404) and were replaced on 2026-09-30. If an error-fallback icon shows up, `curl` every `images.unsplash.com` URL in `products.json` for a non-200 and swap in a free-license photo (`netlify.toml`'s CSP only allows `images.unsplash.com` as a remote image host)
 - **Initial app boot** — `client/index.html` renders a `#app-boot-loader` (inline-styled spinner, no Tailwind dependency since it must paint before the bundle loads) over `#root`; `main.tsx` fades it out via a `.hide` class after `createRoot().render()` and removes it from the DOM on `transitionend`, with a `setTimeout(400ms)` fallback removal since `transitionend` can fail to fire when the "hide" class is applied before the initial state has painted
 - **Search debounce** — `search-results.tsx` swaps the search icon for a spinning `Loader2` whenever `query !== debouncedQuery`, signaling that displayed results haven't caught up to what's typed yet (300ms `use-debounce` window)
 
@@ -412,17 +428,34 @@ Since all data (`data.ts`/JSON) is static and rendered synchronously, there is n
 - Loading states added for product images (skeleton + fade-in + error fallback), initial app boot (spinner overlay), and search debounce (spinner icon) — see [Loading States](#loading-states). Fixed a bug in the boot-loader removal where `transitionend` alone could leave `#app-boot-loader` stuck in the DOM (invisible but present) if the "hide" class was applied before the initial paint — added a `setTimeout` fallback removal
 - Terms of Use (`/terms`) and Privacy Policy (`/privacy`) pages added, with a non-affiliation disclaimer and honest, behavior-accurate privacy content (localStorage-only, no backend/tracking) — see [Legal Pages](#legal-pages)
 - Local product images compressed from PNG to WebP via new `script/compress-images.ts` (`sharp`, devDependency) — 9.9MB → ~0.8MB (93% smaller) across 35 files, transparency preserved, `products.json` `image_url`s updated to `.webp` — see [Product images are WebP, not PNG](#product-images-are-webp-not-png)
+- **2026-09-30 fix pass:**
+  - **Sort + brand filter did nothing** (URL changed, results didn't) — see [Read query params with `useSearch()`](#read-query-params-with-wouters-usesearch-never-windowlocationsearch)
+  - **Product data copy-paste errors** in `products.json`: `香蕉` (banana) keyword on 6 non-banana tropical fruits, `草莓` (strawberry) on every tomato/grape/orange/avocado/blueberry, `菠菜` (spinach) on cucumbers and bean sprouts; blueberries `c1` had the Chinese name `新鮮草莓`; lemon `b4` was filed under Apples & Pears (→ Citrus Fruits); avocado `d1` under Citrus Fruits (→ Tropical Fruits); `c2`/`c5` shared the English name "Cherry Tomatoes 550g" (→ "Yu Nu …" / "Sheng Nu …", matching their Chinese names)
+  - 5 dead (404) Unsplash image URLs replaced
+  - Empty categories: counts + "No products here yet" state (see [Category Browsing](#category-browsing)); category page header said "N Categories" for subcategories
+  - Hardcoded EN/ZH ternaries moved into `i18n.ts` (hero title, nav labels, brand/sort select, "Including", favorites hint, "Try a different store", subcategory counts, theme toggle label)
+  - Mobile header overflowed at 375px (page scrolled sideways): language toggle drops the flags below `sm`, the "PX Mart" text title is `sr-only` below 420px (logo stays), store picker truncates (`min-w-0`) — verified at 320px with the back button showing
+  - Theme toggle's first click was a no-op in "system" mode on a dark OS (it compared against the stored `"system"`); now toggles from the actual `.dark` class. "System" mode also follows OS changes live
+  - Store map snapped the header's store picker back to the URL's store; `ProductImage` could get stuck invisible; similar-products button could empty the list with no feedback — see the respective feature sections
+  - Scroll resets to top on route change (`layout.tsx`); clear-search (×) only clears the query, keeping category/brand/sort; searches from the search page are saved to recent searches too; the active brand stays selectable when a new query excludes it
+  - `<html lang>` follows the language toggle (`zh-Hant-TW` / `en`); aria-labels on icon-only buttons (heart, back, clear, store picker); `View Aisle Map` is now a styled `Link` instead of a `<button>` nested inside an `<a>`
+  - `index.html`: added a default `<title>`/description/`theme-color`, removed an unused Inter + Noto Sans **SC** (Simplified) stylesheet, fixed `og:image` pointing at a non-existent `Logo.jpg`, removed Replit's `twitter:site`, removed `maximum-scale=1` (it blocked pinch-zoom); `site.webmanifest` icon paths pointed at `/` instead of `/favicon_io/` and had an empty name
+  - Replit agent state binaries (`.local/state/replit/`) deleted and gitignored
+  - `robots.txt` added, plus a build-generated `sitemap.xml` and absolute `og:image`/`twitter:image` URLs (see [SEO Follow-ups](#seo-follow-ups--done-2026-09-30))
 
 ### Build Status
 TypeScript: `npx tsc --noEmit` → 0 errors
-Runtime: `npm run dev:client` → serves on port 5000, no CSS/PostCSS errors
+Build: `npm run build` → no warnings; main chunk ~506KB (162KB gzip), route chunks lazy-loaded
+Runtime: `npm run dev:client` → serves on port 5000; zero console errors/warnings across all routes (only the DEV data-validation log, which passes)
+Production preview: `.claude/launch.json` has `px-mart-prod-preview` (`vite preview` on port 5001, serves `dist/public` — run `npm run build` first)
 
 ## Pending / Future Improvements
 
 ### Data Expansion
-- More products
+- More products — 15 of 23 categories have none yet (they show "Coming soon"); Fresh Fruits alone is 34 of 56 products
 - Richer category coverage
 - Real branch data
+- Some local image folders don't match the product's (corrected) subcategory, e.g. the lemon's photo lives in `Images/Fresh Fruits/Apples & Pears/` — harmless, paths are still valid
 
 ### Backend Expansion
 - APIs
@@ -433,13 +466,16 @@ Runtime: `npm run dev:client` → serves on port 5000, no CSS/PostCSS errors
 ### Real PX Mart Integration
 Currently NOT integrated with real PX Mart systems. All data is prototype/demo data.
 
-### Bundle Size / Code-Splitting (identified 2026-09-29, not yet done)
-`npm run build` reports the main JS chunk at **629KB (199KB gzipped)**, with Vite's "chunks larger than 500KB" warning. All pages/routes are eagerly imported in `App.tsx` (no `React.lazy`), and framer-motion + Fuse.js + all shadcn/ui components ship in one bundle regardless of which route is visited. Not urgent — the app still loads fine on typical connections — but a reasonable next step if bundle size becomes a concern:
-- Convert the page imports in `App.tsx` to `React.lazy()` + a `<Suspense>` fallback around the `<Switch>` (a small skeleton, consistent with the existing [Loading States](#loading-states) pattern), so `search-results.tsx` (Fuse.js) and other heavier pages aren't in the initial bundle for someone just landing on `/`.
-- Keep it simple — this is a route-level split, not a wholesale restructure. Don't reach for `manualChunks` tuning or a state-management rewrite; that would violate the "Do NOT Add Enterprise Complexity" rule below.
+### Bundle Size / Code-Splitting — done 2026-09-30
+See [Route-level code-splitting](#route-level-code-splitting). 629KB → ~506KB main chunk, no build warning.
 
-### SEO Follow-ups (not yet done)
-Per-page `<title>`/`<meta name="description">` are in place ([Per-Page SEO Meta Tags](#per-page-seo-meta-tags)), but there's no `robots.txt` or `sitemap.xml` in `client/public/` yet, and the static `og:title`/`og:description`/`og:image` in `index.html` don't vary per page (expected for a client-only SPA without SSR — social link-unfurlers don't execute JS, so this is a known limitation, not a bug). If real discoverability/sharing ever matters for this prototype: add a minimal `robots.txt` + `sitemap.xml` listing the 9 routes, and note in `README.md` that per-page OG images would require SSR/prerendering (out of scope for the current stack).
+### Deployment
+Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` (Node 22), publishes `dist/public`, and sets security headers including a CSP whose only allowed remote image host is `images.unsplash.com`. `.netlify/state.json` holds only the site ID, so it's **unverified whether pushing to git auto-deploys** or whether deploys go through the Netlify CLI. Don't tell the owner a push will deploy until that's confirmed. The live site keeps serving the previous build until a deploy happens.
+
+### SEO Follow-ups — done 2026-09-30
+- `client/public/robots.txt` — allow all + `Sitemap:` line.
+- `sitemap.xml` is **generated, not committed**: `script/sitemap.ts` (`writeSitemap`) runs inside `script/build.ts` right after the Vite build and writes `dist/public/sitemap.xml` from `products.json` + `categories.json` — 5 static routes + every `/category/<id>` + every `/product/<id>` (84 URLs today). It can't drift when data changes; if the domain ever changes, update `SITE_URL` there, the `Sitemap:` line in `robots.txt`, and the absolute `og:image`/`twitter:image` in `index.html`. `/favorites` is deliberately excluded (per-device localStorage, always empty for a crawler). Note `npx vite build` alone skips the sitemap — use `npm run build`.
+- The static `og:title`/`og:description`/`og:image` don't vary per page — expected for a client-only SPA (unfurlers don't run JS); per-page OG would need SSR/prerendering, out of scope.
 
 ---
 
@@ -492,6 +528,9 @@ Avoid unnecessary schema rewrites unless strictly required.
 
 ### Do NOT Nest motion.div whileTap Inside Another motion.div whileTap
 Framer-motion uses native `pointerdown` listeners. Nesting `whileTap` motion elements causes the parent to trigger on child taps due to event bubbling. Use CSS `active:scale-*` for press feedback on nested interactive elements.
+
+### Do NOT Commit or Push
+The owner commits and pushes himself (restated 2026-09-30). Leave every change uncommitted in the working tree, list the changed files at the end, and don't offer to commit. Only run `git commit`/`git push` if he explicitly asks in that moment.
 
 ### Do NOT Hardcode Strings in JSX
 All user-facing text must go through `t("key")` from `useLanguage()`. The only exception is parameterized strings that require interpolation (no template support in `t()`).

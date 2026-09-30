@@ -9,14 +9,15 @@ import { STORE_LIST } from "@/lib/data";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, ChevronDown, Heart, Home as HomeIcon, MapPin, Search } from "lucide-react";
+import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { LanguageToggle } from "./language-toggle";
 import { ThemeToggle } from "./theme-toggle";
 
 const NAV_ITEMS = [
-  { href: "/", Icon: HomeIcon, en: "Home", zh: "首頁" },
-  { href: "/search", Icon: Search, en: "Search", zh: "搜尋" },
-  { href: "/favorites", Icon: Heart, en: "Saved", zh: "收藏" },
+  { href: "/", Icon: HomeIcon, labelKey: "home" },
+  { href: "/search", Icon: Search, labelKey: "navSearch" },
+  { href: "/favorites", Icon: Heart, labelKey: "navSaved" },
 ] as const;
 
 function isNavActive(href: string, location: string) {
@@ -25,12 +26,12 @@ function isNavActive(href: string, location: string) {
 
 function Sidebar() {
   const [location] = useLocation();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <aside className="hidden lg:flex flex-col w-56 shrink-0 border-r border-border/40 sticky top-[72px] h-[calc(100vh-72px)] overflow-y-auto bg-background">
       <nav className="p-3 pt-6 space-y-1">
-        {NAV_ITEMS.map(({ href, Icon, en, zh }) => {
+        {NAV_ITEMS.map(({ href, Icon, labelKey }) => {
           const active = isNavActive(href, location);
           return (
             <Link key={href} href={href}>
@@ -44,7 +45,7 @@ function Sidebar() {
                   "w-5 h-5 shrink-0",
                   href === "/favorites" && active && "fill-current"
                 )} />
-                <span>{language === "en" ? en : zh}</span>
+                <span>{t(labelKey)}</span>
               </div>
             </Link>
           );
@@ -65,12 +66,12 @@ function Sidebar() {
 
 function BottomNav() {
   const [location] = useLocation();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/40 shadow-[0_-4px_24px_rgba(0,0,0,0.07)]">
       <div className="flex h-16">
-        {NAV_ITEMS.map(({ href, Icon, en, zh }) => {
+        {NAV_ITEMS.map(({ href, Icon, labelKey }) => {
           const active = isNavActive(href, location);
           return (
             <Link key={href} href={href} className="flex-1">
@@ -87,7 +88,7 @@ function BottomNav() {
                   href === "/favorites" && active && "fill-current"
                 )} />
                 <span className={cn("text-[10px]", active ? "font-bold" : "font-medium")}>
-                  {language === "en" ? en : zh}
+                  {t(labelKey)}
                 </span>
               </div>
             </Link>
@@ -99,22 +100,28 @@ function BottomNav() {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { selectedStore, setStore } = useStore();
   const [location] = useLocation();
   const isHome = location === "/";
+
+  // SPA navigation keeps the previous page's scroll offset; start each new page at the top.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
       {/* Header — full viewport width, content capped at screen-xl */}
       <header className="bg-primary text-primary-foreground sticky top-0 z-50 shadow-md transition-colors duration-300">
-        <div className="max-w-screen-xl mx-auto px-4 h-[72px] flex items-center justify-between gap-4">
+        <div className="max-w-screen-xl mx-auto px-4 h-[72px] flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-1 shrink-0">
             {!isHome && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => window.history.back()}
+                aria-label={t("back")}
                 className="text-primary-foreground hover:bg-white/10 -ml-2 mr-1 rounded-full w-8 h-8 shrink-0"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -123,17 +130,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link href="/">
               <div className="flex items-center gap-2 cursor-pointer">
                 <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center overflow-hidden p-1 shrink-0">
-                  <img src="/Images/Logo.png" alt="Logo" className="w-full h-full object-contain" />
+                  <img src="/Images/Logo.png" alt="" className="w-full h-full object-contain" />
                 </div>
-                <h1 className="font-bold text-lg tracking-tight">PX Mart</h1>
+                {/* Text title only fits beside the store picker + toggles from ~420px up; the logo carries it below that */}
+                <h1 className="sr-only min-[420px]:not-sr-only font-bold text-lg tracking-tight">PX Mart</h1>
               </div>
             </Link>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center px-2 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-semibold max-w-[8rem] transition-colors hover:bg-white/20 outline-none">
+                <button
+                  aria-label={`${t("selectStore")}: ${language === "en" ? selectedStore.nameEn : selectedStore.nameZh}`}
+                  className="flex items-center min-w-0 px-2 py-1 rounded-full bg-white/10 border border-white/20 text-[10px] font-semibold max-w-[8rem] transition-colors hover:bg-white/20 outline-none"
+                >
                   <MapPin className="w-3 h-3 mr-1 opacity-80 shrink-0" />
                   <span className="truncate mr-1">
                     {language === "en" ? selectedStore.nameEn : selectedStore.nameZh}

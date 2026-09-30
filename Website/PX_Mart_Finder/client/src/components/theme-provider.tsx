@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { readStored, writeStored } from "@/lib/storage";
 
 type Theme = "dark" | "light" | "system";
 
@@ -25,32 +26,32 @@ export function ThemeProvider({
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = readStored(storageKey);
+    return stored === "light" || stored === "dark" || stored === "system" ? stored : defaultTheme;
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    root.classList.remove("light", "dark");
+    const apply = () => {
+      root.classList.remove("light", "dark");
+      root.classList.add(theme === "system" ? (media.matches ? "dark" : "light") : theme);
+    };
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+    apply();
+    if (theme !== "system") return;
 
-      root.classList.add(systemTheme);
-      return;
-    }
-
-    root.classList.add(theme);
+    // Follow OS light/dark switches live while in "system" mode.
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
   }, [theme]);
 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
+      writeStored(storageKey, theme);
       setTheme(theme);
     },
   };

@@ -1,60 +1,70 @@
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
 import { LanguageContext, translations, Language, StoreContext } from "@/lib/i18n";
 import { FavoritesProvider } from "@/lib/favorites-provider";
-import { useState, useEffect } from "react";
+import { readStored, writeStored } from "@/lib/storage";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { STORE_LIST, Store } from "@/lib/data";
+import { Loader2 } from "lucide-react";
 
+// Home (the landing route) and NotFound stay in the main bundle; every other route
+// is split out so Fuse.js etc. only load when those pages are visited.
 import Home from "@/pages/home";
-import SearchResults from "@/pages/search-results";
-import ProductDetail from "@/pages/product-detail";
-import CategoryDetail from "@/pages/category-detail";
-import Favorites from "@/pages/favorites";
-import StoreMap from "@/pages/store-map";
-import Terms from "@/pages/terms";
-import Privacy from "@/pages/privacy";
 import NotFound from "@/pages/not-found";
 import { ThemeProvider } from "@/components/theme-provider";
+
+const SearchResults = lazy(() => import("@/pages/search-results"));
+const ProductDetail = lazy(() => import("@/pages/product-detail"));
+const CategoryDetail = lazy(() => import("@/pages/category-detail"));
+const Favorites = lazy(() => import("@/pages/favorites"));
+const StoreMap = lazy(() => import("@/pages/store-map"));
+const Terms = lazy(() => import("@/pages/terms"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+
+function PageFallback() {
+  return (
+    <div className="flex flex-1 items-center justify-center py-24">
+      <Loader2 className="w-6 h-6 animate-spin text-primary/60" />
+    </div>
+  );
+}
 
 function Router() {
   return (
     <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/search" component={SearchResults} />
-        <Route path="/category/:id" component={CategoryDetail} />
-        <Route path="/product/:id" component={ProductDetail} />
-        <Route path="/favorites" component={Favorites} />
-        <Route path="/store-map" component={StoreMap} />
-        <Route path="/terms" component={Terms} />
-        <Route path="/privacy" component={Privacy} />
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageFallback />}>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/search" component={SearchResults} />
+          <Route path="/category/:id" component={CategoryDetail} />
+          <Route path="/product/:id" component={ProductDetail} />
+          <Route path="/favorites" component={Favorites} />
+          <Route path="/store-map" component={StoreMap} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/privacy" component={Privacy} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </Layout>
   );
 }
 
 function App() {
-  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem("px-lang") as Language) || "en");
+  const [language, setLanguage] = useState<Language>(() =>
+    readStored("px-lang") === "zh" ? "zh" : "en"
+  );
   const [selectedStore, setSelectedStore] = useState<Store>(() => {
-    const saved = localStorage.getItem("px-store");
-    if (saved) {
-      const found = STORE_LIST.find(s => s.id === saved);
-      if (found) return found;
-    }
-    return STORE_LIST[0];
+    const saved = readStored("px-store");
+    return STORE_LIST.find(s => s.id === saved) ?? STORE_LIST[0];
   });
 
   useEffect(() => {
-    localStorage.setItem("px-lang", language);
+    writeStored("px-lang", language);
+    document.documentElement.lang = language === "zh" ? "zh-Hant-TW" : "en";
   }, [language]);
 
   useEffect(() => {
-    localStorage.setItem("px-store", selectedStore.id);
+    writeStored("px-store", selectedStore.id);
   }, [selectedStore]);
 
   const t = (key: keyof typeof translations.en) => {
@@ -64,20 +74,15 @@ function App() {
   const setStore = (store: Store) => setSelectedStore(store);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <TooltipProvider>
-          <LanguageContext.Provider value={{ language, setLanguage, t }}>
-            <StoreContext.Provider value={{ selectedStore, setStore }}>
-              <FavoritesProvider>
-                <Toaster />
-                <Router />
-              </FavoritesProvider>
-            </StoreContext.Provider>
-          </LanguageContext.Provider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <LanguageContext.Provider value={{ language, setLanguage, t }}>
+        <StoreContext.Provider value={{ selectedStore, setStore }}>
+          <FavoritesProvider>
+            <Router />
+          </FavoritesProvider>
+        </StoreContext.Provider>
+      </LanguageContext.Provider>
+    </ThemeProvider>
   );
 }
 

@@ -8,14 +8,37 @@ export type FavoritesContextValue = {
 
 export const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
+// Corrupt/hand-edited localStorage (or storage blocked by the browser) must never crash the app.
+export function readStored(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export function readStoredList(key: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(readStored(key) ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function writeStored(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage full or blocked — preferences just won't persist this session.
+  }
+}
+
 export function useFavoritesState(): FavoritesContextValue {
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    const saved = localStorage.getItem("px-favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [favorites, setFavorites] = useState<string[]>(() => readStoredList("px-favorites"));
 
   useEffect(() => {
-    localStorage.setItem("px-favorites", JSON.stringify(favorites));
+    writeStored("px-favorites", JSON.stringify(favorites));
   }, [favorites]);
 
   const toggleFavorite = (id: string) => {
@@ -36,13 +59,10 @@ export function useFavorites(): FavoritesContextValue {
 }
 
 export function useRecentSearches() {
-  const [recent, setRecent] = useState<string[]>(() => {
-    const saved = localStorage.getItem("px-recent-searches");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [recent, setRecent] = useState<string[]>(() => readStoredList("px-recent-searches"));
 
   useEffect(() => {
-    localStorage.setItem("px-recent-searches", JSON.stringify(recent));
+    writeStored("px-recent-searches", JSON.stringify(recent));
   }, [recent]);
 
   const addSearch = (query: string) => {

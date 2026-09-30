@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 
 export default function Favorites() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { favorites } = useFavorites();
 
   usePageMeta(t("metaFavoritesTitle"), t("metaFavoritesDesc"));
@@ -40,9 +40,7 @@ export default function Favorites() {
           </div>
           <h3 className="font-bold text-lg text-foreground mb-2">{t("noFavorites")}</h3>
           <p className="text-sm text-muted-foreground max-w-[200px] leading-relaxed">
-            {language === "en"
-              ? "Tap the heart on any product to save it here."
-              : "點擊商品上的愛心即可收藏。"}
+            {t("favoritesHint")}
           </p>
         </motion.div>
       ) : (

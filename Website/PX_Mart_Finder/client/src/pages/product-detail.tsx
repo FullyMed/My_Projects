@@ -1,27 +1,32 @@
-import { useLocation, useRoute, Link } from "wouter";
+import { useRoute, Link } from "wouter";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { PRODUCTS } from "@/lib/data";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
-import { ArrowLeft, MapPin, Share2, Info, Heart, Map as MapIcon, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { MapPin, Heart, Map as MapIcon, AlertCircle } from "lucide-react";
 import { useFavorites } from "@/lib/storage";
 import { usePageMeta } from "@/lib/seo";
+import NotFound from "@/pages/not-found";
 import { cn } from "@/lib/utils";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ProductDetail() {
   const { t, language } = useLanguage();
   const { selectedStore } = useStore();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const [, setLocation] = useLocation();
   const [, params] = useRoute("/product/:id");
   const [showOnlyWithLocation, setShowOnlyWithLocation] = useState(false);
   const similarSectionRef = useRef<HTMLDivElement>(null);
 
   const product = PRODUCTS.find(p => p.id === params?.id);
+
+  // wouter keeps this component mounted across /product/:id changes (e.g. tapping a
+  // similar product), so per-product UI state has to be reset by hand.
+  useEffect(() => {
+    setShowOnlyWithLocation(false);
+  }, [params?.id]);
 
   usePageMeta(
     product ? (language === "en" ? product.product_name_en : product.product_name_zh) : t("productNotFound"),
@@ -36,7 +41,7 @@ export default function ProductDetail() {
   );
 
   if (!product) {
-    return <div className="p-8 text-center">{t("productNotFound")}</div>;
+    return <NotFound />;
   }
 
   const name = language === "en" ? product.product_name_en : product.product_name_zh;
@@ -46,12 +51,13 @@ export default function ProductDetail() {
   const location = product.locationsByStore[selectedStore.id];
   const section = location ? (language === "en" ? location.section_en : location.section_zh) : null;
 
-  const similarProducts = PRODUCTS
-    .filter(p =>
-        (p.category_en === product.category_en || p.category_zh === product.category_zh) &&
-        (p.id !== product.id) &&
-        (!showOnlyWithLocation || p.locationsByStore[selectedStore.id])
-    )
+  const sameCategory = PRODUCTS.filter(p =>
+    (p.category_en === product.category_en || p.category_zh === product.category_zh) &&
+    p.id !== product.id
+  );
+  const hasSimilarWithLocation = sameCategory.some(p => p.locationsByStore[selectedStore.id]);
+  const similarProducts = sameCategory
+    .filter(p => !showOnlyWithLocation || p.locationsByStore[selectedStore.id])
     .slice(0, showOnlyWithLocation ? 10 : 2);
 
   const handleShowSimilar = () => {
@@ -89,6 +95,8 @@ export default function ProductDetail() {
                       favorited ? "text-red-500 hover:text-red-600 bg-red-50" : "text-muted-foreground"
                     )}
                     onClick={() => toggleFavorite(product.id)}
+                    aria-label={favorited ? t("removeFromFavorites") : t("addToFavorites")}
+                    aria-pressed={favorited}
                   >
                     <Heart className={cn("w-5 h-5", favorited && "fill-current")} />
                   </Button>
@@ -126,11 +134,12 @@ export default function ProductDetail() {
                       </div>
                   </div>
 
-                  <Link href={`/store-map?store=${selectedStore.id}&aisle=${location.aisle}`}>
-                    <Button className="w-full h-12 rounded-xl font-bold gap-2 shadow-sm">
-                      <MapIcon className="w-5 h-5" />
-                      {t("viewAisleMap")}
-                    </Button>
+                  <Link
+                    href={`/store-map?store=${selectedStore.id}&aisle=${encodeURIComponent(location.aisle)}`}
+                    className={cn(buttonVariants(), "w-full h-12 rounded-xl font-bold gap-2 shadow-sm")}
+                  >
+                    <MapIcon className="w-5 h-5" />
+                    {t("viewAisleMap")}
                   </Link>
                 </div>
             ) : (
@@ -143,17 +152,21 @@ export default function ProductDetail() {
                         : t("locationNotAvailable")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Try selecting a different store branch' : '請嘗試選擇其他門市分店'}
+                      {t("tryDifferentStore")}
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-2 w-full border-primary/30 text-primary hover:bg-primary/5 font-bold"
-                    onClick={handleShowSimilar}
-                  >
-                    {t("showSimilarWithLocation")}
-                  </Button>
+                  {hasSimilarWithLocation ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full border-primary/30 text-primary hover:bg-primary/5 font-bold"
+                      onClick={handleShowSimilar}
+                    >
+                      {t("showSimilarWithLocation")}
+                    </Button>
+                  ) : (
+                    <p className="mt-1 text-xs text-muted-foreground/80">{t("noSimilarWithLocation")}</p>
+                  )}
               </div>
             )}
         </div>

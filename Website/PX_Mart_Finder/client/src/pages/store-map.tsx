@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSearch } from "wouter";
 import { useLanguage, useStore } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Map as MapIcon } from "lucide-react";
@@ -10,9 +11,11 @@ export default function StoreMap() {
   const { t, language } = useLanguage();
   const { selectedStore, setStore } = useStore();
 
-  const searchParams = new URLSearchParams(window.location.search);
-  const highlightedAisle = searchParams.get("aisle");
+  const searchParams = new URLSearchParams(useSearch());
   const storeId = searchParams.get("store");
+  // The aisle number belongs to the store in the link; hide it once the user switches branches.
+  const highlightedAisle =
+    !storeId || storeId === selectedStore.id ? searchParams.get("aisle") : null;
 
   usePageMeta(
     t("metaStoreMapTitle"),
@@ -21,14 +24,14 @@ export default function StoreMap() {
       : `查看全聯${selectedStore.nameZh}的示意走道地圖。`
   );
 
+  // Sync to the linked store only when the link changes — depending on selectedStore
+  // here would snap the header's store picker back to the URL's store on every change.
   useEffect(() => {
-    if (storeId && storeId !== selectedStore.id) {
-      const foundStore = STORE_LIST.find(s => s.id === storeId);
-      if (foundStore) {
-        setStore(foundStore);
-      }
+    const foundStore = storeId ? STORE_LIST.find(s => s.id === storeId) : undefined;
+    if (foundStore) {
+      setStore(foundStore);
     }
-  }, [storeId, selectedStore.id, setStore]);
+  }, [storeId]);
 
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
@@ -40,7 +43,7 @@ export default function StoreMap() {
       </div>
 
       <div className="p-4 border-b sticky top-[calc(var(--px-header-h)+30px)] bg-background z-10 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="rounded-full">
+        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label={t("back")} className="rounded-full">
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-xl font-bold">{t("storeMap")}</h1>

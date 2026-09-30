@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { CATEGORIES } from "@/lib/data";
+import { CATEGORIES, countProducts } from "@/lib/data";
 import { useLanguage } from "@/lib/i18n";
 import { usePageMeta } from "@/lib/seo";
+import NotFound from "@/pages/not-found";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
@@ -23,8 +25,10 @@ export default function CategoryDetail() {
   );
 
   if (!category) {
-    return <div className="p-8 text-center">{t("categoryNotFound")}</div>;
+    return <NotFound />;
   }
+
+  const totalCount = countProducts(category);
 
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
@@ -48,7 +52,8 @@ export default function CategoryDetail() {
                 {language === "en" ? category.en : category.zh}
             </h1>
             <p className="text-primary-foreground/80 text-sm mt-1">
-                {category.subCategories.length} {t("categories")}
+                {category.subCategories.length} {t("subcategoriesCount")} · {totalCount}{" "}
+                {totalCount === 1 ? t("itemCount") : t("itemsCount")}
             </p>
          </div>
       </div>
@@ -56,9 +61,11 @@ export default function CategoryDetail() {
       {/* Subcategories List */}
       <div className="flex-1 p-6 lg:p-8 -mt-4 relative z-20">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {category.subCategories.map((sub, index) => (
+          {category.subCategories.map((sub, index) => {
+            const count = countProducts(category, sub);
+            return (
             <motion.div
-              key={index}
+              key={sub.en}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               whileTap={{ scale: 0.97 }}
@@ -71,18 +78,26 @@ export default function CategoryDetail() {
             >
               <Button
                 variant="outline"
-                className="w-full justify-between h-14 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-2xl transition-colors duration-200"
+                className="group w-full justify-between h-14 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-2xl transition-colors duration-200"
                 onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
               >
-                <span className="font-medium">
-                  {language === "en" ? sub.en : sub.zh}
-                </span>
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <div className="flex flex-col items-start min-w-0 text-left">
+                  <span className={cn("font-medium truncate max-w-full", count === 0 && "text-muted-foreground")}>
+                    {language === "en" ? sub.en : sub.zh}
+                  </span>
+                  <span className={cn("text-[11px] font-normal", count > 0 ? "text-primary/80" : "text-muted-foreground/70")}>
+                    {count > 0
+                      ? `${count} ${count === 1 ? t("itemCount") : t("itemsCount")}`
+                      : t("comingSoon")}
+                  </span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
                   <Search className="w-4 h-4 text-muted-foreground" />
                 </div>
               </Button>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

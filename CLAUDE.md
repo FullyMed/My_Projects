@@ -89,7 +89,7 @@ Then run `claude` to start Claude Code in that project.
 ### Website / PX Mart Finder
 - **Type:** React + TypeScript + Vite SPA
 - **Purpose:** Retail product discovery prototype for PX Mart (全聯) — single-branch demo
-- **Key traits:** Fuse.js fuzzy search, Framer Motion, shadcn/ui, Traditional Chinese + English, dark mode
+- **Key traits:** Fuse.js fuzzy search, Framer Motion, shadcn/ui, Traditional Chinese + English, dark mode, route-level code-splitting, build-generated sitemap. Live at https://px-mart-finder.netlify.app/ (whether pushing auto-deploys is unverified). A 2026-09-30 fix pass was verified in the browser but is uncommitted, for the owner to review; see "2026-09-30 fix pass" in its `CLAUDE.md`. Read query params with wouter's `useSearch()`, never `window.location.search`.
 - **Run:** `npm run dev:client` (use WSL2 for `npm ci`)
 
 ### Website / Three Frogs

@@ -20,7 +20,7 @@ export default function Terms() {
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
       <div className="p-4 border-b sticky top-[var(--px-header-h)] bg-background z-10 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="rounded-full">
+        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label={t("back")} className="rounded-full">
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-xl font-bold">{t("termsTitle")}</h1>
