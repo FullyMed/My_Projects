@@ -93,8 +93,8 @@ with s3:
 with s4:
     st.markdown("""
     <div class="stat-box">
-        <div class="stat-number">20.3%</div>
-        <div class="stat-label">Recall@10 (Title Mode)</div>
+        <div class="stat-number">21.5K</div>
+        <div class="stat-label">Games with Review Sentiment</div>
     </div>
     """, unsafe_allow_html=True)
 

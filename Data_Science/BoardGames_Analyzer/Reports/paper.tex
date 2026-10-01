@@ -32,9 +32,9 @@ Email: maxfelix05@gmail.com
     
     The proposed system integrates textual game descriptions, gameplay traits, user review sentiment, and popularity-based information to generate recommendations through title-based, trait-based, and combined recommendation modes. Content representations were generated using TF-IDF and sentence-transformer embeddings, while sentiment scores were derived from transformer-based review analysis. The system was evaluated using a filtered subset of the BoardGameGeek dataset containing over 21,000 board games and millions of user ratings and reviews.
     
-    Experimental evaluation was conducted using Recall@K and NDCG@K metrics under a holdout-based recommendation setting. Results show that the title-based recommendation mode achieved the strongest quantitative performance, particularly in Recall@10 and NDCG@10, while the combined mode provided more flexible discovery capabilities by incorporating both seed-game similarity and user-selected gameplay traits. In contrast, the trait-based mode demonstrated substantially weaker retrieval effectiveness, highlighting the limitations of sparse trait-only recommendation strategies.
-    
-    The findings suggest that explainable content-oriented recommendation systems can provide practical and effective support for board game discovery without relying exclusively on collaborative filtering. The proposed framework offers a lightweight and interpretable alternative for hobby-domain recommendation systems while also identifying important limitations and opportunities for future improvement.
+    The system was evaluated on 300 BoardGameGeek users with Recall@K and NDCG@K under a holdout protocol, alongside a popularity baseline, a content-only baseline, and a sentiment ablation. Under this protocol, whose held-out games are dominated by the most-rated titles, the popularity baseline was clearly strongest (Recall@10 of 0.230), while the three proposed modes reached Recall@10 between 0.020 and 0.037, the combined mode being best among them. Counting only held-out games outside the 100 most-rated titles, the popularity baseline retrieved none, whereas the proposed modes retrieved a small share (Recall@10 of 0.015--0.022).
+
+    The findings indicate that offline accuracy on this dataset is driven largely by popularity, and that the value of the proposed framework lies in explainable, similarity-driven discovery beyond the most popular games rather than in raw retrieval accuracy. The paper reports these results candidly and identifies the evaluation and modelling changes needed to strengthen them.
     
 \end{abstract}
 
@@ -128,7 +128,7 @@ Trait matching was implemented as a soft overlap mechanism rather than a strict 
 
 User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using the HuggingFace transformer pipeline with the DistilBERT SST-2 sentiment classification model applied to textual user reviews collected from BoardGameGeek.
 
-Scoring every comment in the review corpus (about 26 million ratings) on a CPU was impractical, so up to ten non-empty comments per game were sampled uniformly at random, giving XXXSENTCOMMENTS comments across XXXSENTSAMPLEGAMES catalog games; comments were truncated to 128 tokens. The classifier returns a label and the confidence in that label, so each prediction was converted to the probability that the review is positive ($p$ for a POSITIVE label, $1-p$ for a NEGATIVE one) before averaging per game. Games with fewer than three scored comments were given no score and fall back to the catalog mean, which leaves XXXSENTGAMES games with a game-specific sentiment value. The per-game values were min-max normalized before integration into the hybrid score.
+Scoring every comment in the review corpus (about 26 million ratings) on a CPU was impractical, so up to ten non-empty comments per game were sampled uniformly at random, giving 209,162 comments across 21,581 catalog games; comments were truncated to 128 tokens. The classifier returns a label and the confidence in that label, so each prediction was converted to the probability that the review is positive ($p$ for a POSITIVE label, $1-p$ for a NEGATIVE one) before averaging per game. Games with fewer than three scored comments were given no score and fall back to the catalog mean, which leaves 21,510 games with a game-specific sentiment value. The per-game values were min-max normalized before integration into the hybrid score.
 
 \subsubsection{Popularity Signal}
 
@@ -170,7 +170,7 @@ The proposed framework supports three recommendation modes designed for differen
 
 \subsubsection{Title-Based Recommendation}
 
-The title-based mode generates recommendations using similarity relationships derived from a selected seed board game. This mode primarily emphasizes semantic content similarity and achieved the strongest quantitative performance during evaluation.
+The title-based mode generates recommendations using similarity relationships derived from a selected seed board game. This mode is driven by content similarity, supported by sentiment and popularity.
 
 \subsubsection{Trait-Based Recommendation}
 
@@ -179,6 +179,10 @@ The trait-based mode allows users to explore games using gameplay-related charac
 \subsubsection{Combined Recommendation}
 
 The combined recommendation mode integrates both seed-game similarity and trait-based filtering to provide guided discovery recommendations. This mode was intended to balance semantic similarity with user-selected gameplay preferences, enabling more flexible exploration of the board game catalog.
+
+\subsection{Post-Ranking Rules}
+
+Two rules are applied after ranking and are therefore not part of any score. First, the optional difficulty filter keeps only games in the selected complexity band. Second, a same-series cap keeps at most two results that share a BGG series tag (family tags beginning with ``Game:'' or ``Series:'') with a seed game. Without it, pure similarity fills the list with a seed's own editions and expansions (for example, six Ticket to Ride variants for a Ticket to Ride seed), which defeats discovery. A capped series is named in the explanation, so the rule remains visible to the user.
 
 \subsection{Evaluation Strategy}
 \label{sec:evalstrategy}
@@ -209,16 +213,19 @@ Table~\ref{tab:explain} reproduces, verbatim, the explanations the system produc
 
 \begin{table}[h]
 \centering
-\caption{Example Explainable Recommendation Output}
-\begin{tabular}{|l|p{5.5cm}|}
+\caption{Verbatim Explanations Produced by the System (Publisher Lists Abbreviated)}
+\label{tab:explain}
+\begin{tabular}{|p{2.0cm}|p{5.6cm}|}
 \hline
-Recommended Game & Explanation \\
+Query $\rightarrow$ Game & System explanation \\
 \hline
-Wingspan & Shared engine-building mechanics, high semantic similarity, and strong positive community sentiment. \\
+Splendor + Azul $\rightarrow$ Sultaniya & Categories: Puzzle $|$ Mechanics: Pattern Building, Set Collection, Tile Placement \\
 \hline
-Azul & Similar abstract strategy gameplay and comparable player complexity level. \\
+Splendor + Azul $\rightarrow$ Azul: Summer Pavilion & Categories: Abstract Strategy, Puzzle $|$ Mechanics: Card Drafting, End Game Bonuses, Pattern Building, Set Collection, Tile Placement, Turn Order: Claim Action $|$ Families: Game: Azul $|$ Publishers: Broadway Toys LTD, \ldots \\
 \hline
-Terraforming Mars & High thematic similarity and strong popularity among strategy game players. \\
+Ticket to Ride $\rightarrow$ Railroad Ink: Deep Blue Edition & Categories: Trains $|$ Mechanics: Network and Route Building $|$ Publishers: Edge Entertainment, Gal\'apagos Jogos \\
+\hline
+Horror + Mystery (traits) $\rightarrow$ Mysterium & Categories: Deduction, Horror $|$ Mechanics: Cooperative Game, Deduction \\
 \hline
 \end{tabular}
 \end{table}
@@ -288,67 +295,80 @@ To isolate the sentiment signal, the title-based scorer was also evaluated with 
 
 \subsection{Experimental Results}
 
-The experimental evaluation focused on comparing the effectiveness of the three proposed recommendation modes under a consistent holdout-based recommendation setting. Recommendation quality was analyzed using Recall@K and NDCG@K metrics across multiple ranking cutoffs.
+Table~\ref{tab:results} reports the main protocol and Fig.~\ref{fig:performance} shows Recall@10 and NDCG@10.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.55\textwidth]{images/performance_chart.png}
-\caption{Performance Comparison of Recommendation Modes}
+\caption{Recall@10 and NDCG@10 of the proposed modes, the baselines, and the sentiment ablation (300 users)}
 \label{fig:performance}
 \end{figure}
 
 \begin{table}[h]
 \centering
-\caption{Recommendation Performance Comparison}
+\caption{Recommendation Performance (300 Users, 3 Seeds / 3 Held Out)}
 \begin{adjustbox}{width=\columnwidth}
 \begin{tabular}{lcccccc}
 \toprule
 Model & Recall@5 & NDCG@5 & Recall@10 & NDCG@10 & Recall@20 & NDCG@20 \\
 \midrule
-Title-Based & 0.1144 & 0.0977 & 0.2033 & 0.1377 & 0.3011 & 0.1726 \\
-Trait-Based & 0.0144 & 0.0137 & 0.0189 & 0.0156 & 0.0367 & 0.0219 \\
-Combined & 0.0967 & 0.0846 & 0.1789 & 0.1217 & 0.2822 & 0.1588 \\
+Title-Based & 0.0133 & 0.0128 & 0.0233 & 0.0174 & 0.0411 & 0.0236 \\
+Trait-Based & 0.0133 & 0.0140 & 0.0200 & 0.0171 & 0.0444 & 0.0256 \\
+Combined & 0.0222 & 0.0168 & 0.0367 & 0.0235 & 0.0556 & 0.0302 \\
+\midrule
+Popularity baseline & 0.1400 & 0.1190 & 0.2300 & 0.1595 & 0.3622 & 0.2068 \\
+Content-only baseline & XXXC5R & XXXC5N & XXXC10R & XXXC10N & XXXC20R & XXXC20N \\
+Title-Based, no sentiment & XXXS5R & XXXS5N & XXXS10R & XXXS10N & XXXS20R & XXXS20N \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
 \label{tab:results}
 \end{table}
 
-The experimental results demonstrate that the title-based recommendation mode achieved the strongest overall ranking performance across most evaluation metrics. As shown in Table \ref{tab:results}, the title-based approach achieved the highest Recall@10 value of 0.2033 and the highest NDCG@10 value of 0.1377.
+The popularity baseline clearly outperformed all three proposed modes, reaching a Recall@10 of 0.230 against 0.037 for the best proposed mode (combined). This is a property of the protocol as much as of the models: 63.0\% of all held-out games are among the 100 most-rated titles in the catalog, so a list of the most-rated games retrieves many of them by construction. Among the proposed modes, the combined mode performed best on every metric, and the title-based and trait-based modes performed similarly to each other.
 
-The combined recommendation mode also demonstrated strong performance, achieving Recall@10 and NDCG@10 values of 0.1789 and 0.1217 respectively. Although its ranking accuracy was slightly lower than the title-based approach, the combined model provides greater flexibility by integrating both title similarity and gameplay preference constraints.
+\begin{table}[h]
+\centering
+\caption{Long-Tail Analysis: Held-Out Games Outside the 100 Most-Rated (155 Users)}
+\begin{adjustbox}{width=\columnwidth}
+\begin{tabular}{lcccccc}
+\toprule
+Model & Recall@5 & NDCG@5 & Recall@10 & NDCG@10 & Recall@20 & NDCG@20 \\
+\midrule
+Title-Based & 0.0129 & 0.0082 & 0.0151 & 0.0092 & 0.0258 & 0.0124 \\
+Trait-Based & 0.0054 & 0.0051 & 0.0183 & 0.0093 & 0.0344 & 0.0141 \\
+Combined & 0.0194 & 0.0101 & 0.0215 & 0.0110 & 0.0398 & 0.0166 \\
+\midrule
+Popularity baseline & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+Content-only baseline & XXXTC5R & XXXTC5N & XXXTC10R & XXXTC10N & XXXTC20R & XXXTC20N \\
+Title-Based, no sentiment & XXXTS5R & XXXTS5N & XXXTS10R & XXXTS10N & XXXTS20R & XXXTS20N \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\label{tab:longtail}
+\end{table}
 
-The trait-based recommendation mode achieved lower ranking performance compared to the other approaches. However, this mode remains useful in situations where users may not know specific board game titles and instead prefer searching through gameplay mechanics, themes, or category preferences.
+Table~\ref{tab:longtail} re-scores the same ranked lists against only the held-out games outside the 100 most-rated titles, for the 155 users who have at least one. The cut-off was fixed before the results were examined. Here the popularity baseline retrieves nothing, because its lists never leave the head of the distribution, whereas the proposed modes do retrieve some less popular games that users went on to rate. The absolute values remain low, so this shows a qualitative difference in behaviour rather than strong long-tail accuracy.
 
-\subsection{Discussion of Results}
-
-The experimental findings suggest that combining multiple recommendation signals provides advantages over relying on a single recommendation strategy. Content similarity effectively captures gameplay and thematic relationships, while sentiment signals contribute qualitative evaluation information derived from user reviews.
-
-However, several limitations remain. Sparse review information may reduce sentiment reliability for less popular games. In addition, popularity signals may introduce bias toward highly rated mainstream games. Despite these limitations, the proposed hybrid architecture demonstrates improved flexibility, interpretability, and recommendation quality for board game discovery tasks.
+XXXABLATION
 
 \section{Discussion}
 
-The experimental results demonstrate that title-based recommendation achieved the strongest ranking performance among the evaluated recommendation modes. This suggests that providing a specific board game title as a recommendation seed offers strong contextual information for similarity matching. Because board games often contain highly descriptive metadata related to mechanics, themes, complexity, and player interaction, title-based similarity can effectively identify closely related games.
+The central finding is that, on this dataset and protocol, popularity is a far stronger predictor of which games a user rates next than content similarity. This is consistent with the well-known popularity bias of offline recommender evaluation: BGG users rate many of the same widely played titles, and a protocol that holds out a user's next ratings in a popularity-ordered file inherits that bias. An earlier version of this system appeared to reach a title-based Recall@10 of 0.20, but that figure was an artifact: its semantic-embedding and sentiment signals had been computed for only 20 very popular games, so the title-based mode effectively recommended those blockbusters to everyone. Once both signals were computed for the full catalog, the title-based mode recommended genuinely similar games and its accuracy fell to the level reported here.
 
-The combined recommendation mode demonstrated moderately strong performance across both Recall@K and NDCG@K metrics while offering greater recommendation flexibility than the purely title-based approach. By integrating seed-game similarity with gameplay preference filtering, the combined framework supports guided discovery scenarios where users may simultaneously consider known favorite games and preferred mechanics, themes, or gameplay styles. Although its quantitative retrieval performance was slightly lower than the title-based mode, the combined approach may provide stronger practical usability for exploratory recommendation tasks.
+The proposed modes are designed for discovery rather than for predicting the next popular game a user rates. The long-tail analysis supports this distinction, since only the similarity-based modes reach games outside the 100 most popular, but it does not show that they do so accurately. Combining seed similarity with explicit traits gave the best results among the proposed modes in the main analysis, which suggests that the user's stated preferences add useful information to seed similarity.
 
-The trait-based recommendation mode produced substantially lower recommendation performance compared to the other evaluated approaches. One possible explanation is that gameplay traits and category preferences are inherently broader and less semantically specific than title-based similarity representations. As a result, trait-based recommendation generates a larger and more diverse candidate space, increasing ranking difficulty and reducing retrieval precision. Despite these limitations, the trait-based mode remains useful for exploratory recommendation scenarios in which users may not know specific board game titles and instead prefer discovering games through mechanics, themes, complexity levels, or gameplay styles.
+The explanations remain the system's main strength. Every recommendation is accompanied by the concrete categories, mechanics, families, and publishers it shares with the user's input (Table~\ref{tab:explain}), the component scores, and the catalog game each typed title was matched to. Their main weakness is that long publisher lists, which mostly reflect localized editions, add noise to otherwise informative explanations.
 
-The integration of sentiment information contributed additional qualitative recommendation signals derived from user reviews. Unlike pure metadata similarity, sentiment-aware recommendation incorporates subjective user opinions related to enjoyment, replayability, and overall player experience. This improves explainability and allows the recommendation system to incorporate community perception beyond numerical ratings alone.
+Several limitations remain. First, the evaluation uses a single protocol with a popularity-ordered split, treats every rated game as relevant regardless of rating, uses only 300 users, and reports single runs without significance testing. Second, review sentiment is estimated from at most ten sampled comments per game, so individual values are noisy. Third, the weights were set manually and were not tuned. Fourth, the semantic embeddings include the game name, so games with similar names receive a small similarity boost. Finally, the system does not use collaborative filtering or personalized user modelling.
 
-Despite these strengths, several limitations remain. First, sentiment reliability depends on the availability and quality of user reviews, which may vary significantly across games. Less popular games often contain limited review information, reducing the effectiveness of sentiment-based recommendation signals. Second, popularity features may introduce bias toward highly rated mainstream games while underrepresenting niche or newly released games. Third, the current system does not incorporate collaborative filtering or personalized user interaction modeling, which may further improve recommendation quality in future work.
-
-Future research may explore the integration of collaborative filtering, embedding-based semantic similarity, and large language model (LLM)-based explanation generation. Additional evaluation with real user studies and interactive feedback collection may also improve recommendation personalization and practical deployment readiness.
+Future work should evaluate the system with a randomized split and a rating threshold for relevance, report confidence intervals, and, most importantly, run a user study that measures discovery and the perceived usefulness of explanations directly. Learning the weights on a validation split, re-ranking for diversity beyond the series cap, and combining the explainable content signals with a collaborative component are natural extensions.
 
 \section{Conclusion}
 
-This study proposed an explainable hybrid board game recommendation framework that integrates content similarity, gameplay trait matching, sentiment analysis, and popularity-based signals to support multiple recommendation modes for board game discovery. The proposed system was designed as a lightweight and interpretable alternative to recommendation approaches that rely heavily on collaborative filtering and large-scale user interaction history.
+This study proposed an explainable, multi-mode board game recommendation framework that combines content similarity, gameplay trait matching, review sentiment, and popularity signals, and that explains every recommendation through the concrete attributes behind it. Evaluated through the same code that powers the deployed application, the three proposed modes were clearly outperformed by a popularity baseline on a holdout protocol dominated by popular games (Recall@10 of 0.037 for the best mode against 0.230), while reaching a small share of less popular held-out games that the popularity baseline never recommends.
 
-Experimental evaluation using Recall@K and NDCG@K demonstrated that the title-based recommendation mode achieved the strongest overall retrieval effectiveness across the evaluated metrics. The combined recommendation mode provided greater flexibility for guided discovery by integrating seed-game similarity with gameplay preference filtering, while the trait-based mode supported exploratory recommendation scenarios despite weaker quantitative performance.
-
-The findings suggest that semantic content similarity remains the most reliable recommendation signal within the proposed framework, while additional signals such as sentiment and gameplay traits contribute useful contextual and explainability-oriented information. The study also highlights the challenges of trait-only recommendation approaches, particularly when semantic contextual information is limited.
-
-Overall, the proposed framework demonstrates that explainable and discovery-oriented recommendation systems can provide practical support for hobby-domain recommendation tasks without requiring fully personalized collaborative filtering architectures. Future work may explore the integration of collaborative filtering, embedding-based semantic retrieval, interactive user feedback, and large language model (LLM)-based explanation generation to further improve recommendation quality and personalization.
+The results do not support claims of superior retrieval accuracy. They support a narrower conclusion: a lightweight, fully interpretable content-based framework can surface relevant games beyond the most popular titles and explain why, but its usefulness for discovery must be demonstrated with user studies and less popularity-biased evaluation rather than with next-rating prediction alone.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

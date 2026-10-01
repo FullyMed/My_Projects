@@ -39,6 +39,11 @@ class BoardGameDiscoveryEngine:
 
         self.pop_norm = None
 
+        # BGG family tags that mark a game line ("Game: Catan") or a publisher series
+        # ("Series: Unlock! (Space Cowboys)"); used to keep one series from filling a list
+        self.SERIES_PREFIXES = ("game:", "series:")
+        self.MAX_PER_SEED_SERIES = 2
+
         self.TRAIT_EXPANSIONS = {
             "strategy": {
                 "categories": ["strategy", "economic", "puzzle", "territory building", "city building"],
@@ -493,6 +498,7 @@ class BoardGameDiscoveryEngine:
         seed_mech = self._seed_values(seed_ids, self.MECH_COL)
         seed_cat = self._seed_values(seed_ids, self.THEME_COL)
         seed_pub = self._seed_values(seed_ids, self.PUB_COL)
+        seed_series = [f for f in self._seed_values(seed_ids, self.FAMILY_COL) if self._is_series_tag(f)]
 
         out = []
         for gid in rec_ids:
@@ -506,6 +512,8 @@ class BoardGameDiscoveryEngine:
                 "matched_mechanics": sorted(self._meta_overlap(gid, self.MECH_COL, seed_mech))[:8],
                 "matched_categories": sorted(self._meta_overlap(gid, self.THEME_COL, seed_cat))[:8],
                 "matched_publishers": sorted(self._meta_overlap(gid, self.PUB_COL, seed_pub))[:6],
+                # Shared series is part of the explanation, and the reason the series cap applies
+                "matched_families": sorted(self._meta_overlap(gid, self.FAMILY_COL, seed_series))[:4],
             })
 
         return pd.DataFrame(out).sort_values("score_like", ascending=False).reset_index(drop=True)
@@ -517,6 +525,40 @@ class BoardGameDiscoveryEngine:
                 if sid in self.df_meta_clean.index:
                     values.extend(self.to_list_safe(self.df_meta_clean.loc[sid, col]))
         return values
+
+    def _is_series_tag(self, value):
+        return self.normalize_token(value).startswith(self.SERIES_PREFIXES)
+
+    def _series_tags(self, gid):
+        if self.FAMILY_COL not in self.df_meta_clean.columns or gid not in self.df_meta_clean.index:
+            return set()
+        return {
+            self.normalize_token(f)
+            for f in self.to_list_safe(self.df_meta_clean.loc[gid, self.FAMILY_COL])
+            if self._is_series_tag(f)
+        }
+
+    def _cap_same_series(self, df, seed_ids):
+        """Keep at most MAX_PER_SEED_SERIES results per series a seed belongs to.
+
+        Pure similarity ranks a seed's own editions and expansions first (Ticket to Ride ->
+        six Ticket to Ride boxes), which crowds out discovery. Expects df sorted best-first.
+        """
+        seed_series = set().union(*[self._series_tags(sid) for sid in seed_ids]) if seed_ids else set()
+        if not seed_series or len(df) == 0:
+            return df
+
+        counts = defaultdict(int)
+        keep = []
+        for gid in df["id"]:
+            shared = self._series_tags(gid) & seed_series
+            if any(counts[tag] >= self.MAX_PER_SEED_SERIES for tag in shared):
+                keep.append(False)
+                continue
+            for tag in shared:
+                counts[tag] += 1
+            keep.append(True)
+        return df[keep]
 
     def _meta_overlap(self, gid, col, seed_values):
         if not seed_values or col not in self.df_meta_clean.columns or gid not in self.df_meta_clean.index:
@@ -662,9 +704,10 @@ class BoardGameDiscoveryEngine:
         seed_ids = []
         if has_title:
             seed_ids, _ = self.resolve_titles_to_ids(query_titles)
-            # The difficulty filter runs after ranking, so a narrow band (e.g. "high" for a
-            # light seed game) needs a deeper candidate pool to still fill top_n
-            title_pool = max(top_n * 5, 100) if difficulty_label is None else max(top_n * 100, 2000)
+            # The difficulty filter and the same-series cap both run after ranking, so the pool
+            # must be deep enough to still fill top_n (a seed's series can have dozens of boxes;
+            # a narrow difficulty band far from the seed removes even more)
+            title_pool = max(top_n * 10, 200) if difficulty_label is None else max(top_n * 100, 2000)
             title_df = self.recommend_by_titles(
                 query_titles=query_titles,
                 top_n=title_pool
@@ -701,10 +744,11 @@ class BoardGameDiscoveryEngine:
             out["score_trait"] = 0.0
             out["final_score"] = out["score_like"]
             out["reason"] = out.apply(self.make_reason, axis=1)
-            return out.sort_values(
+            out = out.sort_values(
                 ["final_score", "avg_rating", "num_votes"],
                 ascending=[False, False, False]
-            ).head(top_n).reset_index(drop=True)
+            )
+            return self._cap_same_series(out, seed_ids).head(top_n).reset_index(drop=True)
 
         if has_trait and not has_title:
             out = trait_df.copy()
@@ -780,10 +824,11 @@ class BoardGameDiscoveryEngine:
         out["reason"] = out.apply(self.make_reason, axis=1)
         out = self._apply_difficulty_filter(out, difficulty_label)
 
-        return out.sort_values(
+        out = out.sort_values(
             ["final_score", "score_like", "score_trait", "avg_rating", "num_votes"],
             ascending=[False, False, False, False, False]
-        ).head(top_n).reset_index(drop=True)
+        )
+        return self._cap_same_series(out, seed_ids).head(top_n).reset_index(drop=True)
 
     def _apply_difficulty_filter(self, df: pd.DataFrame, difficulty_label) -> pd.DataFrame:
         """Post-processing difficulty filter applied to any result path."""

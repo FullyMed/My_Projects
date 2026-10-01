@@ -342,6 +342,13 @@ BAD:  # Add popularity score
 - Applied as a **post-processing step** in `_apply_difficulty_filter()` on ALL three paths
 - Works correctly in Title-Based mode (see Bug Fixes section)
 
+## Same-Series Cap (added 2026-10-01)
+- Once the embedding matrix covered every game, pure similarity put a seed's own editions/expansions first (Ticket to Ride → six Ticket to Ride boxes; an Unlock! seed → six Unlock! boxes)
+- `_cap_same_series()` keeps at most `MAX_PER_SEED_SERIES = 2` results per BGG series tag that a **seed** has. Series tags are `boardgamefamily` values starting with `Game:` (one game line, e.g. `Game: Catan`) or `Series:` (a publisher line, e.g. `Series: Unlock! (Space Cowboys)`); `Game:` alone would miss Unlock!
+- Applied after ranking, before `head(top_n)`, on the two seeded paths (title-only, combined). The title candidate pool is `max(top_n * 10, 200)` so the cap can't starve the list
+- Explainable: title mode now fills `matched_families` with the shared series tags, so the reason reads e.g. "Families: Game: Ticket to Ride (Official)"
+- Like the difficulty filter, this is a post-ranking rule, not a score term. Keep it that way, and keep it inside `discover()` so Notebook 09 evaluates it
+
 ## Responsive Design
 The App/ Streamlit app supports:
 - iOS / Android (≤640px): all columns stack vertically, reduced font sizes, 44px minimum touch targets, 16px input font to prevent iOS auto-zoom
