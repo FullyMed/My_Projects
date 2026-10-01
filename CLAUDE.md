@@ -42,7 +42,7 @@ Then run `claude` to start Claude Code in that project.
 ### App / Taiwan Fare Finder
 - **Type:** Flutter (Dart), cross-platform mobile/desktop app
 - **Purpose:** Search and compare public transit fares across Taiwan (HSR, TRA, MRT, Bus, YouBike)
-- **Key traits:** live HSR/TRA fares via TDX (through a Cloudflare Worker proxy in `proxy/`), offline LRU cache, English / Traditional Chinese / Indonesian (no Simplified), responsive layout. A 2026-10-01 fix pass (separate Search/Compare state, "not served" modes, real concession fares, re-run fixes, layout fixes, ~30 tests) passed analyze, tests and a live web run, but is uncommitted for the owner to review; see "Known TODOs" in its `CLAUDE.md`.
+- **Key traits:** live HSR/TRA fares via TDX (through a Cloudflare Worker proxy in `proxy/`), offline LRU cache, English / Traditional Chinese / Indonesian (no Simplified), responsive layout. A 2026-10-01 fix pass (separate Search/Compare state, "not served" modes, real concession fares, re-run fixes, layout fixes, ~30 tests) passed analyze, tests and a live web run, and was committed + pushed by the owner (`7b9e6f6`); not yet run on a phone. See "Known TODOs" in its `CLAUDE.md`.
 - **Run:** `flutter run --dart-define-from-file=tdx.env.json` · `flutter test`
 
 ### Data Science / BoardGames Analyzer
