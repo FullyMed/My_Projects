@@ -25,19 +25,19 @@ class HistoryService {
   Future<List<SearchHistoryEntry>> add({required String userId, required String origin, required String destination, required List<TransportMode> modes}) async {
     final current = await load(userId: userId);
     final now = DateTime.now();
-    final normalizedKey = '${origin.trim().toLowerCase()}__${destination.trim().toLowerCase()}__${modes.map((e) => e.storageKey).join('-')}';
-    final deduped = current.where((e) => '${e.origin.trim().toLowerCase()}__${e.destination.trim().toLowerCase()}__${e.modes.map((m) => m.storageKey).join('-')}' != normalizedKey).toList();
+    final normalizedKey = _routeKey(origin, destination, modes);
+    final deduped = current.where((e) => _routeKey(e.origin, e.destination, e.modes) != normalizedKey).toList();
     final entry = SearchHistoryEntry(id: IdGenerator.next(), userId: userId, origin: origin, destination: destination, modes: modes, ranAt: now, createdAt: now, updatedAt: now);
     final next = [entry, ...deduped];
     final trimmed = next.take(_maxItems).toList();
-    await storage.writeList(_key, trimmed.map((e) => e.toJson()).toList());
+    await _writeForUser(userId, trimmed);
     return trimmed;
   }
 
   Future<List<SearchHistoryEntry>> remove({required String userId, required String entryId}) async {
     final current = await load(userId: userId);
     final next = current.where((e) => e.id != entryId).toList();
-    await storage.writeList(_key, next.map((e) => e.toJson()).toList());
+    await _writeForUser(userId, next);
     return next;
   }
 
@@ -49,5 +49,22 @@ class HistoryService {
       if (entry == null || entry.userId != userId) kept.add(item);
     }
     await storage.writeList(_key, kept);
+  }
+
+  /// Same route regardless of mode order (Compare passes a Set's order).
+  static String _routeKey(String origin, String destination, List<TransportMode> modes) {
+    final keys = modes.map((m) => m.storageKey).toList()..sort();
+    return '${origin.trim().toLowerCase()}__${destination.trim().toLowerCase()}__${keys.join('-')}';
+  }
+
+  /// Replaces [userId]'s rows while keeping every other user's rows intact.
+  Future<void> _writeForUser(String userId, List<SearchHistoryEntry> items) async {
+    final all = await storage.readList(_key);
+    final others = <Map<String, dynamic>>[];
+    for (final item in all) {
+      final parsed = SearchHistoryEntry.fromJson(item);
+      if (parsed == null || parsed.userId != userId) others.add(item);
+    }
+    await storage.writeList(_key, [...items.map((e) => e.toJson()), ...others]);
   }
 }

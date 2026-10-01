@@ -27,8 +27,8 @@ class FavoritesService {
 
     // De-duplicate: if the same route already exists, remove it before re-adding
     // at the top (treat as "touch").
-    final normalizedKey = '${origin.trim().toLowerCase()}__${destination.trim().toLowerCase()}__${modes.map((e) => e.storageKey).join('-')}';
-    final deduped = current.where((f) => '${f.origin.trim().toLowerCase()}__${f.destination.trim().toLowerCase()}__${f.modes.map((m) => m.storageKey).join('-')}' != normalizedKey).toList();
+    final normalizedKey = _routeKey(origin, destination, modes);
+    final deduped = current.where((f) => _routeKey(f.origin, f.destination, f.modes) != normalizedKey).toList();
 
     // Graceful handling: do not exceed max favorites.
     // If already full (and we're not replacing an existing route), keep the
@@ -41,14 +41,14 @@ class FavoritesService {
     final now = DateTime.now();
     final fav = FavoriteRoute(id: IdGenerator.next(), userId: userId, label: (label == null || label.trim().isEmpty) ? '$origin → $destination' : label.trim(), origin: origin, destination: destination, modes: modes, createdAt: now, updatedAt: now);
     final next = [fav, ...deduped];
-    await storage.writeList(_key, next.map((e) => e.toJson()).toList());
+    await _writeForUser(userId, next);
     return next;
   }
 
   Future<List<FavoriteRoute>> remove({required String userId, required String favoriteId}) async {
     final current = await load(userId: userId);
     final next = current.where((e) => e.id != favoriteId).toList();
-    await storage.writeList(_key, next.map((e) => e.toJson()).toList());
+    await _writeForUser(userId, next);
     return next;
   }
 
@@ -60,5 +60,22 @@ class FavoritesService {
       if (fav == null || fav.userId != userId) kept.add(item);
     }
     await storage.writeList(_key, kept);
+  }
+
+  /// Same route regardless of mode order (Compare passes a Set's order).
+  static String _routeKey(String origin, String destination, List<TransportMode> modes) {
+    final keys = modes.map((m) => m.storageKey).toList()..sort();
+    return '${origin.trim().toLowerCase()}__${destination.trim().toLowerCase()}__${keys.join('-')}';
+  }
+
+  /// Replaces [userId]'s rows while keeping every other user's rows intact.
+  Future<void> _writeForUser(String userId, List<FavoriteRoute> items) async {
+    final all = await storage.readList(_key);
+    final others = <Map<String, dynamic>>[];
+    for (final item in all) {
+      final parsed = FavoriteRoute.fromJson(item);
+      if (parsed == null || parsed.userId != userId) others.add(item);
+    }
+    await storage.writeList(_key, [...items.map((e) => e.toJson()), ...others]);
   }
 }

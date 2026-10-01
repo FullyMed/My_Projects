@@ -4,13 +4,16 @@
 // Note: the THSR station IDs differ from the 4-digit scheme (0100, 0200…)
 // sometimes cited in external docs — the actual TDX values are used here.
 // Kaohsiung maps to Zuoying (左營), the THSR terminus in Kaohsiung City.
-// Keelung and New Taipei have no THSR service and are omitted.
+// New Taipei maps to Banqiao (板橋), its main HSR and TRA station.
+// Keelung has no THSR service and is omitted — a Keelung HSR search in API
+// mode is reported as "not served" (see RouteNotServedException).
 //
 // TRA IDs confirmed via GET /api/basic/v2/Rail/TRA/Station.
 // Yunlin maps to Douliu (斗六), the prefectural-seat station of Yunlin County.
 
 const Map<String, String> hsrStationId = {
   'Taipei': '1000',
+  'New Taipei': '1010',
   'Banqiao': '1010',
   'Taoyuan': '1020',
   'Hsinchu': '1030',
@@ -26,6 +29,7 @@ const Map<String, String> hsrStationId = {
 const Map<String, String> traStationId = {
   'Keelung': '0900',
   'Taipei': '1000',
+  'New Taipei': '1020',
   'Banqiao': '1020',
   'Taoyuan': '1080',
   'Hsinchu': '1210',

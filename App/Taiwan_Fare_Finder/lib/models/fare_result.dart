@@ -1,18 +1,22 @@
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
 
 class FareBreakdown {
-  const FareBreakdown({required this.adult, required this.student, required this.child, required this.senior});
+  const FareBreakdown({required this.adult, required this.student, required this.child, required this.senior, this.studentEstimated = false});
 
   final int adult;
   final int student;
   final int child;
   final int senior;
 
-  FareBreakdown copyWith({int? adult, int? student, int? child, int? senior}) => FareBreakdown(adult: adult ?? this.adult, student: student ?? this.student, child: child ?? this.child, senior: senior ?? this.senior);
+  /// True when [student] is not an official fare (HSR and TRA have no fixed
+  /// student ticket, so live results carry an estimate). The UI labels it.
+  final bool studentEstimated;
 
-  Map<String, dynamic> toJson() => {"adult": adult, "student": student, "child": child, "senior": senior};
+  FareBreakdown copyWith({int? adult, int? student, int? child, int? senior, bool? studentEstimated}) => FareBreakdown(adult: adult ?? this.adult, student: student ?? this.student, child: child ?? this.child, senior: senior ?? this.senior, studentEstimated: studentEstimated ?? this.studentEstimated);
 
-  static FareBreakdown fromJson(Map<String, dynamic> json) => FareBreakdown(adult: _i(json["adult"]) ?? 0, student: _i(json["student"]) ?? 0, child: _i(json["child"]) ?? 0, senior: _i(json["senior"]) ?? 0);
+  Map<String, dynamic> toJson() => {"adult": adult, "student": student, "child": child, "senior": senior, "studentEstimated": studentEstimated};
+
+  static FareBreakdown fromJson(Map<String, dynamic> json) => FareBreakdown(adult: _i(json["adult"]) ?? 0, student: _i(json["student"]) ?? 0, child: _i(json["child"]) ?? 0, senior: _i(json["senior"]) ?? 0, studentEstimated: json["studentEstimated"] == true);
 
   static int? _i(dynamic v) {
     if (v == null) return null;

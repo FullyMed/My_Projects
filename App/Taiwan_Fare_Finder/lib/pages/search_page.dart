@@ -36,21 +36,18 @@ class _SearchPageState extends State<SearchPage> {
   Location? _origin;
   Location? _destination;
   TransportMode? _mode = TransportMode.hsr;
-  bool _hydratedFromLastQuery = false;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final fare = context.read<FareController>();
-    if (_hydratedFromLastQuery) return;
+  /// Id of the last query the form was filled from. A new query (e.g. a
+  /// re-run started from the Saved page) refills the form once.
+  String? _syncedQueryId;
+
+  void _syncFormWith(FareController fare) {
     final last = fare.lastQuery;
-    if (last != null && last.modes.length == 1) {
-      _origin = LocationService.findByAnyName(last.origin) ?? Location.fromRaw(last.origin);
-      _destination = LocationService.findByAnyName(last.destination) ?? Location.fromRaw(last.destination);
-      _mode = last.modes.first;
-      _hydratedFromLastQuery = true;
-      setState(() {});
-    }
+    if (last == null || last.id == _syncedQueryId) return;
+    _syncedQueryId = last.id;
+    _origin = LocationService.findByAnyName(last.origin) ?? Location.fromRaw(last.origin);
+    _destination = LocationService.findByAnyName(last.destination) ?? Location.fromRaw(last.destination);
+    if (last.modes.isNotEmpty) _mode = last.modes.first;
   }
 
   @override
@@ -58,6 +55,7 @@ class _SearchPageState extends State<SearchPage> {
     final l10n = TffLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final fare = context.watch<FareController>();
+    _syncFormWith(fare);
     final snack = fare.snackMessage;
     if (snack != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -86,8 +84,12 @@ class _SearchPageState extends State<SearchPage> {
 
     final recentLocations = _recentFromHistory(history.history);
 
+    // Everything below describes the route that was actually searched
+    // (lastQuery), which can differ from the form once the user edits it.
+    final lastQuery = fare.lastQuery;
     final resultsEmpty = fare.results.isEmpty;
-    final result = (_mode == null || resultsEmpty) ? null : fare.results.firstWhere((e) => e.mode == _mode, orElse: () => fare.results.first);
+    final result = resultsEmpty ? null : fare.results.first;
+    final routeLabel = lastQuery == null ? null : LocationService.routeLabel(lastQuery.origin, lastQuery.destination, l10n.locale);
 
     return TffPageScaffold(
       title: l10n.tabSearch,
@@ -135,23 +137,21 @@ class _SearchPageState extends State<SearchPage> {
 
           final results = _ResultsCard(
             result: result,
+            routeLabel: routeLabel,
             resultsEmpty: resultsEmpty,
+            unservedModes: fare.unservedModes,
             isLoading: fare.isLoading,
             errorKey: fare.errorMessage,
             hasSearched: fare.hasSearched,
             inputsComplete: canSearch,
-            isFavorite: _origin != null && _destination != null && _mode != null && favorites.isFavorite(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [_mode!]),
-            onToggleFavorite: (_origin != null && _destination != null && _mode != null)
-                ? () {
-                    final mode = _mode;
-                    if (mode == null) return;
-                    context.read<AnalyticsService>().logEvent('favorite_toggle', params: {'mode': mode.storageKey});
-                    context.read<FavoritesController>().toggleFavorite(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [mode]);
-                  }
-                : null,
-            onRetry: (canSearch && !fare.isLoading)
-                ? () => context.read<FareController>().search(origin: _origin!.queryToken, destination: _destination!.queryToken, modes: [_mode!], offline: settings.offlineMode, dataMode: settings.dataMode)
-                : null,
+            isFavorite: lastQuery != null && favorites.isFavorite(origin: lastQuery.origin, destination: lastQuery.destination, modes: lastQuery.modes),
+            onToggleFavorite: lastQuery == null
+                ? null
+                : () {
+                    context.read<AnalyticsService>().logEvent('favorite_toggle', params: {'mode': lastQuery.modes.map((m) => m.storageKey).join(',')});
+                    context.read<FavoritesController>().toggleFavorite(origin: lastQuery.origin, destination: lastQuery.destination, modes: lastQuery.modes);
+                  },
+            onRetry: fare.canRetry ? () => context.read<FareController>().retryLast(offline: settings.offlineMode, dataMode: settings.dataMode) : null,
           );
 
           if (!isWide) {
@@ -163,14 +163,15 @@ class _SearchPageState extends State<SearchPage> {
             );
           }
 
+          // Each column scrolls on its own so short desktop windows don't overflow.
           return Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(flex: 5, child: form),
+                Flexible(flex: 5, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: form)),
                 const SizedBox(width: AppSpacing.lg),
-                Flexible(flex: 6, child: results),
+                Flexible(flex: 6, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: results)),
               ],
             ),
           );
@@ -310,7 +311,9 @@ class _SearchFormCard extends StatelessWidget {
 class _ResultsCard extends StatelessWidget {
   const _ResultsCard({
     required this.result,
+    required this.routeLabel,
     required this.resultsEmpty,
+    required this.unservedModes,
     required this.isLoading,
     required this.errorKey,
     required this.hasSearched,
@@ -321,7 +324,9 @@ class _ResultsCard extends StatelessWidget {
   });
 
   final FareResult? result;
+  final String? routeLabel;
   final bool resultsEmpty;
+  final List<TransportMode> unservedModes;
   final bool isLoading;
   final String? errorKey;
   final bool hasSearched;
@@ -357,6 +362,14 @@ class _ResultsCard extends StatelessWidget {
       return TffEmptyState(title: l10n.searchEmptyReadyTitle, body: l10n.searchEmptyReadyBody, icon: Icons.search_rounded);
     }
 
+    if (resultsEmpty && unservedModes.isNotEmpty) {
+      return TffEmptyState(
+        title: l10n.routeNotServedTitle,
+        body: l10n.routeNotServedBody(l10n.modesLabel(unservedModes)),
+        icon: Icons.do_not_disturb_alt_rounded,
+      );
+    }
+
     if (resultsEmpty) {
       return TffEmptyState(
         title: l10n.searchEmptyNoResultsTitle,
@@ -372,8 +385,8 @@ class _ResultsCard extends StatelessWidget {
 
     final cs = Theme.of(context).colorScheme;
     return FareResultCard(
-      title: l10n.results,
       result: result!,
+      subtitle: routeLabel,
       trailing: IconButton(
         tooltip: isFavorite ? l10n.unfavorite : l10n.favorite,
         onPressed: onToggleFavorite,

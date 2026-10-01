@@ -111,6 +111,11 @@ class FavoritesController extends ChangeNotifier {
   Future<void> remove(String favoriteId) async {
     if (_userId == null) return;
 
+    // Drop it from the visible list synchronously: a swiped-away Dismissible
+    // must leave the tree in the very next build.
+    _favorites = _favorites.where((f) => f.id != favoriteId).toList();
+    notifyListeners();
+
     try {
       _favorites = await favoritesService.remove(
         userId: _userId!,

@@ -76,6 +76,11 @@ class HistoryController extends ChangeNotifier {
   Future<void> remove(String entryId) async {
     if (_userId == null) return;
 
+    // Drop it from the visible list synchronously: a swiped-away Dismissible
+    // must leave the tree in the very next build.
+    _history = _history.where((e) => e.id != entryId).toList();
+    notifyListeners();
+
     try {
       _history = await historyService.remove(
         userId: _userId!,

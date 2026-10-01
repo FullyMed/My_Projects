@@ -1,8 +1,10 @@
 # Security
 
-Taiwan Fare Finder is a client-only Flutter app: no backend of its own, no
-accounts, no login, no payments, no personal data, no WebView, no deep links.
-The only network dependency is Taiwan's public **TDX** open-data API. The
+Taiwan Fare Finder is a client-only Flutter app: no backend of its own beyond
+a stateless TDX relay (the Cloudflare Worker in `proxy/`, which stores nothing
+per user), no accounts, no login, no payments, no personal data, no WebView,
+no deep links. The only network dependency is Taiwan's public **TDX**
+open-data API, reached through that relay. The
 realistic threat model is therefore narrow — it's about protecting the TDX
 account and the release build, not user data.
 

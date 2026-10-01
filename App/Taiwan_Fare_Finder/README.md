@@ -6,14 +6,14 @@ A cross-platform Flutter app for searching and comparing public transportation f
 
 ## Features
 
-- **Fare search** — look up fares between 13 cities by selecting origin, destination, and transport mode
-- **Fare comparison** — compare multiple modes side-by-side on the Compare page
-- **Passenger tiers** — adult, student, child, and senior fares where available
+- **Fare search** — look up fares between 13 locations in 12 cities by selecting origin, destination, and transport mode
+- **Fare comparison** — compare multiple modes side-by-side on the Compare page (its results are kept separately from the Search page's)
+- **Passenger tiers** — adult, student, child, and senior fares. For live HSR/TRA results, child and senior are the real concession fares; the student price is an estimate (neither railway has a fixed student ticket) and is labelled "est."
 - **Saved routes** — bookmark frequently used routes for quick access
-- **Search history** — automatically tracks recent searches per user
+- **Search history** — automatically tracks recent searches per user; re-running a saved route opens it on Search (one mode) or Compare (several modes) with the form filled in
 - **Offline support** — LRU cache (up to 100 queries) stored in `shared_preferences`; works without a connection
 - **Responsive layout** — adapts from phone to tablet to desktop (bottom nav → nav rail → extended nav rail)
-- **Multilingual** — English, Traditional Chinese, Simplified Chinese, and Indonesian
+- **Multilingual** — English, Traditional Chinese, and Indonesian (route names are localized too)
 - **Custom 404 page** — unmatched routes render a themed "page not found" screen with a way back to Search
 - **Shimmer loading states** — fare results, comparisons, and saved routes/history show content-shaped skeleton placeholders while loading, instead of a generic spinner
 - **In-app Terms of Use & Privacy Policy** — full, localized legal pages reachable from Settings, describing exactly what the app stores locally and what it sends to TDX in API mode
@@ -22,7 +22,7 @@ A cross-platform Flutter app for searching and comparing public transportation f
 
 ## Supported Cities
 
-Taipei, New Taipei (Banqiao), Taoyuan, Hsinchu, Miaoli, Taichung, Changhua, Yunlin, Chiayi, Tainan, Kaohsiung, Keelung
+Taipei, New Taipei (Banqiao), Taoyuan, Hsinchu, Miaoli, Taichung, Changhua, Yunlin, Chiayi, Tainan, Kaohsiung, Keelung. That's 12 cities; Banqiao is also listed as its own stop, for 13 pickable locations.
 
 ---
 
@@ -37,6 +37,8 @@ Taipei, New Taipei (Banqiao), Taoyuan, Hsinchu, Miaoli, Taichung, Changhua, Yunl
 | YouBike | Deterministic mock |
 
 HSR and TRA fares are fetched from Taiwan's [TDX platform](https://tdx.transportdata.tw/). All other modes use a seeded mock that produces consistent results for a given route. On any API failure, the app falls back to the local cache.
+
+If a city has no station for a mode, that mode is reported as **not served** and the other modes are still shown. For example, Keelung has no HSR. New Taipei uses Banqiao station.
 
 ---
 
@@ -111,7 +113,7 @@ the listing copy doesn't drift from what the app actually does.
 lib/
 ├── config/          # TDX credentials and station ID maps
 ├── controllers/     # ChangeNotifier controllers (Fare, Favorites, History, Settings, Session)
-├── l10n/            # ARB locale files (en, zh, zh_Hant, id)
+├── l10n/            # ARB locale files (en, zh_Hant, id; zh is a Traditional-character fallback)
 ├── localization/    # TffLocalizations — runtime ARB loader (source of truth for i18n)
 ├── models/          # Data classes (Location, FareResult, RouteQuery, …)
 ├── nav.dart         # go_router route definitions
@@ -120,6 +122,12 @@ lib/
 ├── theme.dart       # Material 3 theme, AppSpacing, AppRadius tokens
 ├── ui/              # Reusable design-system widgets (TffCard, TffButton, TffSkeleton, …)
 └── utils/           # IdGenerator, travel_duration (shared speed/boarding estimate)
+
+test/
+├── fixtures/        # real TDX responses (THSR/TRA fares + timetable sample), captured 2026-10-01
+├── services/        # TDX parsing, FareService (mock / API / cache / offline / LRU), favorites + history
+├── controllers/     # stale-response guard, Search vs Compare independence
+└── widgets/         # full-app flows + no-overflow checks on phone (Indonesian) and desktop sizes
 ```
 
 ---
@@ -156,7 +164,7 @@ flutter pub get       # install dependencies
 flutter run           # run on connected device/emulator
 flutter analyze       # lint
 dart format .         # format all Dart files
-flutter test          # run tests
+flutter test          # run unit + widget tests (about 30, no network needed)
 flutter gen-l10n      # regenerate ARB stubs (rarely needed)
 dart run flutter_launcher_icons  # regenerate Android/iOS/web icons from assets/icons/app_icon.png
 
@@ -177,9 +185,9 @@ A Play Store build also needs `android/key.properties` (see `android/key.propert
 
 Carried over between chat sessions — pick any of these up without needing prior context:
 
-- [ ] **iOS bundle ID still the Flutter template default.** `ios/Runner.xcodeproj/project.pbxproj` has `com.mycompany.CounterApp` instead of `com.felix.taiwanfarefinder` (what Android already uses). Fix before creating an App Store Connect record / provisioning profile.
+- [ ] **Register the iOS App ID.** The bundle ID is now `com.felix.taiwanfarefinder`, matching Android. Create the matching App ID / provisioning profile in the Apple Developer account before the App Store Connect record. No Xcode build has been done yet.
 - [ ] **Store listings need real hosted URLs.** Apple/Google require a public *URL* for Privacy Policy (and Apple wants a Support URL too) — an in-app screen alone doesn't satisfy the field. The content is ready to copy/host as-is: `lib/pages/privacy_page.dart` (and its ARB `privacy*` keys). See `store_listing/app_store.md` / `store_listing/play_store.md` for the full unfilled-fields list.
 - [ ] **Confirm category, age rating, and price for both stores.** Suggested defaults are already written into `store_listing/app_store.md` / `store_listing/play_store.md` (Travel / Everyone-4+ / Free) — just needs a final yes from Felix before submission.
-- [ ] **Remove the 3 unused illustration images** in `assets/images/` (`metro_map_abstract_lines_lilac_*.png`, `Taipei_night_skyline_*.png`, `Taiwan_train_station_*.jpg`, ~496KB total). They're bundled into every install via the `assets:` entry in `pubspec.yaml` but nothing in `lib/` references them — pure dead weight. Offered once already, not yet actioned.
-- [ ] **Run `flutter test`** — hasn't been run this session despite substantial changes (404 page, loading-state overhaul, Terms/Privacy pages, new app icon). Worth a pass to confirm nothing regressed.
+- [ ] **Run on a real Android/iOS device or emulator.** The 2026-10-01 fix pass was verified with `flutter analyze`, the test suite, and a release web build clicked through against the live proxy, but not on a phone.
+- [ ] `.flutter-plugins-dependencies` is committed although `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies`.
 - Not urgent, just noting: the Terms/Privacy "Contact" sections use `maxfelix05@gmail.com` — Felix's own address, explicitly approved as a placeholder-for-now. Fine to leave until a dedicated support address exists.

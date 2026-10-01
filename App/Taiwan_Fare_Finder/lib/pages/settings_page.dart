@@ -8,13 +8,29 @@ import 'package:taiwan_fare_finder/controllers/history_controller.dart';
 import 'package:taiwan_fare_finder/controllers/settings_controller.dart';
 import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/models/app_settings.dart';
+import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
 import 'package:taiwan_fare_finder/ui/tff_page_scaffold.dart';
 import 'package:taiwan_fare_finder/ui/tff_skeleton.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Search and Compare share one on-device cache; re-read the counts so a
+    // comparison run since the last refresh is reflected here.
+    Future.microtask(() {
+      if (mounted) context.read<FareController>().reloadCacheStats();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +44,7 @@ class SettingsPage extends StatelessWidget {
       actions: [
         IconButton(
           tooltip: l10n.cancel,
-          onPressed: () => context.pop(),
+          onPressed: () => closePushedPage(context),
           icon: Icon(Icons.close_rounded, color: cs.onSurface),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -267,8 +283,14 @@ class SettingsPage extends StatelessWidget {
                           _DangerAction(
                             icon: Icons.delete_outline_rounded,
                             title: l10n.clearOfflineData,
-                            onConfirmed: () =>
-                                context.read<FareController>().clearCache(),
+                            onConfirmed: () async {
+                              final compare =
+                                  context.read<CompareFareController>();
+                              await context
+                                  .read<FareController>()
+                                  .clearCache();
+                              await compare.clearResults();
+                            },
                           ),
                         ],
                       ),

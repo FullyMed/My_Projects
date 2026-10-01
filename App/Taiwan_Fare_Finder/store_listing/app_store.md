@@ -47,7 +47,7 @@ transit,fare,HSR,TRA,MRT,bus,YouBike,Taiwan,ticket,price,rail,train,commute,offl
 Taiwan Fare Finder helps you search, compare, and save public transportation fares across Taiwan — all in one clean, fast, multilingual app.
 
 FIND FARES IN SECONDS
-Pick an origin and destination from 13 major Taiwan cities and see fares by passenger category (adult, student, child, senior) plus estimated travel time.
+Pick an origin and destination from 13 locations across 12 major Taiwan cities and see fares by passenger category (adult, student, child, senior) plus estimated travel time.
 
 COMPARE EVERY MODE SIDE-BY-SIDE
 See High Speed Rail (HSR), Taiwan Railway (TRA), MRT, Bus, and YouBike fares together, sorted by price, speed, or number of transfers — so you always know the best way to go.
@@ -101,7 +101,7 @@ Initial release: search and compare Taiwan transit fares (HSR, TRA, MRT, Bus, Yo
 「台灣票價查詢」讓你快速查詢、比較並收藏台灣各種大眾運輸的票價，介面簡潔、支援多國語言。
 
 快速查詢票價
-從全台 13 個主要城市中選擇起點與終點，即可查看成人、學生、孩童、敬老等不同族群的票價，以及預估搭乘時間。
+從全台 12 個主要城市（共 13 個地點）中選擇起點與終點，即可查看成人、學生、孩童、敬老等不同族群的票價，以及預估搭乘時間。
 
 一次比較所有交通方式
 同時查看高鐵、台鐵、捷運、公車、YouBike 的票價，並依價格、時間或轉乘次數排序，輕鬆找到最適合的方案。
@@ -155,7 +155,7 @@ transit,tarif,HSR,TRA,MRT,bus,YouBike,Taiwan,tiket,harga,kereta,transportasi,off
 Pencari Tarif Taiwan membantu Anda mencari, membandingkan, dan menyimpan tarif transportasi umum di seluruh Taiwan — dalam satu aplikasi yang cepat dan multibahasa.
 
 TEMUKAN TARIF DALAM HITUNGAN DETIK
-Pilih asal dan tujuan dari 13 kota besar di Taiwan, lalu lihat tarif berdasarkan kategori penumpang (dewasa, pelajar, anak, lansia) beserta estimasi waktu tempuh.
+Pilih asal dan tujuan dari 13 lokasi di 12 kota besar Taiwan, lalu lihat tarif berdasarkan kategori penumpang (dewasa, pelajar, anak, lansia) beserta estimasi waktu tempuh.
 
 BANDINGKAN SEMUA MODA SEKALIGUS
 Lihat tarif High Speed Rail (HSR), Taiwan Railway (TRA), MRT, Bus, dan YouBike secara berdampingan, diurutkan berdasarkan harga, kecepatan, atau jumlah transit — agar Anda selalu tahu cara terbaik untuk bepergian.

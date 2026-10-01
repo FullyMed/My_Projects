@@ -9,10 +9,28 @@ import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/services/tdx_auth_service.dart';
 import 'package:taiwan_fare_finder/utils/travel_duration.dart';
 
+/// Thrown when a city has no station for the requested mode (e.g. Keelung has
+/// no HSR). Not a failure: [FareService] reports the mode as "not served"
+/// instead of failing the whole search.
+class RouteNotServedException implements Exception {
+  const RouteNotServedException(this.mode, this.city);
+
+  final TransportMode mode;
+  final String city;
+
+  @override
+  String toString() => 'RouteNotServedException: ${mode.storageKey} does not serve "$city"';
+}
+
 class TdxFareService {
-  TdxFareService({required this.authService, this.proxyBaseUrl = ''});
+  TdxFareService({required this.authService, this.proxyBaseUrl = '', http.Client? client}) : _injectedClient = client;
 
   final TdxAuthService authService;
+  final http.Client? _injectedClient;
+  http.Client? _defaultClient;
+
+  /// Created on first use, so mock-only sessions never open a connection pool.
+  http.Client get _client => _injectedClient ?? (_defaultClient ??= http.Client());
 
   /// When non-empty, all TDX traffic is routed through this base URL (a proxy
   /// that injects the bearer token server-side). Should point at the proxy's
@@ -38,9 +56,10 @@ class TdxFareService {
   /// Fetches a real [FareResult] for [mode] from TDX (directly or via proxy).
   ///
   /// Only [TransportMode.hsr] and [TransportMode.tra] are supported.
-  /// Throws [ArgumentError] for unsupported modes or missing/invalid station
-  /// mappings, and [StateError] when a direct call would leak the baked-in
-  /// secret (web build with no proxy configured).
+  /// Throws [RouteNotServedException] when origin or destination has no station
+  /// for [mode], [ArgumentError] for unsupported modes or malformed station
+  /// IDs, and [StateError] when a direct call would leak the baked-in secret
+  /// (web build with no proxy configured).
   Future<FareResult> fetch({
     required RouteQuery query,
     required TransportMode mode,
@@ -65,10 +84,13 @@ class TdxFareService {
     return {'Authorization': 'Bearer $token'};
   }
 
-  String _requireStationId(String? id, {required String label}) {
-    if (id == null || !_stationIdPattern.hasMatch(id)) {
+  String _requireStationId(Map<String, String> map, String city,
+      {required TransportMode mode}) {
+    final id = map[city];
+    if (id == null) throw RouteNotServedException(mode, city);
+    if (!_stationIdPattern.hasMatch(id)) {
       throw ArgumentError(
-          'TdxFareService: invalid or missing $label station id');
+          'TdxFareService: invalid ${mode.storageKey} station id for "$city"');
     }
     return id;
   }
@@ -81,10 +103,10 @@ class TdxFareService {
     required RouteQuery query,
     required int distanceKm,
   }) async {
-    final originId = _requireStationId(hsrStationId[query.origin],
-        label: 'HSR origin "${query.origin}"');
-    final destId = _requireStationId(hsrStationId[query.destination],
-        label: 'HSR destination "${query.destination}"');
+    final originId =
+        _requireStationId(hsrStationId, query.origin, mode: TransportMode.hsr);
+    final destId = _requireStationId(hsrStationId, query.destination,
+        mode: TransportMode.hsr);
 
     final headers = await _authHeaders();
 
@@ -129,13 +151,13 @@ class TdxFareService {
           "OriginStationID eq '$originId' and DestinationStationID eq '$destId'",
     });
 
-    final resp = await http.get(uri, headers: headers);
+    final resp = await _client.get(uri, headers: headers);
     if (resp.statusCode != 200) {
       throw Exception(
           'THSR ODFare HTTP ${resp.statusCode} for $originId→$destId');
     }
 
-    final list = _asJsonList(resp.body, context: 'THSR ODFare');
+    final list = _asJsonList(utf8.decode(resp.bodyBytes), context: 'THSR ODFare');
     if (list.isEmpty) {
       throw Exception('THSR ODFare: no data for $originId→$destId');
     }
@@ -162,11 +184,26 @@ class TdxFareService {
 
     final adult =
         _asPositiveInt(adultEntry['Price'], context: 'THSR adult Price');
+
+    // FareClass=9 is the concession fare (children, seniors 65+, disabled) —
+    // half price. Fall back to 50% if TDX ever omits it.
+    final concessionEntry = fares.where((f) =>
+        f['TicketType'] == 1 && f['FareClass'] == 9 && f['CabinClass'] == 1);
+    final concessionPrice = concessionEntry.isEmpty
+        ? null
+        : int.tryParse('${concessionEntry.first['Price']}');
+    final concession = (concessionPrice != null && concessionPrice > 0)
+        ? concessionPrice
+        : _pct(adult, 0.50);
+
+    // THSR has no fixed student ticket (student discounts vary by train), so
+    // the student tier is an estimate and flagged as such.
     return FareBreakdown(
       adult: adult,
       student: _pct(adult, 0.85),
-      child: _pct(adult, 0.50),
-      senior: _pct(adult, 0.80),
+      child: concession,
+      senior: concession,
+      studentEstimated: true,
     );
   }
 
@@ -228,12 +265,12 @@ class TdxFareService {
     final uri = Uri.parse('$_base/Rail/THSR/GeneralTimetable')
         .replace(queryParameters: {'\$format': 'JSON'});
 
-    final resp = await http.get(uri, headers: headers);
+    final resp = await _client.get(uri, headers: headers);
     if (resp.statusCode != 200) {
       throw Exception('THSR GeneralTimetable HTTP ${resp.statusCode}');
     }
 
-    _timetable = _asJsonList(resp.body, context: 'THSR GeneralTimetable');
+    _timetable = _asJsonList(utf8.decode(resp.bodyBytes), context: 'THSR GeneralTimetable');
     _timetableCachedAt = DateTime.now();
   }
 
@@ -255,10 +292,10 @@ class TdxFareService {
     required RouteQuery query,
     required int distanceKm,
   }) async {
-    final originId = _requireStationId(traStationId[query.origin],
-        label: 'TRA origin "${query.origin}"');
-    final destId = _requireStationId(traStationId[query.destination],
-        label: 'TRA destination "${query.destination}"');
+    final originId =
+        _requireStationId(traStationId, query.origin, mode: TransportMode.tra);
+    final destId = _requireStationId(traStationId, query.destination,
+        mode: TransportMode.tra);
 
     final headers = await _authHeaders();
 
@@ -297,13 +334,13 @@ class TdxFareService {
           "OriginStationID eq '$originId' and DestinationStationID eq '$destId'",
     });
 
-    final resp = await http.get(uri, headers: headers);
+    final resp = await _client.get(uri, headers: headers);
     if (resp.statusCode != 200) {
       throw Exception(
           'TRA ODFare HTTP ${resp.statusCode} for $originId→$destId');
     }
 
-    final list = _asJsonList(resp.body, context: 'TRA ODFare');
+    final list = _asJsonList(utf8.decode(resp.bodyBytes), context: 'TRA ODFare');
     if (list.isEmpty) {
       throw Exception('TRA ODFare: no data for $originId→$destId');
     }
@@ -320,19 +357,22 @@ class TdxFareService {
 
     // TRA TicketType is a Chinese string. The API returns fares by train class
     // (Ziqiang 自強, Juguang 莒光, Fuhsing 復興, Puyama 普快) × passenger type
-    // (成=adult, 孩=child). No explicit student or senior ticket type is present
-    // in the v2 response — those are computed below.
+    // (成=adult, 孩=child, 愛孩=concession: seniors 65+ / disabled / children).
+    // No student ticket type exists — that tier is estimated below.
     int? adult;
     int? child;
+    int? concession;
 
     for (final f in fares) {
-      final type = f['TicketType'] as String?;
+      final type = f['TicketType'];
       final price = f['Price'];
-      if (type == null || price is! int) continue;
+      if (type is! String || price is! int) continue;
       // '成自' = adult Ziqiang (fastest class, full-price baseline).
       if (type == '成自') adult = price;
       // '孩自' = child Ziqiang.
       if (type == '孩自') child = price;
+      // '愛孩自' = concession Ziqiang (what seniors pay).
+      if (type == '愛孩自') concession = price;
     }
 
     if (adult == null || adult <= 0) {
@@ -342,12 +382,15 @@ class TdxFareService {
     final adultFare = adult;
     final childFare =
         (child != null && child > 0) ? child : _pct(adultFare, 0.50);
+    final seniorFare =
+        (concession != null && concession > 0) ? concession : childFare;
 
     return FareBreakdown(
       adult: adultFare,
       student: _pct(adultFare, 0.85),
       child: childFare,
-      senior: _pct(adultFare, 0.80),
+      senior: seniorFare,
+      studentEstimated: true,
     );
   }
 

@@ -303,6 +303,22 @@ class AppLocalizationsId extends AppLocalizations {
   String get sourceLive => 'Langsung';
 
   @override
+  String get routeNotServedTitle => 'Tidak ada layanan di rute ini';
+
+  @override
+  String routeNotServedBody(Object mode) {
+    return '$mode tidak memiliki stasiun di asal atau tujuan Anda. Coba moda lain.';
+  }
+
+  @override
+  String routeNotServedList(Object modes) {
+    return 'Tidak melayani rute ini: $modes';
+  }
+
+  @override
+  String get estimatedShort => 'perkiraan';
+
+  @override
   String get transferDirect => 'Langsung';
 
   @override
@@ -447,11 +463,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get privacyPolicyTitle => 'Kebijakan Privasi';
 
   @override
-  String get privacyLastUpdated => 'Terakhir diperbarui: 21 September 2026';
+  String get privacyLastUpdated => 'Terakhir diperbarui: 1 Oktober 2026';
 
   @override
   String get privacyPolicyIntro =>
-      'Taiwan Fare Finder tidak memerlukan akun, tidak memiliki sistem login, dan tidak mengoperasikan server backend miliknya sendiri. Kebijakan ini menjelaskan sedikit data yang ditangani Aplikasi, dan ke mana data tersebut pergi.';
+      'Taiwan Fare Finder tidak memerlukan akun, tidak memiliki sistem login, dan tidak menyimpan data Anda di server mana pun. Kebijakan ini menjelaskan sedikit data yang ditangani Aplikasi, dan ke mana data tersebut pergi.';
 
   @override
   String get privacySection1Title =>
@@ -459,14 +475,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get privacySection1Body =>
-      'Riwayat pencarian, rute favorit yang disimpan, hasil tarif yang di-cache, dan pengaturan aplikasi (bahasa, tema, mode offline) disimpan secara lokal di perangkat Anda menggunakan penyimpanan aplikasi standar. Data ini tidak pernah diunggah ke server yang kami operasikan — karena kami tidak memilikinya.';
+      'Riwayat pencarian, rute favorit yang disimpan, hasil tarif yang di-cache, dan pengaturan aplikasi (bahasa, tema, mode offline, sumber data) disimpan secara lokal di perangkat Anda menggunakan penyimpanan aplikasi standar. Data ini tidak pernah diunggah ke mana pun.';
 
   @override
   String get privacySection2Title => 'Informasi yang Dikirim ke Pihak Ketiga';
 
   @override
   String get privacySection2Body =>
-      'Dalam mode data Simulasi, tidak ada yang Anda cari yang pernah meninggalkan perangkat Anda. Dalam mode data API, ID stasiun asal dan tujuan untuk pencarian High Speed Rail dan Taiwan Railway dikirim — melalui server proxy kami — ke platform data terbuka resmi TDX Taiwan untuk mengambil tarif sebenarnya. Tidak ada nama, akun, atau ID perangkat yang disertakan dalam permintaan tersebut, karena Aplikasi memang tidak memilikinya untuk dikirim.';
+      'Dalam mode data Simulasi, tidak ada yang Anda cari yang pernah meninggalkan perangkat Anda. Dalam mode data API, ID stasiun asal dan tujuan untuk pencarian High Speed Rail dan Taiwan Railway dikirim ke server perantara kecil kami (proxy yang di-hosting di Cloudflare), yang meneruskannya ke platform data terbuka resmi TDX Taiwan untuk mengambil tarif sebenarnya. Server perantara menyimpan kunci akses TDX sehingga kunci tersebut tidak pernah disertakan di dalam Aplikasi; server ini menyimpan sementara data tarif selama beberapa jam agar tetap cepat, tetapi tidak mencatat siapa yang mengirim permintaan. Tidak ada nama, akun, atau ID perangkat yang disertakan dalam permintaan tersebut, karena Aplikasi memang tidak memilikinya untuk dikirim. Seperti permintaan internet lainnya, alamat IP Anda terlihat oleh jaringan yang membawanya.';
 
   @override
   String get privacySection3Title => 'Analitik';
@@ -487,7 +503,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get privacySection5Body =>
-      'Anda dapat menghapus tarif yang di-cache, riwayat pencarian, atau favorit kapan saja melalui Pengaturan → Kelola data. Menghapus instalasi Aplikasi akan menghapus semua data yang disimpannya di perangkat Anda.';
+      'Anda dapat menghapus tarif yang di-cache (Pengaturan → Kelola Data Offline) serta riwayat pencarian atau favorit (Pengaturan → Kelola data) kapan saja. Menghapus instalasi Aplikasi akan menghapus semua data yang disimpannya di perangkat Anda.';
 
   @override
   String get privacySection6Title => 'Perubahan Kebijakan Ini';

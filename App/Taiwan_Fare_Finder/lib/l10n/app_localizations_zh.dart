@@ -288,6 +288,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sourceLive => '即時';
 
   @override
+  String get routeNotServedTitle => '此路線無此服務';
+
+  @override
+  String routeNotServedBody(Object mode) {
+    return '$mode在出發地或目的地沒有車站，請改選其他交通方式。';
+  }
+
+  @override
+  String routeNotServedList(Object modes) {
+    return '此路線未提供服務：$modes';
+  }
+
+  @override
+  String get estimatedShort => '估算';
+
+  @override
   String get transferDirect => '直達';
 
   @override
@@ -427,25 +443,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacyPolicyTitle => '隱私權政策';
 
   @override
-  String get privacyLastUpdated => '最後更新：2026年9月21日';
+  String get privacyLastUpdated => '最後更新：2026年10月1日';
 
   @override
   String get privacyPolicyIntro =>
-      '「台灣票價查詢」不需要註冊帳號、沒有登入機制，也沒有屬於我們自己的後端伺服器。本政策說明本應用程式會處理的少量資料，以及這些資料的流向。';
+      '「台灣票價查詢」不需要註冊帳號、沒有登入機制，也不會將您的任何資料保存在伺服器上。本政策說明本應用程式會處理的少量資料，以及這些資料的流向。';
 
   @override
   String get privacySection1Title => '儲存於您裝置上的資料';
 
   @override
   String get privacySection1Body =>
-      '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式）皆以標準應用程式儲存方式，儲存在您的裝置本機。這些資料不會上傳至我們營運的伺服器——因為我們並沒有這樣的伺服器。';
+      '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式、資料來源）皆以標準應用程式儲存方式，儲存在您的裝置本機，不會上傳至任何地方。';
 
   @override
   String get privacySection2Title => '提供給第三方的資訊';
 
   @override
   String get privacySection2Body =>
-      '在「模擬」資料模式下，您搜尋的任何內容都不會離開您的裝置。在「API」資料模式下，高鐵與台鐵查詢的起訖站代碼會透過我們的代理伺服器，傳送至交通部 TDX 運輸資料流通服務平台以取得真實票價。由於本應用程式沒有姓名、帳號或裝置識別碼可傳送，該請求也不會附帶任何此類資訊。';
+      '在「模擬」資料模式下，您搜尋的任何內容都不會離開您的裝置。在「API」資料模式下，高鐵與台鐵查詢的起訖站代碼會傳送至我們的小型中繼伺服器（架設於 Cloudflare 的代理），再由其轉送至交通部 TDX 運輸資料流通服務平台以取得真實票價。中繼伺服器保管 TDX 存取金鑰，因此金鑰不會內建於應用程式中；它會將票價資料暫存數小時以加快速度，但不會記錄是誰發出請求。這些請求不會附帶任何姓名、帳號或裝置識別碼，因為本應用程式沒有這類資訊可傳送。如同任何網路請求，傳輸過程中的網路可看見您的 IP 位址。';
 
   @override
   String get privacySection3Title => '使用分析';
@@ -466,7 +482,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacySection5Body =>
-      '您可隨時於「設定 → 資料管理」清除快取票價、搜尋紀錄或收藏。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
+      '您可隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏（設定 → 資料管理）。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
 
   @override
   String get privacySection6Title => '政策變更';
@@ -766,6 +782,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get sourceLive => '即時';
 
   @override
+  String get routeNotServedTitle => '此路線無此服務';
+
+  @override
+  String routeNotServedBody(Object mode) {
+    return '$mode在出發地或目的地沒有車站，請改選其他交通方式。';
+  }
+
+  @override
+  String routeNotServedList(Object modes) {
+    return '此路線未提供服務：$modes';
+  }
+
+  @override
+  String get estimatedShort => '估算';
+
+  @override
   String get transferDirect => '直達';
 
   @override
@@ -905,25 +937,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get privacyPolicyTitle => '隱私權政策';
 
   @override
-  String get privacyLastUpdated => '最後更新：2026年9月21日';
+  String get privacyLastUpdated => '最後更新：2026年10月1日';
 
   @override
   String get privacyPolicyIntro =>
-      '「台灣票價查詢」不需要註冊帳號、沒有登入機制，也沒有屬於我們自己的後端伺服器。本政策說明本應用程式會處理的少量資料，以及這些資料的流向。';
+      '「台灣票價查詢」不需要註冊帳號、沒有登入機制，也不會將您的任何資料保存在伺服器上。本政策說明本應用程式會處理的少量資料，以及這些資料的流向。';
 
   @override
   String get privacySection1Title => '儲存於您裝置上的資料';
 
   @override
   String get privacySection1Body =>
-      '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式）皆以標準應用程式儲存方式，儲存在您的裝置本機。這些資料不會上傳至我們營運的伺服器——因為我們並沒有這樣的伺服器。';
+      '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式、資料來源）皆以標準應用程式儲存方式，儲存在您的裝置本機，不會上傳至任何地方。';
 
   @override
   String get privacySection2Title => '提供給第三方的資訊';
 
   @override
   String get privacySection2Body =>
-      '在「模擬」資料模式下，您搜尋的任何內容都不會離開您的裝置。在「API」資料模式下，高鐵與台鐵查詢的起訖站代碼會透過我們的代理伺服器，傳送至交通部 TDX 運輸資料流通服務平台以取得真實票價。由於本應用程式沒有姓名、帳號或裝置識別碼可傳送，該請求也不會附帶任何此類資訊。';
+      '在「模擬」資料模式下，您搜尋的任何內容都不會離開您的裝置。在「API」資料模式下，高鐵與台鐵查詢的起訖站代碼會傳送至我們的小型中繼伺服器（架設於 Cloudflare 的代理），再由其轉送至交通部 TDX 運輸資料流通服務平台以取得真實票價。中繼伺服器保管 TDX 存取金鑰，因此金鑰不會內建於應用程式中；它會將票價資料暫存數小時以加快速度，但不會記錄是誰發出請求。這些請求不會附帶任何姓名、帳號或裝置識別碼，因為本應用程式沒有這類資訊可傳送。如同任何網路請求，傳輸過程中的網路可看見您的 IP 位址。';
 
   @override
   String get privacySection3Title => '使用分析';
@@ -944,7 +976,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get privacySection5Body =>
-      '您可隨時於「設定 → 資料管理」清除快取票價、搜尋紀錄或收藏。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
+      '您可隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏（設定 → 資料管理）。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
 
   @override
   String get privacySection6Title => '政策變更';

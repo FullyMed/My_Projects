@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
+import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/legal_section.dart';
 import 'package:taiwan_fare_finder/ui/tff_page_scaffold.dart';
@@ -18,7 +18,7 @@ class PrivacyPolicyPage extends StatelessWidget {
       actions: [
         IconButton(
           tooltip: l10n.cancel,
-          onPressed: () => context.pop(),
+          onPressed: () => closePushedPage(context),
           icon: Icon(Icons.close_rounded, color: cs.onSurface),
         ),
         const SizedBox(width: AppSpacing.sm),

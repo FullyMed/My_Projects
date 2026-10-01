@@ -659,6 +659,30 @@ abstract class AppLocalizations {
   /// **'Live'**
   String get sourceLive;
 
+  /// No description provided for @routeNotServedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No service on this route'**
+  String get routeNotServedTitle;
+
+  /// No description provided for @routeNotServedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{mode} has no station at your origin or destination. Try another mode.'**
+  String routeNotServedBody(Object mode);
+
+  /// No description provided for @routeNotServedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Not served on this route: {modes}'**
+  String routeNotServedList(Object modes);
+
+  /// No description provided for @estimatedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'est.'**
+  String get estimatedShort;
+
   /// No description provided for @transferDirect.
   ///
   /// In en, this message translates to:
@@ -920,13 +944,13 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLastUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last updated: September 21, 2026'**
+  /// **'Last updated: October 1, 2026'**
   String get privacyLastUpdated;
 
   /// No description provided for @privacyPolicyIntro.
   ///
   /// In en, this message translates to:
-  /// **'Taiwan Fare Finder does not require an account, does not have a login, and does not operate a backend server of its own. This policy explains the little data the App does handle, and where it goes.'**
+  /// **'Taiwan Fare Finder does not require an account, has no login, and keeps none of your data on a server. This policy explains the little data the App does handle, and where it goes.'**
   String get privacyPolicyIntro;
 
   /// No description provided for @privacySection1Title.
@@ -938,7 +962,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection1Body.
   ///
   /// In en, this message translates to:
-  /// **'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode) are stored locally on your device using standard app storage. This data is never uploaded to a server we operate — we don\'t have one.'**
+  /// **'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode, data source) are stored locally on your device using standard app storage. This data is never uploaded anywhere.'**
   String get privacySection1Body;
 
   /// No description provided for @privacySection2Title.
@@ -950,7 +974,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection2Body.
   ///
   /// In en, this message translates to:
-  /// **'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent — through our proxy server — to Taiwan\'s official TDX open-data platform to retrieve real fares. No name, account, or device identifier is attached to that request, because the App has none to send.'**
+  /// **'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent to our small relay server (a proxy hosted on Cloudflare), which forwards them to Taiwan\'s official TDX open-data platform to retrieve real fares. The relay holds the TDX access key so it never ships inside the App; it caches fare data for a few hours to stay fast, but does not record who made a request. No name, account, or device identifier is attached to these requests, because the App has none to send. As with any internet request, your IP address is visible to the networks that carry it.'**
   String get privacySection2Body;
 
   /// No description provided for @privacySection3Title.
@@ -986,7 +1010,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection5Body.
   ///
   /// In en, this message translates to:
-  /// **'You can clear your cached fares, search history, or favorites at any time from Settings → Data management. Uninstalling the App removes all data it stored on your device.'**
+  /// **'You can clear cached fares (Settings → Manage offline data) and your search history or favorites (Settings → Data management) at any time. Uninstalling the App removes all data it stored on your device.'**
   String get privacySection5Body;
 
   /// No description provided for @privacySection6Title.

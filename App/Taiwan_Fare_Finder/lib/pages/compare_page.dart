@@ -41,11 +41,26 @@ class _ComparePageState extends State<ComparePage> {
   };
   CompareSort _sort = CompareSort.cheapest;
 
+  /// Id of the last query the form was filled from (see SearchPage).
+  String? _syncedQueryId;
+
+  void _syncFormWith(FareController fare) {
+    final last = fare.lastQuery;
+    if (last == null || last.id == _syncedQueryId) return;
+    _syncedQueryId = last.id;
+    _origin = LocationService.findByAnyName(last.origin) ?? Location.fromRaw(last.origin);
+    _destination = LocationService.findByAnyName(last.destination) ?? Location.fromRaw(last.destination);
+    _modes
+      ..clear()
+      ..addAll(last.modes);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final fare = context.watch<FareController>();
+    final fare = context.watch<CompareFareController>();
+    _syncFormWith(fare);
     final snack = fare.snackMessage;
     if (snack != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -63,7 +78,7 @@ class _ComparePageState extends State<ComparePage> {
             ),
           );
         }
-        context.read<FareController>().consumeSnackMessage();
+        context.read<CompareFareController>().consumeSnackMessage();
       });
     }
     final settings = context.watch<SettingsController>();
@@ -146,34 +161,40 @@ class _ComparePageState extends State<ComparePage> {
                         .labelLarge
                         ?.copyWith(color: cs.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.sm),
-                Row(
+                // Wraps the buttons onto their own line when a translation
+                // is too long to share one row (e.g. Indonesian on phones).
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Expanded(
-                        child: Text(
-                            l10n.compareSelectedCountLabel(_modes.length),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: cs.onSurfaceVariant))),
-                    TffTextButton(
-                      label: l10n.selectAll,
-                      icon: Icons.select_all_rounded,
-                      onPressed: fare.isLoading
-                          ? null
-                          : () {
-                              setState(() {
-                                _modes
-                                  ..clear()
-                                  ..addAll(TransportMode.values);
-                              });
-                            },
-                    ),
-                    TffTextButton(
-                      label: l10n.clear,
-                      icon: Icons.clear_all_rounded,
-                      onPressed: (fare.isLoading || _modes.isEmpty)
-                          ? null
-                          : () => setState(() => _modes.clear()),
+                    Text(l10n.compareSelectedCountLabel(_modes.length),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant)),
+                    Wrap(
+                      children: [
+                        TffTextButton(
+                          label: l10n.selectAll,
+                          icon: Icons.select_all_rounded,
+                          onPressed: fare.isLoading
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _modes
+                                      ..clear()
+                                      ..addAll(TransportMode.values);
+                                  });
+                                },
+                        ),
+                        TffTextButton(
+                          label: l10n.clear,
+                          icon: Icons.clear_all_rounded,
+                          onPressed: (fare.isLoading || _modes.isEmpty)
+                              ? null
+                              : () => setState(() => _modes.clear()),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -197,53 +218,63 @@ class _ComparePageState extends State<ComparePage> {
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
+                    // Label and dropdown share the row (2:3, dropdown capped at
+                    // 220) so long translations wrap between words, not mid-word.
                     Expanded(
+                        flex: 2,
                         child: Text(l10n.compareSortLabel,
                             style: Theme.of(context)
                                 .textTheme
                                 .labelLarge
                                 ?.copyWith(color: cs.onSurfaceVariant))),
-                    SizedBox(
-                      width: 220,
-                      child: DropdownButtonFormField<CompareSort>(
-                        value: _sort,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          filled: true,
-                          fillColor: cs.surfaceContainerHighest
-                              .withValues(alpha: 0.55),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                              borderSide: BorderSide(
-                                  color: cs.outline.withValues(alpha: 0.2))),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                              borderSide: BorderSide(
-                                  color: cs.outline.withValues(alpha: 0.2))),
+                    const SizedBox(width: AppSpacing.md),
+                    Flexible(
+                      flex: 3,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 220),
+                        child: DropdownButtonFormField<CompareSort>(
+                          value: _sort,
+                          // Constrain labels to the field width so long
+                          // translations ellipsize instead of overflowing.
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                            filled: true,
+                            fillColor: cs.surfaceContainerHighest
+                                .withValues(alpha: 0.55),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppRadius.lg),
+                                borderSide: BorderSide(
+                                    color: cs.outline.withValues(alpha: 0.2))),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(AppRadius.lg),
+                                borderSide: BorderSide(
+                                    color: cs.outline.withValues(alpha: 0.2))),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                                value: CompareSort.cheapest,
+                                child: Text(l10n.compareSortCheapest,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis)),
+                            DropdownMenuItem(
+                                value: CompareSort.fastest,
+                                child: Text(l10n.compareSortFastest,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis)),
+                            DropdownMenuItem(
+                                value: CompareSort.fewestTransfers,
+                                child: Text(l10n.compareSortFewestTransfers,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis)),
+                          ],
+                          onChanged: fare.isLoading
+                              ? null
+                              : (v) => setState(
+                                  () => _sort = v ?? CompareSort.cheapest),
                         ),
-                        items: [
-                          DropdownMenuItem(
-                              value: CompareSort.cheapest,
-                              child: Text(l10n.compareSortCheapest,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis)),
-                          DropdownMenuItem(
-                              value: CompareSort.fastest,
-                              child: Text(l10n.compareSortFastest,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis)),
-                          DropdownMenuItem(
-                              value: CompareSort.fewestTransfers,
-                              child: Text(l10n.compareSortFewestTransfers,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis)),
-                        ],
-                        onChanged: fare.isLoading
-                            ? null
-                            : (v) => setState(
-                                () => _sort = v ?? CompareSort.cheapest),
                       ),
                     ),
                   ],
@@ -256,7 +287,7 @@ class _ComparePageState extends State<ComparePage> {
                   onPressed: canCompare
                       ? () async {
                           final modes = _modes.toList();
-                          final fareCtrl = context.read<FareController>();
+                          final fareCtrl = context.read<CompareFareController>();
                           final histCtrl = context.read<HistoryController>();
                           context
                               .read<AnalyticsService>()
@@ -309,11 +340,8 @@ class _ComparePageState extends State<ComparePage> {
             results = TffErrorCard(
               title: l10n.errorTitle,
               message: l10n.errorApiNotReady,
-              onRetry: (canCompare && !fare.isLoading)
-                  ? () => context.read<FareController>().search(
-                      origin: _origin!.queryToken,
-                      destination: _destination!.queryToken,
-                      modes: _modes.toList(),
+              onRetry: fare.canRetry
+                  ? () => context.read<CompareFareController>().retryLast(
                       offline: settings.offlineMode,
                       dataMode: settings.dataMode)
                   : null,
@@ -322,22 +350,35 @@ class _ComparePageState extends State<ComparePage> {
             results = TffErrorCard(
               title: l10n.errorTitle,
               message: l10n.errorSearchFailed,
-              onRetry: (canCompare && !fare.isLoading)
-                  ? () => context.read<FareController>().search(
-                      origin: _origin!.queryToken,
-                      destination: _destination!.queryToken,
-                      modes: _modes.toList(),
+              onRetry: fare.canRetry
+                  ? () => context.read<CompareFareController>().retryLast(
                       offline: settings.offlineMode,
                       dataMode: settings.dataMode)
                   : null,
             );
+          } else if (sorted.isEmpty && fare.unservedModes.isNotEmpty) {
+            results = TffEmptyState(
+                title: l10n.routeNotServedTitle,
+                body: l10n.routeNotServedBody(
+                    l10n.modesLabel(fare.unservedModes)),
+                icon: Icons.do_not_disturb_alt_rounded);
           } else if (sorted.isEmpty) {
             results = TffEmptyState(
                 title: l10n.noResults,
                 body: l10n.pickRouteFirst,
                 icon: Icons.compare_arrows_rounded);
           } else {
-            results = _CompareResults(results: sorted);
+            results = _CompareResults(
+              results: sorted,
+              routeLabel: fare.lastQuery == null
+                  ? null
+                  : LocationService.routeLabel(fare.lastQuery!.origin,
+                      fare.lastQuery!.destination, l10n.locale),
+              unservedNote: fare.unservedModes.isEmpty
+                  ? null
+                  : l10n.routeNotServedList(
+                      l10n.modesLabel(fare.unservedModes)),
+            );
           }
 
           if (!isWide) {
@@ -470,16 +511,45 @@ List<Location> _recentFromHistory(List<SearchHistoryEntry> history) {
 }
 
 class _CompareResults extends StatelessWidget {
-  const _CompareResults({required this.results});
+  const _CompareResults(
+      {required this.results, this.routeLabel, this.unservedNote});
 
   final List<FareResult> results;
 
+  /// Localized route the results belong to (the form may have been edited).
+  final String? routeLabel;
+
+  /// e.g. "Not served on this route: HSR" — modes skipped in API mode.
+  final String? unservedNote;
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (unservedNote != null) ...[
+          TffCard(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                Icon(Icons.do_not_disturb_alt_rounded,
+                    size: 20, color: cs.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(unservedNote!,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: cs.onSurfaceVariant)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         for (final r in results) ...[
-          FareResultCard(result: r),
+          FareResultCard(result: r, subtitle: routeLabel),
           const SizedBox(height: AppSpacing.lg),
         ]
       ],

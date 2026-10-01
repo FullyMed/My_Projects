@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:taiwan_fare_finder/models/transport_mode.dart';
 
 class TffLocalizations {
   const TffLocalizations(this.locale, this._strings);
@@ -106,6 +107,18 @@ class TffLocalizations {
   String get modesMRT => _t('modesMRT');
   String get modesBus => _t('modesBus');
   String get modesYouBike => _t('modesYouBike');
+
+  /// Localized label for [mode] (single source for every page/card).
+  String modeLabel(TransportMode mode) => switch (mode) {
+        TransportMode.hsr => modesHSR,
+        TransportMode.tra => modesTRA,
+        TransportMode.mrt => modesMRT,
+        TransportMode.bus => modesBus,
+        TransportMode.youBike => modesYouBike,
+      };
+
+  /// e.g. "HSR • TRA • MRT"
+  String modesLabel(Iterable<TransportMode> modes) => modes.map(modeLabel).join(' • ');
   String get compareHint => _t('compareHint');
   String get selectAtLeastOneMode => _t('selectAtLeastOneMode');
   String get pickRouteFirst => _t('pickRouteFirst');
@@ -128,6 +141,12 @@ class TffLocalizations {
   String get sourceMock => _t('sourceMock');
   String get sourceCached => _t('sourceCached');
   String get sourceLive => _t('sourceLive');
+  String get estimatedShort => _t('estimatedShort');
+
+  // Route not served by a mode (API mode, e.g. HSR from Keelung)
+  String get routeNotServedTitle => _t('routeNotServedTitle');
+  String routeNotServedBody(String mode) => _t('routeNotServedBody').replaceAll('{mode}', mode);
+  String routeNotServedList(String modes) => _t('routeNotServedList').replaceAll('{modes}', modes);
 
   // Transfers
   String get transferDirect => _t('transferDirect');
@@ -215,7 +234,7 @@ class _TffLocalizationsDelegate extends LocalizationsDelegate<TffLocalizations> 
   Future<TffLocalizations> load(Locale locale) async {
     final tag = _tag(locale);
     final asset = 'lib/l10n/app_$tag.arb';
-    final fallback = 'lib/l10n/app.arb';
+    final fallback = 'lib/l10n/app_en.arb';
 
     Map<String, dynamic> decoded;
     try {

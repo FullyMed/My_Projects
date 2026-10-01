@@ -1,0 +1,99 @@
+[
+ {
+  "OriginStationID": "1000",
+  "OriginStationName": {
+   "Zh_tw": "臺北",
+   "En": "Taipei"
+  },
+  "DestinationStationID": "4400",
+  "DestinationStationName": {
+   "Zh_tw": "高雄",
+   "En": "Kaohsiung"
+  },
+  "Direction": 1,
+  "Fares": [
+   {
+    "TicketType": "成自",
+    "Price": 994
+   },
+   {
+    "TicketType": "孩自",
+    "Price": 497
+   },
+   {
+    "TicketType": "愛孩自",
+    "Price": 497
+   },
+   {
+    "TicketType": "成自折",
+    "Price": 497
+   },
+   {
+    "TicketType": "孩自折",
+    "Price": 0
+   },
+   {
+    "TicketType": "成莒",
+    "Price": 767
+   },
+   {
+    "TicketType": "孩莒",
+    "Price": 384
+   },
+   {
+    "TicketType": "愛孩莒",
+    "Price": 384
+   },
+   {
+    "TicketType": "成莒折",
+    "Price": 384
+   },
+   {
+    "TicketType": "孩莒折",
+    "Price": 0
+   },
+   {
+    "TicketType": "成復",
+    "Price": 640
+   },
+   {
+    "TicketType": "孩復",
+    "Price": 320
+   },
+   {
+    "TicketType": "愛孩復",
+    "Price": 320
+   },
+   {
+    "TicketType": "成復折",
+    "Price": 320
+   },
+   {
+    "TicketType": "孩復折",
+    "Price": 0
+   },
+   {
+    "TicketType": "成普",
+    "Price": 394
+   },
+   {
+    "TicketType": "孩普",
+    "Price": 197
+   },
+   {
+    "TicketType": "愛孩普",
+    "Price": 197
+   },
+   {
+    "TicketType": "成普折",
+    "Price": 197
+   },
+   {
+    "TicketType": "孩普折",
+    "Price": 0
+   }
+  ],
+  "UpdateTime": "2025-10-01T11:37:42+08:00",
+  "VersionID": 8
+ }
+]

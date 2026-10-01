@@ -300,6 +300,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceLive => 'Live';
 
   @override
+  String get routeNotServedTitle => 'No service on this route';
+
+  @override
+  String routeNotServedBody(Object mode) {
+    return '$mode has no station at your origin or destination. Try another mode.';
+  }
+
+  @override
+  String routeNotServedList(Object modes) {
+    return 'Not served on this route: $modes';
+  }
+
+  @override
+  String get estimatedShort => 'est.';
+
+  @override
   String get transferDirect => 'Direct';
 
   @override
@@ -444,25 +460,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
-  String get privacyLastUpdated => 'Last updated: September 21, 2026';
+  String get privacyLastUpdated => 'Last updated: October 1, 2026';
 
   @override
   String get privacyPolicyIntro =>
-      'Taiwan Fare Finder does not require an account, does not have a login, and does not operate a backend server of its own. This policy explains the little data the App does handle, and where it goes.';
+      'Taiwan Fare Finder does not require an account, has no login, and keeps none of your data on a server. This policy explains the little data the App does handle, and where it goes.';
 
   @override
   String get privacySection1Title => 'Information We Store On Your Device';
 
   @override
   String get privacySection1Body =>
-      'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode) are stored locally on your device using standard app storage. This data is never uploaded to a server we operate — we don\'t have one.';
+      'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode, data source) are stored locally on your device using standard app storage. This data is never uploaded anywhere.';
 
   @override
   String get privacySection2Title => 'Information Sent To Third Parties';
 
   @override
   String get privacySection2Body =>
-      'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent — through our proxy server — to Taiwan\'s official TDX open-data platform to retrieve real fares. No name, account, or device identifier is attached to that request, because the App has none to send.';
+      'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent to our small relay server (a proxy hosted on Cloudflare), which forwards them to Taiwan\'s official TDX open-data platform to retrieve real fares. The relay holds the TDX access key so it never ships inside the App; it caches fare data for a few hours to stay fast, but does not record who made a request. No name, account, or device identifier is attached to these requests, because the App has none to send. As with any internet request, your IP address is visible to the networks that carry it.';
 
   @override
   String get privacySection3Title => 'Analytics';
@@ -483,7 +499,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacySection5Body =>
-      'You can clear your cached fares, search history, or favorites at any time from Settings → Data management. Uninstalling the App removes all data it stored on your device.';
+      'You can clear cached fares (Settings → Manage offline data) and your search history or favorites (Settings → Data management) at any time. Uninstalling the App removes all data it stored on your device.';
 
   @override
   String get privacySection6Title => 'Changes to This Policy';

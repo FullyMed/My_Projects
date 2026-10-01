@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:taiwan_fare_finder/models/location.dart';
 
 class LocationService {
@@ -152,15 +152,21 @@ class LocationService {
   static Location? findByAnyName(String raw) {
     final q = raw.trim().toLowerCase();
     if (q.isEmpty) return null;
-    try {
-      return starterLocations.firstWhere((l) {
-        return l.nameEn.trim().toLowerCase() == q || l.nameZhHant.trim().toLowerCase() == q || l.nameId.trim().toLowerCase() == q;
-      });
-    } catch (_) {
-      debugPrint('LocationService: could not map "$raw" to a starter location.');
-      return null;
+    for (final l in starterLocations) {
+      if (l.nameEn.trim().toLowerCase() == q || l.nameZhHant.trim().toLowerCase() == q || l.nameId.trim().toLowerCase() == q) return l;
     }
+    debugPrint('LocationService: could not map "$raw" to a starter location.');
+    return null;
   }
+
+  /// Localized display name for a stored query token (e.g. a history entry's
+  /// "Taipei" → "台北"); unknown names are shown as-is.
+  static String displayName(String raw, Locale locale) =>
+      (findByAnyName(raw) ?? Location.fromRaw(raw)).nameForLocale(locale);
+
+  /// Localized "Origin → Destination" label for stored query tokens.
+  static String routeLabel(String origin, String destination, Locale locale) =>
+      '${displayName(origin, locale)} → ${displayName(destination, locale)}';
 
   static Map<String, List<Location>> groupByCityEn(Iterable<Location> locations) {
     final map = <String, List<Location>>{};

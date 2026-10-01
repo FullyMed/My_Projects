@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/models/fare_result.dart';
-import 'package:taiwan_fare_finder/models/transport_mode.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/tff_badge.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
@@ -20,6 +19,7 @@ class FareResultCard extends StatelessWidget {
     super.key,
     required this.result,
     this.title,
+    this.subtitle,
     this.trailing,
   });
 
@@ -27,6 +27,9 @@ class FareResultCard extends StatelessWidget {
 
   /// Optional title. If omitted, uses the mode label.
   final String? title;
+
+  /// Optional line under the title (e.g. the localized route).
+  final String? subtitle;
 
   /// Optional widget placed at the far right of the header row.
   /// (e.g., favorite button).
@@ -43,7 +46,7 @@ class FareResultCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, c) {
         final isWide = c.maxWidth >= 520;
-        final headerTitle = title ?? _modeLabel(context, result.mode);
+        final headerTitle = title ?? l10n.modeLabel(result.mode);
 
         final adultPrice = 'NT\$${moneyFmt.format(result.fares.adult)}';
         final metaLine =
@@ -58,11 +61,26 @@ class FareResultCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      headerTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          headerTitle,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -132,17 +150,6 @@ class FareResultCard extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _modeLabel(BuildContext context, TransportMode mode) {
-    final l10n = TffLocalizations.of(context);
-    return switch (mode) {
-      TransportMode.hsr => l10n.modesHSR,
-      TransportMode.tra => l10n.modesTRA,
-      TransportMode.mrt => l10n.modesMRT,
-      TransportMode.bus => l10n.modesBus,
-      TransportMode.youBike => l10n.modesYouBike,
-    };
   }
 
   String _transferText(TffLocalizations l10n, String keyOrText) {
@@ -234,7 +241,9 @@ class _PriceBlock extends StatelessWidget {
               childAspectRatio: cross == 3 ? 2.8 : 2.6,
               children: [
                 _TierTile(
-                    label: l10n.student,
+                    label: fares.studentEstimated
+                        ? '${l10n.student} (${l10n.estimatedShort})'
+                        : l10n.student,
                     value: 'NT\$${moneyFmt.format(fares.student)}',
                     icon: Icons.school_rounded),
                 _TierTile(

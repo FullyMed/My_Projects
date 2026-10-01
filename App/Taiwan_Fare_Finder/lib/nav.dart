@@ -66,3 +66,14 @@ class AppRoutes {
   static const String terms = '/terms';
   static const String privacy = '/privacy';
 }
+
+/// Closes a pushed full-screen page (Settings / Terms / Privacy). When there is
+/// nothing to pop — e.g. the page was opened directly by URL on web — goes to
+/// Search instead of throwing.
+void closePushedPage(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(AppRoutes.search);
+  }
+}

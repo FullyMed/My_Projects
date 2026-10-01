@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/models/fare_result.dart';
 import 'package:taiwan_fare_finder/models/route_query.dart';
@@ -12,10 +13,15 @@ import 'package:taiwan_fare_finder/services/tdx_fare_service.dart';
 import 'package:taiwan_fare_finder/utils/travel_duration.dart';
 
 class FareSearchResponse {
-  const FareSearchResponse({required this.results, required this.usedCache, this.warningCode});
+  const FareSearchResponse({required this.results, required this.usedCache, this.warningCode, this.unservedModes = const []});
 
   final List<FareResult> results;
   final bool usedCache;
+
+  /// Modes skipped because origin or destination has no station for them
+  /// (API mode only, e.g. HSR from Keelung). Not an error — the UI says
+  /// "not served" for these while still showing the other modes.
+  final List<TransportMode> unservedModes;
 
   /// Optional warning code to be surfaced non-blockingly by the UI.
   final String? warningCode;
@@ -33,9 +39,11 @@ class FareService {
     required this.storage,
     required TdxAuthService authService,
     String proxyBaseUrl = '',
+    http.Client? httpClient,
   }) : _tdx = TdxFareService(
           authService: authService,
           proxyBaseUrl: proxyBaseUrl,
+          client: httpClient,
         );
 
   final LocalStorageService storage;
@@ -104,12 +112,13 @@ class FareService {
 
     // 2) "Online" path.
     try {
+      final unserved = <TransportMode>[];
       final results = switch (dataMode) {
-        DataMode.api => await _searchApi(query: query),
+        DataMode.api => await _searchApi(query: query, unserved: unserved),
         DataMode.mock => _searchMock(query: query),
       };
       await upsertCache(userId: query.userId, results: results);
-      return FareSearchResponse(results: results, usedCache: false);
+      return FareSearchResponse(results: results, usedCache: false, unservedModes: unserved);
     } catch (e) {
       debugPrint('FareService: online search failed, attempting cache fallback: $e');
       final cached = await getCachedForQueryKey(queryKey, userId: query.userId);
@@ -134,23 +143,31 @@ class FareService {
     return out;
   }
 
-  Future<List<FareResult>> _searchApi({required RouteQuery query}) async {
+  /// Live HSR/TRA via TDX; every other mode uses the mock. A mode whose
+  /// station doesn't exist for this route is added to [unserved] and skipped —
+  /// any other failure propagates so [search] can fall back to cache.
+  Future<List<FareResult>> _searchApi({required RouteQuery query, required List<TransportMode> unserved}) async {
     final distanceKm = _estimateDistanceKm(query.origin, query.destination);
     final results = <FareResult>[];
 
     for (final mode in query.modes) {
-      final result = switch (mode) {
-        TransportMode.hsr || TransportMode.tra =>
-          await _tdx.fetch(query: query, mode: mode, distanceKm: distanceKm),
-        _ => _mock(
+      switch (mode) {
+        case TransportMode.hsr || TransportMode.tra:
+          try {
+            results.add(await _tdx.fetch(query: query, mode: mode, distanceKm: distanceKm));
+          } on RouteNotServedException catch (e) {
+            debugPrint('FareService: $e');
+            unserved.add(mode);
+          }
+        default:
+          results.add(_mock(
             userId: query.userId,
             queryKey: query.cacheKey,
             mode: mode,
             distanceKm: distanceKm,
             now: DateTime.now(),
-          ),
-      };
-      results.add(result);
+          ));
+      }
     }
     return results;
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +12,9 @@ import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/models/favorite_route.dart';
 import 'package:taiwan_fare_finder/models/search_history_entry.dart';
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
+import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/services/analytics_service.dart';
+import 'package:taiwan_fare_finder/services/location_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/tff_adaptive.dart';
 import 'package:taiwan_fare_finder/ui/tff_button.dart';
@@ -28,7 +32,15 @@ class SavedPage extends StatefulWidget {
 
 class _SavedPageState extends State<SavedPage>
     with SingleTickerProviderStateMixin {
-  late final TabController _tab = TabController(length: 2, vsync: this);
+  // Created eagerly: on wide layouts the tab bar is never built, and a lazy
+  // initializer would first run inside dispose() and throw.
+  late final TabController _tab;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 2, vsync: this);
+  }
 
   @override
   void dispose() {
@@ -348,23 +360,16 @@ class _FavoritesList extends StatelessWidget {
           background: const _SwipeDeleteBg(),
           onDismissed: (_) => favController.remove(f.id),
           child: _RouteTile(
-            title: f.label,
-            subtitle: _modesLabel(context, f.modes),
-            onRun: () async {
-              final fareCtrl = context.read<FareController>();
-              context.read<AnalyticsService>().logEvent('saved_rerun',
-                  params: {
-                    'type': 'favorite',
-                    'modes': f.modes.map((e) => e.storageKey).join(',')
-                  });
-              await fareCtrl.search(
-                  origin: f.origin,
-                  destination: f.destination,
-                  modes: f.modes,
-                  offline: offline,
-                  dataMode: dataMode);
-              if (context.mounted) context.go('/search');
-            },
+            title: LocationService.routeLabel(
+                f.origin, f.destination, l10n.locale),
+            subtitle: l10n.modesLabel(f.modes),
+            onRun: () => _rerunSaved(context,
+                type: 'favorite',
+                origin: f.origin,
+                destination: f.destination,
+                modes: f.modes,
+                offline: offline,
+                dataMode: dataMode),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -385,19 +390,6 @@ class _FavoritesList extends StatelessWidget {
     );
   }
 
-  String _modesLabel(BuildContext context, List<TransportMode> modes) {
-    final l10n = TffLocalizations.of(context);
-    final parts = modes
-        .map((m) => switch (m) {
-              TransportMode.hsr => l10n.modesHSR,
-              TransportMode.tra => l10n.modesTRA,
-              TransportMode.mrt => l10n.modesMRT,
-              TransportMode.bus => l10n.modesBus,
-              TransportMode.youBike => l10n.modesYouBike,
-            })
-        .toList();
-    return parts.join(' • ');
-  }
 }
 
 // ── History list ──────────────────────────────────────────────────────────────
@@ -464,24 +456,16 @@ class _HistoryList extends StatelessWidget {
                 background: const _SwipeDeleteBg(),
                 onDismissed: (_) => histController.remove(h.id),
                 child: _RouteTile(
-                  title: '${h.origin} → ${h.destination}',
-                  subtitle: _modesLabel(context, h.modes),
-                  onRun: () async {
-                    final fareCtrl = context.read<FareController>();
-                    context.read<AnalyticsService>().logEvent('saved_rerun',
-                        params: {
-                          'type': 'history',
-                          'modes':
-                              h.modes.map((e) => e.storageKey).join(',')
-                        });
-                    await fareCtrl.search(
-                        origin: h.origin,
-                        destination: h.destination,
-                        modes: h.modes,
-                        offline: offline,
-                        dataMode: dataMode);
-                    if (context.mounted) context.go(h.modes.length == 1 ? '/search' : '/compare');
-                  },
+                  title: LocationService.routeLabel(
+                      h.origin, h.destination, l10n.locale),
+                  subtitle: l10n.modesLabel(h.modes),
+                  onRun: () => _rerunSaved(context,
+                      type: 'history',
+                      origin: h.origin,
+                      destination: h.destination,
+                      modes: h.modes,
+                      offline: offline,
+                      dataMode: dataMode),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -506,19 +490,6 @@ class _HistoryList extends StatelessWidget {
     );
   }
 
-  String _modesLabel(BuildContext context, List<TransportMode> modes) {
-    final l10n = TffLocalizations.of(context);
-    final parts = modes
-        .map((m) => switch (m) {
-              TransportMode.hsr => l10n.modesHSR,
-              TransportMode.tra => l10n.modesTRA,
-              TransportMode.mrt => l10n.modesMRT,
-              TransportMode.bus => l10n.modesBus,
-              TransportMode.youBike => l10n.modesYouBike,
-            })
-        .toList();
-    return parts.join(' • ');
-  }
 }
 
 // ── Shared tile ───────────────────────────────────────────────────────────────
@@ -546,42 +517,56 @@ class _RouteTile extends StatelessWidget {
       onTap: onRun,
       child: TffCard(
         padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // On phones the labelled button would squeeze the route name down
+            // to a few letters; the whole tile re-runs anyway, so go icon-only.
+            final compact = constraints.maxWidth < 480;
+            return Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: cs.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            trailing,
-            const SizedBox(width: AppSpacing.sm),
-            TffTextButton(
-                label: l10n.rerun,
-                icon: Icons.play_arrow_rounded,
-                onPressed: onRun),
-          ],
+                ),
+                const SizedBox(width: AppSpacing.md),
+                trailing,
+                const SizedBox(width: AppSpacing.sm),
+                if (compact)
+                  IconButton(
+                    tooltip: l10n.rerun,
+                    onPressed: onRun,
+                    icon: Icon(Icons.play_arrow_rounded, color: cs.primary),
+                  )
+                else
+                  TffTextButton(
+                      label: l10n.rerun,
+                      icon: Icons.play_arrow_rounded,
+                      onPressed: onRun),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -589,6 +574,40 @@ class _RouteTile extends StatelessWidget {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/// Re-runs a saved route: single-mode routes open on Search, multi-mode ones on
+/// Compare. Navigates first so the page's loading skeleton is visible while
+/// the search runs; the page refills its form from the new query.
+void _rerunSaved(
+  BuildContext context, {
+  required String type,
+  required String origin,
+  required String destination,
+  required List<TransportMode> modes,
+  required bool offline,
+  required DataMode dataMode,
+}) {
+  final single = modes.length == 1;
+  final FareController fareCtrl = single
+      ? context.read<FareController>()
+      : context.read<CompareFareController>();
+  final histCtrl = context.read<HistoryController>();
+  context.read<AnalyticsService>().logEvent('saved_rerun', params: {
+    'type': type,
+    'modes': modes.map((e) => e.storageKey).join(','),
+  });
+
+  context.go(single ? AppRoutes.search : AppRoutes.compare);
+  unawaited(fareCtrl
+      .search(
+          origin: origin,
+          destination: destination,
+          modes: modes,
+          offline: offline,
+          dataMode: dataMode)
+      .then((_) => histCtrl.add(
+          origin: origin, destination: destination, modes: modes)));
+}
 
 Future<bool?> _confirmClearHistory(BuildContext context) async {
   final l10n = TffLocalizations.of(context);

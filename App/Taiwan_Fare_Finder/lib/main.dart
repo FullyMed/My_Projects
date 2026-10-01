@@ -53,6 +53,9 @@ class TffApp extends StatelessWidget {
                 SessionController(userService: c.read<UserService>())),
         ChangeNotifierProxyProvider2<SessionController, SettingsService,
             SettingsController>(
+          // Eager: bind to the user at startup, so a page that first reads this
+          // controller mid-action (e.g. a re-run from Saved) finds it ready.
+          lazy: false,
           create: (c) =>
               SettingsController(settingsService: c.read<SettingsService>()),
           update: (c, session, service, controller) {
@@ -75,6 +78,9 @@ class TffApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider2<SessionController, FareService,
             FareController>(
+          // Eager: bind to the user at startup, so a page that first reads this
+          // controller mid-action (e.g. a re-run from Saved) finds it ready.
+          lazy: false,
           create: (c) => FareController(fareService: c.read<FareService>()),
           update: (c, session, service, controller) {
             final next = controller ?? FareController(fareService: service);
@@ -94,8 +100,37 @@ class TffApp extends StatelessWidget {
             return next;
           },
         ),
+        ChangeNotifierProxyProvider2<SessionController, FareService,
+            CompareFareController>(
+          // Eager: bind to the user at startup, so a page that first reads this
+          // controller mid-action (e.g. a re-run from Saved) finds it ready.
+          lazy: false,
+          create: (c) =>
+              CompareFareController(fareService: c.read<FareService>()),
+          update: (c, session, service, controller) {
+            final next =
+                controller ?? CompareFareController(fareService: service);
+
+            final userId = session.user?.id;
+            if (next.boundUserId != userId) {
+              Future.microtask(() async {
+                try {
+                  await next.bindUser(userId);
+                } catch (e, st) {
+                  debugPrint('bindUser failed: $e');
+                  debugPrintStack(stackTrace: st);
+                }
+              });
+            }
+
+            return next;
+          },
+        ),
         ChangeNotifierProxyProvider2<SessionController, FavoritesService,
             FavoritesController>(
+          // Eager: bind to the user at startup, so a page that first reads this
+          // controller mid-action (e.g. a re-run from Saved) finds it ready.
+          lazy: false,
           create: (c) =>
               FavoritesController(favoritesService: c.read<FavoritesService>()),
           update: (c, session, service, controller) {
@@ -118,6 +153,9 @@ class TffApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider2<SessionController, HistoryService,
             HistoryController>(
+          // Eager: bind to the user at startup, so a page that first reads this
+          // controller mid-action (e.g. a re-run from Saved) finds it ready.
+          lazy: false,
           create: (c) =>
               HistoryController(historyService: c.read<HistoryService>()),
           update: (c, session, service, controller) {
