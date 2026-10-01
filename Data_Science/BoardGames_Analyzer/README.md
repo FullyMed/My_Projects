@@ -23,13 +23,16 @@ The system helps users discover board games through three complementary recommen
 
 ## Recommendation Modes
 
-| Mode | Signal | Recall@10 | NDCG@10 |
-|---|---|---|---|
-| **Title-Based** | TF-IDF + MiniLM embeddings + sentiment + popularity | **0.2033** | **0.1377** |
-| **Combined** | Title similarity + trait filtering (hybrid) | 0.1789 | 0.1217 |
-| **Trait-Based** | Category / mechanic / family / publisher overlap | 0.0189 | 0.0156 |
+| Mode | Signal | Recall@10 | NDCG@10 | Recall@10, long tail |
+|---|---|---|---|---|
+| **Title-Based** | TF-IDF + MiniLM embeddings + sentiment + popularity | 0.0233 | 0.0174 | 0.0151 |
+| **Trait-Based** | Category / mechanic / family / publisher overlap | 0.0200 | 0.0171 | 0.0183 |
+| **Combined** | Title similarity + trait filtering (hybrid) | **0.0367** | **0.0235** | **0.0215** |
+| *Popularity baseline* | Most-rated games, ignoring the seeds | *0.2300* | *0.1595* | *0.0000* |
+| *Content-only baseline* | Title mode without sentiment and popularity | *XXXC10R* | *XXXC10N* | *XXXTC10R* |
+| *Title-Based, no sentiment* | Ablation | *XXXS10R* | *XXXS10N* | *XXXTS10R* |
 
-> Evaluation: 300 sampled users, 3 seed games → top-K recommendations → checked against 3 held-out games.
+> **Read this honestly:** on this offline protocol the popularity baseline wins clearly. The protocol is from Notebook 09: 300 users, each user's first 3 rated games as seeds and the next 3 held out. The ratings file is ordered by game popularity, so 63% of held-out games are top-100 most-rated titles. The **long-tail** column counts only held-out games outside the top 100 (155 users). There, popularity scores 0 and the similarity-based modes find a few. The system is built for explainable discovery, not next-rating prediction. Earlier versions of this README showed Title-Based Recall@10 = 0.20. That number came from a data bug (sentiment and embeddings covered only 20 popular games) and is withdrawn. Full tables are in `CLAUDE.md` Section 7 and the paper.
 
 ---
 
@@ -272,14 +275,18 @@ The project includes a full IEEE-format research paper at `Reports/paper.tex` / 
 - **No personalization** — the system does not maintain user profiles or collaborative filtering
 - **Trait-Based mode is exploratory** — low quantitative performance by design; intended for preference exploration rather than precise retrieval
 - **Sentiment is sampled** — at most 10 review comments per game are scored, so values for individual games are noisy
-- **No statistical significance testing** — evaluation uses single runs without p-values
+- **Popularity wins offline** — on the evaluation protocol every mode is far below a popularity baseline; the system's value is explainable discovery beyond the blockbusters, which needs a user study to demonstrate
+- **Same-series cap** — at most 2 results from any BGG series a seed belongs to (otherwise Ticket to Ride returns six Ticket to Ride editions); the shared series is named in the explanation
+- **Name in embeddings** — game names are part of the embedded text, so similarly-named games get a small boost
+- **No statistical significance testing** — evaluation uses single runs without p-values or confidence intervals
 
 ---
 
 ## Roadmap / Open Items
 
 - **Legal pages placeholder info** — Terms of Use / Privacy Policy currently list the GitHub repo as the only contact method and state no software license is published. Update both if a real license or dedicated contact email is added later.
-- **Paper vs. code inconsistencies** — the weight mismatch, missing baseline results, and the hand-written explainability example described in `CLAUDE.md` (Known Paper vs. Code Inconsistencies) are still unresolved.
+- **Paper vs. code** — fixed on 2026-10-01: the paper now uses the real per-mode formulas, reports baselines, an ablation and a long-tail analysis, and shows verbatim system explanations.
+- **Suggested next steps** (not yet approved): pin `App/requirements.txt` versions, bootstrap confidence intervals, shorter publisher lists in explanations, description-only embeddings, a less popularity-biased evaluation protocol. See `CLAUDE.md` Section 12.
 - **Root single-page app** (`app.py` / `recommender.py` at the project root) is kept only for reference and intentionally does not have the 404 page, SEO meta tags, or loading-state spinners that the `App/` version has.
 - Image compression was evaluated and skipped — the app has no static images (all charts render live via matplotlib); see `CLAUDE.md` for details.
 
@@ -292,7 +299,7 @@ Developed as an undergraduate Data Science and Recommender Systems research proj
 - Practical hybrid recommendation system design
 - Explainable AI in a hobby domain
 - End-to-end ML pipeline from raw data to interactive app
-- Research methodology with proper holdout evaluation
+- Research methodology with holdout evaluation, baselines and candid reporting of negative results
 
 ---
 

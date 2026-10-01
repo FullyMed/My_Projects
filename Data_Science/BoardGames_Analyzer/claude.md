@@ -164,7 +164,7 @@ Home / landing page of the multi-page Streamlit app. Streamlit's `pages/` conven
 Displays:
 - Project title and description
 - Navigation cards to Recommendation and Analytics pages
-- Key project stats (21K+ games, 18.7M ratings, Recall@10)
+- Key project stats (21K+ games, 18.7M ratings, 3 modes, 21.5K games with review sentiment). The fourth box used to show "20.3% Recall@10 (Title Mode)"; that number came from the 20-game data bug (Bugs 14–15) and was replaced on 2026-10-01
 - "How It Works" explainer for the three hybrid signals
 
 ### `App/theme.py`
@@ -321,19 +321,19 @@ BAD:  # Add popularity score
 ## Recommendation Modes
 
 ### 1. Title-Based
-- Strongest quantitative performance (Recall@10: 0.20, NDCG@10: 0.14)
-- Uses TF-IDF + MiniLM embedding cosine similarity
-- Seed game → similarity scored against all 21K+ games
+- Recall@10 0.0233, NDCG@10 0.0174 (see Section 7 for why this is far below the old 0.20)
+- Uses TF-IDF description + mechanic/theme attribute similarity (averaged into `text_sim`) and MiniLM name+description embedding similarity
+- Seed game → similarity scored against all 21K+ games, then the same-series cap
 - Hybrid signal: `0.35 * text_sim + 0.35 * emb_sim + 0.10 * sentiment + 0.20 * popularity`
 
 ### 2. Trait-Based
-- Exploratory mode (Recall@10: 0.02, NDCG@10: 0.02)
-- Uses category, mechanic, family, publisher overlap scoring
+- Exploratory mode (Recall@10 0.0200, NDCG@10 0.0171)
+- Uses category, mechanic, family, publisher overlap scoring: `0.40 cat + 0.35 mech + 0.15 fam + 0.10 pub`, then `0.70 * score_trait + 0.15 * rating + 0.10 * log-votes + 0.05 * sentiment`
 - Trait expansion: e.g. "strategy" → expands to ["economic", "puzzle", "tile placement", ...]
-- Intentionally weaker quantitatively — designed for exploratory discovery, not ranking
+- Designed for exploratory discovery, not ranking
 
 ### 3. Combined
-- Guided discovery (Recall@10: 0.18, NDCG@10: 0.12)
+- Guided discovery; best of the three modes on every metric (Recall@10 0.0367, NDCG@10 0.0235)
 - Outer-joins title similarity with trait filtering
 - Final score: `0.65 * score_like + 0.35 * score_trait + 0.08 * rating + 0.04 * votes + 0.03 * sentiment`
 
@@ -399,13 +399,33 @@ If a new slow operation (cached loader, heavy compute) is added, give it an expl
 
 # 7. Evaluation Results
 
-| Model       | Recall@5 | NDCG@5 | Recall@10 | NDCG@10 | Recall@20 | NDCG@20 |
-|-------------|----------|--------|-----------|---------|-----------|---------|
-| Title-Based | 0.1144   | 0.0977 | 0.2033    | 0.1377  | 0.3011    | 0.1726  |
-| Trait-Based | 0.0144   | 0.0137 | 0.0189    | 0.0156  | 0.0367    | 0.0219  |
-| Combined    | 0.0967   | 0.0846 | 0.1789    | 0.1217  | 0.2822    | 0.1588  |
+Source: `Notebooks/09_Evaluation.ipynb` (evaluates the deployed `App/recommender.py`), saved to `Reports/notebook09_summary_metrics.csv`. Re-run 2026-10-01 after Bugs 14–16 and the same-series cap.
 
-Evaluation protocol: 300 sampled users, 3 seed games → recommend → check against 3 held-out games.
+| Model | Recall@5 | NDCG@5 | Recall@10 | NDCG@10 | Recall@20 | NDCG@20 |
+|---|---|---|---|---|---|---|
+| Title-Based | 0.0133 | 0.0128 | 0.0233 | 0.0174 | 0.0411 | 0.0236 |
+| Trait-Based | 0.0133 | 0.0140 | 0.0200 | 0.0171 | 0.0444 | 0.0256 |
+| Combined | 0.0222 | 0.0168 | 0.0367 | 0.0235 | 0.0556 | 0.0302 |
+| Popularity baseline | 0.1400 | 0.1190 | 0.2300 | 0.1595 | 0.3622 | 0.2068 |
+| Content-only baseline | XXXC5R | XXXC5N | XXXC10R | XXXC10N | XXXC20R | XXXC20N |
+| Title-Based, no sentiment | XXXS5R | XXXS5N | XXXS10R | XXXS10N | XXXS20R | XXXS20N |
+
+**Long-tail analysis** (`Reports/notebook09_longtail_metrics.csv`): the same lists, scored only on held-out games outside the 100 most-rated catalog games (155 of 300 users have one; the cut-off was fixed before looking at results).
+
+| Model | Recall@10 | NDCG@10 | Recall@20 | NDCG@20 |
+|---|---|---|---|---|
+| Title-Based | 0.0151 | 0.0092 | 0.0258 | 0.0124 |
+| Trait-Based | 0.0183 | 0.0093 | 0.0344 | 0.0141 |
+| Combined | 0.0215 | 0.0110 | 0.0398 | 0.0166 |
+| Popularity baseline | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
+| Content-only baseline | XXXTC10R | XXXTC10N | XXXTC20R | XXXTC20N |
+| Title-Based, no sentiment | XXXTS10R | XXXTS10N | XXXTS20R | XXXTS20N |
+
+**Protocol (accurate description):** ratings from `large_user_ratings.csv` on catalog games (18,744,924); 259,737 users have ≥ 6 rated games; the **first 300** in `groupby` order are evaluated; each user's first 3 ratings **in file order** are seeds and the next 3 are held out; any rated game counts as relevant. The file is grouped by game, most-rated first, so 63.0% of held-out games are top-100 most-rated games. That's why the popularity baseline dominates.
+
+**Why the old numbers (Title Recall@10 0.2033) are gone:** they came from the 20-game embedding/sentiment bug. Those 20 blockbusters recommended each other for every seed, which matched this popularity-skewed protocol. Don't quote 0.20 anywhere.
+
+**Content-only and the no-sentiment ablation** use `title_variant()` in NB09, which applies the same series cap and pool depth as `discover()` (verified to reproduce the deployed title mode exactly when given the deployed weights), so they differ from Title-Based only in their weights.
 
 ---
 
@@ -421,12 +441,12 @@ Evaluation protocol: 300 sampled users, 3 seed games → recommend → check aga
 - Difficulty filter works correctly across all three modes
 
 ### Evaluation
-- Recall@K and NDCG@K evaluation complete
+- Recall@K and NDCG@K evaluation of the deployed engine, with popularity / content-only baselines, a no-sentiment ablation and a long-tail analysis (2026-10-01)
 - Holdout-based evaluation implemented
 
 ### Research Paper
 - IEEE paper structure complete
-- Methodology, evaluation, discussion, and explainability sections complete
+- 2026-10-01: methodology rewritten to match the code (per-mode formulas, real feature construction, sentiment sampling, post-ranking rules, accurate protocol); results, discussion and conclusion rewritten around the new numbers (popularity baseline wins the main protocol); Table II now shows verbatim system output; PDF recompiled
 
 ### App
 - Multi-page Streamlit app (`App/`) complete with Home, Recommendation, and Analytics pages
@@ -436,20 +456,14 @@ Evaluation protocol: 300 sampled users, 3 seed games → recommend → check aga
 
 ---
 
-## Known Paper vs. Code Inconsistencies (Unresolved)
+## Known Paper vs. Code Inconsistencies — Resolved 2026-10-01
 
-These are known issues in the research paper that have not yet been corrected:
+All three earlier inconsistencies are fixed in `Reports/paper.tex`:
+1. **Weight mismatch**: the single `w1..w4` formula was replaced by the real per-mode formulas (title, trait, combined).
+2. **Missing baseline results**: Table I now has popularity and content-only baselines plus a no-sentiment ablation, and a long-tail table was added.
+3. **Hand-written explainability example**: Table II now reproduces the system's verbatim explanations (publisher lists abbreviated with "…").
 
-### 1. Weight Mismatch
-The paper (Section III) states weights: `w1=0.50, w2=0.20, w3=0.15, w4=0.15`.
-The actual code (`recommender.py:recommend_by_titles`) uses: `w_text=0.35, w_emb=0.35, w_sent=0.10, w_pop=0.20`.
-The paper formula and code implementation do not match.
-
-### 2. Missing Baseline Results
-The paper (Section IV) describes a popularity-based baseline and a content-based baseline, but Table I only shows Title, Trait, and Combined rows — no baseline numbers.
-
-### 3. Hand-Written Explainability Example
-Table II shows polished natural-language explanations (e.g. "Shared engine-building mechanics, high semantic similarity..."). The actual system outputs raw matched field names (e.g. "Categories: Strategy | Mechanics: Tile Placement"). The table does not reflect actual system output.
+The rewrite also fixed claims the code never supported: a "random holdout" of "positively rated" games, player count/complexity as traits, "no normalisation needed", and explanations mentioning sentiment/popularity. **Rule:** if the engine, the data or the protocol changes, update the paper in the same pass and re-run NB09.
 
 ---
 
@@ -623,14 +637,23 @@ Keep dependencies lightweight and justified.
 
 # 11. Known Research Limitations
 
+### All Modes Lose to Popularity Offline
+On the NB09 protocol, every mode is far below the popularity baseline (best mode Combined: Recall@10 0.037 vs 0.230), because the held-out games are mostly blockbusters. In the long-tail analysis, the popularity baseline gets 0 while the modes get a small share. The paper reports this candidly. Don't reframe it as a win.
+
 ### Trait-Based Recommendation Weakness
-Trait-based mode has low Recall@10 (0.02) and NDCG@10 (0.02). This is intentional — it is positioned as an exploratory filtering tool, not a strong ranking model. Acknowledged in the paper.
+Trait-based mode is positioned as an exploratory filtering tool, not a strong ranking model (Recall@10 0.020). Acknowledged in the paper.
+
+### Sentiment Is Sampled and Adds Little Measurable Value
+At most 10 comments per game are scored, so per-game values are noisy. The no-sentiment ablation is within noise of the full title mode (Section 7).
+
+### Name in the Embedding Text
+`05b` embeds `name + description`, so similarly-named games get a small boost (Gloomhaven → "Fairytale Gloom"; catan → Catan editions). Embedding the description alone would remove it (≈25 min rebuild + NB09 re-run).
 
 ### No Personalization
 The system does not maintain user profiles, implement collaborative filtering, or learn long-term user preferences. This is intentional given the project scope.
 
 ### No Statistical Significance Testing
-Evaluation uses single runs without p-values or repeated trials. Acceptable for the current scope.
+Evaluation uses single runs over 300 users without p-values or confidence intervals. A bootstrap over `notebook09_user_level_results.csv` would add CIs without re-running anything.
 
 ### Explainability Trade-Off
 The project intentionally prioritizes transparency and interpretability over raw recommendation optimization. This means Recall@K scores are lower than a pure CF system would achieve.
@@ -658,8 +681,17 @@ The legacy single-page `app.py` / `recommender.py` at the project root do **not*
 ## Image compression — considered and declined (2026-09-29)
 The app has no static images at all (every chart is generated live via matplotlib/`st.pyplot`). The only PNGs in the repo are `Reports/images/architecture.png` (468K) and `performance_chart.png` (116K), used solely in the LaTeX paper build — together under 600K with zero effect on the deployed app. Don't re-suggest this unless static images are actually added to the app later.
 
-## Still-open items from earlier sections (not new, just resurfaced here)
-- Known Paper vs. Code Inconsistencies (Section 8) — weight mismatch, missing baseline results, hand-written explainability example — none of these have been fixed yet.
+## Suggested next improvements (offered to Felix 2026-10-01, not yet approved)
+1. **Pin `App/requirements.txt`** to the tested versions (venv: pandas 2.3.3, numpy 1.26.4, scikit-learn 1.8.0, scipy 1.16.3, streamlit 1.52.2). Unpinned, Streamlit Cloud installs the newest on every rebuild.
+2. **Bootstrap confidence intervals** for Table I from the user-level CSV.
+3. **Trim publisher lists in explanations**: big games list many localisation publishers, which adds noise to the reasons.
+4. **Embed description only** in `05b` (removes the name-similarity boost).
+5. **Require ≥ 3 characters for the substring title fallback** (a lone `(` currently matches some game; the page does show the match).
+6. **A second, less popularity-biased protocol** (random split, rating ≥ 7 as relevant).
+7. **Delete the legacy root `app.py` / `recommender.py`?** Felix's call.
+
+## After pushing the 2026-10-01 pass
+The live app redeploys from the push on its own (entrypoint unchanged). New deployed data: `emb_topk_csr.joblib` (8.7 MB, was 91 KB) and `sentiment_summary.csv` (21,510 games, was 20). Open the live site once to confirm it starts and Title mode returns similar games, not blockbusters.
 
 ---
 
