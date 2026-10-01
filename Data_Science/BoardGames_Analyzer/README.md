@@ -29,8 +29,8 @@ The system helps users discover board games through three complementary recommen
 | **Trait-Based** | Category / mechanic / family / publisher overlap | 0.0200 | 0.0171 | 0.0183 |
 | **Combined** | Title similarity + trait filtering (hybrid) | **0.0367** | **0.0235** | **0.0215** |
 | *Popularity baseline* | Most-rated games, ignoring the seeds | *0.2300* | *0.1595* | *0.0000* |
-| *Content-only baseline* | Title mode without sentiment and popularity | *XXXC10R* | *XXXC10N* | *XXXTC10R* |
-| *Title-Based, no sentiment* | Ablation | *XXXS10R* | *XXXS10N* | *XXXTS10R* |
+| *Content-only baseline* | Title mode without sentiment and popularity | *0.0122* | *0.0100* | *0.0151* |
+| *Title-Based, no sentiment* | Ablation | *0.0244* | *0.0178* | *0.0151* |
 
 > **Read this honestly:** on this offline protocol the popularity baseline wins clearly. The protocol is from Notebook 09: 300 users, each user's first 3 rated games as seeds and the next 3 held out. The ratings file is ordered by game popularity, so 63% of held-out games are top-100 most-rated titles. The **long-tail** column counts only held-out games outside the top 100 (155 users). There, popularity scores 0 and the similarity-based modes find a few. The system is built for explainable discovery, not next-rating prediction. Earlier versions of this README showed Title-Based Recall@10 = 0.20. That number came from a data bug (sentiment and embeddings covered only 20 popular games) and is withdrawn. Full tables are in `CLAUDE.md` Section 7 and the paper.
 

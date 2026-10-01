@@ -49,7 +49,7 @@ Traditional recommendation systems commonly rely on collaborative filtering tech
 
 Content-based recommendation approaches attempt to address some of these limitations by utilizing item attributes such as descriptions, mechanics, categories, and themes. However, content-only systems often fail to capture qualitative user opinions and emotional responses toward games. Meanwhile, popularity-based approaches may over-recommend highly popular games while ignoring niche preferences and personalized interests.
 
-To address these challenges, this paper proposes an explainable hybrid board game recommendation system that combines multiple recommendation signals into a unified framework. The proposed system integrates content similarity, sentiment analysis derived from user reviews, and popularity information to generate more relevant and interpretable recommendations. Furthermore, the system supports multiple recommendation modes, including title-based recommendations, trait-based recommendations, and combined hybrid recommendations.
+To address these challenges, this paper proposes an explainable hybrid board game recommendation system that combines multiple recommendation signals into a unified framework. The proposed system integrates content similarity, sentiment analysis derived from user reviews, and popularity information to generate interpretable recommendations, and evaluates candidly how much each signal contributes. Furthermore, the system supports multiple recommendation modes, including title-based recommendations, trait-based recommendations, and combined hybrid recommendations.
 
 The primary contributions of this paper are as follows:
 
@@ -98,7 +98,7 @@ This study utilized publicly available board game data collected from the BoardG
 
 The dataset preprocessing stage involved removing incomplete records, filtering games with insufficient metadata, and cleaning textual review content. Board game attributes such as categories, mechanics, themes, descriptions, complexity ratings, and user rating statistics were retained for recommendation modeling.
 
-User rating data was additionally filtered to reduce sparsity and improve evaluation consistency. The final processed interaction dataset contained approximately 18.7 million valid user ratings after preprocessing.
+User rating data was restricted to games in the catalog, leaving 18,744,924 ratings (approximately 18.7 million) from 410,471 users.
 
 The evaluation subset was constructed with a holdout strategy applied to this interaction data. Users with fewer than six rated games were excluded, and each remaining user's ratings were split into seed-game inputs and held-out relevance targets, as detailed in Section~\ref{sec:evalstrategy}.
 
@@ -299,7 +299,7 @@ Table~\ref{tab:results} reports the main protocol and Fig.~\ref{fig:performance}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.55\textwidth]{images/performance_chart.png}
+\includegraphics[width=\columnwidth]{images/performance_chart.png}
 \caption{Recall@10 and NDCG@10 of the proposed modes, the baselines, and the sentiment ablation (300 users)}
 \label{fig:performance}
 \end{figure}
@@ -317,8 +317,8 @@ Trait-Based & 0.0133 & 0.0140 & 0.0200 & 0.0171 & 0.0444 & 0.0256 \\
 Combined & 0.0222 & 0.0168 & 0.0367 & 0.0235 & 0.0556 & 0.0302 \\
 \midrule
 Popularity baseline & 0.1400 & 0.1190 & 0.2300 & 0.1595 & 0.3622 & 0.2068 \\
-Content-only baseline & XXXC5R & XXXC5N & XXXC10R & XXXC10N & XXXC20R & XXXC20N \\
-Title-Based, no sentiment & XXXS5R & XXXS5N & XXXS10R & XXXS10N & XXXS20R & XXXS20N \\
+Content-only baseline & 0.0111 & 0.0095 & 0.0122 & 0.0100 & 0.0167 & 0.0116 \\
+Title-Based, no sentiment & 0.0133 & 0.0128 & 0.0244 & 0.0178 & 0.0367 & 0.0222 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -340,8 +340,8 @@ Trait-Based & 0.0054 & 0.0051 & 0.0183 & 0.0093 & 0.0344 & 0.0141 \\
 Combined & 0.0194 & 0.0101 & 0.0215 & 0.0110 & 0.0398 & 0.0166 \\
 \midrule
 Popularity baseline & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
-Content-only baseline & XXXTC5R & XXXTC5N & XXXTC10R & XXXTC10N & XXXTC20R & XXXTC20N \\
-Title-Based, no sentiment & XXXTS5R & XXXTS5N & XXXTS10R & XXXTS10N & XXXTS20R & XXXTS20N \\
+Content-only baseline & 0.0129 & 0.0090 & 0.0151 & 0.0100 & 0.0215 & 0.0122 \\
+Title-Based, no sentiment & 0.0129 & 0.0082 & 0.0151 & 0.0091 & 0.0280 & 0.0129 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
@@ -350,7 +350,7 @@ Title-Based, no sentiment & XXXTS5R & XXXTS5N & XXXTS10R & XXXTS10N & XXXTS20R &
 
 Table~\ref{tab:longtail} re-scores the same ranked lists against only the held-out games outside the 100 most-rated titles, for the 155 users who have at least one. The cut-off was fixed before the results were examined. Here the popularity baseline retrieves nothing, because its lists never leave the head of the distribution, whereas the proposed modes do retrieve some less popular games that users went on to rate. The absolute values remain low, so this shows a qualitative difference in behaviour rather than strong long-tail accuracy.
 
-XXXABLATION
+The two comparison models isolate the supporting signals. Removing only the sentiment term changed the title-based Recall@10 from 0.0233 to 0.0244, a difference of a single hit across the 900 held-out games, so the sentiment signal has no measurable effect in this evaluation. Removing both sentiment and popularity (the content-only baseline) lowered Recall@10 to 0.0122, which is consistent with the popularity bias of the protocol: the popularity term, not content similarity, accounts for most of the title-based mode's offline accuracy.
 
 \section{Discussion}
 

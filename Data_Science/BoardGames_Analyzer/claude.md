@@ -141,7 +141,7 @@ BoardGames_Analyzer/
 │   ├── references.bib
 │   ├── paper.pdf                   ← Compiled output
 │   ├── eval_metrics_results.csv    ← Legacy NB07 output (pre-NDCG-fix; not used anywhere)
-│   ├── notebook09_summary_metrics.csv ← Table I numbers (3 modes + 2 baselines + sentiment ablation)
+│   ├── notebook09_summary_metrics.csv ← paper Table II numbers (3 modes + 2 baselines + sentiment ablation); long-tail Table III is notebook09_longtail_metrics.csv
 │   ├── notebook09_user_level_results.csv
 │   └── images/
 │       ├── architecture.png
@@ -226,7 +226,7 @@ Static legal pages, styled with the existing `.section-title` / `.info-box` them
 Main recommendation system notebook.
 
 ### `Notebooks/09_Evaluation.ipynb`
-Evaluation notebook with Recall@K and NDCG@K results. Since 2026-10-01 it **imports `App/recommender.py`** instead of carrying its own copy of the engine, so the numbers describe the deployed app. Also evaluates a popularity baseline, a content-only baseline and a no-sentiment ablation, saves the CSVs in `Reports/`, prints the verbatim case-study explanations used in the paper's Table II, and regenerates `Reports/images/performance_chart.png` from the computed numbers.
+Evaluation notebook with Recall@K and NDCG@K results. Since 2026-10-01 it **imports `App/recommender.py`** instead of carrying its own copy of the engine, so the numbers describe the deployed app. Also evaluates a popularity baseline, a content-only baseline and a no-sentiment ablation, saves the CSVs in `Reports/`, prints the verbatim case-study explanations used in the paper's Table I, and regenerates `Reports/images/performance_chart.png` from the computed numbers.
 
 ### `Notebooks/02b_sentiment_full_coverage.py` / `Notebooks/05b_embeddings_full_coverage.py`
 Standalone, resumable scripts (run from the project root with the venv's python) that rebuild `sentiment_summary.csv` and `emb_topk_csr.joblib`. They exist because Notebooks 02 and 05 built both signals from a 500,000-row slice of the reviews file that covered only 20 games (see Bugs 14 and 15). The docstring at the top of each explains the method.
@@ -407,8 +407,8 @@ Source: `Notebooks/09_Evaluation.ipynb` (evaluates the deployed `App/recommender
 | Trait-Based | 0.0133 | 0.0140 | 0.0200 | 0.0171 | 0.0444 | 0.0256 |
 | Combined | 0.0222 | 0.0168 | 0.0367 | 0.0235 | 0.0556 | 0.0302 |
 | Popularity baseline | 0.1400 | 0.1190 | 0.2300 | 0.1595 | 0.3622 | 0.2068 |
-| Content-only baseline | XXXC5R | XXXC5N | XXXC10R | XXXC10N | XXXC20R | XXXC20N |
-| Title-Based, no sentiment | XXXS5R | XXXS5N | XXXS10R | XXXS10N | XXXS20R | XXXS20N |
+| Content-only baseline | 0.0111 | 0.0095 | 0.0122 | 0.0100 | 0.0167 | 0.0116 |
+| Title-Based, no sentiment | 0.0133 | 0.0128 | 0.0244 | 0.0178 | 0.0367 | 0.0222 |
 
 **Long-tail analysis** (`Reports/notebook09_longtail_metrics.csv`): the same lists, scored only on held-out games outside the 100 most-rated catalog games (155 of 300 users have one; the cut-off was fixed before looking at results).
 
@@ -418,8 +418,8 @@ Source: `Notebooks/09_Evaluation.ipynb` (evaluates the deployed `App/recommender
 | Trait-Based | 0.0183 | 0.0093 | 0.0344 | 0.0141 |
 | Combined | 0.0215 | 0.0110 | 0.0398 | 0.0166 |
 | Popularity baseline | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| Content-only baseline | XXXTC10R | XXXTC10N | XXXTC20R | XXXTC20N |
-| Title-Based, no sentiment | XXXTS10R | XXXTS10N | XXXTS20R | XXXTS20N |
+| Content-only baseline | 0.0151 | 0.0100 | 0.0215 | 0.0122 |
+| Title-Based, no sentiment | 0.0151 | 0.0091 | 0.0280 | 0.0129 |
 
 **Protocol (accurate description):** ratings from `large_user_ratings.csv` on catalog games (18,744,924); 259,737 users have ≥ 6 rated games; the **first 300** in `groupby` order are evaluated; each user's first 3 ratings **in file order** are seeds and the next 3 are held out; any rated game counts as relevant. The file is grouped by game, most-rated first, so 63.0% of held-out games are top-100 most-rated games. That's why the popularity baseline dominates.
 
@@ -460,8 +460,8 @@ Source: `Notebooks/09_Evaluation.ipynb` (evaluates the deployed `App/recommender
 
 All three earlier inconsistencies are fixed in `Reports/paper.tex`:
 1. **Weight mismatch**: the single `w1..w4` formula was replaced by the real per-mode formulas (title, trait, combined).
-2. **Missing baseline results**: Table I now has popularity and content-only baselines plus a no-sentiment ablation, and a long-tail table was added.
-3. **Hand-written explainability example**: Table II now reproduces the system's verbatim explanations (publisher lists abbreviated with "…").
+2. **Missing baseline results**: the results table (now Table II) has popularity and content-only baselines plus a no-sentiment ablation, and a long-tail table was added.
+3. **Hand-written explainability example**: the explanation table (now Table I) reproduces the system's verbatim explanations (publisher lists abbreviated with "…").
 
 The rewrite also fixed claims the code never supported: a "random holdout" of "positively rated" games, player count/complexity as traits, "no normalisation needed", and explanations mentioning sentiment/popularity. **Rule:** if the engine, the data or the protocol changes, update the paper in the same pass and re-run NB09.
 
@@ -683,7 +683,7 @@ The app has no static images at all (every chart is generated live via matplotli
 
 ## Suggested next improvements (offered to Felix 2026-10-01, not yet approved)
 1. **Pin `App/requirements.txt`** to the tested versions (venv: pandas 2.3.3, numpy 1.26.4, scikit-learn 1.8.0, scipy 1.16.3, streamlit 1.52.2). Unpinned, Streamlit Cloud installs the newest on every rebuild.
-2. **Bootstrap confidence intervals** for Table I from the user-level CSV.
+2. **Bootstrap confidence intervals** for the results table (paper Table II) from the user-level CSV.
 3. **Trim publisher lists in explanations**: big games list many localisation publishers, which adds noise to the reasons.
 4. **Embed description only** in `05b` (removes the name-similarity boost).
 5. **Require ≥ 3 characters for the substring title fallback** (a lone `(` currently matches some game; the page does show the match).
