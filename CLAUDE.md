@@ -77,8 +77,8 @@ Then run `claude` to start Claude Code in that project.
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA
 - **Purpose:** Personal productivity planner (weekly tasks, goal tracker, event calendar)
-- **Key traits:** Supabase auth + RLS, localStorage offline fallback, 5 themes, Tailwind CSS. Live at https://journeyset.vercel.app/. Vercel auto-deploys on push to `main` (verified 2026-09-30). The Supabase project is free tier and **pauses after ~1 week idle**, which breaks sign-in; if login fails everywhere, restore it first. A 2026-09-30 fix pass is committed, pushed and deployed, but its signed-in flows still need a browser run with the owner signing in; see "Known gaps" in its `CLAUDE.md`.
-- **Run:** `npm run dev` (`npm run build` now type-checks first)
+- **Key traits:** Supabase auth + RLS, localStorage offline fallback, 5 themes, Tailwind CSS. Live at https://journeyset.vercel.app/. Vercel auto-deploys on push to `main` (verified 2026-09-30). The Supabase project is free tier and **pauses after ~1 week idle**, which breaks sign-in; if login fails everywhere, restore it first. A 2026-09-30 fix pass is committed, pushed and deployed. A 2026-10-06 improvement pass (password reset, self-serve account deletion, delete confirmations, OG preview image, code-splitting) is uncommitted, for the owner to review. Its migration `20261006090000_add_delete_my_account.sql` is **not yet applied** to the live DB; apply it before pushing. Signed-in flows from both passes still need a browser run with the owner signing in; see "Known gaps" in its `CLAUDE.md`.
+- **Run:** `npm run dev` (`npm run build` type-checks first) · `npm run icons` regenerates favicons + OG image
 
 ### Website / Prambanan Batik
 - **Type:** PHP 7.4 + MySQL, no build step

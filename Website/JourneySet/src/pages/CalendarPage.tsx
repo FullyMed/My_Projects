@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import EventCalendar from '../components/EventCalendar';
 import ExportButton from '../components/ExportButton';
-import { useState } from 'react';
-import PrintView from '../components/PrintView';
 import { usePageMeta } from '../hooks/usePageMeta';
+
+// Only needed on Export, so it's split into its own chunk.
+const PrintView = lazy(() => import('../components/PrintView'));
 
 const CalendarPage: React.FC = () => {
   usePageMeta(
@@ -21,7 +22,11 @@ const CalendarPage: React.FC = () => {
         <ExportButton onPrint={() => setPrintView(true)} label="Export" />
       </div>
       <EventCalendar onMonthChange={setVisibleMonth} />
-      {printView && <PrintView view="calendar" month={visibleMonth} onClose={() => setPrintView(false)} />}
+      {printView && (
+        <Suspense fallback={null}>
+          <PrintView view="calendar" month={visibleMonth} onClose={() => setPrintView(false)} />
+        </Suspense>
+      )}
     </>
   );
 };

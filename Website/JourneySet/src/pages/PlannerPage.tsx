@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { getISOWeek, getISOWeekYear } from 'date-fns';
 import WeeklyPlanner from '../components/WeeklyPlanner';
 import ExportButton from '../components/ExportButton';
-import PrintView from '../components/PrintView';
 import { usePageMeta } from '../hooks/usePageMeta';
+
+// Only needed on Export, so it's split into its own chunk.
+const PrintView = lazy(() => import('../components/PrintView'));
 
 const getWeekKey = (date: Date) => {
   const year = getISOWeekYear(date);
@@ -29,11 +31,13 @@ const PlannerPage: React.FC = () => {
       </div>
       <WeeklyPlanner onWeekChange={setCurrentWeekKey} />
       {printView && (
-        <PrintView
-          view="planner"
-          weekKey={currentWeekKey}
-          onClose={() => setPrintView(false)}
-        />
+        <Suspense fallback={null}>
+          <PrintView
+            view="planner"
+            weekKey={currentWeekKey}
+            onClose={() => setPrintView(false)}
+          />
+        </Suspense>
       )}
     </>
   );

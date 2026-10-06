@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useModalFocus } from '../hooks/useModalFocus';
 import ErrorBanner from './ErrorBanner';
+import ConfirmDialog from './ConfirmDialog';
 import { SAVE_ERROR } from '../constants/messages';
 import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X, Loader2 } from 'lucide-react';
 import { Event } from '../types';
@@ -45,6 +46,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
   const { isCompact } = useCompactMode();
@@ -353,7 +355,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                             <Edit3 className="h-3.5 w-3.5" />
                           </button>
                           <button
-                            onClick={() => deleteEventHandler(event.id)}
+                            onClick={() => setDeletingEvent(event)}
                             aria-label="Delete event"
                             className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors cursor-pointer"
                             title="Delete"
@@ -518,7 +520,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
               <div className="flex justify-between mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
                 {editingEvent ? (
                   <button
-                    onClick={() => deleteEventHandler(editingEvent.id)}
+                    onClick={() => setDeletingEvent(editingEvent)}
                     className="inline-flex items-center gap-2 px-3 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -547,6 +549,18 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {deletingEvent && (
+        <ConfirmDialog
+          title="Delete event?"
+          message={<>“{deletingEvent.title}” will be permanently deleted.</>}
+          onConfirm={async () => {
+            await deleteEventHandler(deletingEvent.id);
+            setDeletingEvent(null);
+          }}
+          onCancel={() => setDeletingEvent(null)}
+        />
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import { useCompactMode } from '../hooks/useCompactMode';
 import { format, startOfWeek, addDays, isToday, subWeeks, addWeeks, getISOWeek, getISOWeekYear } from 'date-fns';
 import EditTaskModal from './EditTaskModal';
 import ErrorBanner from './ErrorBanner';
+import ConfirmDialog from './ConfirmDialog';
 import { SAVE_ERROR } from '../constants/messages';
 import { getPlannerTasks, createPlannerTask, updatePlannerTask, deletePlannerTask } from '../api/plannerApi';
 
@@ -26,6 +27,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
   const [adding, setAdding] = useState(false);
   const [navigating, setNavigating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingTask, setDeletingTask] = useState<PlannerTask | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
   const { isCompact } = useCompactMode();
@@ -459,7 +461,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                           <Copy className="h-3.5 w-3.5" />
                         </button>
                         <button
-                          onClick={() => deleteTask(task.id)}
+                          onClick={() => setDeletingTask(task)}
                           className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
                           title="Delete"
                           aria-label="Delete task"
@@ -480,6 +482,18 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           );
         })}
       </div>
+      )}
+
+      {deletingTask && (
+        <ConfirmDialog
+          title="Delete task?"
+          message={<>“{deletingTask.title}” will be permanently deleted.</>}
+          onConfirm={async () => {
+            await deleteTask(deletingTask.id);
+            setDeletingTask(null);
+          }}
+          onCancel={() => setDeletingTask(null)}
+        />
       )}
 
       {editingTaskData && (

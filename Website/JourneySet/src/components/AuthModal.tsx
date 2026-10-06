@@ -18,7 +18,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirmationSentTo, setConfirmationSentTo] = useState<string | null>(null);
-  const { login, register } = useAuth();
+  // "Forgot password?" is a sub-step of login mode, not a third mode prop.
+  const [forgot, setForgot] = useState(false);
+  const [resetSentTo, setResetSentTo] = useState<string | null>(null);
+  const { login, register, requestPasswordReset } = useAuth();
   const { modalRef } = useModalFocus(true, onClose);
 
   // The modal stays mounted when switching between sign-in and sign-up, so
@@ -26,7 +29,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
   useEffect(() => {
     setError('');
     setConfirmationSentTo(null);
+    setForgot(false);
+    setResetSentTo(null);
   }, [mode]);
+
+  const showForgot = (value: boolean) => {
+    setForgot(value);
+    setError('');
+    setResetSentTo(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +45,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
     setLoading(true);
 
     try {
-      if (mode === 'login') {
+      if (mode === 'login' && forgot) {
+        const result = await requestPasswordReset(email.trim());
+        if (!result.success) {
+          setError(result.error || "Couldn't send the reset email");
+        } else {
+          setResetSentTo(email.trim());
+        }
+      } else if (mode === 'login') {
         const result = await login(email.trim(), password);
         if (!result.success) {
           setError(result.error || 'Invalid email or password');
@@ -119,15 +137,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
             className="text-xl xs:text-2xl font-bold text-center text-slate-900 dark:text-white mb-1"
             id="auth-modal-title"
           >
-            {mode === 'login' ? 'Welcome back' : 'Create account'}
+            {forgot ? 'Reset your password' : mode === 'login' ? 'Welcome back' : 'Create account'}
           </h2>
           <p className="text-center text-xs xs:text-sm text-slate-500 dark:text-slate-400 mb-5 xs:mb-7">
-            {mode === 'login'
+            {forgot
+              ? "Enter your email and we'll send you a link to set a new one"
+              : mode === 'login'
               ? 'Sign in to continue your journey'
               : 'Start your productivity journey today'}
           </p>
 
-          {confirmationSentTo ? (
+          {resetSentTo ? (
+            <div className="text-center space-y-3 py-2" role="status">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center">
+                <MailCheck className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Check your email</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                If an account exists for <span className="font-medium text-slate-700 dark:text-slate-300 break-all">{resetSentTo}</span>,
+                you'll get a link to set a new password. It can take a few minutes, so check your spam folder too.
+              </p>
+            </div>
+          ) : confirmationSentTo ? (
             <div className="text-center space-y-3 py-2" role="status">
               <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center">
                 <MailCheck className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
@@ -175,6 +206,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               />
             </div>
 
+            {!forgot && (
             <div>
               <label htmlFor="password-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Password
@@ -200,7 +232,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {mode === 'login' && (
+                <div className="mt-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => showForgot(true)}
+                    className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
             </div>
+            )}
 
             {error && (
               <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg px-4 py-3">
@@ -215,7 +259,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+              {loading ? 'Please wait…' : forgot ? 'Send reset link' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
 
             {mode === 'register' && (
@@ -229,15 +273,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
           </form>
           )}
 
-          <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={onSwitchMode}
-              className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold focus:outline-none cursor-pointer"
-            >
-              {mode === 'login' ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
+          {forgot ? (
+            <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+              <button
+                onClick={() => showForgot(false)}
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold focus:outline-none cursor-pointer"
+              >
+                Back to sign in
+              </button>
+            </p>
+          ) : (
+            <p className="mt-5 xs:mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+              {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                onClick={onSwitchMode}
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold focus:outline-none cursor-pointer"
+              >
+                {mode === 'login' ? 'Sign up' : 'Sign in'}
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>

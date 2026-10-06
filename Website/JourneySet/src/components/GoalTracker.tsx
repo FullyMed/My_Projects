@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
 import { getGoals, createGoal, updateGoal, deleteGoal } from '../api/goalsApi';
 import ErrorBanner from './ErrorBanner';
+import ConfirmDialog from './ConfirmDialog';
 import { SAVE_ERROR } from '../constants/messages';
 
 const GoalTracker: React.FC = () => {
@@ -24,6 +25,7 @@ const GoalTracker: React.FC = () => {
   // clicks can't send two writes computed from the same stale value.
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
   const { user } = useAuth();
   const userId = user?.id;
 
@@ -280,7 +282,7 @@ const GoalTracker: React.FC = () => {
                       <RotateCcw className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => deleteGoalHandler(goal.id)}
+                      onClick={() => setDeletingGoal(goal)}
                       disabled={isPending}
                       aria-label="Delete goal"
                       className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors cursor-pointer"
@@ -399,6 +401,18 @@ const GoalTracker: React.FC = () => {
             Create your first goal to start tracking your progress.
           </p>
         </div>
+      )}
+
+      {deletingGoal && (
+        <ConfirmDialog
+          title="Delete goal?"
+          message={<>“{deletingGoal.title}” and its progress will be permanently deleted.</>}
+          onConfirm={async () => {
+            await deleteGoalHandler(deletingGoal.id);
+            setDeletingGoal(null);
+          }}
+          onCancel={() => setDeletingGoal(null)}
+        />
       )}
     </div>
   );

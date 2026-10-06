@@ -54,10 +54,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
     },
   ];
 
+  // Product facts, not usage numbers — keep these true.
   const stats = [
-    { label: 'Tasks tracked', value: '10K+' },
-    { label: 'Goals completed', value: '95%' },
-    { label: 'Weekly planners', value: '5K+' },
+    { label: 'Planner, goals & calendar', value: '3-in-1' },
+    { label: 'Colour themes', value: '5' },
+    { label: 'Free to use', value: '$0' },
   ];
 
   return (

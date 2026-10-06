@@ -9,7 +9,7 @@ const TermsPage: React.FC = () => {
   );
 
   return (
-    <LegalPageLayout title="Terms of Use" lastUpdated="September 21, 2026">
+    <LegalPageLayout title="Terms of Use" lastUpdated="October 6, 2026">
       <section>
         <h2>1. Acceptance of Terms</h2>
         <p>
@@ -81,7 +81,8 @@ const TermsPage: React.FC = () => {
       <section>
         <h2>8. Termination</h2>
         <p>
-          You may stop using the Service and delete your account at any time. We may suspend or
+          You may stop using the Service and delete your account at any time from
+          <strong> Settings → Delete account</strong>. We may suspend or
           terminate access to the Service for accounts that violate these Terms or the Acceptable
           Use section above.
         </p>

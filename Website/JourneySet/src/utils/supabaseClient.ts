@@ -7,4 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+/**
+ * The URL hash as the page first loaded, captured before supabase-js parses
+ * (and clears) it. ResetPasswordPage reads `error_description` from it when a
+ * password-reset link has expired.
+ */
+export const initialUrlHash = typeof window !== 'undefined' ? window.location.hash : '';
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

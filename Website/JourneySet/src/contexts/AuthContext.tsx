@@ -13,6 +13,14 @@ interface AuthContextType {
     name: string
   ) => Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }>;
   logout: () => Promise<void>;
+  /** Sends a password-reset email whose link lands on /reset-password. */
+  requestPasswordReset: (email: string) => Promise<{ success: boolean; error?: string }>;
+  /** Sets a new password for the signed-in (or recovery-session) user. */
+  updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
+  /** True after the user arrived via a password-reset email link, until they set a new password. */
+  passwordRecovery: boolean;
+  /** Permanently deletes the signed-in user's account and all their data. */
+  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   loading: boolean;
   isLoading: boolean;
 }
@@ -26,6 +34,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
 
   useEffect(() => {
     let settled = false;
@@ -87,6 +96,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null);
         }
 
+        // Fired when the page loads from a password-reset email link. The
+        // user then has a short-lived session that is only good for setting a
+        // new password, so App routes them to /reset-password.
+        if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
+        if (event === 'SIGNED_OUT') setPasswordRecovery(false);
+
         if (event === 'INITIAL_SESSION') {
           clearTimeout(timer);
           resolve();
@@ -133,6 +148,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const requestPasswordReset = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    } catch {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
+  const updatePassword = async (password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) return { success: false, error: error.message };
+      setPasswordRecovery(false);
+      return { success: true };
+    } catch {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
   const logout = async () => {
     const userId = user?.id;
     try {
@@ -149,8 +187,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const deleteAccount = async (): Promise<{ success: boolean; error?: string }> => {
+    const userId = user?.id;
+    try {
+      // SECURITY DEFINER function (migration 20261006...): deletes auth.users
+      // row for auth.uid(); every table cascades from it.
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) return { success: false, error: error.message };
+    } catch {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+    // The account (and so its server-side sessions) is gone; end it locally.
+    await supabase.auth.signOut({ scope: 'local' });
+    if (userId) storage.clearUserCache(userId);
+    clearLastSync();
+    setUser(null);
+    return { success: true };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, isLoading: loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        requestPasswordReset,
+        updatePassword,
+        passwordRecovery,
+        deleteAccount,
+        loading,
+        isLoading: loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -14,11 +14,16 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 - **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
 - **Offline-resilient** — all reads fall back to a per-user localStorage cache when Supabase is unreachable (the planner cache is per week); failed saves show a dismissible error instead of silently doing nothing
 - **Private on shared devices** — signing out clears that user's cached data from the browser
+- **Password reset** — "Forgot password?" in the sign-in window emails a link to `/reset-password`, where you choose a new password
+- **Delete your account** — Settings → Delete account permanently removes the account and all its data (you confirm by typing your email)
+- **Safe deletes** — deleting a task, goal or event asks for confirmation first
 - **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
-- **Per-page meta** — each route sets its own `<title>` and meta description for SEO/sharing
+- **Per-page meta** — each route sets its own `<title>` and meta description for SEO
+- **Link previews** — Open Graph / Twitter tags and a 1200×630 preview image, so shared links show a card with the logo
+- **Fast first load** — pages and the print view are code-split and load on demand
 - **Loading states** — a themed full-page loader while auth resolves, plus per-feature spinners so the Planner, Goals, and Calendar lists never flash an empty state while their data is still loading
 - **Terms of Use & Privacy Policy** — dedicated pages at `/terms` and `/privacy`, linked from the landing footer, the sign-up form, and Settings
-- **Full favicon set** — SVG favicon, ICO fallback, Apple touch icon, and a web manifest with Android/PWA icons, all redrawn from the in-app logo mark
+- **Full favicon set** — SVG favicon, ICO fallback, Apple touch icon, and a web manifest with Android/PWA icons, all redrawn from the in-app logo mark (`npm run icons` regenerates them and the preview image)
 
 ## Tech stack
 
@@ -67,6 +72,7 @@ supabase/migrations/
   20260405053928_create_goals_table.sql
   20260405053937_create_events_table.sql
   20260930063000_add_updated_at_triggers.sql   # keeps updated_at current on every UPDATE
+  20261006090000_add_delete_my_account.sql     # lets a user delete their own account (Settings → Delete account)
 ```
 
 > **Free-tier note**: Supabase pauses free projects after about a week without activity. While paused, nobody can sign in. Restore it from the Supabase dashboard.
@@ -81,6 +87,7 @@ npm run typecheck  # TypeScript check (tsc --noEmit)
 npm run build      # typecheck + production build (fails on type errors)
 npm run preview    # preview production build
 npm run lint       # ESLint
+npm run icons      # regenerate favicons + og-image.png from SVG
 ```
 
 > **WSL users**: if Vite errors with `Cannot find module @rollup/rollup-linux-x64-gnu`, run `npm install @rollup/rollup-linux-x64-gnu --no-save` once.
@@ -100,18 +107,22 @@ src/
 │   ├── EventCalendar.tsx     # Calendar feature
 │   ├── AuthModal.tsx         # Login / register (shows "check your email" when confirmation is required)
 │   ├── ErrorBanner.tsx       # Dismissible error shown when a save fails
+│   ├── ConfirmDialog.tsx     # "Delete …?" confirmation for tasks, goals, events
+│   ├── DeleteAccountDialog.tsx # Type-your-email confirmation for account deletion
 │   ├── LandingPage.tsx       # Marketing page
 │   ├── NotFoundPage.tsx      # Custom 404 (standalone or embedded in AppLayout)
 │   ├── LoadingScreen.tsx     # Full-page loading state (auth resolving)
 │   ├── LegalPageLayout.tsx   # Shared nav/footer + prose chrome for Terms/Privacy
 │   └── PrintView.tsx         # Print-ready layout (portalled to <body>)
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
-├── pages/            # Route-level wrappers (thin, delegate to components)
+├── pages/            # Route-level wrappers (thin, delegate to components), incl. ResetPasswordPage
 ├── hooks/            # useModalFocus (trap + Escape handling), usePageMeta (per-route title/description)
 ├── constants/        # EVENT_CATEGORIES, THEMES (the 5 theme definitions), shared messages
 ├── data/             # Static quotes array
 ├── types/            # Shared TypeScript interfaces
 └── utils/            # storage.ts (localStorage), supabaseClient.ts
+scripts/
+└── generate-icons.mjs  # favicons + Open Graph image (sharp + png-to-ico)
 supabase/
 └── migrations/       # SQL schema files
 ```
@@ -171,13 +182,10 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 Nothing here is broken — these are known gaps, noted so they aren't lost between sessions:
 
-- **Social share previews (Open Graph / Twitter cards)** — sharing a JourneySet link currently shows plain text, no card/image. Needs static `og:*`/`twitter:*` tags in `index.html` at minimum (a full per-route version would need SSR or prerendering, which this plain Vite SPA doesn't have).
+- **Email delivery** — Supabase's built-in email sender only reaches your own Supabase team and is heavily rate-limited. Set up custom SMTP (Authentication → Emails → SMTP Settings) so password-reset and confirmation emails reach real users.
+- **Supabase settings** — set the Site URL to `https://journeyset.vercel.app`, add `https://journeyset.vercel.app/**` and `http://localhost:5173/**` to Redirect URLs, and turn on leaked-password protection if your plan allows it. Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
 - **Legal page review** — Terms of Use and Privacy Policy exist (`/terms`, `/privacy`) but were drafted, not lawyer-reviewed; revisit before any real/paying user base, and consider explicit GDPR/CCPA language if that becomes relevant.
-- **Bundle size** — main JS chunk is ~530 kB (147 kB gzip), past Vite's default 500 kB warning threshold. Fine for now; code-splitting (e.g. lazy-loading `PrintView`) is the fix if it keeps growing.
-- **Landing-page stats** — the "10K+ / 95% / 5K+" figures on the landing page are placeholders, not real usage numbers.
-- **Password reset** — there's no "Forgot password?" flow yet.
-- **Supabase hardening** — turn on leaked-password protection, and check that Auth → URL Configuration lists the production URL so confirmation emails link to the live site. Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
-- **Favicon regen script** — the favicon PNG/ICO set was generated once via a throwaway `npx sharp` + `png-to-ico` script that isn't checked into the repo. If the logo mark ever changes, that script needs to be rewritten (see `CLAUDE.md` for the approach).
+- **Tooling upgrades** — `npm audit` flags dev-only tooling (Vite 5, Tailwind 3); the shipped app has no known vulnerabilities. Fixing them means upgrading to Vite 8 / Tailwind 4.
 
 ## License
 

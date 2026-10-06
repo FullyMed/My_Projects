@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, LogOut, Palette, Check, Clock, Maximize2, Minimize2, User, Wifi } from 'lucide-react';
+import { Trash2, LogOut, Palette, Check, Clock, Maximize2, Minimize2, User, Wifi, UserX } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -9,6 +9,7 @@ import { getLastSync } from '../api/plannerApi';
 import { formatDistanceToNow } from 'date-fns';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useModalFocus } from '../hooks/useModalFocus';
+import DeleteAccountDialog from '../components/DeleteAccountDialog';
 
 const SettingsPage: React.FC = () => {
   usePageMeta(
@@ -19,6 +20,7 @@ const SettingsPage: React.FC = () => {
   const { theme, setTheme, themes } = useTheme();
   const { isCompact, toggleCompact } = useCompactMode();
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const { modalRef: resetModalRef } = useModalFocus(showResetModal, () => setShowResetModal(false));
 
@@ -181,6 +183,16 @@ const SettingsPage: React.FC = () => {
               <LogOut className="h-4 w-4" />
               <span className="text-sm font-medium">Sign out</span>
             </button>
+            <button
+              onClick={() => setShowDeleteAccount(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors cursor-pointer"
+            >
+              <UserX className="h-4 w-4" />
+              <span className="text-sm font-semibold">Delete account</span>
+            </button>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Permanently deletes your account and all your tasks, goals and events.
+            </p>
           </div>
         </section>
 
@@ -190,6 +202,8 @@ const SettingsPage: React.FC = () => {
           <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</Link>
         </div>
       </div>
+
+      {showDeleteAccount && <DeleteAccountDialog onClose={() => setShowDeleteAccount(false)} />}
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
