@@ -182,8 +182,8 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 Nothing here is broken — these are known gaps, noted so they aren't lost between sessions:
 
-- **Email delivery** — Supabase's built-in email sender only reaches your own Supabase team and is heavily rate-limited. Set up custom SMTP (Authentication → Emails → SMTP Settings) so password-reset and confirmation emails reach real users.
-- **Supabase settings** — set the Site URL to `https://journeyset.vercel.app`, add `https://journeyset.vercel.app/**` and `http://localhost:5173/**` to Redirect URLs, and turn on leaked-password protection if your plan allows it. Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
+- **Email provider** — emails go out through custom SMTP (Gmail) since 2026-10-06. That's fine at this scale; switch to a dedicated provider (e.g. Resend) if sign-ups grow past Gmail's daily sending limits.
+- **Supabase hardening** — leaked-password protection is off (it needs a paid plan). Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
 - **Legal page review** — Terms of Use and Privacy Policy exist (`/terms`, `/privacy`) but were drafted, not lawyer-reviewed; revisit before any real/paying user base, and consider explicit GDPR/CCPA language if that becomes relevant.
 - **Tooling upgrades** — `npm audit` flags dev-only tooling (Vite 5, Tailwind 3); the shipped app has no known vulnerabilities. Fixing them means upgrading to Vite 8 / Tailwind 4.
 
