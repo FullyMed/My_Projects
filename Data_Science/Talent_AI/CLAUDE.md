@@ -186,6 +186,10 @@ pgvector's iterative scan that's at most `hnsw.ef_search` (40) rows globally,
 so at multi-tenant scale a tenant could get fewer than `top_k` results or
 none. `0014` sets `hnsw.iterative_scan = strict_order` on both functions; any
 new vector-search function over a shared index needs the same `SET` clause.
+That `SET` clause fails with `42501: permission denied to set parameter`
+unless pgvector's library is already loaded in the session (the `postgres`
+role isn't a superuser), so start the migration with a throwaway
+`select '[1]'::extensions.vector;` as `0014` does.
 
 ### Anonymization is best-effort, not a guarantee
 

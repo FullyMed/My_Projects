@@ -12,6 +12,14 @@
 -- the ORDER BY needs no re-sort.
 --
 -- Bodies are unchanged from 0009/0012; `create or replace` keeps their grants.
+--
+-- The first statement only exists to load pgvector's shared library in this
+-- session. Until it's loaded, Postgres doesn't know `hnsw.iterative_scan` is
+-- pgvector's user-settable parameter and treats it as an unknown placeholder,
+-- which only a superuser may attach to a function -- Supabase's `postgres`
+-- role isn't one, so without this line the CREATEs fail with
+-- "42501: permission denied to set parameter".
+select '[1]'::extensions.vector;
 
 create or replace function public.match_candidates(
   query_embedding extensions.vector(384),
