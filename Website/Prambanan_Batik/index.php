@@ -3,8 +3,8 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
-$page_title = 'Authentic Indonesian Batik';
-$meta_description = 'Discover authentic Indonesian batik at Prambanan Batik — premium handcrafted traditional patterns, ready-to-wear, and fabric collections with trusted customer reviews.';
+$page_title = 'Handmade Indonesian batik';
+$meta_description = 'Handmade Indonesian batik from Prambanan Batik: traditional patterns, clothing, fabric and pieces for the home. See photos, prices and what other customers thought.';
 $canonical_url = BASE_URL . '/';
 
 $db = null;
@@ -47,16 +47,16 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
     <section class="hero">
         <div class="hero-content">
             <span class="hero-eyebrow">Prambanan Batik</span>
-            <h2>Discover Authentic Batik</h2>
-            <p>Premium Indonesian batik craftsmanship with trusted customer reviews</p>
-            <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-primary btn-large">Explore Collection</a>
+            <h2>Indonesian batik, made by hand</h2>
+            <p>Traditional patterns, clothing and cloth, with reviews from the people who bought them.</p>
+            <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-primary btn-large">Browse the collection</a>
         </div>
     </section>
 
     <section class="featured-section">
         <div class="container">
-            <h2 class="section-title reveal">Featured Products</h2>
-            <p class="section-subtitle reveal">Handpicked pieces loved by our customers</p>
+            <h2 class="section-title reveal">Top-rated batik</h2>
+            <p class="section-subtitle reveal">The pieces our customers rate highest.</p>
             <div class="products-grid">
                 <?php foreach ($featured_products as $product): ?>
                     <article class="product-card">

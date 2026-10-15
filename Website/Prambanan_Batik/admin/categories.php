@@ -25,7 +25,7 @@ if ($edit_id) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = $_POST['action'] ?? '';
 
@@ -36,15 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = post_string('description');
 
             if ($name === '' || $slug === '') {
-                $error = 'Name and slug are required';
+                $error = 'Enter a name for the category.';
             } else {
                 try {
                     $stmt = $pdo->prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)');
                     $stmt->execute([$name, $slug, $description ?: null]);
-                    $message = 'Category created successfully';
+                    $message = 'Category created.';
                 } catch (Exception $e) {
                     error_log('Failed to create category: ' . $e->getMessage());
-                    $error = 'Failed to create category. The name or slug may already be in use.';
+                    $error = 'We couldn\'t create the category. Another category may already use that name or slug.';
                 }
             }
         } elseif ($action === 'update') {
@@ -54,24 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = post_string('description');
 
             if ($id < 1 || $name === '' || $slug === '') {
-                $error = 'ID, name and slug are required';
+                $error = 'Enter a name for the category.';
             } else {
                 try {
                     $stmt = $pdo->prepare('UPDATE categories SET name = ?, slug = ?, description = ?, updated_at = NOW() WHERE id = ?');
                     $stmt->execute([$name, $slug, $description ?: null, $id]);
-                    $message = 'Category updated successfully';
+                    $message = 'Category saved.';
                     $edit_category = null;
                     $edit_id = null;
                 } catch (Exception $e) {
                     error_log('Failed to update category: ' . $e->getMessage());
-                    $error = 'Failed to update category. The name or slug may already be in use.';
+                    $error = 'We couldn\'t save the category. Another category may already use that name or slug.';
                 }
             }
         } elseif ($action === 'delete') {
             $id = (int)post_string('id');
 
             if ($id < 1) {
-                $error = 'Category ID is required';
+                $error = 'We couldn\'t find that category.';
             } else {
                 try {
                     // Products in this category are kept; the FK sets their category_id to NULL.
@@ -81,14 +81,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $stmt = $pdo->prepare('DELETE FROM categories WHERE id = ?');
                     $stmt->execute([$id]);
-                    $message = 'Category deleted successfully' . ($orphaned > 0 ? " ({$orphaned} product" . ($orphaned === 1 ? '' : 's') . ' now uncategorized)' : '');
+                    $message = 'Category deleted.' . ($orphaned > 0 ? ' ' . $orphaned . ($orphaned === 1 ? ' product now has' : ' products now have') . ' no category.' : '');
                     if ($edit_id === $id) {
                         $edit_category = null;
                         $edit_id = null;
                     }
                 } catch (Exception $e) {
                     error_log('Failed to delete category: ' . $e->getMessage());
-                    $error = 'Failed to delete category';
+                    $error = 'We couldn\'t delete the category. Try again.';
                 }
             }
         }
@@ -105,7 +105,7 @@ $categories = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Categories</title>
+    <title>Manage categories</title>
 
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -119,7 +119,7 @@ $categories = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -128,7 +128,7 @@ $categories = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -138,7 +138,7 @@ $categories = $stmt->fetchAll();
                 <h1>Categories</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
@@ -153,7 +153,7 @@ $categories = $stmt->fetchAll();
 
                 <?php if ($edit_category): ?>
                     <div class="form-section">
-                        <h3>Edit Category</h3>
+                        <h3>Edit category</h3>
                         <form method="POST">
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="id" value="<?php echo htmlspecialchars($edit_category['id']); ?>">
@@ -166,7 +166,7 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="edit_slug">Slug</label>
-                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" placeholder="Leave blank to generate from the name">
+                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
@@ -175,14 +175,14 @@ $categories = $stmt->fetchAll();
                             </div>
 
                             <div style="display: flex; gap: 0.5rem;">
-                                <button type="submit" class="btn">Update Category</button>
+                                <button type="submit" class="btn">Save category</button>
                                 <a href="<?php echo SITE_PATH; ?>/admin/categories.php" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
                 <?php else: ?>
                     <div class="form-section">
-                        <h3>Create New Category</h3>
+                        <h3>New category</h3>
                         <form method="POST">
                             <input type="hidden" name="action" value="create">
                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -194,7 +194,7 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="slug">Slug</label>
-                                <input type="text" id="slug" name="slug" placeholder="Leave blank to generate from the name">
+                                <input type="text" id="slug" name="slug" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
@@ -202,7 +202,7 @@ $categories = $stmt->fetchAll();
                                 <textarea id="description" name="description"></textarea>
                             </div>
 
-                            <button type="submit" class="btn">Create Category</button>
+                            <button type="submit" class="btn">Create category</button>
                         </form>
                     </div>
                 <?php endif; ?>
@@ -232,7 +232,7 @@ $categories = $stmt->fetchAll();
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($category['id']); ?>">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category? Its products are kept but become uncategorized.')">Delete</button>
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this category? Its products stay, but they\'ll have no category.')">Delete</button>
                                             </form>
                                         </div>
                                     </td>

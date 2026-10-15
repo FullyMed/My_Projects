@@ -14,7 +14,7 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = $_POST['action'] ?? '';
 
@@ -24,28 +24,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $confirm  = post_string('confirm', false);
 
             if (empty($email) || empty($password)) {
-                $error = 'Email and password are required';
+                $error = 'Enter an email address and a password.';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-                $error = 'Invalid email address';
+                $error = 'That email address doesn\'t look right.';
             } elseif (strlen($password) < 8) {
-                $error = 'Password must be at least 8 characters';
+                $error = 'Use a password of at least 8 characters.';
             } elseif (strlen($password) > 72) {
                 // bcrypt silently ignores everything after 72 bytes.
-                $error = 'Password must be at most 72 characters';
+                $error = 'Use a password of 72 characters or fewer.';
             } elseif ($password !== $confirm) {
-                $error = 'Passwords do not match';
+                $error = 'The two passwords don\'t match.';
             } else {
                 try {
                     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                     $stmt = $pdo->prepare('INSERT INTO admin_users (email, password_hash, created_at) VALUES (?, ?, NOW())');
                     $stmt->execute([$email, $hash]);
-                    $message = 'Admin account created successfully';
+                    $message = 'Admin account created.';
                 } catch (PDOException $e) {
                     if ($e->getCode() === '23000') {
-                        $error = 'That email is already registered as an admin';
+                        $error = 'That email address already has an admin account.';
                     } else {
                         error_log('Failed to create admin: ' . $e->getMessage());
-                        $error = 'Failed to create admin account';
+                        $error = 'We couldn\'t create the account. Try again.';
                     }
                 }
             }
@@ -54,9 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)($_POST['id'] ?? 0);
 
             if ($id === (int)$admin['id']) {
-                $error = 'You cannot delete your own account';
+                $error = 'You can\'t delete your own account.';
             } elseif ($id < 1) {
-                $error = 'Invalid admin ID';
+                $error = 'We couldn\'t find that admin account.';
             } else {
                 // Prevent deleting the last admin
                 $countStmt = $pdo->prepare('SELECT COUNT(*) FROM admin_users');
@@ -64,19 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $total = (int)$countStmt->fetchColumn();
 
                 if ($total <= 1) {
-                    $error = 'Cannot delete the last admin account';
+                    $error = 'You can\'t delete the last admin account.';
                 } else {
                     try {
                         $stmt = $pdo->prepare('DELETE FROM admin_users WHERE id = ?');
                         $stmt->execute([$id]);
                         if ($stmt->rowCount() > 0) {
-                            $message = 'Admin account deleted';
+                            $message = 'Admin account deleted.';
                         } else {
-                            $error = 'Admin account not found';
+                            $error = 'We couldn\'t find that admin account.';
                         }
                     } catch (Exception $e) {
                         error_log('Failed to delete admin: ' . $e->getMessage());
-                        $error = 'Failed to delete admin account';
+                        $error = 'We couldn\'t delete the account. Try again.';
                     }
                 }
             }
@@ -87,13 +87,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $confirm  = post_string('confirm_password', false);
 
             if ($id < 1) {
-                $error = 'Invalid admin ID';
+                $error = 'We couldn\'t find that admin account.';
             } elseif (strlen($password) < 8) {
-                $error = 'Password must be at least 8 characters';
+                $error = 'Use a password of at least 8 characters.';
             } elseif (strlen($password) > 72) {
-                $error = 'Password must be at most 72 characters';
+                $error = 'Use a password of 72 characters or fewer.';
             } elseif ($password !== $confirm) {
-                $error = 'Passwords do not match';
+                $error = 'The two passwords don\'t match.';
             } else {
                 try {
                     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
@@ -101,13 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$hash, $id]);
                     // A fresh bcrypt hash always differs from the old one, so 0 rows means no such admin.
                     if ($stmt->rowCount() > 0) {
-                        $message = 'Password updated successfully';
+                        $message = 'Password changed.';
                     } else {
-                        $error = 'Admin account not found';
+                        $error = 'We couldn\'t find that admin account.';
                     }
                 } catch (Exception $e) {
                     error_log('Failed to update admin password: ' . $e->getMessage());
-                    $error = 'Failed to update password';
+                    $error = 'We couldn\'t change the password. Try again.';
                 }
             }
         }
@@ -124,7 +124,7 @@ $admins = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Admins</title>
+    <title>Manage admins</title>
 
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -188,7 +188,7 @@ $admins = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -197,7 +197,7 @@ $admins = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php" class="active">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -207,7 +207,7 @@ $admins = $stmt->fetchAll();
                 <h1>Admins</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
@@ -221,7 +221,7 @@ $admins = $stmt->fetchAll();
 
                 <!-- Existing admins -->
                 <div class="page-header">
-                    <h2 class="page-title">Admin Accounts</h2>
+                    <h2 class="page-title">Admin accounts</h2>
                 </div>
 
                 <div style="margin-bottom: 2rem;">
@@ -267,11 +267,11 @@ $admins = $stmt->fetchAll();
                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                             <div class="pw-row">
                                 <div class="form-group">
-                                    <label>New Password (min. 8 chars)</label>
+                                    <label>New password (8 characters or more)</label>
                                     <input type="password" name="new_password" required minlength="8">
                                 </div>
                                 <div class="form-group">
-                                    <label>Confirm Password</label>
+                                    <label>Confirm password</label>
                                     <input type="password" name="confirm_password" required minlength="8">
                                 </div>
                                 <div>
@@ -286,7 +286,7 @@ $admins = $stmt->fetchAll();
 
                 <!-- Add new admin -->
                 <div class="form-section">
-                    <h3>Add New Admin</h3>
+                    <h3>Add an admin</h3>
                     <form method="POST">
                         <input type="hidden" name="action" value="create">
                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -302,18 +302,18 @@ $admins = $stmt->fetchAll();
                             <div class="form-group">
                                 <label for="password">Password <span class="required">*</span></label>
                                 <input type="password" id="password" name="password"
-                                       placeholder="Min. 8 characters" required minlength="8">
+                                       placeholder="8 characters or more" required minlength="8">
                             </div>
 
                             <div class="form-group">
-                                <label for="confirm">Confirm Password <span class="required">*</span></label>
+                                <label for="confirm">Confirm password <span class="required">*</span></label>
                                 <input type="password" id="confirm" name="confirm"
-                                       placeholder="Repeat password" required minlength="8">
+                                       placeholder="Type it again" required minlength="8">
                             </div>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn">Create Admin</button>
+                            <button type="submit" class="btn">Create admin</button>
                         </div>
                     </form>
                 </div>

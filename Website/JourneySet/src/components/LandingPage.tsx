@@ -10,46 +10,46 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
   usePageMeta(
-    'JourneySet - Personal Productivity Planner',
-    'Plan your weekly schedules, set and track goals, and manage events with JourneySet - your personal productivity companion.'
+    'JourneySet | Free weekly planner',
+    'Plan your week, track goals and keep a calendar of events. JourneySet is free and works in your browser.'
   );
   const { isDark, toggleTheme } = useTheme();
 
   const features = [
     {
       icon: CheckSquare,
-      title: 'Weekly Planner',
-      description: 'Structure every day with tasks and optional time slots. Recurring tasks carry forward automatically.',
+      title: 'Weekly planner',
+      description: 'Add tasks to any day, with an optional time. Mark a task as weekly and JourneySet copies it into next week for you.',
       color: 'bg-blue-500',
     },
     {
       icon: Target,
-      title: 'Goal Tracker',
-      description: 'Define weekly targets and watch your progress climb with clear visual indicators.',
+      title: 'Goal tracker',
+      description: 'Set a target in any unit, like 10 runs or 200 pages, and press +1 as you go. The bar shows how close you are.',
       color: 'bg-fuchsia-500',
     },
     {
       icon: Calendar,
-      title: 'Event Calendar',
-      description: 'A full monthly calendar for events and appointments, with conflict detection built in.',
+      title: 'Event calendar',
+      description: 'See the whole month at once. JourneySet warns you when two events land on the same time.',
       color: 'bg-emerald-500',
     },
     {
       icon: BarChart3,
-      title: 'Progress Analytics',
-      description: 'At-a-glance completion stats and goal summaries so you always know where you stand.',
+      title: 'Progress at a glance',
+      description: 'The goals page counts how many you have finished, and each printed week shows how many tasks you ticked off.',
       color: 'bg-sky-500',
     },
     {
       icon: Download,
-      title: 'Export & Print',
-      description: 'Generate clean print-ready views of your planner, goals, and calendar in one click.',
+      title: 'Print or save as PDF',
+      description: 'Print your week, your goals or a month of events, or save any of them as a PDF from the print window.',
       color: 'bg-amber-500',
     },
     {
       icon: isDark ? Sun : Moon,
-      title: 'Five Colour Themes',
-      description: 'Light, Dark, Sky, Gold and Forest — pick the look you like; your choice is always remembered.',
+      title: 'Five colour themes',
+      description: 'Pick Light, Dark, Sky, Gold or Forest. This browser remembers the one you choose.',
       color: 'bg-rose-500',
     },
   ];
@@ -118,20 +118,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
           {/* Badge */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs xs:text-sm font-medium mb-6 xs:mb-8">
             <Zap className="h-3 w-3 xs:h-3.5 xs:w-3.5" />
-            <span>Your week, perfectly organised</span>
+            <span>Tasks, goals and events in one place</span>
           </div>
 
-          {/* Headline — scales from 375 px up to 1440 px */}
+          {/* Headline: scales from 375 px up to 1440 px */}
           <h1 className="text-[2.25rem] leading-[1.1] xs:text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-4 xs:mb-6 tracking-tight">
-            The productivity
+            Plan your week
             <br />
             <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
-              planner you'll love
+              and keep your goals in sight
             </span>
           </h1>
 
           <p className="text-sm xs:text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 xs:mb-10 max-w-2xl mx-auto leading-relaxed px-2 xs:px-0">
-            Plan your week, track your goals, and manage events — all in one elegant workspace built for focused people.
+            Add tasks to each day, count your way towards a goal and keep your appointments on a monthly calendar.
           </p>
 
           {/* CTAs — stacked on mobile, side-by-side on xs+ */}
@@ -167,10 +167,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
       <div className="max-w-7xl mx-auto px-4 xs:px-6 py-14 xs:py-20">
         <div className="text-center mb-10 xs:mb-14">
           <h2 className="text-2xl xs:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3 xs:mb-4 tracking-tight">
-            Everything in one place
+            What you get
           </h2>
           <p className="text-sm xs:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Four powerful tools that work seamlessly together to keep your week on track.
+            A planner, a goal tracker and a calendar, plus printing and themes.
           </p>
         </div>
 
@@ -204,7 +204,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
             Ready to get organised?
           </h2>
           <p className="text-sm xs:text-base text-on-accent/80 mb-6 xs:mb-8 max-w-xl mx-auto">
-            Join thousands building better weekly habits with JourneySet.
+            It's free, and you can delete your account at any time.
           </p>
           <button
             onClick={() => onShowAuth('register')}
@@ -230,7 +230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
             <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</Link>
           </div>
           <p className="text-xs xs:text-sm text-slate-400 dark:text-slate-600">
-            Your personal productivity companion.
+            A free planner for your week.
           </p>
         </div>
       </footer>

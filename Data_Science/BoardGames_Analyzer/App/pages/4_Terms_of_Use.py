@@ -7,76 +7,73 @@ import streamlit as st
 import theme
 
 st.set_page_config(
-    page_title="Terms of Use — Board Game Discovery Engine",
+    page_title="Terms of use · Board Game Discovery Engine",
     page_icon="📜",
     layout="wide",
 )
 theme.set_meta_description(
-    "Terms of use for BoardGames Analyzer, an educational, non-commercial board game "
-    "recommendation demo built with Streamlit."
+    "The terms for using BoardGames Analyzer, a free, non-commercial student project "
+    "that recommends board games."
 )
 
 st.sidebar.title("⚙ Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 st.sidebar.markdown("---")
-st.sidebar.caption("Board Game Discovery Engine — interactive recommendation demo.")
+st.sidebar.caption("Board Game Discovery Engine, a student research project.")
 
-st.markdown('<div class="main-title"><span class="title-icon">📜</span> Terms of Use</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">📜</span> Terms of use</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Please read these terms before using BoardGames Analyzer.</div>',
+    '<div class="subtitle">The ground rules for using BoardGames Analyzer.</div>',
     unsafe_allow_html=True,
 )
-st.caption("Last updated: September 21, 2026")
+st.caption("Last updated: October 15, 2026")
 st.markdown("---")
 
 sections = [
     (
-        "1. About This Project",
-        "BoardGames Analyzer is an independent, non-commercial educational and portfolio project "
-        "that demonstrates an explainable hybrid board game recommendation system. It is not a "
-        "registered business or commercial service, and these terms are offered in that spirit.",
+        "1. What this is",
+        "BoardGames Analyzer is a free student project. It's a portfolio and research demo of an "
+        "explainable board game recommender, not a business or a commercial service, and these terms "
+        "are written with that in mind.",
     ),
     (
-        "2. Acceptable Use",
-        "This app is intended for personal, non-commercial exploration and demonstration. Please "
-        "don't use automated tools to scrape, overload, or disrupt the app, or attempt to circumvent "
-        "its normal operation.",
+        "2. Using the app",
+        "Use it to look around and find games for yourself. Please don't scrape it with automated "
+        "tools, flood it with requests, or try to get around how it normally works.",
     ),
     (
-        "3. Recommendations Are Not Advice",
-        "Recommendations are generated algorithmically from public BoardGameGeek (BGG) data using "
-        "content similarity, trait matching, sentiment analysis, and popularity signals. They are "
-        "provided for discovery and entertainment purposes only, may be incomplete or inaccurate, "
-        "and are not a guarantee of any game's quality, availability, or suitability for you.",
+        "3. Recommendations aren't advice",
+        "An algorithm builds every recommendation from public BoardGameGeek (BGG) data, using content "
+        "similarity, trait matching, review sentiment and popularity. The suggestions are for discovery "
+        "and fun. They can be incomplete or wrong, and they don't guarantee that a game is good, "
+        "available, or right for you.",
     ),
     (
-        "4. Data Source &amp; Attribution",
-        "Game metadata, ratings, and review text used by this app are sourced from publicly "
-        "available BoardGameGeek (BGG) datasets. This project is not affiliated with, endorsed by, "
-        "or sponsored by BoardGameGeek LLC or Geekdo, Inc. \"BoardGameGeek\" and related trademarks "
-        "belong to their respective owners.",
+        "4. Where the data comes from",
+        "The game details, ratings and review text come from publicly available BoardGameGeek (BGG) "
+        "datasets. BoardGameGeek LLC and Geekdo, Inc. have no connection to this project: they don't "
+        "endorse or sponsor it. \"BoardGameGeek\" and related trademarks belong to their owners.",
     ),
     (
-        "5. No Warranty",
-        "This app is provided \"as is,\" without warranty of any kind, express or implied, including "
-        "availability, uptime, accuracy, or fitness for a particular purpose. The maintainer is not "
-        "liable for any damages arising from use of, or inability to use, this app.",
+        "5. No warranty",
+        "The app comes \"as is\", with no warranty of any kind, express or implied. That covers "
+        "availability, uptime, accuracy, and fitness for any particular purpose. The maintainer isn't "
+        "liable for any damage that comes from using the app or from not being able to use it.",
     ),
     (
-        "6. Source Code",
-        "The source code for this project is hosted on GitHub. No specific open-source license is "
-        "currently published for this repository — please contact the maintainer via GitHub before "
-        "reusing the code.",
+        "6. Source code",
+        "The code lives on GitHub. The repository doesn't publish an open-source license yet, so "
+        "please ask the maintainer on GitHub before you reuse the code.",
     ),
     (
-        "7. Changes to These Terms",
-        "These terms may be updated as the project evolves. Continued use of the app after changes "
-        "are posted constitutes acceptance of the updated terms.",
+        "7. Changes to these terms",
+        "The maintainer may update these terms as the project changes. If you keep using the app "
+        "after an update, you accept the new terms.",
     ),
     (
         "8. Contact",
-        "Questions about these terms can be raised via the project's GitHub repository: "
+        "Questions about these terms? Ask on the project's GitHub repository: "
         '<a href="https://github.com/FullyMed/My_Projects" target="_blank">github.com/FullyMed/My_Projects</a>.',
     ),
 ]
@@ -90,7 +87,7 @@ c1, c2 = st.columns(2)
 with c1:
     st.page_link("app.py", label="Home", icon="🏠")
 with c2:
-    st.page_link("pages/5_Privacy_Policy.py", label="Privacy Policy", icon="🔒")
+    st.page_link("pages/5_Privacy_Policy.py", label="Privacy policy", icon="🔒")
 
 st.markdown("---")
-st.caption("BoardGames Analyzer — Explainable Hybrid Recommendation System · Built with Streamlit")
+st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

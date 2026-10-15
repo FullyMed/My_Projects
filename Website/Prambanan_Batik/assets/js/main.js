@@ -58,7 +58,7 @@ function initScrollReveal() {
     revealObserver.observe(el);
   });
 
-  // Product cards — staggered within their grid
+  // Product cards, staggered within their grid
   const cardObserver = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
@@ -78,7 +78,7 @@ function initScrollReveal() {
   });
 }
 
-/* ── Product card — reviewer avatar initial ─────────────────── */
+/* ── Product card: reviewer avatar initial ─────────────────── */
 function initProductCards() {
   // Generate avatar initials for reviews
   document.querySelectorAll('.reviewer-avatar').forEach(function (el) {
@@ -141,7 +141,7 @@ function initImageLoading() {
   });
 }
 
-/* ── Form submit — disable + spinner on the submit button ───────── */
+/* ── Form submit: disable + spinner on the submit button ───────── */
 function initFormLoadingStates() {
   document.querySelectorAll('form').forEach(function (form) {
     form.addEventListener('submit', function () {
@@ -198,7 +198,7 @@ function initNavProgressBar() {
     if (!e.defaultPrevented) start();
   });
 
-  // Restore the bar — and any submit buttons initFormLoadingStates() disabled — if the
+  // Restore the bar (and any submit buttons initFormLoadingStates() disabled) if the
   // page is reached via the back/forward cache, so the restored page is usable again.
   window.addEventListener('pageshow', function (e) {
     bar.classList.remove('is-active');

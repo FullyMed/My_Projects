@@ -11,13 +11,13 @@ import theme
 INPUT_MAX_CHARS = 200
 
 st.set_page_config(
-    page_title="Recommendation — Board Game Discovery Engine",
+    page_title="Recommendations · Board Game Discovery Engine",
     page_icon="🎲",
     layout="wide",
 )
 theme.set_meta_description(
-    "Get board game recommendations by title similarity, gameplay traits, or both — "
-    "with transparent, explainable reasons for every suggestion."
+    "Tell us games you like or traits you want, and get board game suggestions "
+    "with the reason behind each one."
 )
 
 # Sidebar
@@ -26,27 +26,35 @@ selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 
 mode = st.sidebar.selectbox(
-    "Recommendation Mode",
+    "Search by",
     ["Combined", "Title-Based", "Trait-Based"],
 )
 
-top_n = st.sidebar.slider("Top N Results", min_value=5, max_value=20, value=10, step=1)
+top_n = st.sidebar.slider("Number of results", min_value=5, max_value=20, value=10, step=1)
 
+# The values are what the engine expects; format_func only changes what the user reads
+DIFFICULTY_LABELS = {
+    "Any": "Any",
+    "low": "Light (BGG weight up to 2)",
+    "medium": "Medium (2 to 3)",
+    "high": "Heavy (over 3)",
+}
 difficulty_label = st.sidebar.selectbox(
-    "Difficulty Filter",
-    ["Any", "low", "medium", "high"],
+    "Difficulty",
+    list(DIFFICULTY_LABELS),
+    format_func=DIFFICULTY_LABELS.get,
 )
 if difficulty_label == "Any":
     difficulty_label = None
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Board Game Discovery Engine — interactive recommendation demo.")
+st.sidebar.caption("Board Game Discovery Engine, a student research project.")
 
 # Engine
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
-@st.cache_resource(show_spinner="Loading recommendation engine...")
+@st.cache_resource(show_spinner="Loading the recommender. The first load takes a few seconds...")
 def load_engine():
     return BoardGameDiscoveryEngine(base_path=str(PROJECT_ROOT))
 
@@ -87,17 +95,17 @@ for key in ["title_input", "category_input", "mechanic_input", "family_input", "
         st.session_state[key] = ""
 
 # Header
-st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Recommendation Engine</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Find your next game</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Discover board games by title similarity, trait preferences, or both.</div>',
+    '<div class="subtitle">Start from games you already like, from traits you want, or from both.</div>',
     unsafe_allow_html=True,
 )
 
 # Mode description
 mode_descriptions = {
-    "Title-Based": "Recommendations driven by semantic similarity to your selected seed games — content, embeddings, sentiment, and popularity.",
-    "Trait-Based": "Explore games using gameplay characteristics: categories, mechanics, families, publishers, and complexity level.",
-    "Combined": "Combines seed-game similarity with trait filtering for guided discovery that balances taste and explicit preferences.",
+    "Title-Based": "Name a few games you like. You'll get games with similar descriptions, mechanics and themes, nudged toward titles lots of people have rated.",
+    "Trait-Based": "No favorites in mind? Pick categories, mechanics, families or publishers, and the games that match the most of them come first.",
+    "Combined": "Give both: games you like and traits you want. Games that are similar to your picks and match your traits rank highest.",
 }
 st.markdown(
     f'<div class="info-box">{mode_descriptions[mode]}</div>',
@@ -107,31 +115,31 @@ st.markdown(
 # Example button
 ex_col, caption_col = st.columns([1, 5])
 with ex_col:
-    if st.button("Try Example"):
+    if st.button("Try an example"):
         st.session_state["title_input"] = "Splendor, Azul"
         st.session_state["category_input"] = "Strategy, Family"
         st.session_state["mechanic_input"] = ""
         st.session_state["family_input"] = ""
         st.session_state["publisher_input"] = ""
 with caption_col:
-    st.caption("Loads a quick demo query so you can test the system instantly.")
+    st.caption("Fills in Splendor and Azul with Strategy and Family so you can see how it works.")
 
 # Input fields
 col1, col2 = st.columns(2)
 with col1:
     title_input = st.text_input(
-        "Favorite Game Titles",
+        "Games you like",
         value=st.session_state["title_input"],
-        placeholder="Example: Splendor, Azul",
+        placeholder="e.g. Splendor, Azul",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["title_input"] = title_input
 
 with col2:
     category_input = st.text_input(
-        "Preferred Categories",
+        "Categories",
         value=st.session_state["category_input"],
-        placeholder="Example: Strategy, Family, Horror",
+        placeholder="e.g. Strategy, Family, Horror",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["category_input"] = category_input
@@ -139,27 +147,27 @@ with col2:
 col3, col4 = st.columns(2)
 with col3:
     mechanic_input = st.text_input(
-        "Preferred Mechanics",
+        "Mechanics",
         value=st.session_state["mechanic_input"],
-        placeholder="Example: Cooperative Game, Tile Placement",
+        placeholder="e.g. Cooperative Game, Tile Placement",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["mechanic_input"] = mechanic_input
 
 with col4:
     family_input = st.text_input(
-        "Preferred Families (optional)",
+        "Families (optional)",
         value=st.session_state["family_input"],
         # Families are exact BGG family names ("Group: Name"), so the example must be a real one
-        placeholder="Example: Components: Miniatures, Crowdfunding: Kickstarter",
+        placeholder="e.g. Components: Miniatures, Crowdfunding: Kickstarter",
         max_chars=INPUT_MAX_CHARS,
     )
     st.session_state["family_input"] = family_input
 
 publisher_input = st.text_input(
-    "Preferred Publishers (optional)",
+    "Publishers (optional)",
     value=st.session_state["publisher_input"],
-    placeholder="Example: Asmodee, CMON Global Limited",
+    placeholder="e.g. Asmodee, CMON Global Limited",
     max_chars=INPUT_MAX_CHARS,
 )
 st.session_state["publisher_input"] = publisher_input
@@ -171,7 +179,7 @@ wanted_families = parse_csv_input(family_input)
 wanted_publishers = parse_csv_input(publisher_input)
 
 st.markdown("---")
-run_btn = st.button("Get Recommendations", width='stretch')
+run_btn = st.button("Get recommendations", width='stretch')
 
 # Run
 if run_btn:
@@ -183,10 +191,10 @@ if run_btn:
 
         if mode == "Title-Based":
             if not query_titles:
-                st.warning("Please enter at least one game title.")
+                st.warning("Type at least one game you like.")
             else:
                 seed_matches = describe_seed_matches(query_titles)
-                with st.spinner("Finding recommendations..."):
+                with st.spinner("Finding games..."):
                     results = engine.discover(
                         query_titles=query_titles,
                         difficulty_label=difficulty_label,
@@ -196,13 +204,13 @@ if run_btn:
 
         elif mode == "Trait-Based":
             if not any([wanted_categories, wanted_mechanics, wanted_families, wanted_publishers]):
-                st.warning("Please enter at least one category, mechanic, family, or publisher.")
+                st.warning("Add at least one category, mechanic, family or publisher.")
             else:
                 expanded_categories, expanded_mechanics = engine.expand_traits(
                     wanted_categories=wanted_categories,
                     wanted_mechanics=wanted_mechanics,
                 )
-                with st.spinner("Finding recommendations..."):
+                with st.spinner("Finding games..."):
                     results = engine.discover(
                         wanted_categories=wanted_categories,
                         wanted_mechanics=wanted_mechanics,
@@ -215,14 +223,14 @@ if run_btn:
 
         else:  # Combined
             if not any([query_titles, wanted_categories, wanted_mechanics, wanted_families, wanted_publishers]):
-                st.warning("Please enter at least one title or one trait.")
+                st.warning("Type a game you like or add at least one trait.")
             else:
                 seed_matches = describe_seed_matches(query_titles) if query_titles else []
                 expanded_categories, expanded_mechanics = engine.expand_traits(
                     wanted_categories=wanted_categories,
                     wanted_mechanics=wanted_mechanics,
                 )
-                with st.spinner("Finding recommendations..."):
+                with st.spinner("Finding games..."):
                     results = engine.discover(
                         query_titles=query_titles,
                         wanted_categories=wanted_categories,
@@ -237,14 +245,14 @@ if run_btn:
         unmatched_titles = [typed for typed, name in seed_matches if name is None]
         if unmatched_titles:
             st.warning(
-                f"No game found for: {', '.join(unmatched_titles)}. "
-                "Check the spelling or try the full title; unmatched titles are ignored."
+                f"We couldn't find: {', '.join(unmatched_titles)}. "
+                "Check the spelling or try the full title. We left it out of this search."
             )
 
         if formatted is not None and len(formatted) > 0:
             # System interpretation summary
             st.markdown("---")
-            st.markdown('<div class="section-title">System Interpretation</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">What we searched for</div>', unsafe_allow_html=True)
 
             if seed_matches:
                 seed_lines = "<br>".join(
@@ -257,35 +265,35 @@ if run_btn:
             ic1, ic2 = st.columns(2)
             with ic1:
                 st.markdown(
-                    f'<div class="info-box"><b>Seed Games (typed → matched):</b><br>{seed_lines}</div>',
+                    f'<div class="info-box"><b>Your games (what you typed → what we matched):</b><br>{seed_lines}</div>',
                     unsafe_allow_html=True,
                 )
             with ic2:
                 st.markdown(
-                    f'<div class="info-box"><b>Difficulty Filter:</b><br>{html.escape(difficulty_label) if difficulty_label else "Any"}</div>',
+                    f'<div class="info-box"><b>Difficulty:</b><br>{html.escape(DIFFICULTY_LABELS[difficulty_label]) if difficulty_label else "Any"}</div>',
                     unsafe_allow_html=True,
                 )
 
             ic3, ic4 = st.columns(2)
             with ic3:
                 st.markdown(
-                    f'<div class="info-box"><b>Expanded Categories:</b><br>{html.escape(", ".join(expanded_categories)) if expanded_categories else "—"}</div>',
+                    f'<div class="info-box"><b>Categories we searched (broad words expand to related BGG terms):</b><br>{html.escape(", ".join(expanded_categories)) if expanded_categories else "—"}</div>',
                     unsafe_allow_html=True,
                 )
             with ic4:
                 st.markdown(
-                    f'<div class="info-box"><b>Expanded Mechanics:</b><br>{html.escape(", ".join(expanded_mechanics)) if expanded_mechanics else "—"}</div>',
+                    f'<div class="info-box"><b>Mechanics we searched:</b><br>{html.escape(", ".join(expanded_mechanics)) if expanded_mechanics else "—"}</div>',
                     unsafe_allow_html=True,
                 )
 
             # Full table
             st.markdown("---")
-            st.markdown('<div class="section-title">Recommendation Table</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">All results</div>', unsafe_allow_html=True)
             st.dataframe(formatted, width='stretch', height=min(400, max(120, 40 + 35 * len(formatted))))
 
             # Top-5 cards
             st.markdown("---")
-            st.markdown('<div class="section-title">Top Recommendations</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Top picks</div>', unsafe_allow_html=True)
 
             for rank, (_, row) in enumerate(formatted.head(5).iterrows()):
                 # Each st.markdown call is its own element, so an opening/closing <div> pair
@@ -299,28 +307,28 @@ if run_btn:
                     # 3 equal columns — on mobile the CSS stacks them vertically
                     mc1, mc2, mc3 = st.columns(3)
                     with mc1:
-                        st.metric("Final Score", row.get("final_score", "—"))
+                        st.metric("Match score", row.get("final_score", "—"))
                     with mc2:
-                        st.metric("Rating", row.get("avg_rating", "—"))
+                        st.metric("BGG rating", row.get("avg_rating", "—"))
                     with mc3:
                         votes = row.get("num_votes", 0)
-                        st.metric("Votes", f'{int(votes):,}' if votes else "—")
+                        st.metric("Ratings", f'{int(votes):,}' if votes else "—")
 
                     st.markdown(
-                        f'<div class="card-reason"><b>Why recommended:</b> {html.escape(shorten_reason(row.get("reason", "—")))}</div>',
+                        f'<div class="card-reason"><b>Why this game:</b> {html.escape(shorten_reason(row.get("reason", "—")))}</div>',
                         unsafe_allow_html=True,
                     )
 
         elif formatted is not None and len(formatted) == 0:
             theme.render_not_found(
-                title="No Matches Found",
-                message="No games matched your query. Try broadening your titles, traits, or difficulty filter.",
+                title="No matches",
+                message="Nothing matched that search. Try fewer traits, a different difficulty, or another game title.",
                 icon="🔍",
             )
 
     except Exception as e:
         print(f"[1_Recommendation] error handling request: {e}", file=sys.stderr)
-        st.error("Something went wrong while generating recommendations. Please try a different query.")
+        st.error("Something went wrong on our side. Try a different search.")
 
 st.markdown("---")
-st.caption("BoardGames Analyzer — Explainable Hybrid Recommendation System · Built with Streamlit")
+st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

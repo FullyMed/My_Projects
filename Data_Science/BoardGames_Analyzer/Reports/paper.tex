@@ -27,15 +27,11 @@ Email: maxfelix05@gmail.com
 \maketitle
 
 \begin{abstract}
-    
-    Board games have experienced significant growth in popularity, resulting in increasingly large and complex game catalogs that make game discovery difficult for players. Traditional recommendation approaches often rely heavily on collaborative filtering, which suffers from sparsity and cold-start limitations when user interaction data is limited. To address these challenges, this study proposes an explainable hybrid board game recommendation system that combines content similarity, sentiment analysis, and popularity signals to support multiple recommendation modes.
-    
-    The proposed system integrates textual game descriptions, gameplay traits, user review sentiment, and popularity-based information to generate recommendations through title-based, trait-based, and combined recommendation modes. Content representations were generated using TF-IDF and sentence-transformer embeddings, while sentiment scores were derived from transformer-based review analysis. The system was evaluated using a filtered subset of the BoardGameGeek dataset containing over 21,000 board games and millions of user ratings and reviews.
-    
-    The system was evaluated on 300 BoardGameGeek users with Recall@K and NDCG@K under a holdout protocol, alongside a popularity baseline, a content-only baseline, and a sentiment ablation. Under this protocol, whose held-out games are dominated by the most-rated titles, the popularity baseline was clearly strongest (Recall@10 of 0.230), while the three proposed modes reached Recall@10 between 0.020 and 0.037, the combined mode being best among them. Counting only held-out games outside the 100 most-rated titles, the popularity baseline retrieved none, whereas the proposed modes retrieved a small share (Recall@10 of 0.015--0.022).
+BoardGameGeek (BGG) lists more than 21,000 board games, and players who want something new have to search a large catalog with little guidance. Collaborative filtering needs rating histories that new players and new games do not have, so we built a recommender that works from game content instead and explains each suggestion. It offers three modes: a title-based mode that starts from games the user already likes, a trait-based mode that starts from categories and mechanics, and a combined mode that uses both. The scores combine TF-IDF and sentence-embedding similarity, BGG attribute overlap, review sentiment from a DistilBERT classifier, and popularity, and every recommendation lists the attributes it shares with the user's input.
 
-    The findings indicate that offline accuracy on this dataset is driven largely by popularity, and that the value of the proposed framework lies in explainable, similarity-driven discovery beyond the most popular games rather than in raw retrieval accuracy. The paper reports these results candidly and identifies the evaluation and modelling changes needed to strengthen them.
-    
+We evaluated the system on 300 BGG users with Recall@K and NDCG@K under a holdout protocol, together with a popularity baseline, a content-only baseline, and a sentiment ablation. The held-out games in this protocol are mostly the most-rated titles, and the popularity baseline won by a wide margin (Recall@10 of 0.230). The three proposed modes reached Recall@10 between 0.020 and 0.037, with the combined mode best. On held-out games outside the 100 most-rated titles, the popularity baseline retrieved none and the proposed modes retrieved a small share (Recall@10 of 0.015--0.022). Removing sentiment made no measurable difference.
+
+On this data, offline accuracy depends mostly on popularity. The value of the framework lies in explainable, similarity-based discovery beyond the best-known games, and showing that value will take a user study and an evaluation that leans less on popular titles.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -43,110 +39,108 @@ Recommender Systems, Board Game Recommendation, Explainable Recommendation, Cont
 \end{IEEEkeywords}
 \section{Introduction}
 
-Board games have experienced significant growth in popularity over the past decade, resulting in increasingly large and complex game catalogs on online platforms such as BoardGameGeek (BGG). As the number of available games continues to expand, users often face difficulties in discovering games that match their preferences, gameplay styles, and thematic interests. This creates a recommendation challenge in which systems must balance personalization, relevance, diversity, and explainability.
+BoardGameGeek (BGG), an online board game database, lists tens of thousands of titles. A player who enjoyed one game and wants another like it has to search that catalog by hand or rely on lists of popular titles. A recommender can help, but it has to cope with a catalog where most games have relatively few ratings and many players have rated only a handful.
 
-Traditional recommendation systems commonly rely on collaborative filtering techniques, which generate recommendations based on user interaction patterns and rating similarities. Although collaborative filtering has shown strong performance in many domains, it suffers from several important limitations. One major issue is the cold-start problem, where newly added games or users with limited interaction history cannot be effectively recommended. In addition, sparse rating distributions may reduce recommendation quality and system reliability.
+Collaborative filtering recommends items from patterns in user ratings and works well when those patterns are dense. It struggles with the cold-start problem: a new game, or a user with a short rating history, gives the method little to work with. Sparse ratings also make its predictions less reliable for the many games in the long tail of the catalog.
 
-Content-based recommendation approaches attempt to address some of these limitations by utilizing item attributes such as descriptions, mechanics, categories, and themes. However, content-only systems often fail to capture qualitative user opinions and emotional responses toward games. Meanwhile, popularity-based approaches may over-recommend highly popular games while ignoring niche preferences and personalized interests.
+Content-based methods avoid the cold-start problem by comparing the items themselves, here through their descriptions, mechanics, categories, and themes. They miss what players say about a game, however, and popularity-based lists favor well-known titles over the niche games a player might enjoy.
 
-To address these challenges, this paper proposes an explainable hybrid board game recommendation system that combines multiple recommendation signals into a unified framework. The proposed system integrates content similarity, sentiment analysis derived from user reviews, and popularity information to generate interpretable recommendations, and evaluates candidly how much each signal contributes. Furthermore, the system supports multiple recommendation modes, including title-based recommendations, trait-based recommendations, and combined hybrid recommendations.
+We combine these signals in one system and keep it explainable. The system scores games by content similarity, attribute overlap, review sentiment, and popularity, and it tells the user which attributes connect each recommendation to their input. It offers title-based, trait-based, and combined modes, and we measure how much each signal contributes.
 
-The primary contributions of this paper are as follows:
+This paper makes four contributions:
 
 \begin{itemize}
-    \item Development of a hybrid recommendation framework combining content similarity, sentiment signals, and popularity metrics.
-    
-    \item Implementation of explainable recommendation outputs that provide interpretable recommendation reasoning.
-    
-    \item Support for multiple recommendation modes, including title-based, trait-based, and combined recommendations.
-    
-    \item Evaluation of recommendation performance using Recall@K and NDCG@K metrics under different recommendation scenarios.
+    \item A recommendation framework that combines content similarity, attribute overlap, review sentiment, and popularity.
+
+    \item An explanation for every recommendation, built from the BGG attributes that link it to the user's input.
+
+    \item Three query modes: title-based, trait-based, and combined.
+
+    \item An evaluation with Recall@K and NDCG@K that includes popularity and content-only baselines, a sentiment ablation, and a long-tail analysis.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section II reviews related work in recommendation systems and sentiment-aware recommendation approaches. Section III describes the proposed methodology and recommendation architecture. Section IV presents the experimental evaluation and performance analysis. Section V discusses the findings, limitations, and implications of the proposed system. Finally, Section VI concludes the paper and suggests directions for future work.
+Section II reviews related work. Section III describes the data, the features, and the scoring. Section IV presents the evaluation and its results, Section V discusses them, and Section VI concludes.
 
 \section{Related Work}
 
-Recommendation systems have been widely studied as a solution for helping users discover relevant items in large information spaces. Collaborative filtering is one of the most established recommendation approaches and relies on user-item interaction patterns to identify similarities between users or items. Su and Khoshgoftaar \cite{su2009survey} provide a broad survey of collaborative filtering techniques, highlighting their effectiveness as well as their limitations, including rating sparsity and cold-start problems. Herlocker et al. \cite{herlocker2004evaluating} further emphasize the importance of proper evaluation methods when assessing collaborative filtering systems.
+Collaborative filtering is one of the most established recommendation approaches. It finds users or items with similar rating patterns and recommends accordingly. Su and Khoshgoftaar \cite{su2009survey} survey collaborative filtering techniques and describe their main weaknesses, rating sparsity and cold start among them. Herlocker et al. \cite{herlocker2004evaluating} discuss how to evaluate collaborative filtering systems properly.
 
-Content-based recommendation systems address some of these limitations by recommending items based on item attributes rather than user interaction histories. Pazzani and Billsus \cite{pazzani2007content} describe how content-based systems use textual and metadata features to model item similarity. In the context of board games, this approach is especially relevant because games often contain rich descriptive information, including descriptions, mechanics, categories, themes, and complexity indicators. However, content-based systems may be limited when item metadata does not fully capture user experience or subjective preference.
+Content-based systems recommend items with attributes similar to those a user liked, so they do not depend on other users' histories. Pazzani and Billsus \cite{pazzani2007content} describe how such systems model item similarity from text and metadata. Board games suit this approach because each game carries a description, mechanics, categories, themes, and a complexity rating. Metadata cannot capture everything players care about, though, such as how a game feels to play.
 
-Hybrid recommendation systems combine multiple recommendation strategies to improve robustness and recommendation quality. Burke \cite{burke2002hybrid} presents hybrid recommender systems as a way to reduce the weaknesses of individual recommendation approaches by combining different sources of evidence. More recent surveys also show that hybrid approaches remain important across different application domains because they can integrate collaborative, content-based, and contextual signals \cite{ko2022survey}. This motivates the design of the proposed system, which combines content similarity, sentiment information, and popularity signals.
+Hybrid systems combine several sources of evidence to offset the weaknesses of each. Burke \cite{burke2002hybrid} presents hybrid recommenders as a way to reduce the weaknesses of individual approaches, and a more recent survey \cite{ko2022survey} shows that hybrid designs remain common across domains because they can mix collaborative, content-based, and contextual signals. Our system follows this line by combining content similarity, sentiment, and popularity.
 
-Sentiment-aware recommendation systems incorporate user opinions from reviews to improve recommendation relevance. Wang et al. \cite{wang2017location} demonstrate the usefulness of sentiment information in recommender systems by integrating sentiment with contextual recommendation signals. Da'u and Salim \cite{da2019sentiment} also show that sentiment-aware models can enhance recommendation performance by capturing opinion-oriented information from review text. For board game recommendations, sentiment is valuable because user reviews often describe enjoyment, difficulty, replayability, and perceived game quality beyond numerical ratings.
+Sentiment-aware recommenders draw on the opinions in user reviews. Wang et al. \cite{wang2017location} combine review sentiment with contextual signals, and Da'u and Salim \cite{da2019sentiment} report that sentiment-aware models improve recommendation performance by using opinion information from review text. Board game reviews often comment on enjoyment, difficulty, and replay value, which ratings alone do not convey.
 
-Explainability has also become an important direction in recommender system research. Zhang and Chen \cite{zhang2020explainable} argue that explainable recommendation systems can improve user trust, transparency, and decision support. Chatti et al. \cite{chatti2024visualization} further discuss the role of visualization in recommendation explainability. This is important for board game discovery because users may want to understand why a specific game is recommended, such as shared mechanics, similar themes, positive sentiment, or popularity.
+Explainable recommendation has become an active research area. Zhang and Chen \cite{zhang2020explainable} argue that explanations improve user trust and support decisions, and Chatti et al. \cite{chatti2024visualization} study how visualization can explain recommendations. A board game player benefits from knowing why a game was suggested, for example because it shares mechanics or themes with a favorite.
 
-Evaluation is another critical aspect of recommender system development. Ranking-based metrics such as Recall@K and NDCG@K are commonly used to assess whether relevant items appear near the top of a recommendation list. Radlinski and Craswell \cite{radlinski2010comparing} compare the sensitivity of information retrieval metrics, while Sakai and Kando \cite{sakai2008information} discuss evaluation metrics under incomplete relevance assessments. These studies support the use of ranking-oriented evaluation for recommendation tasks where the order of suggested items is important.
+Ranking metrics such as Recall@K and NDCG@K measure whether relevant items appear near the top of a list. Radlinski and Craswell \cite{radlinski2010comparing} compare the sensitivity of information retrieval metrics, and Sakai and Kando \cite{sakai2008information} examine metrics under incomplete relevance judgments. Both support ranking-based evaluation when the order of results matters.
 
-Based on the reviewed literature, several gaps remain relevant to board game recommendation. Collaborative filtering methods may struggle under sparse user interaction data, while pure content-based systems may ignore subjective user sentiment. Popularity-based recommendations are simple and robust but may overemphasize mainstream games. Existing studies also often focus on algorithmic accuracy without providing flexible query modes and interpretable explanations for end users. Therefore, this paper proposes an explainable hybrid board game recommendation system that integrates content similarity, sentiment signals, and popularity information while supporting title-based, trait-based, and combined recommendation modes.
+Prior work leaves a gap for board games. Collaborative filtering struggles with sparse data, pure content-based systems ignore what players say, and popularity lists favor mainstream titles. Few systems combine flexible query modes with explanations an ordinary user can read. We address that gap with a system that integrates content similarity, sentiment, and popularity and supports title-based, trait-based, and combined queries.
 
 \section{Methodology}
 
-This section describes the dataset, feature engineering process, recommendation architecture, and evaluation pipeline used in the proposed hybrid board game recommendation system.
+This section covers the data, the features, the scoring in each mode, and the evaluation protocol.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.50\textwidth]{images/architecture.png}
-\caption{Proposed Hybrid Board Game Recommendation Framework}
+\caption{Overview of the recommendation framework}
 \label{fig:architecture}
 \end{figure}
 
 \subsection{Dataset Description}
 
-This study utilized publicly available board game data collected from the BoardGameGeek (BGG) platform. The dataset contains board game metadata, user ratings, and textual user reviews. After preprocessing and filtering, the final dataset included over 21,000 board games and millions of user rating interactions.
+We used public BoardGameGeek data: game metadata, user ratings, and the review comments that accompany some ratings. The game catalog contains the 21,631 games in the metadata file that have a unique, valid identifier. For each game we kept its description, categories, mechanics, families, publishers, complexity rating (BGG average weight), and rating statistics.
 
-The dataset preprocessing stage involved removing incomplete records, filtering games with insufficient metadata, and cleaning textual review content. Board game attributes such as categories, mechanics, themes, descriptions, complexity ratings, and user rating statistics were retained for recommendation modeling.
+We restricted the user ratings to games in the catalog, which left 18,744,924 ratings (approximately 18.7 million) from 410,471 users.
 
-User rating data was restricted to games in the catalog, leaving 18,744,924 ratings (approximately 18.7 million) from 410,471 users.
+For evaluation, we excluded users with fewer than six rated games and split each remaining user's ratings into seed games and held-out targets, as Section~\ref{sec:evalstrategy} describes.
 
-The evaluation subset was constructed with a holdout strategy applied to this interaction data. Users with fewer than six rated games were excluded, and each remaining user's ratings were split into seed-game inputs and held-out relevance targets, as detailed in Section~\ref{sec:evalstrategy}.
-
-Textual review data was used for sentiment analysis, while game descriptions, categories, and mechanics were used for content-based similarity modeling. The processed dataset was then used to support title-based, trait-based, and combined recommendation experiments.
+The review comments feed the sentiment signal. The descriptions and attributes feed the similarity signals.
 
 \subsection{Feature Engineering}
 
-Feature engineering was performed to extract meaningful recommendation signals from board game metadata and review information. The proposed system combines content similarity features, sentiment features, and popularity indicators.
+We derived three kinds of signal from the metadata and reviews: content similarity, sentiment, and popularity.
 
 \subsubsection{Content Representation}
 
-Content-based similarity was computed from three complementary representations of each game:
+We computed content similarity from three representations of each game:
 \begin{itemize}
-    \item \textbf{Description TF-IDF}: unigram and bigram TF-IDF vectors (20,000 features) of the BGG game description, capturing keyword-level similarity.
-    \item \textbf{Attribute vectors}: L2-normalized binary indicators of the game's BGG mechanics, themes, and subcategories, capturing structural gameplay similarity.
-    \item \textbf{Semantic embeddings}: the game name and description encoded with the all-MiniLM-L6-v2 sentence-transformer (first 256 tokens), capturing higher-level semantic relationships that keyword overlap misses.
+    \item \textbf{Description TF-IDF}: unigram and bigram TF-IDF vectors (20,000 features) of the BGG game description, which capture keyword-level similarity.
+    \item \textbf{Attribute vectors}: L2-normalized binary indicators of the game's BGG mechanics, themes, and subcategories, which capture similarity in how a game plays.
+    \item \textbf{Semantic embeddings}: the game name and description encoded with the all-MiniLM-L6-v2 sentence-transformer (first 256 tokens), which capture semantic relationships that keyword overlap misses.
 \end{itemize}
-Cosine similarity was computed within each representation, and each game's 50 nearest neighbours were stored as a sparse matrix.
+Within each representation we computed cosine similarity and stored each game's 50 nearest neighbors in a sparse matrix.
 
 \subsubsection{Trait Extraction}
 
-Trait-based recommendation utilized four structured BGG attributes: categories, mechanics, families, and publishers. For each attribute, the overlap score of a candidate game is the fraction of the user's requested values that the game carries. A small hand-written expansion table maps broad keywords to related BGG terms (for example, ``strategy'' expands to categories such as Economic and Territory Building and mechanics such as Hand Management and Tile Placement), so users can describe preferences in everyday words.
+The trait-based score uses four structured BGG attributes: categories, mechanics, families, and publishers. For each attribute, a candidate game's overlap score is the fraction of the user's requested values that the game has. A small hand-written expansion table maps broad keywords to related BGG terms, so users can describe what they want in everyday words. For example, ``strategy'' expands to categories such as Economic and Territory Building and mechanics such as Hand Management and Tile Placement.
 
-Trait matching was implemented as a soft overlap mechanism rather than a strict binary filter: games sharing a larger proportion of the requested traits receive higher trait scores. Complexity (BGG average weight) is not part of the trait score; it is exposed as an optional post-ranking filter with three bands (low $\le 2.0$, medium $2.0$--$3.0$, high $> 3.0$).
+Trait matching is a soft overlap, not a strict filter: a game that has more of the requested traits receives a higher score. Complexity (BGG average weight) does not enter the trait score. The user can instead apply it as an optional filter after ranking, with three bands (low $\le 2.0$, medium $2.0$--$3.0$, high $> 3.0$).
 
 \subsubsection{Sentiment Analysis}
 
-User review sentiment was incorporated as an additional recommendation signal. Sentiment scores were generated using the HuggingFace transformer pipeline with the DistilBERT SST-2 sentiment classification model applied to textual user reviews collected from BoardGameGeek.
+We scored review sentiment with the DistilBERT SST-2 classifier from the HuggingFace transformers pipeline.
 
-Scoring every comment in the review corpus (about 26 million ratings) on a CPU was impractical, so up to ten non-empty comments per game were sampled uniformly at random, giving 209,162 comments across 21,581 catalog games; comments were truncated to 128 tokens. The classifier returns a label and the confidence in that label, so each prediction was converted to the probability that the review is positive ($p$ for a POSITIVE label, $1-p$ for a NEGATIVE one) before averaging per game. Games with fewer than three scored comments were given no score and fall back to the catalog mean, which leaves 21,510 games with a game-specific sentiment value. The per-game values were min-max normalized before integration into the hybrid score.
+The review corpus holds about 26 million ratings, too many to classify on a CPU. We therefore sampled up to ten non-empty comments per game uniformly at random, which gave 209,162 comments across 21,581 catalog games, and truncated each comment to 128 tokens. The classifier returns a label and its confidence in that label, so we converted each prediction to the probability that the review is positive ($p$ for a POSITIVE label, $1-p$ for a NEGATIVE one) and averaged these per game. Games with fewer than three scored comments received no score and fall back to the catalog mean, which leaves 21,510 games with their own sentiment value. We min-max normalized the per-game values before adding them to the hybrid score.
 
 \subsubsection{Popularity Signal}
 
-Popularity-based information was incorporated using aggregate BGG rating statistics. In the title-based score, popularity $P$ is the game's number of user ratings, min-max normalized over the catalog. The trait-based and combined modes additionally use the Bayesian average rating ($R$) and the log-scaled rating count ($V$), both min-max normalized over the candidate set, as small tie-breaking terms.
+Popularity comes from BGG's rating statistics. In the title-based score, popularity $P$ is the game's number of user ratings, min-max normalized over the catalog. The trait-based and combined modes also use the Bayesian average rating ($R$) and the log-scaled rating count ($V$), both min-max normalized over the candidate set, as small tie-breaking terms.
 
-Popularity features were normalized prior to score combination so that they stay on the same $[0,1]$ scale as the similarity signals.
+We normalized the popularity features before combining them so that they share the $[0,1]$ scale of the similarity signals.
 
 \subsection{Score Normalization}
 
-The recommendation framework combines multiple heterogeneous signals, including content similarity, trait overlap, sentiment scores, and popularity statistics. Because these components operate on different numerical scales, normalization was applied before score aggregation to ensure balanced contribution within the hybrid recommendation framework.
+The signals start on different scales, so we normalized each one before combining them.
 
-For a query with one or more seed games, a candidate's similarity in each matrix is the mean of its stored similarities to the seeds that list it among their 50 neighbours, and zero if none do. The keyword signal $T$ is the average of the description and attribute similarities, and the semantic signal $E$ is the embedding similarity; each is then min-max normalized over the whole catalog. Trait overlap scores already lie in $[0,1]$ because they are proportions of matched attributes.
+For a query with one or more seed games, a candidate's similarity in each matrix is the mean of its stored similarities to the seeds that list it among their 50 neighbors, and zero if none do. The keyword signal $T$ is the average of the description and attribute similarities, and the semantic signal $E$ is the embedding similarity. We min-max normalized both over the whole catalog. Trait overlap scores already lie in $[0,1]$ because they are proportions of matched attributes.
 
-Popularity (rating counts) and aggregated sentiment scores were also min-max normalized prior to integration into the final recommendation formulas.
+We also min-max normalized the rating counts and the per-game sentiment scores before they enter the formulas below.
 
 \subsection{Hybrid Recommendation Formula}
 
-Each recommendation mode combines the normalized signals with its own fixed weights. The title-based score for a candidate game is
+Each mode combines the normalized signals with its own fixed weights. The title-based score for a candidate game is
 \begin{equation}
 S_{title} = 0.35\,T + 0.35\,E + 0.10\,S + 0.20\,P
 \end{equation}
@@ -162,52 +156,52 @@ S_{comb} = 0.65\,S_{title} + 0.35\,S_{trait} + 0.08\,R + 0.04\,V + 0.03\,S
 \end{equation}
 where a candidate missing from one side contributes zero for that side.
 
-The weights were set manually rather than learned or tuned on the evaluation data. Similarity terms receive most of the weight because finding games similar to the user's stated taste is the primary objective of this discovery-oriented framework; popularity and sentiment act as secondary signals.
+We set the weights by hand and did not learn or tune them on the evaluation data. Similarity terms carry most of the weight because the system's purpose is to find games like the ones a user names; popularity and sentiment play a supporting part.
 
 \subsection{Recommendation Modes}
 
-The proposed framework supports three recommendation modes designed for different board game discovery scenarios.
+The three modes cover different starting points.
 
 \subsubsection{Title-Based Recommendation}
 
-The title-based mode generates recommendations using similarity relationships derived from a selected seed board game. This mode is driven by content similarity, supported by sentiment and popularity.
+The user names one or more games they like, and the system ranks the catalog by $S_{title}$. Content similarity drives this mode, with sentiment and popularity in a supporting role.
 
 \subsubsection{Trait-Based Recommendation}
 
-The trait-based mode allows users to explore games using gameplay-related characteristics (categories, mechanics, families, and publishers), optionally restricted to a complexity band. This mode was designed to support exploratory discovery scenarios where users may not have a specific seed game in mind.
+The user names categories, mechanics, families, or publishers, optionally with a complexity band, and the system ranks games by how many of those traits they have. This mode serves users who have no particular game in mind.
 
 \subsubsection{Combined Recommendation}
 
-The combined recommendation mode integrates both seed-game similarity and trait-based filtering to provide guided discovery recommendations. This mode was intended to balance semantic similarity with user-selected gameplay preferences, enabling more flexible exploration of the board game catalog.
+The user gives both seed games and traits, and the system ranks candidates by $S_{comb}$. Games that resemble the seeds and also match the requested traits rank highest.
 
 \subsection{Post-Ranking Rules}
 
-Two rules are applied after ranking and are therefore not part of any score. First, the optional difficulty filter keeps only games in the selected complexity band. Second, a same-series cap keeps at most two results that share a BGG series tag (family tags beginning with ``Game:'' or ``Series:'') with a seed game. Without it, pure similarity fills the list with a seed's own editions and expansions (for example, six Ticket to Ride variants for a Ticket to Ride seed), which defeats discovery. A capped series is named in the explanation, so the rule remains visible to the user.
+Two rules run after ranking and therefore change no score. The optional difficulty filter keeps only games in the selected complexity band. The same-series cap keeps at most two results that share a BGG series tag (family tags beginning with ``Game:'' or ``Series:'') with a seed game. Without the cap, pure similarity fills the list with a seed's own editions and expansions, for example six Ticket to Ride variants for a Ticket to Ride seed, and leaves little room for new discoveries. The explanation names the shared series, so the user can see why the rule applied.
 
 \subsection{Evaluation Strategy}
 \label{sec:evalstrategy}
 
-The recommendation framework was evaluated using a holdout-based recommendation protocol constructed from the BoardGameGeek user rating data (18.7 million ratings on catalog games).
+We evaluated the framework with a holdout protocol built from the BGG rating data (18.7 million ratings on catalog games).
 
-Of the 259,737 users with at least six rated games, the first 300 in the order produced by grouping the ratings by username were evaluated. For each user, the first three rated games in the order they appear in the ratings file were used as seed games, and the next three were withheld as ground-truth relevance targets. Because the ratings file is grouped by game with the most-rated games first, both seeds and held-out games are skewed towards popular titles. This should be kept in mind when comparing against a popularity baseline.
+Of the 259,737 users with at least six rated games, we evaluated the first 300 in the order produced by grouping the ratings by username. For each user, the first three rated games in the order they appear in the ratings file served as seed games, and the next three were held out as relevance targets. The ratings file lists games with the most ratings first, so both the seeds and the held-out games lean toward popular titles. This matters when comparing against a popularity baseline.
 
-Recommendation quality was evaluated using Recall@K and NDCG@K metrics at multiple cutoff levels. A recommendation was considered relevant if it matched one of the user's held-out games; any rated game counts as relevant, regardless of the rating value. For the trait-based and combined modes, the trait query was derived automatically from the seeds (their two most frequent categories and two most frequent mechanics). All modes were evaluated through the same engine code that powers the deployed application.
+We measured Recall@K and NDCG@K at several cutoffs. A recommendation counts as relevant if it matches one of the user's held-out games, whatever rating the user gave it. For the trait-based and combined modes, we derived the trait query from the seeds: their two most frequent categories and two most frequent mechanics. All modes ran through the same engine code that serves the deployed application.
 
-Recall@K was used to measure the proportion of relevant games successfully retrieved within the top-K recommendations, while NDCG@K was used to evaluate ranking quality by assigning higher importance to correctly ranked recommendations appearing earlier in the recommendation list.
+Recall@K measures the share of relevant games that appear in the top K, and NDCG@K rewards placing them near the top of the list.
 
 \subsection{System Implementation}
 
-The recommendation system was implemented using Python-based data science tools and libraries. Data preprocessing and analysis were performed using Pandas and NumPy, while TF-IDF vectorization and similarity calculations were implemented using Scikit-learn. The user interface prototype was developed using Streamlit to provide interactive recommendation exploration and explainable recommendation outputs.
+We implemented the system in Python. Pandas and NumPy handle the data, scikit-learn computes the TF-IDF vectors and similarities, and a Streamlit application lets users run queries and read the explanations.
 
-The system architecture was designed to support modular recommendation experiments and evaluation workflows.
+The code keeps the scoring engine separate from the interface, so the same engine serves both the application and the evaluation notebook.
 
 \section{Evaluation}
 
-This section presents the experimental setup, evaluation metrics, baseline methods, and performance analysis used to evaluate the proposed hybrid board game recommendation system.
+This section shows example explanations, defines the metrics, and reports the results.
 
 \subsection{Explainability Example}
 
-To improve recommendation transparency, the proposed system attaches an explanation to every recommendation. The explanation lists the concrete BGG attributes behind the match: the categories, mechanics, families, and publishers that the recommended game shares with the seed games (title-based mode) or with the requested traits (trait-based and combined modes). Alongside it, the interface shows the component scores ($S_{title}$, $S_{trait}$, and the final score), the Bayesian average rating, and the rating count, so users can see how much of a ranking comes from similarity and how much from the supporting signals. The interface also shows which catalog game each typed title was matched to, because title lookup falls back to substring matching.
+The system attaches an explanation to every recommendation. The explanation lists the BGG attributes behind the match: the categories, mechanics, families, and publishers that the recommended game shares with the seed games (title-based mode) or with the requested traits (trait-based and combined modes). The interface also shows the component scores ($S_{title}$, $S_{trait}$, and the final score), the Bayesian average rating, and the rating count, so users can see how much of a ranking comes from similarity and how much from the supporting signals. Because title lookup falls back to substring matching, the interface also reports which catalog game each typed title matched.
 
 Table~\ref{tab:explain} reproduces, verbatim, the explanations the system produced for three example queries.
 
@@ -232,11 +226,9 @@ Horror + Mystery (traits) $\rightarrow$ Mysterium & Categories: Deduction, Horro
 
 \subsection{Evaluation Metrics}
 
-To evaluate recommendation quality, this study utilizes ranking-based evaluation metrics commonly used in recommender systems research, namely Recall@K and Normalized Discounted Cumulative Gain (NDCG@K).
+We use two standard ranking metrics from recommender systems research: Recall@K and Normalized Discounted Cumulative Gain (NDCG@K).
 
-Recall@K measures the proportion of relevant items successfully retrieved within the top-K recommendations. This metric is useful for evaluating whether the recommendation system is capable of retrieving relevant board games for users.
-
-The Recall@K metric is defined as follows:
+Recall@K is the share of a user's relevant items that appear among the top-K recommendations:
 
 \begin{equation}
 Recall@K =
@@ -244,9 +236,7 @@ Recall@K =
 {\text{Total Number of Relevant Items}}
 \end{equation}
 
-NDCG@K evaluates ranking quality by assigning higher importance to relevant items appearing near the top of the recommendation list. Unlike Recall@K, NDCG@K considers recommendation ordering and ranking position.
-
-The Discounted Cumulative Gain (DCG) is computed as:
+NDCG@K also accounts for position, giving more credit to relevant items near the top of the list. The Discounted Cumulative Gain (DCG) is
 
 \begin{equation}
 DCG@K =
@@ -254,22 +244,20 @@ DCG@K =
 \frac{rel_i}{\log_2(i+1)}
 \end{equation}
 
-The normalized version is computed as:
+and its normalized form is
 
 \begin{equation}
 NDCG@K =
 \frac{DCG@K}{IDCG@K}
 \end{equation}
 
-where $IDCG@K$ represents the ideal discounted cumulative gain.
+where $IDCG@K$ is the DCG of an ideal ranking that places every held-out item first.
 
-These metrics were selected because recommendation ranking quality is important in board game discovery scenarios, where users typically interact with only the top portion of recommendation results.
+We chose these metrics because users of a discovery tool tend to look only at the first few results.
 
 \subsection{Experimental Setup}
 
-The recommendation experiments were conducted using the processed BoardGameGeek dataset. The dataset was divided into recommendation input data and evaluation targets for ranking analysis.
-
-The following models were evaluated on the same 300 users:
+We evaluated six models on the same 300 users:
 \begin{itemize}
     \item Title-based recommendation,
     \item Trait-based recommendation,
@@ -279,23 +267,23 @@ The following models were evaluated on the same 300 users:
     \item a title-based variant without sentiment (ablation).
 \end{itemize}
 
-Recommendation results for the three proposed modes were generated using the scoring framework described in Section III, with no difficulty filter applied. Each evaluation is a single run without repeated sampling or significance testing.
+The three proposed modes used the scoring described in Section III, with no difficulty filter. Each result comes from a single run, without repeated sampling or significance testing.
 
 \subsubsection{Popularity-Based Baseline}
 
-The popularity-based baseline recommends the games with the most user ratings, excluding the user's seed games, independent of the seeds' content. This baseline represents a simple recommendation strategy commonly used in many recommendation platforms.
+The popularity baseline recommends the games with the most user ratings, excluding the user's seed games, regardless of what the seeds are. Many platforms use this simple strategy.
 
 \subsubsection{Content-Based Baseline}
 
-The content-based baseline is the title-based scorer with the sentiment and popularity weights set to zero ($0.5\,T + 0.5\,E$). It measures what content similarity alone achieves and therefore what the hybrid components add.
+The content-based baseline is the title-based scorer with the sentiment and popularity weights set to zero ($0.5\,T + 0.5\,E$). It shows what content similarity achieves on its own, and therefore what the other signals add.
 
 \subsubsection{Sentiment Ablation}
 
-To isolate the sentiment signal, the title-based scorer was also evaluated with only the sentiment weight set to zero ($0.35\,T + 0.35\,E + 0.20\,P$).
+To isolate the sentiment signal, we also ran the title-based scorer with only the sentiment weight set to zero ($0.35\,T + 0.35\,E + 0.20\,P$).
 
 \subsection{Experimental Results}
 
-Table~\ref{tab:results} reports the main protocol and Fig.~\ref{fig:performance} shows Recall@10 and NDCG@10.
+Table~\ref{tab:results} reports the main protocol, and Fig.~\ref{fig:performance} plots Recall@10 and NDCG@10.
 
 \begin{figure}[H]
 \centering
@@ -325,7 +313,7 @@ Title-Based, no sentiment & 0.0133 & 0.0128 & 0.0244 & 0.0178 & 0.0367 & 0.0222 
 \label{tab:results}
 \end{table}
 
-The popularity baseline clearly outperformed all three proposed modes, reaching a Recall@10 of 0.230 against 0.037 for the best proposed mode (combined). This is a property of the protocol as much as of the models: 63.0\% of all held-out games are among the 100 most-rated titles in the catalog, so a list of the most-rated games retrieves many of them by construction. Among the proposed modes, the combined mode performed best on every metric, and the title-based and trait-based modes performed similarly to each other.
+The popularity baseline outperformed all three proposed modes by a wide margin, with a Recall@10 of 0.230 against 0.037 for the best proposed mode (combined). The protocol explains much of this gap. Of all held-out games, 63.0\% are among the 100 most-rated titles in the catalog, so a list of the most-rated games retrieves many of them by construction. Among the proposed modes, the combined mode scored highest on every metric, and the title-based and trait-based modes scored about the same.
 
 \begin{table}[h]
 \centering
@@ -348,27 +336,27 @@ Title-Based, no sentiment & 0.0129 & 0.0082 & 0.0151 & 0.0091 & 0.0280 & 0.0129 
 \label{tab:longtail}
 \end{table}
 
-Table~\ref{tab:longtail} re-scores the same ranked lists against only the held-out games outside the 100 most-rated titles, for the 155 users who have at least one. The cut-off was fixed before the results were examined. Here the popularity baseline retrieves nothing, because its lists never leave the head of the distribution, whereas the proposed modes do retrieve some less popular games that users went on to rate. The absolute values remain low, so this shows a qualitative difference in behaviour rather than strong long-tail accuracy.
+Table~\ref{tab:longtail} scores the same ranked lists against only the held-out games outside the 100 most-rated titles, for the 155 users who have at least one such game. We fixed the cut-off before looking at the results. The popularity baseline retrieves none of these games, since its lists stay among the most popular titles, while the proposed modes retrieve some less popular games that users went on to rate. The absolute values are low, so the table shows a difference in behavior rather than strong long-tail accuracy.
 
-The two comparison models isolate the supporting signals. Removing only the sentiment term changed the title-based Recall@10 from 0.0233 to 0.0244, a difference of a single hit across the 900 held-out games, so the sentiment signal has no measurable effect in this evaluation. Removing both sentiment and popularity (the content-only baseline) lowered Recall@10 to 0.0122, which is consistent with the popularity bias of the protocol: the popularity term, not content similarity, accounts for most of the title-based mode's offline accuracy.
+The two comparison models isolate the supporting signals. Removing only the sentiment term changed the title-based Recall@10 from 0.0233 to 0.0244, a difference of a single hit across the 900 held-out games, so sentiment has no measurable effect in this evaluation. Removing both sentiment and popularity (the content-only baseline) lowered Recall@10 to 0.0122. This fits the popularity bias of the protocol: the popularity term, more than content similarity, accounts for the title-based mode's offline accuracy.
 
 \section{Discussion}
 
-The central finding is that, on this dataset and protocol, popularity is a far stronger predictor of which games a user rates next than content similarity. This is consistent with the well-known popularity bias of offline recommender evaluation: BGG users rate many of the same widely played titles, and a protocol that holds out a user's next ratings in a popularity-ordered file inherits that bias. An earlier version of this system appeared to reach a title-based Recall@10 of 0.20, but that figure was an artifact: its semantic-embedding and sentiment signals had been computed for only 20 very popular games, so the title-based mode effectively recommended those blockbusters to everyone. Once both signals were computed for the full catalog, the title-based mode recommended genuinely similar games and its accuracy fell to the level reported here.
+On this dataset and protocol, popularity predicts which games a user rates next far better than content similarity does. Offline recommender evaluations often show this popularity bias. BGG users rate many of the same widely played titles, and a protocol that holds out a user's next ratings in a popularity-ordered file inherits that bias. An earlier version of this system appeared to reach a title-based Recall@10 of 0.20. That figure was an artifact: we had computed the semantic-embedding and sentiment signals for only 20 very popular games, so the title-based mode recommended those 20 titles to almost everyone. Once we computed both signals for the full catalog, the title-based mode recommended similar games and its accuracy fell to the level reported here.
 
-The proposed modes are designed for discovery rather than for predicting the next popular game a user rates. The long-tail analysis supports this distinction, since only the similarity-based modes reach games outside the 100 most popular, but it does not show that they do so accurately. Combining seed similarity with explicit traits gave the best results among the proposed modes in the main analysis, which suggests that the user's stated preferences add useful information to seed similarity.
+We designed the proposed modes for discovery, not for predicting the next popular game a user rates. The long-tail analysis supports this distinction, since only the similarity-based modes reach games outside the 100 most popular, but it does not show that they reach them accurately. Combining seed similarity with explicit traits gave the best results among the proposed modes in the main analysis, which suggests that a user's stated preferences add information that seed similarity alone lacks.
 
-The explanations remain the system's main strength. Every recommendation is accompanied by the concrete categories, mechanics, families, and publishers it shares with the user's input (Table~\ref{tab:explain}), the component scores, and the catalog game each typed title was matched to. Their main weakness is that long publisher lists, which mostly reflect localized editions, add noise to otherwise informative explanations.
+The explanations are the system's main strength. Each recommendation comes with the categories, mechanics, families, and publishers it shares with the user's input (Table~\ref{tab:explain}), along with the component scores and the catalog game each typed title matched. Their main weakness is the publisher list: popular games carry many publishers of localized editions, and listing them all adds noise to an otherwise informative explanation.
 
-Several limitations remain. First, the evaluation uses a single protocol with a popularity-ordered split, treats every rated game as relevant regardless of rating, uses only 300 users, and reports single runs without significance testing. Second, review sentiment is estimated from at most ten sampled comments per game, so individual values are noisy. Third, the weights were set manually and were not tuned. Fourth, the semantic embeddings include the game name, so games with similar names receive a small similarity boost. Finally, the system does not use collaborative filtering or personalized user modelling.
+The study has several limitations. First, the evaluation uses one protocol with a popularity-ordered split, treats every rated game as relevant regardless of its rating, covers only 300 users, and reports single runs without significance testing. Second, sentiment comes from at most ten sampled comments per game, so each game's value is noisy. Third, we set the weights by hand and did not tune them. Fourth, the semantic embeddings include the game name, which gives games with similar names a small similarity boost. Finally, the system does not use collaborative filtering or model individual users.
 
-Future work should evaluate the system with a randomized split and a rating threshold for relevance, report confidence intervals, and, most importantly, run a user study that measures discovery and the perceived usefulness of explanations directly. Learning the weights on a validation split, re-ranking for diversity beyond the series cap, and combining the explainable content signals with a collaborative component are natural extensions.
+Future work should evaluate the system with a randomized split and a rating threshold for relevance, and report confidence intervals. A user study that measures discovery and the usefulness of the explanations directly would test the system's main claim. Learning the weights on a validation split, re-ranking for diversity beyond the series cap, and adding a collaborative component to the content signals are further extensions.
 
 \section{Conclusion}
 
-This study proposed an explainable, multi-mode board game recommendation framework that combines content similarity, gameplay trait matching, review sentiment, and popularity signals, and that explains every recommendation through the concrete attributes behind it. Evaluated through the same code that powers the deployed application, the three proposed modes were clearly outperformed by a popularity baseline on a holdout protocol dominated by popular games (Recall@10 of 0.037 for the best mode against 0.230), while reaching a small share of less popular held-out games that the popularity baseline never recommends.
+We presented an explainable board game recommender with three query modes that combines content similarity, attribute matching, review sentiment, and popularity, and explains each recommendation through the attributes behind it. We evaluated it through the same code that serves the deployed application. On a holdout protocol dominated by popular games, a popularity baseline outperformed all three modes by a wide margin (Recall@10 of 0.230 against 0.037 for the best mode), while the modes retrieved a small share of less popular held-out games that the baseline never recommends.
 
-The results do not support claims of superior retrieval accuracy. They support a narrower conclusion: a lightweight, fully interpretable content-based framework can surface relevant games beyond the most popular titles and explain why, but its usefulness for discovery must be demonstrated with user studies and less popularity-biased evaluation rather than with next-rating prediction alone.
+The results do not support a claim of superior retrieval accuracy. They support a narrower one: a lightweight, interpretable, content-based framework can surface relevant games beyond the most popular titles and say why it chose them. Whether that helps players discover games remains to be shown with user studies and with evaluation that depends less on predicting the next rating.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

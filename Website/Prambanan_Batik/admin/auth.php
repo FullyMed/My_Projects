@@ -16,7 +16,7 @@ function isAdminLoggedIn() {
     }
     if (!isset($_SESSION['admin_login_time']) || (time() - $_SESSION['admin_login_time']) > SESSION_TIMEOUT) {
         // Drop the admin identity but keep the session itself alive (not session_destroy()),
-        // so the CSRF token generated for the login form right after this is actually saved.
+        // so the CSRF token generated for the login form right after this gets saved.
         unset($_SESSION['admin_id'], $_SESSION['admin_email'], $_SESSION['admin_login_time']);
         session_regenerate_id(true);
         return false;
@@ -41,7 +41,7 @@ function requireDatabase($pdo) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Unavailable</title>
+    <title>Database unavailable</title>
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo SITE_PATH; ?>/assets/favicon/apple-touch-icon.png">
@@ -104,7 +104,7 @@ function getAdminSession() {
     return null;
 }
 
-// Valid-format bcrypt hash with no matching plaintext — verified against on a miss so that
+// Valid-format bcrypt hash with no matching plaintext. Verified against on a miss so that
 // "unknown email" and "wrong password" take the same amount of time (timing-safe lookup).
 define('DUMMY_PASSWORD_HASH', '$2y$12$Y.nYtL4wJ6HPjR/sAr96XucPXkKcSyeeYOyLWMCR8sJmmPWraHlD2');
 
@@ -118,7 +118,7 @@ function loginAdmin($pdo, $email, $password) {
         $passwordOk = password_verify($password, $hashToCheck);
 
         if (!$admin || !$passwordOk) {
-            return ['success' => false, 'message' => 'Invalid email or password'];
+            return ['success' => false, 'message' => 'That email address and password don\'t match.'];
         }
 
         // Regenerate the session ID on privilege change to prevent session fixation.
@@ -128,10 +128,10 @@ function loginAdmin($pdo, $email, $password) {
         $_SESSION['admin_email'] = $admin['email'];
         $_SESSION['admin_login_time'] = time();
 
-        return ['success' => true, 'message' => 'Login successful'];
+        return ['success' => true, 'message' => 'Logged in.'];
     } catch (Exception $e) {
         error_log('Admin login error: ' . $e->getMessage());
-        return ['success' => false, 'message' => 'An error occurred during login'];
+        return ['success' => false, 'message' => 'Something went wrong while logging you in. Try again.'];
     }
 }
 
@@ -162,10 +162,10 @@ function createAdmin($pdo, $email, $password) {
         $stmt = $pdo->prepare('INSERT INTO admin_users (email, password_hash, created_at) VALUES (?, ?, NOW())');
         $stmt->execute([$email, $passwordHash]);
 
-        return ['success' => true, 'message' => 'Admin account created'];
+        return ['success' => true, 'message' => 'Admin account created.'];
     } catch (Exception $e) {
         error_log('Admin creation error: ' . $e->getMessage());
-        return ['success' => false, 'message' => 'Failed to create admin account'];
+        return ['success' => false, 'message' => 'We couldn\'t create the account. Try again.'];
     }
 }
 
@@ -176,10 +176,10 @@ function updateAdminPassword($pdo, $adminId, $newPassword) {
         $stmt = $pdo->prepare('UPDATE admin_users SET password_hash = ? WHERE id = ?');
         $stmt->execute([$passwordHash, $adminId]);
 
-        return ['success' => true, 'message' => 'Password updated successfully'];
+        return ['success' => true, 'message' => 'Password changed.'];
     } catch (Exception $e) {
         error_log('Password update error: ' . $e->getMessage());
-        return ['success' => false, 'message' => 'Failed to update password'];
+        return ['success' => false, 'message' => 'We couldn\'t change the password. Try again.'];
     }
 }
 
@@ -190,6 +190,10 @@ define('LOGIN_LOCKOUT_MINUTES', 15);
 function isLoginRateLimited($pdo, $ip) {
     if ($pdo === null) return false;
     try {
+        // privacy.php promises failed-login records last about a day, so prune on every
+        // login page view as well as after each failed attempt.
+        $pdo->prepare('DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 DAY)')->execute();
+
         $stmt = $pdo->prepare('
             SELECT COUNT(*) FROM login_attempts
             WHERE ip_address = ?

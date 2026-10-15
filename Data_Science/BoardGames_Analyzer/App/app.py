@@ -12,12 +12,12 @@ st.set_page_config(
     layout="wide",
 )
 theme.set_meta_description(
-    "BoardGames Analyzer is an explainable hybrid recommendation system for discovering "
-    "board games, combining content similarity, sentiment analysis, and trait matching."
+    "Find board games like the ones you already love. BoardGames Analyzer suggests games "
+    "from 21,000+ BoardGameGeek titles and tells you why it picked each one."
 )
 
 st.sidebar.title("Navigation")
-st.sidebar.info("Use the pages above to navigate between the Recommendation engine and the Analytics dashboard.")
+st.sidebar.info("Pick a page above. Recommendation finds games for you; Analytics shows the data behind it.")
 st.sidebar.markdown("---")
 st.sidebar.title("⚙ Settings")
 selected_theme = theme.sidebar_theme()
@@ -26,7 +26,7 @@ theme.apply_theme(selected_theme)
 # Header
 st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Board Game Discovery Engine</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">An explainable hybrid recommendation system for board game discovery.</div>',
+    '<div class="subtitle">Find board games like the ones you love, and see why each one was picked.</div>',
     unsafe_allow_html=True,
 )
 
@@ -39,10 +39,10 @@ with col1:
     st.markdown("""
     <div class="home-card">
         <div class="home-card-icon">🧠</div>
-        <div class="home-card-title">Recommendation Engine</div>
+        <div class="home-card-title">Get recommendations</div>
         <div class="home-card-desc">
-            Discover board games by entering titles you enjoy, selecting gameplay traits,
-            or combining both. Three modes: Title-Based, Trait-Based, and Combined.
+            Type a few games you like, pick the traits you want, or do both.
+            Each suggestion lists the mechanics and categories it shares with your picks.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -51,10 +51,10 @@ with col2:
     st.markdown("""
     <div class="home-card">
         <div class="home-card-icon">📊</div>
-        <div class="home-card-title">Dataset Analytics</div>
+        <div class="home-card-title">Explore the data</div>
         <div class="home-card-desc">
-            Explore the BoardGameGeek dataset powering the engine — rating distributions,
-            top-rated games, most common mechanics, categories, and publication trends.
+            Charts of the BoardGameGeek games behind the recommender: ratings, complexity,
+            the most common mechanics, and how many games came out each year.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -62,7 +62,7 @@ with col2:
 st.markdown("---")
 
 # Key stats
-st.markdown('<div class="section-title">Project at a Glance</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">At a glance</div>', unsafe_allow_html=True)
 
 s1, s2, s3, s4 = st.columns(4)
 
@@ -70,7 +70,7 @@ with s1:
     st.markdown("""
     <div class="stat-box">
         <div class="stat-number">21K+</div>
-        <div class="stat-label">Board Games</div>
+        <div class="stat-label">Board games</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -78,7 +78,7 @@ with s2:
     st.markdown("""
     <div class="stat-box">
         <div class="stat-number">18.7M</div>
-        <div class="stat-label">User Ratings</div>
+        <div class="stat-label">User ratings</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -86,7 +86,7 @@ with s3:
     st.markdown("""
     <div class="stat-box">
         <div class="stat-number">3</div>
-        <div class="stat-label">Recommendation Modes</div>
+        <div class="stat-label">Ways to search</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -94,50 +94,50 @@ with s4:
     st.markdown("""
     <div class="stat-box">
         <div class="stat-number">21.5K</div>
-        <div class="stat-label">Games with Review Sentiment</div>
+        <div class="stat-label">Games with review sentiment</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
 
 # How it works
-st.markdown('<div class="section-title">How It Works</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">How it works</div>', unsafe_allow_html=True)
 
 h1, h2, h3 = st.columns(3)
 
 with h1:
     st.markdown("""
     <div class="info-box">
-        <b>Content Similarity</b><br><br>
-        TF-IDF and MiniLM sentence-transformer embeddings capture keyword-level
-        and semantic similarity between board game descriptions and metadata.
+        <b>Similar games</b><br><br>
+        We compare game descriptions word by word (TF-IDF) and by meaning
+        (MiniLM embeddings), and check which BGG mechanics and themes they share.
     </div>
     """, unsafe_allow_html=True)
 
 with h2:
     st.markdown("""
     <div class="info-box">
-        <b>Sentiment Analysis</b><br><br>
-        DistilBERT SST-2 scores a sample of each game's user reviews (up to 10),
-        adding a community-perception signal beyond raw numerical ratings.
+        <b>Review sentiment</b><br><br>
+        A DistilBERT model read up to 10 user reviews per game and scored how
+        positive they sound. It's a small part of the score.
     </div>
     """, unsafe_allow_html=True)
 
 with h3:
     st.markdown("""
     <div class="info-box">
-        <b>Popularity Signals</b><br><br>
-        Normalized rating counts and average ratings ensure well-regarded games
-        surface without completely overshadowing niche titles.
+        <b>Popularity</b><br><br>
+        Games with more ratings get a boost, so well-known titles aren't buried.
+        The trade-off: big hits show up more often than hidden gems.
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
 f1, f2 = st.columns(2)
 with f1:
-    st.page_link("pages/4_Terms_of_Use.py", label="Terms of Use", icon="📜")
+    st.page_link("pages/4_Terms_of_Use.py", label="Terms of use", icon="📜")
 with f2:
-    st.page_link("pages/5_Privacy_Policy.py", label="Privacy Policy", icon="🔒")
+    st.page_link("pages/5_Privacy_Policy.py", label="Privacy policy", icon="🔒")
 
 st.markdown("---")
-st.caption("BoardGames Analyzer — Explainable Hybrid Recommendation System · Built with Streamlit")
+st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

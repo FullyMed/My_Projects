@@ -49,8 +49,8 @@ try {
         $stmt->execute(array_merge($params, [ITEMS_PER_PAGE, $pagination['offset']]));
         $all_products = $stmt->fetchAll();
 
-        // Sample data is only for a catalog with no products at all — a category that
-        // simply has no products yet gets an empty state below, not fake products.
+        // Sample data is only for a catalog with no products at all. A category that
+        // has no products yet gets an empty state below, not fake products.
         if ($total_products === 0 && !$db->query('SELECT 1 FROM products LIMIT 1')->fetchColumn()) {
             $preview_mode = true;
         }
@@ -94,7 +94,7 @@ if ($preview_mode) {
         ['name' => 'Fabric & Cloth',       'slug' => 'fabric-cloth'],
         ['name' => 'Traditional Wear',     'slug' => 'traditional-wear'],
         ['name' => 'Regional Styles',      'slug' => 'regional-styles'],
-        ['name' => 'Premium Collection',   'slug' => 'premium-collection'],
+        ['name' => 'Batik Tulis',   'slug' => 'batik-tulis'],
         ['name' => 'Accessories',          'slug' => 'accessories'],
         ['name' => 'Home Decor',           'slug' => 'home-decor'],
     ];
@@ -112,10 +112,10 @@ if ($category_filter !== '') {
 
 if ($active_category_name !== '') {
     $page_title = $active_category_name;
-    $meta_description = "Shop {$active_category_name} batik at Prambanan Batik — authentic Indonesian craftsmanship with trusted customer reviews.";
+    $meta_description = "{$active_category_name} from Prambanan Batik: handmade Indonesian batik with photos, prices in rupiah and reviews from our customers.";
 } else {
-    $page_title = 'Batik Collection';
-    $meta_description = 'Browse our full collection of authentic Indonesian batik — traditional patterns, ready-to-wear, fabric, and accessories, with real customer ratings and reviews.';
+    $page_title = 'Batik collection';
+    $meta_description = 'Everything Prambanan Batik sells: traditional patterns, clothing, fabric, accessories and pieces for the home, with customer ratings and reviews.';
 }
 
 $canonical_query = [];
@@ -132,15 +132,15 @@ $canonical_url = BASE_URL . '/products.php' . ($canonical_query ? '?' . http_bui
 
     <section class="products-section">
         <div class="container">
-            <h2 class="section-title reveal">Batik Collection</h2>
-            <p class="section-subtitle reveal">Browse our full range of authentic Indonesian batik</p>
+            <h2 class="section-title reveal">Batik collection</h2>
+            <p class="section-subtitle reveal">Everything we sell, highest rated first. Pick a category to narrow it down.</p>
 
             <div class="products-filters">
                 <form method="get" class="filter-form">
                     <div class="filter-group">
                         <label for="category">Category:</label>
                         <select name="category" id="category">
-                            <option value="">All Styles</option>
+                            <option value="">All categories</option>
                             <?php foreach ($categories_for_filter as $cat): ?>
                                 <option value="<?php echo escape($cat['slug']); ?>" <?php echo $category_filter === $cat['slug'] ? 'selected' : ''; ?>>
                                     <?php echo escape($cat['name']); ?>
@@ -155,8 +155,8 @@ $canonical_url = BASE_URL . '/products.php' . ($canonical_query ? '?' . http_bui
             <?php if (empty($all_products)): ?>
                 <div class="empty-state reveal">
                     <h3>No batik here yet</h3>
-                    <p><?php echo $active_category_name !== '' ? 'There are no products in ' . escape($active_category_name) . ' right now.' : 'We couldn\'t find any products matching that filter.'; ?></p>
-                    <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary">View All Styles</a>
+                    <p><?php echo $active_category_name !== '' ? 'We don\'t have anything in ' . escape($active_category_name) . ' at the moment.' : 'We don\'t have a category by that name.'; ?></p>
+                    <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary">See all batik</a>
                 </div>
             <?php endif; ?>
 

@@ -78,21 +78,21 @@ if ($preview_mode) {
                 'id' => 1,
                 'reviewer_name' => 'Siti Nurhaliza',
                 'rating' => 5,
-                'content' => 'Authentic batik with incredible craftsmanship. The cloud patterns are so intricate! Truly a masterpiece.',
+                'content' => 'The wax lines are fine and even, and the colour looks the same as in the photo. Arrived well packed.',
                 'created_at' => date('Y-m-d H:i:s', strtotime('-5 days')),
             ],
             [
                 'id' => 2,
                 'reviewer_name' => 'Bambang',
                 'rating' => 5,
-                'content' => 'Absolutely beautiful piece. Perfect for my batik collection. Prambanan Batik delivers exceptional quality.',
+                'content' => 'Bought it as a gift for my mother. She wore it to a wedding the same week.',
                 'created_at' => date('Y-m-d H:i:s', strtotime('-2 days')),
             ],
             [
                 'id' => 3,
                 'reviewer_name' => 'Dewi',
                 'rating' => 4,
-                'content' => 'Love the modern take on traditional batik. Very comfortable to wear and excellent quality fabric.',
+                'content' => 'Soft cotton and a nice pattern. The dye ran a little in the first wash, so wash it on its own.',
                 'created_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
             ],
         ];
@@ -110,7 +110,7 @@ if (!empty($product['description'])) {
     $meta_description = truncate_text($product['description'], 155);
 } else {
     $product_category = $product['category'] ?? 'Batik';
-    $meta_description = "{$product['name']} — authentic {$product_category} from Prambanan Batik, with verified customer reviews.";
+    $meta_description = "{$product['name']}, {$product_category} from Prambanan Batik. See photos, the price and customer reviews.";
 }
 
 $canonical_url = BASE_URL . '/product.php?id=' . (int)$product['id'];
@@ -129,7 +129,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
             <div class="breadcrumb">
                 <a href="<?php echo SITE_PATH; ?>/">Home</a>
                 <span>/</span>
-                <a href="<?php echo SITE_PATH; ?>/products.php">Products</a>
+                <a href="<?php echo SITE_PATH; ?>/products.php">Batik collection</a>
                 <span>/</span>
                 <?php if (!empty($product['category'])): ?>
                     <a href="<?php echo SITE_PATH; ?>/products.php?category=<?php echo urlencode($product['category_slug'] ?? ''); ?>"><?php echo escape($product['category']); ?></a>
@@ -174,19 +174,19 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                             <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Tokopedia</a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_other'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy Now</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy now</a>
                         <?php endif; ?>
                         <?php if (empty($product['buy_link_shopee']) && empty($product['buy_link_tokopedia']) && empty($product['buy_link_other'])): ?>
                             <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Search on Shopee</a>
                         <?php endif; ?>
-                        <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary btn-large">Back to Products</a>
+                        <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary btn-large">Back to the collection</a>
                     </div>
                 </div>
             </div>
 
             <?php if (!empty($reviews)): ?>
                 <div class="reviews-section">
-                    <h2 class="reveal">Customer Reviews</h2>
+                    <h2 class="reveal">Customer reviews</h2>
                     <div class="reviews-list">
                         <?php foreach ($reviews as $review): ?>
                             <article class="review-item reveal">

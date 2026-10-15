@@ -48,7 +48,7 @@ Then run `claude` to start Claude Code in that project.
 ### Data Science / BoardGames Analyzer
 - **Type:** Python data science + Streamlit app
 - **Purpose:** Explainable hybrid board game recommendation system (undergraduate research project)
-- **Key traits:** TF-IDF + MiniLM embeddings + DistilBERT sentiment, three recommendation modes, IEEE paper included
+- **Key traits:** TF-IDF + MiniLM embeddings + DistilBERT sentiment, three recommendation modes, IEEE paper included. A 2026-10-01 fix pass rebuilt sentiment and embeddings for the whole catalog (both had covered only 20 games) and re-ran the evaluation, where a popularity baseline wins and the paper says so. A 2026-10-15 writing pass ran the app text, legal pages, README, CLAUDE.md and the paper through the Humanizer and Stop Slop skills (plain, friendly app voice; formal paper; rules under "Writing style" in its `CLAUDE.md`). The writing pass is uncommitted, for the owner to review.
 - **Run:** `streamlit run App/app.py`
 
 ### Data Science / Talent_AI
@@ -83,7 +83,7 @@ Then run `claude` to start Claude Code in that project.
 ### Website / Prambanan Batik
 - **Type:** PHP 7.4 + MySQL, no build step
 - **Purpose:** Product catalog and admin panel for Indonesian batik
-- **Key traits:** PDO prepared statements, CSRF protection, brute-force login protection, preview mode, Open Graph tags. A 2026-09-30 fix pass was verified end to end against a real local DB but is uncommitted, for the owner to review; see "Known Gaps" in its `CLAUDE.md`.
+- **Key traits:** PDO prepared statements, CSRF protection, brute-force login protection, preview mode, Open Graph tags. The 2026-09-30 fix pass is committed. A 2026-10-15 writing pass ran all visitor-facing text, the admin messages, the legal pages, the sample products and both docs through the Humanizer and Stop Slop skills in a plain, friendly shop voice (rules under "Writing style" in its `CLAUDE.md`). It passed a 74-check run and browser checks, and it's uncommitted, for the owner to review. See "Still to do" in its `CLAUDE.md`.
 - **Run:** `http://localhost/Prambanan_Batik/` via XAMPP Apache. `htdocs\Prambanan_Batik` is a junction to the project folder. The DB is XAMPP MariaDB on **port 3307** (`prambanan_batik`); credentials are in the project's gitignored `.env`, which `config.php` loads.
 
 ### Website / PX Mart Finder

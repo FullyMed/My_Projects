@@ -14,20 +14,20 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $id = post_string('id');
 
         if (empty($id)) {
-            $error = 'Product ID is required';
+            $error = 'We couldn\'t find that product.';
         } else {
             try {
                 $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
                 $stmt->execute([$id]);
-                $message = 'Product deleted successfully';
+                $message = 'Product deleted.';
             } catch (Exception $e) {
                 error_log('Failed to delete product: ' . $e->getMessage());
-                $error = 'Failed to delete product';
+                $error = 'We couldn\'t delete the product. Try again.';
             }
         }
     }
@@ -43,7 +43,7 @@ $products = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Products</title>
+    <title>Manage products</title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -57,7 +57,7 @@ $products = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -66,7 +66,7 @@ $products = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -76,15 +76,15 @@ $products = $stmt->fetchAll();
                 <h1>Products</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <h2 class="page-title">Manage Products</h2>
+                    <h2 class="page-title">Manage products</h2>
                     <div style="display: flex; gap: 0.5rem;">
-                        <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php" class="btn">Create Product</a>
+                        <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php" class="btn">Create product</a>
                         <a href="<?php echo SITE_PATH; ?>/admin/import_products.php" class="btn">Import CSV</a>
                     </div>
                 </div>

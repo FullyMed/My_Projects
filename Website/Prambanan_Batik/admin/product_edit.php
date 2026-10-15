@@ -20,12 +20,12 @@ if ($productId) {
     $product = $stmt->fetch();
 
     if (!$product) {
-        $error = 'Product not found';
+        $error = 'We couldn\'t find that product.';
     }
 }
 
 if (isset($_GET['created']) && $product) {
-    $message = 'Product created successfully. Add images from the Products list (Images button).';
+    $message = 'Product created. To add photos, open the Products list and click Images.';
 }
 
 // Values shown in the form: the saved product, or what was just submitted if saving failed.
@@ -33,7 +33,7 @@ $form = $product ?: [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = post_string('action');
 
@@ -52,15 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $form['slug'] = slugify($form['slug'] !== '' ? $form['slug'] : $form['name']);
 
         if (!in_array($action, ['create', 'update'], true) || ($action === 'update') !== (bool)$product) {
-            $error = 'Invalid action';
+            $error = 'Something went wrong. Reload the page and try again.';
         } elseif ($form['category_id'] === '' || $form['sku'] === '' || $form['name'] === '' || $form['price_display'] === '') {
-            $error = 'Category, SKU, name, and price are required';
+            $error = 'Fill in the name, SKU, category and price.';
         } elseif ($form['slug'] === '') {
-            $error = 'Slug must contain at least one letter or number';
+            $error = 'The slug needs at least one letter or number.';
         } elseif (!is_numeric($form['price_display']) || (float)$form['price_display'] < 0 || (float)$form['price_display'] > 99999999.99) {
-            $error = 'Price must be a number between 0 and 99,999,999 (plain digits, e.g. 350000)';
+            $error = 'Enter the price in rupiah as digits only, between 0 and 99,999,999 (for example 350000).';
         } elseif (!is_valid_buy_link($form['buy_link_shopee']) || !is_valid_buy_link($form['buy_link_tokopedia']) || !is_valid_buy_link($form['buy_link_other'])) {
-            $error = 'Buy links must start with http:// or https://';
+            $error = 'Buy links must start with http:// or https://.';
         } else {
             $currentId = $product ? (int)$product['id'] : 0;
 
@@ -72,11 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $duplicate = $dupStmt->fetch();
 
             if (!$catStmt->fetchColumn()) {
-                $error = 'Selected category does not exist';
+                $error = 'That category no longer exists. Pick another one.';
             } elseif ($duplicate) {
                 $error = strcasecmp($duplicate['sku'], $form['sku']) === 0
-                    ? 'Another product already uses this SKU'
-                    : 'Another product already uses this slug';
+                    ? 'Another product already uses this SKU.'
+                    : 'Another product already uses this slug.';
             } else {
                 $values = [
                     (int)$form['category_id'],
@@ -101,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $values[] = $currentId;
                     $stmt = $pdo->prepare('UPDATE products SET category_id = ?, sku = ?, slug = ?, name = ?, description = ?, price_display = ?, buy_link_shopee = ?, buy_link_tokopedia = ?, buy_link_other = ?, updated_at = NOW() WHERE id = ?');
                     $stmt->execute($values);
-                    $message = 'Product updated successfully';
+                    $message = 'Product saved.';
                     $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ? LIMIT 1');
                     $stmt->execute([$currentId]);
                     $product = $stmt->fetch();
                     $form = $product;
                 } catch (Exception $e) {
                     error_log('Failed to save product: ' . $e->getMessage());
-                    $error = 'Failed to save product. Please try again.';
+                    $error = 'We couldn\'t save the product. Try again.';
                 }
             }
         }
@@ -125,7 +125,7 @@ $categories = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $product ? 'Edit Product' : 'Create Product'; ?></title>
+    <title><?php echo $product ? 'Edit product' : 'Create product'; ?></title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -139,7 +139,7 @@ $categories = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -148,23 +148,23 @@ $categories = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
         <div class="main-content">
             <div class="topbar">
-                <h1><?php echo $product ? 'Edit Product' : 'Create Product'; ?></h1>
+                <h1><?php echo $product ? 'Edit product' : 'Create product'; ?></h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to Products</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to products</a>
                 </div>
 
                 <?php if ($message): ?>
@@ -185,7 +185,7 @@ $categories = $stmt->fetchAll();
 
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="name">Product Name <span class="required">*</span></label>
+                                <label for="name">Product name <span class="required">*</span></label>
                                 <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($form['name'] ?? ''); ?>" required>
                             </div>
 
@@ -196,13 +196,13 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="slug">Slug</label>
-                                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars($form['slug'] ?? ''); ?>" placeholder="Leave blank to generate from the name">
+                                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars($form['slug'] ?? ''); ?>" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
                                 <label for="category_id">Category <span class="required">*</span></label>
                                 <select id="category_id" name="category_id" required>
-                                    <option value="">Select Category</option>
+                                    <option value="">Choose a category</option>
                                     <?php foreach ($categories as $category): ?>
                                         <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ((int)($form['category_id'] ?? 0) === (int)$category['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($category['name']); ?>
@@ -222,23 +222,23 @@ $categories = $stmt->fetchAll();
                             </div>
 
                             <div class="form-group full">
-                                <label for="buy_link_shopee">Shopee Link</label>
+                                <label for="buy_link_shopee">Shopee link</label>
                                 <input type="url" id="buy_link_shopee" name="buy_link_shopee" value="<?php echo htmlspecialchars($form['buy_link_shopee'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
-                                <label for="buy_link_tokopedia">Tokopedia Link</label>
+                                <label for="buy_link_tokopedia">Tokopedia link</label>
                                 <input type="url" id="buy_link_tokopedia" name="buy_link_tokopedia" value="<?php echo htmlspecialchars($form['buy_link_tokopedia'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
-                                <label for="buy_link_other">Other Link</label>
+                                <label for="buy_link_other">Other link</label>
                                 <input type="url" id="buy_link_other" name="buy_link_other" value="<?php echo htmlspecialchars($form['buy_link_other'] ?? ''); ?>">
                             </div>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn"><?php echo $product ? 'Update Product' : 'Create Product'; ?></button>
+                            <button type="submit" class="btn"><?php echo $product ? 'Save product' : 'Create product'; ?></button>
                             <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>

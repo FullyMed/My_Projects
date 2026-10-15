@@ -5,8 +5,8 @@ require_once __DIR__ . '/functions.php';
 
 http_response_code(404);
 
-$page_title = 'Page Not Found';
-$meta_description = "The page you're looking for doesn't exist or may have been moved. Return to Prambanan Batik to explore our full batik collection.";
+$page_title = 'Page not found';
+$meta_description = "We couldn't find this page at Prambanan Batik. Go back to the home page or browse the batik collection.";
 
 ?>
 <?php include __DIR__ . '/header.php'; ?>
@@ -14,11 +14,11 @@ $meta_description = "The page you're looking for doesn't exist or may have been 
     <section class="error-page">
         <div class="container">
             <span class="error-code">404</span>
-            <h2>Page Not Found</h2>
-            <p>The page you're looking for doesn't exist or may have been moved.</p>
+            <h2>Page not found</h2>
+            <p>We couldn't find that page. The link may be old, or the product may no longer be listed.</p>
             <div class="error-actions">
-                <a href="<?php echo SITE_PATH; ?>/" class="btn btn-primary">Back to Home</a>
-                <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary">Browse Collection</a>
+                <a href="<?php echo SITE_PATH; ?>/" class="btn btn-primary">Go to the home page</a>
+                <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary">Browse batik</a>
             </div>
         </div>
     </section>

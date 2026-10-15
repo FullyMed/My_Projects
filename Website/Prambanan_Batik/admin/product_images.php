@@ -15,20 +15,20 @@ $product = null;
 $productId = get_query_param('product_id', 0, FILTER_VALIDATE_INT) ?: 0;
 
 if (!$productId) {
-    $error = 'Product ID is required';
+    $error = 'Pick a product first: open the Products list and click Images.';
 } else {
     $stmt = $pdo->prepare('SELECT id, name FROM products WHERE id = ? LIMIT 1');
     $stmt->execute([$productId]);
     $product = $stmt->fetch() ?: null;
 
     if (!$product) {
-        $error = 'Product not found';
+        $error = 'We couldn\'t find that product.';
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product) {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = $_POST['action'] ?? '';
 
@@ -38,28 +38,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product) {
             $sortOrder = (int)post_string('sort_order');
 
             if ($imageUrl === '') {
-                $error = 'Image URL is required';
+                $error = 'Enter an image URL.';
             } elseif (!preg_match('/^https?:\/\//i', $imageUrl)) {
-                $error = 'Image URL must start with http:// or https://';
+                $error = 'The image URL must start with http:// or https://.';
             } elseif (strlen($imageUrl) > 500) {
-                $error = 'Image URL is too long (max 500 characters)';
+                $error = 'That image URL is too long. Use one of 500 characters or fewer.';
             } else {
                 try {
                     $stmt = $pdo->prepare('INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (?, ?, ?, ?)');
                     $stmt->execute([$productId, $imageUrl, $altText !== '' ? mb_substr($altText, 0, 255, 'UTF-8') : null, $sortOrder]);
                     // Bump updated_at so the sitemap's <lastmod> reflects the image change.
                     $pdo->prepare('UPDATE products SET updated_at = NOW() WHERE id = ?')->execute([$productId]);
-                    $message = 'Image added successfully';
+                    $message = 'Image added.';
                 } catch (Exception $e) {
                     error_log('Failed to add product image: ' . $e->getMessage());
-                    $error = 'Failed to add image';
+                    $error = 'We couldn\'t add the image. Try again.';
                 }
             }
         } elseif ($action === 'delete') {
             $imageId = (int)post_string('id');
 
             if ($imageId < 1) {
-                $error = 'Image ID is required';
+                $error = 'We couldn\'t find that image.';
             } else {
                 try {
                     // Scoped to this product so a stray id can't delete another product's image.
@@ -67,13 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product) {
                     $stmt->execute([$imageId, $productId]);
                     if ($stmt->rowCount() > 0) {
                         $pdo->prepare('UPDATE products SET updated_at = NOW() WHERE id = ?')->execute([$productId]);
-                        $message = 'Image deleted successfully';
+                        $message = 'Image deleted.';
                     } else {
-                        $error = 'Image not found';
+                        $error = 'We couldn\'t find that image.';
                     }
                 } catch (Exception $e) {
                     error_log('Failed to delete product image: ' . $e->getMessage());
-                    $error = 'Failed to delete image';
+                    $error = 'We couldn\'t delete the image. Try again.';
                 }
             }
         }
@@ -93,7 +93,7 @@ if ($product) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Product Images</title>
+    <title>Manage product images</title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -107,7 +107,7 @@ if ($product) {
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -116,23 +116,23 @@ if ($product) {
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
         <div class="main-content">
             <div class="topbar">
-                <h1>Product Images</h1>
+                <h1>Product images</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to Products</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to products</a>
                 </div>
 
                 <?php if ($message): ?>
@@ -149,7 +149,7 @@ if ($product) {
                     </div>
 
                     <div class="form-section">
-                        <h3>Add Image</h3>
+                        <h3>Add image</h3>
                         <form method="POST">
                             <input type="hidden" name="action" value="upload">
                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -161,23 +161,23 @@ if ($product) {
                                 </div>
 
                                 <div class="form-group full">
-                                    <label for="alt_text">Alt Text</label>
-                                    <input type="text" id="alt_text" name="alt_text" placeholder="Describe the image">
+                                    <label for="alt_text">Alt text</label>
+                                    <input type="text" id="alt_text" name="alt_text" placeholder="What the photo shows, for screen readers">
                                 </div>
 
                                 <div class="form-group full">
-                                    <label for="sort_order">Sort Order <span class="optional">(lowest number is the main product photo)</span></label>
+                                    <label for="sort_order">Sort order <span class="optional">(lowest number is the main product photo)</span></label>
                                     <input type="number" id="sort_order" name="sort_order" value="0">
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn">Add Image</button>
+                            <button type="submit" class="btn">Add image</button>
                         </form>
                     </div>
 
                     <?php if (count($images) > 0): ?>
                         <div class="form-section">
-                            <h3>Product Images</h3>
+                            <h3>Product images</h3>
                             <div class="images-grid">
                                 <?php foreach ($images as $image): ?>
                                     <div class="image-card">

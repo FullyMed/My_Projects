@@ -1,5 +1,5 @@
 /* ============================================================
-   PRAMBANAN BATIK — Main Stylesheet
+   PRAMBANAN BATIK: main stylesheet
    Palette: warm cream · espresso · copper-gold
    Type:    Cormorant Garamond (display) · Inter (body)
    ============================================================ */
@@ -409,6 +409,7 @@ p:last-child { margin-bottom: 0; }
   color: #f5e6c4;
   letter-spacing: -0.01em;
   line-height: 1.1;
+  text-wrap: balance;
   margin-bottom: var(--spacing-lg);
 }
 
@@ -439,6 +440,7 @@ p:last-child { margin-bottom: 0; }
   margin-bottom: var(--spacing-xl);
   font-weight: var(--font-weight-light);
   line-height: var(--line-height-relaxed);
+  text-wrap: balance;
 }
 
 /* ── Section titles ───────────────────────────────────────── */
@@ -1068,7 +1070,7 @@ p:last-child { margin-bottom: 0; }
   transform: translateY(0);
 }
 
-/* ── Responsive — tablet ──────────────────────────────────── */
+/* ── Responsive: tablet ──────────────────────────────────── */
 @media (max-width: 900px) {
   .product-layout {
     grid-template-columns: 1fr;

@@ -52,7 +52,7 @@ if ($pdo !== null) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin dashboard</title>
 
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -102,7 +102,7 @@ if ($pdo !== null) {
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
                 <p>Prambanan Batik</p>
             </div>
             <nav>
@@ -112,7 +112,7 @@ if ($pdo !== null) {
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -122,7 +122,7 @@ if ($pdo !== null) {
                 <h1>Dashboard</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
@@ -143,20 +143,20 @@ if ($pdo !== null) {
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"><?php echo number_format($stats['clicks']); ?></div>
-                        <div class="stat-label">Outbound Clicks</div>
+                        <div class="stat-label">Buy-button clicks</div>
                     </div>
                 </div>
 
                 <div class="quick-actions" style="margin-bottom: 2rem;">
-                    <a href="<?php echo SITE_PATH; ?>/admin/categories.php" class="action-btn">Manage Categories</a>
-                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="action-btn">Manage Products</a>
-                    <a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="action-btn">Manage Reviews</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/categories.php" class="action-btn">Manage categories</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="action-btn">Manage products</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="action-btn">Manage reviews</a>
                     <a href="<?php echo SITE_PATH; ?>/admin/import_products.php" class="action-btn">Import CSV</a>
                 </div>
 
                 <?php if (!empty($recent_reviews)): ?>
                 <div class="table-section">
-                    <h3 style="margin-bottom: 1rem;">Recent Reviews</h3>
+                    <h3 style="margin-bottom: 1rem;">Recent reviews</h3>
                     <table class="recent-table">
                         <thead>
                             <tr>
@@ -173,7 +173,7 @@ if ($pdo !== null) {
                                 <td><span class="star-badge"><?php echo (int)$r['rating']; ?>★</span></td>
                                 <td>
                                     <a href="<?php echo SITE_PATH; ?>/admin/product_edit.php?id=<?php echo urlencode($r['product_id']); ?>">
-                                        <?php echo htmlspecialchars($r['product_name'] ?? '—'); ?>
+                                        <?php echo htmlspecialchars($r['product_name'] ?? '(deleted product)'); ?>
                                     </a>
                                 </td>
                                 <td><?php echo date('M d, Y', strtotime($r['created_at'])); ?></td>

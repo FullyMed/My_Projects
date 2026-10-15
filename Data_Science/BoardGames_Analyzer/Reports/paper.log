@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  1 OCT 2026 13:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.18)  15 OCT 2026 20:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -499,27 +499,22 @@ Package hyperref Info: Link coloring OFF on input line 24.
 \openout3 = `paper.out'.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 41--43
+Underfull \hbox (badness 10000) in paragraph at lines 37--39
 []\OT1/ptm/b/it/9 Index Terms\OT1/ptm/b/n/9 ---Recommender Sys-tems, Board Game
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 41--43
+Underfull \hbox (badness 10000) in paragraph at lines 37--39
 \OT1/ptm/b/n/9 Rec-om-men-da-tion, Ex-plain-able Rec-om-men-da-tion, Content-
  []
 
-
-Underfull \hbox (badness 1629) in paragraph at lines 50--51
-\OT1/ptm/m/n/10 popularity-based ap-proaches may over-recommend highly
- []
-
-LaTeX Font Info:    Trying to load font information for U+msa on input line 57.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 53.
 
 (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 57.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 53.
 
 
 (C:\Users\felix\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
@@ -530,78 +525,74 @@ lix/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-<images/architecture.png, id=139, 2695.06876pt x 4230.80624pt>
+<images/architecture.png, id=142, 2695.06876pt x 4230.80624pt>
 File: images/architecture.png Graphic file (type png)
 <use images/architecture.png>
-Package pdftex.def Info: images/architecture.png  used on input line 90.
+Package pdftex.def Info: images/architecture.png  used on input line 86.
 (pdftex.def)             Requested size: 258.0pt x 404.96495pt.
 
-Overfull \hbox (6.0pt too wide) in paragraph at lines 90--91
+Overfull \hbox (6.0pt too wide) in paragraph at lines 86--87
  [][] 
  []
 
-[2]
-Underfull \hbox (badness 2591) in paragraph at lines 117--118
+
+Underfull \hbox (badness 2591) in paragraph at lines 111--112
 \OT1/ptm/m/n/10 tion en-coded with the all-MiniLM-L6-v2 sentence-
  []
 
-[3
+[2
 pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.136 
-       <./images/architecture.png>]
-Underfull \hbox (badness 1642) in paragraph at lines 173--174
- \OT1/ptm/m/it/10 1) Title-Based Rec-om-men-da-tion: [][][] \OT1/ptm/m/n/10 The
- title-based mode
- []
-
-
-Underfull \hbox (badness 3536) in paragraph at lines 200--201
-[]\OT1/ptm/m/n/10 The rec-om-men-da-tion sys-tem was im-ple-mented us-ing
- []
-
-[4]
-Underfull \hbox (badness 3291) in paragraph at lines 224--224
+l.112 \end{itemize}
+                    <./images/architecture.png>] [3]
+Underfull \hbox (badness 3291) in paragraph at lines 218--218
 \OMS/cmsy/m/n/8 !$ \OT1/ptm/m/n/8 Azul: Sum-
  []
 
 
-Underfull \hbox (badness 6978) in paragraph at lines 226--226
+Underfull \hbox (badness 6978) in paragraph at lines 220--220
 []\OT1/ptm/m/n/8 Ticket to Ride
  []
 
-[5
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[4
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.296 \subsection
-                 {Experimental Results}]
-<images/performance_chart.png, id=189, 650.43pt x 361.35pt>
+l.279 
+      ]
+<images/performance_chart.png, id=185, 650.43pt x 361.35pt>
 File: images/performance_chart.png Graphic file (type png)
 <use images/performance_chart.png>
-Package pdftex.def Info: images/performance_chart.png  used on input line 302.
+Package pdftex.def Info: images/performance_chart.png  used on input line 290.
 (pdftex.def)             Requested size: 252.0pt x 139.99962pt.
- [6
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[5
 pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.366 
+l.352 
       
 pdfTeX warning (ext4): destination with the same identifier (name{table.2}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.366 
+l.352 
       
 pdfTeX warning (ext4): destination with the same identifier (name{table.3}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.366 
+l.352 
        <./images/performance_chart.png>] (paper.bbl
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 6
 2.
@@ -620,7 +611,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[7] (paper.aux)
+[6] (paper.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
@@ -629,13 +620,13 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: 17461ED1D1FB70DF5898AD6085407BAD;4398.
  ) 
 Here is how much of TeX's memory you used:
- 11960 strings out of 467871
- 190454 string characters out of 5418376
- 617223 words of memory out of 5000000
+ 11959 strings out of 467871
+ 190448 string characters out of 5418376
+ 617212 words of memory out of 5000000
  40618 multiletter control sequences out of 15000+600000
  666187 words of font info for 113 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,887b,442s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,801b,533s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
 cmex10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
 fonts/cm/cmmi10.pfb><C:/Users/felix/AppData/Local/Programs/MiKTeX/fonts/type1/p
@@ -649,9 +640,9 @@ elix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/f
 elix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/
 felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/
 felix/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (7 pages, 519437 bytes).
+Output written on paper.pdf (6 pages, 515030 bytes).
 PDF statistics:
- 271 PDF objects out of 1000 (max. 8388607)
- 59 named destinations out of 1000 (max. 500000)
+ 265 PDF objects out of 1000 (max. 8388607)
+ 58 named destinations out of 1000 (max. 500000)
  243 words of extra memory for PDF output out of 10000 (max. 10000000)
 

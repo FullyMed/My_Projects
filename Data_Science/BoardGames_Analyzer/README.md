@@ -1,27 +1,23 @@
 # BoardGames Analyzer
 
-**An explainable hybrid board game recommendation system** built as an undergraduate Data Science and Recommender Systems research project.
+A board game recommender that tells you why it picked each game. I built it as an undergraduate data science research project, with a Streamlit app and an IEEE-style paper.
 
-The system helps users discover board games through three complementary recommendation modes, combining semantic content similarity, sentiment analysis, and popularity signals — with lightweight, interpretable explanations for every recommendation.
-
----
-
-## Features
-
-- **Three recommendation modes** — Title-Based, Trait-Based, and Combined
-- **Explainable results** — every recommendation lists the mechanics, categories, families and publishers it shares with your seeds or requested traits, plus its component scores; the page also shows which game each typed title was matched to
-- **Sentiment signal** — DistilBERT SST-2 run on a random sample of each game's user reviews (up to 10 per game)
-- **Analytics dashboard** — interactive EDA with rating distributions, top games, mechanic/category frequency, and publication trends
-- **Responsive UI** — works on mobile (iOS/Android), tablet (iPad), and desktop
-- **Light / Dark theme** — toggleable from the sidebar on every page
-- **Custom 404 / Not Found page** — themed empty-state experience, both as a dedicated page and inline for zero-result searches
-- **Per-page SEO metadata** — distinct browser-tab title and meta description on every page
-- **Loading states** — explicit spinners for the recommendation engine's cold start, each search, and dataset loading on the Analytics page
-- **Terms of Use / Privacy Policy pages** — linked from the home page footer
+You can start from games you already like, from traits you want (co-op, tile placement, horror), or from both. Each suggestion lists the categories, mechanics, families and publishers it shares with what you asked for.
 
 ---
 
-## Recommendation Modes
+## What's in the app
+
+- Three ways to search: Title-Based, Trait-Based and Combined.
+- A reason on every result, plus the component scores. The page also shows which catalog game each typed title matched, so a typo can't quietly pick the wrong seed.
+- A review-sentiment signal: DistilBERT SST-2 scored up to 10 random review comments per game.
+- An Analytics page with charts of the data: ratings, complexity, top games, common mechanics and categories, and releases per year.
+- Light and dark themes, a layout that works on phones, tablets and desktops, and loading spinners for the slow steps.
+- A themed 404 page, a distinct title and meta description on every page, and Terms of use and Privacy policy pages linked from the home page.
+
+---
+
+## How well it works
 
 | Mode | Signal | Recall@10 | NDCG@10 | Recall@10, long tail |
 |---|---|---|---|---|
@@ -32,11 +28,15 @@ The system helps users discover board games through three complementary recommen
 | *Content-only baseline* | Title mode without sentiment and popularity | *0.0122* | *0.0100* | *0.0151* |
 | *Title-Based, no sentiment* | Ablation | *0.0244* | *0.0178* | *0.0151* |
 
-> **Read this honestly:** on this offline protocol the popularity baseline wins clearly. The protocol is from Notebook 09: 300 users, each user's first 3 rated games as seeds and the next 3 held out. The ratings file is ordered by game popularity, so 63% of held-out games are top-100 most-rated titles. The **long-tail** column counts only held-out games outside the top 100 (155 users). There, popularity scores 0 and the similarity-based modes find a few. The system is built for explainable discovery, not next-rating prediction. Earlier versions of this README showed Title-Based Recall@10 = 0.20. That number came from a data bug (sentiment and embeddings covered only 20 popular games) and is withdrawn. Full tables are in `CLAUDE.md` Section 7 and the paper.
+The popularity baseline wins this test by a wide margin. Notebook 09 takes 300 users, uses each user's first 3 rated games as seeds, and holds out the next 3. The ratings file lists the most-rated games first, so 63% of the held-out games are top-100 blockbusters, and a list of popular games guesses many of them.
+
+The long-tail column counts only held-out games outside the top 100 (155 of the 300 users have one). There, popularity scores zero and the three modes find a few. That fits what the app is for: explainable discovery beyond the obvious picks, not predicting the next popular game someone rates.
+
+Older versions of this README showed Title-Based Recall@10 = 0.20. That number came from a data bug, where sentiment and embeddings covered only 20 popular games, and I've withdrawn it. The full tables are in `CLAUDE.md` Section 7 and in the paper.
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 BoardGames_Analyzer/
@@ -46,11 +46,11 @@ BoardGames_Analyzer/
 │   ├── recommender.py              ← BoardGameDiscoveryEngine class
 │   ├── theme.py                    ← Shared CSS, responsive design, chart colors
 │   └── pages/
-│       ├── 1_Recommendation.py     ← Recommendation engine UI
-│       ├── 2_Analytics.py         ← EDA / analytics dashboard
-│       ├── 3_Not_Found.py         ← Themed "Not Found" page
-│       ├── 4_Terms_of_Use.py      ← Terms of Use
-│       └── 5_Privacy_Policy.py    ← Privacy Policy
+│       ├── 1_Recommendation.py     ← Recommendation page
+│       ├── 2_Analytics.py         ← Data charts
+│       ├── 3_Not_Found.py         ← Themed "not found" page
+│       ├── 4_Terms_of_Use.py      ← Terms of use
+│       └── 5_Privacy_Policy.py    ← Privacy policy
 │
 ├── Notebooks/
 │   ├── 01_Data_Inspection.ipynb
@@ -82,13 +82,13 @@ BoardGames_Analyzer/
 
 ---
 
-## Getting Started
+## Getting started
 
-### Prerequisites
+### What you need
 
-- Python 3.10+
-- Full dev environment: all dependencies in `Requirements.txt`
-- Streamlit Cloud deployment: minimal deps in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, matplotlib)
+- Python 3.10 or newer
+- For development: everything in `Requirements.txt`
+- For the Streamlit Cloud deployment: the short list in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, matplotlib)
 
 ### Install
 
@@ -126,40 +126,40 @@ Then open `http://localhost:8501` in your browser.
 
 ## Deployment
 
-The app is deployed live on **Streamlit Community Cloud**, served from `App/app.py` in this repository.
+The live app runs on Streamlit Community Cloud from `App/app.py` in this repository.
 
-Streamlit Cloud uses `App/requirements.txt` as the dependency manifest. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are committed to the repository and loaded at startup — no build step required.
+Streamlit Cloud installs the packages in `App/requirements.txt`. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are in the repository, and the app loads them at startup, so there's no build step.
 
 ---
 
 ## Dataset
 
-Data sourced from the [BoardGameGeek (BGG)](https://boardgamegeek.com/) platform via publicly available datasets.
+All data comes from public [BoardGameGeek (BGG)](https://boardgamegeek.com/) datasets.
 
 | Dataset | Details |
 |---|---|
 | Game metadata | 21,631 board games with descriptions, mechanics, categories, complexity |
-| User ratings | ~18.7 million valid ratings after preprocessing |
-| User reviews | ~26 million ratings with optional comments; a random sample of up to 10 comments per game is used for sentiment |
+| User ratings | 18.7 million ratings on those games |
+| User reviews | ~26 million ratings with optional comments; the sentiment step samples up to 10 comments per game |
 
-### Precomputed Artifacts
+### Precomputed files
 
-The `Dataset/Processed/` folder contains precomputed artifacts required by the app:
+The app needs these files from `Dataset/Processed/`:
 
 | File | Description |
 |---|---|
 | `desc_topk_csr.joblib` | TF-IDF description similarity (sparse CSR matrix) |
-| `content_topk_csr.joblib` | Combined content similarity (sparse CSR matrix) |
+| `content_topk_csr.joblib` | Mechanic / theme / subcategory similarity (sparse CSR matrix) |
 | `emb_topk_csr.joblib` | MiniLM (all-MiniLM-L6-v2) name + description embedding similarity (sparse CSR matrix), built by `Notebooks/05b_embeddings_full_coverage.py` |
 | `sentiment_summary.csv` | Per-game mean probability that a review is positive (DistilBERT SST-2), built by `Notebooks/02b_sentiment_full_coverage.py` |
 
 ---
 
-## How It Works
+## How it works
 
-### Hybrid Signals
+### The scores
 
-Each mode has its own fixed weights (all signals min-max normalized to 0–1):
+Each mode has its own fixed weights. Every signal is min-max normalized to 0–1 first.
 
 ```
 Title-Based:  0.35 × keyword similarity (TF-IDF description + mechanics/themes, averaged)
@@ -175,55 +175,52 @@ Combined:     0.65 × Title-Based score + 0.35 × trait score
             + 0.08 × rating + 0.04 × log(votes) + 0.03 × sentiment
 ```
 
-**Keyword / semantic similarity** — each game's 50 nearest neighbours under description TF-IDF, mechanic/theme/subcategory vectors, and all-MiniLM-L6-v2 embeddings of its name and description.
+For keyword and semantic similarity, the engine stores each game's 50 nearest neighbours in three spaces: description TF-IDF, mechanic/theme/subcategory vectors, and all-MiniLM-L6-v2 embeddings of the game's name and description.
 
-**Trait Overlap** — the share of your requested categories / mechanics / families / publishers that a game has. Includes trait expansion (e.g. "strategy" → expands to related categories and mechanics automatically).
+Trait overlap is the share of your requested categories, mechanics, families and publishers that a game has. Broad words expand into related BGG terms, so "strategy" also searches categories like Economic and mechanics like Hand Management.
 
-**Sentiment** — mean probability that a review is positive (DistilBERT SST-2) over up to 10 randomly sampled comments per game; games with fewer than 3 scored comments use the dataset mean.
+Sentiment is the average chance that a review is positive, over up to 10 random comments per game. Games with fewer than 3 scored comments get the overall average.
 
-**Popularity** — min-max normalized number of user ratings (plus Bayes average rating in the Trait-Based and Combined modes).
+Popularity is the min-max normalized number of user ratings. The Trait-Based and Combined modes also add the Bayes average rating.
 
-### Difficulty Filter
+### After ranking
 
-Games can be filtered by complexity level before results are returned:
+Two rules run after the scores, so neither one changes a score.
 
-| Level | BGG Average Weight |
+The difficulty filter keeps games in the band you choose:
+
+| Level | BGG average weight |
 |---|---|
-| Low | ≤ 2.0 |
+| Light | ≤ 2.0 |
 | Medium | 2.0 – 3.0 |
-| High | > 3.0 |
+| Heavy | > 3.0 |
 
-The filter is applied as a post-processing step across all three recommendation modes.
+The same-series cap allows at most 2 results from any BGG series a seed game belongs to. Without it, Ticket to Ride returns six Ticket to Ride editions. The explanation names the shared series.
 
 ---
 
-## App Pages
+## App pages
 
 ### Home
-Landing page with project overview, key stats, and navigation cards.
+An overview, a few stats, and links to the other pages.
 
-### Recommendation Engine
-- Enter up to several game titles (comma-separated) and/or trait preferences; the page shows which game each title matched and warns about titles it couldn't find
-- Choose mode: **Title-Based**, **Trait-Based**, or **Combined**
-- Optionally filter by difficulty level
-- Results include a full ranked table and top-5 styled cards with explanation text
-- A zero-result query shows a themed "No Matches Found" card instead of a plain message
+### Recommendation
+Type one or more games (comma-separated), traits, or both, and pick a mode: Title-Based, Trait-Based or Combined. You can also set a difficulty. The page shows which game each typed title matched and warns you about titles it couldn't find. You get a ranked table and cards for the top 5, each with its reason. A search with no results shows a "No matches" card with ideas for widening it.
 
-### Not Found
-A dedicated, themed 404 page (styled to match the rest of the app) with links back to Home, Recommendation, and Analytics. Note: Streamlit's router still shows its own built-in "Page not found" banner for genuinely unrecognized URLs before falling back to Home — this page covers in-app "not found" states, not arbitrary bad URLs (a Streamlit platform limitation).
-
-### Terms of Use / Privacy Policy
-Static pages describing what the app actually does with your input (short version: no accounts, no persisted personal data — search inputs live only in your browser session) and disclaiming BGG affiliation. Linked from the Home page footer and from each other.
-
-### Analytics Dashboard
-Interactive dataset explorer with sidebar controls (min-vote threshold, year range, chart size):
+### Analytics
+Charts of the dataset, with sidebar controls for the minimum number of ratings, the years shown and the bars per chart:
 
 - Rating and complexity distributions
-- Top N highest-rated games
-- Top N most-rated games
-- Most common mechanics and categories
-- Games published per year trend
-- Community sentiment distribution (mean P(positive) per game)
+- Top N highest-rated and most-rated games
+- The most common mechanics and categories
+- Games released per year
+- How positive the reviews sound, per game
+
+### Not found
+A themed 404 page with links back to Home, Recommendation and Analytics. Streamlit's router still shows its own "Page not found" banner for unknown URLs before it falls back to Home, and the app can't change that. This page covers "not found" states inside the app.
+
+### Terms of use and privacy policy
+Plain-language pages about what the app does with your input: no accounts, and what you type stays in your browser session. They also say the project has no connection to BGG. The home page footer links to both, and they link to each other.
 
 ---
 
@@ -231,21 +228,21 @@ Interactive dataset explorer with sidebar controls (min-vote threshold, year ran
 
 | Notebook | Purpose |
 |---|---|
-| `01_Data_Inspection` | Initial data exploration and schema review |
+| `01_Data_Inspection` | First look at the data and its schema |
 | `02_Preprocessing` | Cleaning, filtering, feature extraction (its sentiment step was a 20-game pilot, replaced by `02b`) |
 | `02b_sentiment_full_coverage.py` | Review sentiment for every game (script) |
-| `03_EDA` | Exploratory data analysis and visualizations |
+| `03_EDA` | Exploratory analysis and charts |
 | `04_Modeling_CF` | Collaborative filtering experiments |
 | `05_Modeling_Content_NLP` | TF-IDF and attribute similarity (its embedding step covered only 20 games, replaced by `05b`) |
 | `05b_embeddings_full_coverage.py` | MiniLM embedding similarity for every game (script) |
-| `06_Hybrid_Model` | Hybrid scoring construction |
+| `06_Hybrid_Model` | Builds the hybrid score |
 | `07_Evaluation_Metrics` | Early metric experiments (superseded by `09`) |
-| `08_Discovery_Engine` | Full recommendation engine implementation |
+| `08_Discovery_Engine` | Full recommendation engine |
 | `09_Evaluation` | Recall@K / NDCG@K of the deployed engine, baselines and a no-sentiment ablation |
 
 ---
 
-## Tech Stack
+## Tech stack
 
 | Category | Libraries |
 |---|---|
@@ -260,46 +257,40 @@ Interactive dataset explorer with sidebar controls (min-vote threshold, year ran
 
 ---
 
-## Research Paper
+## Research paper
 
-The project includes a full IEEE-format research paper at `Reports/paper.tex` / `Reports/paper.pdf`.
+The full paper is at `Reports/paper.tex`, compiled to `Reports/paper.pdf`.
 
 **Title:** *An Explainable Multi-Mode Board Game Recommendation System Using Content Similarity, Sentiment Analysis, and Popularity Signals*
 
-**Abstract:** Proposes a lightweight hybrid recommendation framework for board game discovery that integrates textual content similarity, gameplay trait matching, sentiment analysis, and popularity-based signals. Evaluated using Recall@K and NDCG@K under a holdout-based protocol on the BoardGameGeek dataset.
+The paper describes the three modes and how each one scores games, then tests them against popularity and content-only baselines on BoardGameGeek ratings with Recall@K and NDCG@K. It reports the result as it came out: popularity wins the main test, the modes reach a few less popular games that popularity never does, and sentiment adds nothing measurable.
 
 ---
 
 ## Limitations
 
-- **No personalization** — the system does not maintain user profiles or collaborative filtering
-- **Trait-Based mode is exploratory** — low quantitative performance by design; intended for preference exploration rather than precise retrieval
-- **Sentiment is sampled** — at most 10 review comments per game are scored, so values for individual games are noisy
-- **Popularity wins offline** — on the evaluation protocol every mode is far below a popularity baseline; the system's value is explainable discovery beyond the blockbusters, which needs a user study to demonstrate
-- **Same-series cap** — at most 2 results from any BGG series a seed belongs to (otherwise Ticket to Ride returns six Ticket to Ride editions); the shared series is named in the explanation
-- **Name in embeddings** — game names are part of the embedded text, so similarly-named games get a small boost
-- **No statistical significance testing** — evaluation uses single runs without p-values or confidence intervals
+- The system doesn't learn from you. There are no user profiles and no collaborative filtering.
+- Trait-Based mode is for exploring, not precise retrieval, and its scores show it.
+- Sentiment comes from at most 10 comments per game, so a single game's value is noisy.
+- Every mode loses to the popularity baseline offline. Showing that the discovery side helps people would take a user study.
+- Game names are part of the embedded text, so games with similar names get a small boost.
+- The evaluation is a single run, with no p-values or confidence intervals.
 
 ---
 
-## Roadmap / Open Items
+## Open items
 
-- **Legal pages placeholder info** — Terms of Use / Privacy Policy currently list the GitHub repo as the only contact method and state no software license is published. Update both if a real license or dedicated contact email is added later.
-- **Paper vs. code** — fixed on 2026-10-01: the paper now uses the real per-mode formulas, reports baselines, an ablation and a long-tail analysis, and shows verbatim system explanations.
-- **Suggested next steps** (not yet approved): pin `App/requirements.txt` versions, bootstrap confidence intervals, shorter publisher lists in explanations, description-only embeddings, a less popularity-biased evaluation protocol. See `CLAUDE.md` Section 12.
-- **Root single-page app** (`app.py` / `recommender.py` at the project root) is kept only for reference and intentionally does not have the 404 page, SEO meta tags, or loading-state spinners that the `App/` version has.
-- Image compression was evaluated and skipped — the app has no static images (all charts render live via matplotlib); see `CLAUDE.md` for details.
+- The legal pages list the GitHub repo as the only contact and say there's no published software license. Both pages need updating if a license or a contact email is added.
+- The paper and the code matched up again on 2026-10-01: real per-mode formulas, baselines, an ablation, a long-tail analysis, and the system's own explanations.
+- Suggested next steps, not yet approved: pin the versions in `App/requirements.txt`, add bootstrap confidence intervals, shorten the publisher lists in explanations, embed descriptions only, and add a second evaluation that leans less on popular games. See `CLAUDE.md` Section 12.
+- The root single-page app (`app.py` / `recommender.py`) is a reference copy. It doesn't have the 404 page, meta tags or loading spinners that `App/` has.
+- Image compression was considered and skipped: the app has no static images, since matplotlib draws every chart live. See `CLAUDE.md`.
 
 ---
 
 ## Purpose
 
-Developed as an undergraduate Data Science and Recommender Systems research project to demonstrate:
-
-- Practical hybrid recommendation system design
-- Explainable AI in a hobby domain
-- End-to-end ML pipeline from raw data to interactive app
-- Research methodology with holdout evaluation, baselines and candid reporting of negative results
+An undergraduate recommender-systems project that covers the whole pipeline: raw BoardGameGeek dumps, a recommender that explains each suggestion, a deployed app, and an evaluation against baselines that reports the result as it came out, including where the baseline wins.
 
 ---
 

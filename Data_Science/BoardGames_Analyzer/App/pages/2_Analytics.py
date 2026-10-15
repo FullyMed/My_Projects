@@ -15,13 +15,13 @@ import streamlit as st
 import theme
 
 st.set_page_config(
-    page_title="Analytics — Board Game Discovery Engine",
+    page_title="Analytics · Board Game Discovery Engine",
     page_icon="📊",
     layout="wide",
 )
 theme.set_meta_description(
-    "Explore the BoardGameGeek dataset behind the recommender: rating distributions, "
-    "top-rated games, most common mechanics and categories, and publication trends."
+    "Charts of the BoardGameGeek data behind the recommender: ratings, complexity, "
+    "top games, common mechanics and categories, and releases per year."
 )
 
 st.sidebar.title("⚙ Settings")
@@ -37,7 +37,7 @@ PROCESSED_PATH = PROJECT_ROOT / "Dataset" / "Processed"
 # ─────────────────────────────────────────────────────────────────
 # Data loading
 # ─────────────────────────────────────────────────────────────────
-@st.cache_data(show_spinner="Loading game dataset...")
+@st.cache_data(show_spinner="Loading the game data...")
 def load_games() -> pd.DataFrame:
     df = pd.read_csv(RAW_PATH / "games_detailed_info.csv", low_memory=False)
     df["id"] = pd.to_numeric(df["id"], errors="coerce")
@@ -53,7 +53,7 @@ def load_games() -> pd.DataFrame:
     return df
 
 
-@st.cache_data(show_spinner="Loading sentiment data...")
+@st.cache_data(show_spinner="Loading review sentiment...")
 def load_sentiment() -> pd.DataFrame:
     path = PROCESSED_PATH / "sentiment_summary.csv"
     if not path.exists():
@@ -117,7 +117,7 @@ def _hbar_chart(labels, values, title, color, n):
 
 def _rating_hbar(names, ratings, title, n, min_votes):
     if len(ratings) == 0:
-        st.info("No games match the current vote threshold. Lower the **Min. votes** slider to see results.")
+        st.info("No games have that many ratings. Lower the **Minimum ratings** slider.")
         return
     height = max(3.5, n * 0.35)
     fig, ax = plt.subplots(figsize=(8, height))
@@ -151,28 +151,28 @@ sent_df = load_sentiment()
 # Sidebar filters
 # ─────────────────────────────────────────────────────────────────
 st.sidebar.markdown("---")
-st.sidebar.markdown("**Chart Filters**")
+st.sidebar.markdown("**Chart filters**")
 
-min_votes = st.sidebar.slider("Min. votes (rating charts)", 100, 5000, 500, step=100)
+min_votes = st.sidebar.slider("Minimum ratings", 100, 5000, 500, step=100, help="Hides games with fewer user ratings from the rating and complexity charts.")
 
 year_min_raw = int(df["yearpublished"].dropna().clip(1900, 2030).min())
 year_max_raw = min(int(df["yearpublished"].dropna().clip(1900, 2030).max()), 2025)
 year_range = st.sidebar.slider(
-    "Publication year range",
+    "Years shown",
     year_min_raw, year_max_raw,
     (1970, year_max_raw),
 )
 
-top_n_bars = st.sidebar.slider("Items in bar charts", 10, 25, 15, step=5)
+top_n_bars = st.sidebar.slider("Bars per chart", 10, 25, 15, step=5)
 
 df_rated = df[df["usersrated"].fillna(0) >= min_votes].copy()
 
 # ─────────────────────────────────────────────────────────────────
 # Header
 # ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="main-title"><span class="title-icon">📊</span> Dataset Analytics</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"><span class="title-icon">📊</span> The data behind it</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Explore the BoardGameGeek dataset powering the recommendation engine.</div>',
+    '<div class="subtitle">The 21,631 BoardGameGeek games the recommender searches, in charts.</div>',
     unsafe_allow_html=True,
 )
 st.markdown("---")
@@ -182,28 +182,28 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────
 m1, m2, m3, m4 = st.columns(4)
 with m1:
-    st.metric("Total Games", f"{len(df):,}")
+    st.metric("Games", f"{len(df):,}")
 with m2:
     avg_r = df_rated["bayesaverage"].mean()
-    st.metric("Avg. Bayes Rating", f"{avg_r:.2f}" if not np.isnan(avg_r) else "—")
+    st.metric("Average BGG rating", f"{avg_r:.2f}" if not np.isnan(avg_r) else "—")
 with m3:
     avg_w = df_rated["averageweight"].mean()
-    st.metric("Avg. Complexity", f"{avg_w:.2f}" if not np.isnan(avg_w) else "—")
+    st.metric("Average complexity (1 to 5)", f"{avg_w:.2f}" if not np.isnan(avg_w) else "—")
 with m4:
-    st.metric(f"Games (≥ {min_votes:,} votes)", f"{len(df_rated):,}")
+    st.metric(f"Games with {min_votes:,}+ ratings", f"{len(df_rated):,}")
 
 st.markdown("---")
 
 # ─────────────────────────────────────────────────────────────────
 # Row 1 — Rating distribution + Complexity distribution
 # ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-title">Score & Complexity Distributions</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Ratings and complexity</div>', unsafe_allow_html=True)
 d1, d2 = st.columns(2)
 
 with d1:
     ratings = df_rated["bayesaverage"].dropna()
     fig, ax = plt.subplots(figsize=(6, 3.5))
-    theme.style_ax(ax, fig, colors, "Distribution of Bayes Average Ratings")
+    theme.style_ax(ax, fig, colors, "BGG rating (Bayes average)")
     ax.hist(ratings, bins=40, color=colors["primary"], alpha=colors["bar_alpha"], edgecolor="none")
     ax.set_xlabel("Bayes Average Rating", fontsize=9)
     ax.set_ylabel("Games", fontsize=9)
@@ -215,7 +215,7 @@ with d1:
 with d2:
     complexity = df_rated["averageweight"].dropna()
     fig, ax = plt.subplots(figsize=(6, 3.5))
-    theme.style_ax(ax, fig, colors, "Complexity Distribution  (1 = Light → 5 = Heavy)")
+    theme.style_ax(ax, fig, colors, "Complexity (1 = light, 5 = heavy)")
     ax.hist(complexity, bins=30, color=colors["secondary"], alpha=colors["bar_alpha"], edgecolor="none")
     ax.set_xlabel("Average Weight", fontsize=9)
     ax.set_ylabel("Games", fontsize=9)
@@ -230,7 +230,7 @@ st.markdown("---")
 # Row 2 — Top-rated games
 # ─────────────────────────────────────────────────────────────────
 st.markdown(
-    f'<div class="section-title">Top {top_n_bars} Highest-Rated Games  (min {min_votes:,} votes)</div>',
+    f'<div class="section-title">Top {top_n_bars} highest-rated games (at least {min_votes:,} ratings)</div>',
     unsafe_allow_html=True,
 )
 top_rated = df_rated.nlargest(top_n_bars, "bayesaverage")[["game_name", "bayesaverage"]].copy()
@@ -248,7 +248,7 @@ st.markdown("---")
 # Row 3 — Most-rated games (by number of user ratings)
 # ─────────────────────────────────────────────────────────────────
 st.markdown(
-    f'<div class="section-title">Top {top_n_bars} Most-Rated Games</div>',
+    f'<div class="section-title">Top {top_n_bars} most-rated games</div>',
     unsafe_allow_html=True,
 )
 top_reviewed = df.nlargest(top_n_bars, "usersrated")[["game_name", "usersrated"]].copy()
@@ -280,7 +280,7 @@ st.markdown("---")
 # Row 4 — Mechanics + Categories (side by side)
 # ─────────────────────────────────────────────────────────────────
 st.markdown(
-    f'<div class="section-title">Top {top_n_bars} Mechanics & Categories</div>',
+    f'<div class="section-title">Top {top_n_bars} mechanics and categories</div>',
     unsafe_allow_html=True,
 )
 mc1, mc2 = st.columns(2)
@@ -291,7 +291,7 @@ with mc1:
         top_mechs = top_values(parsed_mechs, n=top_n_bars)
         _hbar_chart(
             top_mechs.index[::-1], top_mechs.values[::-1],
-            f"Top {top_n_bars} Mechanics", colors["primary"], top_n_bars,
+            f"Top {top_n_bars} mechanics", colors["primary"], top_n_bars,
         )
 
 with mc2:
@@ -300,7 +300,7 @@ with mc2:
         top_cats = top_values(parsed_cats, n=top_n_bars)
         _hbar_chart(
             top_cats.index[::-1], top_cats.values[::-1],
-            f"Top {top_n_bars} Categories", colors["secondary"], top_n_bars,
+            f"Top {top_n_bars} categories", colors["secondary"], top_n_bars,
         )
 
 st.markdown("---")
@@ -309,7 +309,7 @@ st.markdown("---")
 # Row 5 — Publication year trend
 # ─────────────────────────────────────────────────────────────────
 st.markdown(
-    f'<div class="section-title">Games Published Per Year  ({year_range[0]}–{year_range[1]})</div>',
+    f'<div class="section-title">Games released per year, {year_range[0]} to {year_range[1]}</div>',
     unsafe_allow_html=True,
 )
 year_df = (
@@ -335,11 +335,11 @@ st.markdown("---")
 # Row 6 — Sentiment (optional, only if data exists)
 # ─────────────────────────────────────────────────────────────────
 if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
-    st.markdown('<div class="section-title">Community Sentiment Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">How positive the reviews sound</div>', unsafe_allow_html=True)
     st.caption(
-        "Per game: the average probability that a review is positive, from DistilBERT SST-2 run on up to "
-        "10 randomly sampled review comments. Games with fewer than 3 scored comments are not shown "
-        "(the recommender uses the dataset mean for them)."
+        "A DistilBERT model read up to 10 random review comments per game and estimated how likely "
+        "each one is to be positive. Each game's score is the average. Games with fewer than 3 comments "
+        "aren't shown, and the recommender gives them the overall average."
     )
 
     sent_scores = sent_df["avg_sentiment_score"].dropna()
@@ -347,9 +347,9 @@ if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
 
     with s1:
         fig, ax = plt.subplots(figsize=(8, 3.5))
-        theme.style_ax(ax, fig, colors, "Avg. Sentiment Score per Game  (0 = Negative → 1 = Positive)")
+        theme.style_ax(ax, fig, colors, "Average review positivity per game (0 = negative, 1 = positive)")
         ax.hist(sent_scores, bins=40, color=colors["accent"], alpha=colors["bar_alpha"], edgecolor="none")
-        ax.set_xlabel("Avg. Sentiment Score", fontsize=9)
+        ax.set_xlabel("Average review positivity", fontsize=9)
         ax.set_ylabel("Games", fontsize=9)
         ax.tick_params(labelsize=8)
         ax.axvline(
@@ -362,12 +362,12 @@ if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
         plt.close()
 
     with s2:
-        st.metric("Games with Sentiment", f"{len(sent_scores):,}")
-        st.metric("Mean Sentiment", f"{sent_scores.mean():.3f}")
-        st.metric("Median Sentiment", f"{sent_scores.median():.3f}")
+        st.metric("Games scored", f"{len(sent_scores):,}")
+        st.metric("Mean", f"{sent_scores.mean():.3f}")
+        st.metric("Median", f"{sent_scores.median():.3f}")
         pct_pos = (sent_scores >= 0.5).mean() * 100
-        st.metric("% Positive (≥ 0.5)", f"{pct_pos:.1f}%")
+        st.metric("Games leaning positive", f"{pct_pos:.1f}%")
 
     st.markdown("---")
 
-st.caption("BoardGames Analyzer — Explainable Hybrid Recommendation System · Built with Streamlit")
+st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

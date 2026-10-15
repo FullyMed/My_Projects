@@ -4,19 +4,19 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3>About Prambanan Batik</h3>
-                <p>Dedicated to preserving and celebrating authentic Indonesian batik craftsmanship. Discover genuine batik products with trusted customer reviews.</p>
+                <p>We list our batik here with photos, prices and customer reviews. When you're ready to buy, you check out on Shopee or Tokopedia.</p>
             </div>
             <div class="footer-section">
-                <h3>Quick Links</h3>
+                <h3>Links</h3>
                 <ul>
                     <li><a href="<?php echo SITE_PATH; ?>/">Home</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/products.php">Batik Collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/products.php">Batik collection</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/terms.php">Terms of Use</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/privacy.php">Privacy Policy</a></li>
                 </ul>
             </div>
             <div class="footer-section">
-                <h3>Shop Now</h3>
+                <h3>Buy online</h3>
                 <p><a href="https://shopee.co.id/search?keyword=prambanan%20batik" target="_blank" rel="noopener noreferrer">Find us on Shopee</a></p>
             </div>
         </div>

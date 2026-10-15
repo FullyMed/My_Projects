@@ -1,4 +1,4 @@
-# Prambanan Batik — web-server hardening
+# Prambanan Batik: web-server hardening
 # These rules are defense-in-depth alongside the security headers already
 # sent from PHP in config.php. If this host disables .htaccess overrides
 # (AllowOverride None), the PHP-level headers still apply on every request

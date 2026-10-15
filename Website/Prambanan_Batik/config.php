@@ -35,8 +35,8 @@ function config_env($key, $default = '') {
 
 // Site Configuration
 define('SITE_NAME', 'Prambanan Batik');
-define('SITE_TAGLINE', 'Authentic Indonesian Batik Craftsmanship');
-define('DEFAULT_META_DESCRIPTION', 'Shop authentic Indonesian batik at Prambanan Batik — premium handcrafted pieces with trusted customer reviews.');
+define('SITE_TAGLINE', 'Handmade Indonesian batik');
+define('DEFAULT_META_DESCRIPTION', 'Browse handmade Indonesian batik at Prambanan Batik, with photos, prices in rupiah and reviews from our customers. You buy through Shopee or Tokopedia.');
 define('CONTACT_EMAIL', config_env('CONTACT_EMAIL', 'hello@prambananbatik.com'));
 define('BASE_URL', rtrim(config_env('BASE_URL', 'http://localhost/Prambanan_Batik'), '/'));
 define('SITE_PATH', rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?: '', '/'));
@@ -74,7 +74,7 @@ $is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
     || (($_SERVER['SERVER_PORT'] ?? '') === '443');
 
-// Session cookie hardening — must run before session_start() (header.php / admin/auth.php).
+// Session cookie hardening. Must run before session_start() (header.php / admin/auth.php).
 if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,

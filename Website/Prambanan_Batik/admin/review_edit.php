@@ -20,7 +20,7 @@ if ($reviewId) {
     $review = $stmt->fetch();
 
     if (!$review) {
-        $error = 'Review not found';
+        $error = 'We couldn\'t find that review.';
     }
 }
 
@@ -42,7 +42,7 @@ $form = $review ?: [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = post_string('action');
 
@@ -60,13 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $productStmt->execute([$form['product_id']]);
 
         if (!in_array($action, ['create', 'update'], true) || ($action === 'update') !== (bool)$review) {
-            $error = 'Invalid action';
+            $error = 'Something went wrong. Reload the page and try again.';
         } elseif ($form['product_id'] < 1 || $form['rating'] < 1 || $form['rating'] > 5) {
-            $error = 'Product and rating (1-5) are required';
+            $error = 'Pick a product and a rating from 1 to 5.';
         } elseif (!$productStmt->fetchColumn()) {
-            $error = 'Selected product does not exist';
+            $error = 'That product no longer exists. Pick another one.';
         } elseif ($form['reviewer_email'] !== '' && !is_valid_email($form['reviewer_email'])) {
-            $error = 'Reviewer email is not a valid email address';
+            $error = 'The reviewer\'s email address doesn\'t look right.';
         } else {
             $values = [
                 $form['product_id'],
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $pdo->commit();
 
-                $message = 'Review updated successfully';
+                $message = 'Review saved.';
                 $stmt = $pdo->prepare('SELECT * FROM reviews WHERE id = ? LIMIT 1');
                 $stmt->execute([(int)$review['id']]);
                 $review = $stmt->fetch();
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->rollBack();
                 }
                 error_log('Failed to save review: ' . $e->getMessage());
-                $error = 'Failed to save review';
+                $error = 'We couldn\'t save the review. Try again.';
             }
         }
     }
@@ -126,7 +126,7 @@ $products = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $review ? 'Edit Review' : 'Create Review'; ?></title>
+    <title><?php echo $review ? 'Edit review' : 'Create review'; ?></title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -140,7 +140,7 @@ $products = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -149,23 +149,23 @@ $products = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="active">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
         <div class="main-content">
             <div class="topbar">
-                <h1><?php echo $review ? 'Edit Review' : 'Create Review'; ?></h1>
+                <h1><?php echo $review ? 'Edit review' : 'Create review'; ?></h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="back-link">← Back to Reviews</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="back-link">← Back to reviews</a>
                 </div>
 
                 <?php if ($message): ?>
@@ -188,7 +188,7 @@ $products = $stmt->fetchAll();
                             <div class="form-group">
                                 <label for="product_id">Product <span class="required">*</span></label>
                                 <select id="product_id" name="product_id" required>
-                                    <option value="">Select Product</option>
+                                    <option value="">Choose a product</option>
                                     <?php foreach ($products as $product): ?>
                                         <option value="<?php echo htmlspecialchars($product['id']); ?>" <?php echo ((int)($form['product_id'] ?? 0) === (int)$product['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($product['name']); ?>
@@ -200,7 +200,7 @@ $products = $stmt->fetchAll();
                             <div class="form-group">
                                 <label for="rating">Rating <span class="required">*</span></label>
                                 <select id="rating" name="rating" required>
-                                    <option value="">Select Rating</option>
+                                    <option value="">Choose a rating</option>
                                     <option value="5" <?php echo (int)($form['rating'] ?? 0) === 5 ? 'selected' : ''; ?>>5 - Excellent</option>
                                     <option value="4" <?php echo (int)($form['rating'] ?? 0) === 4 ? 'selected' : ''; ?>>4 - Good</option>
                                     <option value="3" <?php echo (int)($form['rating'] ?? 0) === 3 ? 'selected' : ''; ?>>3 - Average</option>
@@ -215,30 +215,30 @@ $products = $stmt->fetchAll();
                             </div>
 
                             <div class="form-group full">
-                                <label for="reviewer_name">Reviewer Name</label>
+                                <label for="reviewer_name">Reviewer name</label>
                                 <input type="text" id="reviewer_name" name="reviewer_name" value="<?php echo htmlspecialchars($form['reviewer_name'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
-                                <label for="reviewer_email">Reviewer Email</label>
+                                <label for="reviewer_email">Reviewer email</label>
                                 <input type="email" id="reviewer_email" name="reviewer_email" value="<?php echo htmlspecialchars($form['reviewer_email'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
-                                <label for="content">Review Content</label>
+                                <label for="content">Review text</label>
                                 <textarea id="content" name="content"><?php echo htmlspecialchars($form['content'] ?? ''); ?></textarea>
                             </div>
 
                             <div class="form-group full">
                                 <div class="checkbox-group">
                                     <input type="checkbox" id="verified_purchase" name="verified_purchase" <?php echo !empty($form['verified_purchase']) ? 'checked' : ''; ?>>
-                                    <label for="verified_purchase" style="margin-bottom: 0;">Verified Purchase</label>
+                                    <label for="verified_purchase" style="margin-bottom: 0;">Verified purchase</label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn"><?php echo $review ? 'Update Review' : 'Create Review'; ?></button>
+                            <button type="submit" class="btn"><?php echo $review ? 'Save review' : 'Create review'; ?></button>
                             <a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>

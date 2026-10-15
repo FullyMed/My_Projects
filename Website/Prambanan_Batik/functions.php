@@ -71,7 +71,7 @@ function get_pagination($current_page, $total_items, $items_per_page = ITEMS_PER
 }
 
 /**
- * Check if preview mode is active — either the global constant or the per-request flag set via $_ENV.
+ * Check if preview mode is active: either the global constant or the per-request flag set via $_ENV.
  */
 function is_preview_mode() {
     return PREVIEW_MODE === true || (isset($_ENV['PREVIEW_MODE']) && $_ENV['PREVIEW_MODE'] === true);
@@ -249,69 +249,69 @@ function get_sample_batik_products($limit = null) {
     $products = [
         [
             'id' => 1,
-            'name' => 'Traditional Mega Mendung Batik',
-            'slug' => 'traditional-mega-mendung-batik',
+            'name' => 'Parang Sogan Batik Cloth',
+            'slug' => 'parang-sogan-batik-cloth',
             'category' => 'Traditional Patterns',
             'rating_avg' => 4.8,
             'rating_count' => 342,
             'price_display' => 350000,
             'image_url' => 'https://images.unsplash.com/photo-1616125162686-770bf85622b9?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Premium traditional Mega Mendung batik with intricate cloud patterns. Hand-drawn designs on premium cotton fabric. Perfect for formal occasions and collections.',
+            'description' => 'Cotton cloth in the parang pattern: rows of slanting S-shapes in cream on sogan brown, the classic colour of Central Javanese batik. Wear it as a kain or take it to your tailor.',
         ],
         [
             'id' => 2,
-            'name' => 'Modern Pekalongan Batik Dress',
-            'slug' => 'modern-pekalongan-batik-dress',
+            'name' => 'Pekalongan Batik Wrap Skirt',
+            'slug' => 'pekalongan-batik-wrap-skirt',
             'category' => 'Ready to Wear',
             'rating_avg' => 4.6,
             'rating_count' => 218,
             'price_display' => 450000,
             'image_url' => 'https://images.unsplash.com/photo-1630929436231-91f4c6fe4884?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Contemporary Pekalongan batik dress combining traditional patterns with modern silhouette. Comfortable breathable fabric suitable for daily wear and special events.',
+            'description' => 'A wrap skirt cut from Pekalongan batik, the north-coast style known for its bright colours. Wear it with a kebaya to a wedding or with a plain top on a normal day.',
         ],
         [
             'id' => 3,
-            'name' => 'Authentic Cirebon Batik Fabric',
-            'slug' => 'authentic-cirebon-batik-fabric',
+            'name' => 'Cirebon Batik Fabric',
+            'slug' => 'cirebon-batik-fabric',
             'category' => 'Fabric & Cloth',
             'rating_avg' => 4.7,
             'rating_count' => 289,
             'price_display' => 280000,
             'image_url' => 'https://images.unsplash.com/photo-1444362408440-274ecb6fc730?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Authentic Cirebon batik fabric with distinctive motifs featuring celestial and floral elements. Premium quality suitable for custom tailoring and collection.',
+            'description' => 'Batik cotton from Cirebon, sold as fabric for your own tailor. Cirebon batik often mixes cloud and flower motifs.',
         ],
         [
             'id' => 4,
-            'name' => 'Javanese Sarong with Batik Motifs',
-            'slug' => 'javanese-sarong-batik-motifs',
+            'name' => 'Long-Sleeve Batik Shirt',
+            'slug' => 'long-sleeve-batik-shirt',
             'category' => 'Traditional Wear',
             'rating_avg' => 4.5,
             'rating_count' => 156,
             'price_display' => 320000,
             'image_url' => 'https://images.unsplash.com/photo-1680345575812-2f6878d7d775?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Traditional Javanese sarong featuring authentic batik patterns. Versatile wrap suitable for casual wear, beach outings, and cultural events.',
+            'description' => 'A long-sleeved shirt in brown and cream batik. In Indonesia a batik shirt counts as formal wear, so this one works for the office, a wedding or a family dinner.',
         ],
         [
             'id' => 5,
-            'name' => 'Lasem Red Batik Collection',
-            'slug' => 'lasem-red-batik-collection',
+            'name' => 'Lasem Red Batik Cloth',
+            'slug' => 'lasem-red-batik-cloth',
             'category' => 'Regional Styles',
             'rating_avg' => 4.9,
             'rating_count' => 405,
             'price_display' => 520000,
             'image_url' => 'https://images.unsplash.com/photo-1680345575909-99633d4b6f46?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Distinctive Lasem red batik featuring bold red and indigo colors. Signature design from Lasem region with intricate maritime motifs.',
+            'description' => 'Lasem, a small town on Java\'s north coast, is known for its deep red dye. This cloth pairs that red with indigo.',
         ],
         [
             'id' => 6,
-            'name' => 'Batik Tulis Hand-drawn Masterpiece',
-            'slug' => 'batik-tulis-hand-drawn-masterpiece',
-            'category' => 'Premium Collection',
+            'name' => 'Hand-Drawn Batik Tulis',
+            'slug' => 'hand-drawn-batik-tulis',
+            'category' => 'Batik Tulis',
             'rating_avg' => 4.9,
             'rating_count' => 178,
             'price_display' => 850000,
             'image_url' => 'https://images.unsplash.com/photo-1604973104381-870c92f10343?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Premium batik tulis (hand-drawn) masterpiece created by master artisans. Limited edition with unique artistic value and exceptional craftsmanship.',
+            'description' => 'Batik tulis is drawn by hand with a canting, a small copper pen that lays down hot wax one line at a time. One cloth can take weeks to finish, which is why it costs more than stamped batik.',
         ],
         [
             'id' => 7,
@@ -322,7 +322,7 @@ function get_sample_batik_products($limit = null) {
             'rating_count' => 97,
             'price_display' => 185000,
             'image_url' => 'https://images.unsplash.com/photo-1672716912554-c23ba8fac4ce?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Elegant Yogyakarta batik scarf with traditional motifs. Lightweight and versatile for various styling occasions.',
+            'description' => 'A light scarf in Yogyakarta-style batik. Wear it around your neck or over your shoulders.',
         ],
         [
             'id' => 8,
@@ -333,7 +333,7 @@ function get_sample_batik_products($limit = null) {
             'rating_count' => 134,
             'price_display' => 420000,
             'image_url' => 'https://images.unsplash.com/photo-1586319826907-1ff4aadbaddc?auto=format&fit=crop&w=600&q=80',
-            'description' => 'Beautiful indigo batik wall hanging featuring traditional geometric patterns. Perfect for adding cultural charm to any interior space.',
+            'description' => 'Blue and white batik with geometric motifs, hemmed and ready to hang on a wall.',
         ],
     ];
 

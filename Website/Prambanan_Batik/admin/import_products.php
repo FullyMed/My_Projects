@@ -31,7 +31,7 @@ function uniqueProductSlug($pdo, $base) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
     $action = $_POST['action'] ?? '';
 
@@ -40,19 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $error = $file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE
-                ? 'File is too large for the server upload limit'
-                : 'Failed to upload file';
+                ? 'That file is bigger than the server allows.'
+                : 'The upload didn\'t finish. Try again.';
         } elseif ($file['size'] === 0) {
-            $error = 'File is empty';
+            $error = 'That file is empty.';
         } elseif ($file['size'] > 5 * 1024 * 1024) {
-            $error = 'File is too large (max 5MB)';
+            $error = 'That file is over 5 MB. Split it into smaller files.';
         } elseif (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) !== 'csv') {
-            $error = 'File must be a CSV file';
+            $error = 'Upload a .csv file.';
         }
 
         $handle = $error ? false : fopen($file['tmp_name'], 'r');
         if (!$error && !$handle) {
-            $error = 'Could not open file';
+            $error = 'We couldn\'t read that file. Try uploading it again.';
         }
 
         if ($handle) {
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }, $row);
                     $missing = array_diff(['sku', 'name', 'price'], $headers);
                     if ($missing) {
-                        $error = 'CSV header row is missing required column(s): ' . implode(', ', $missing);
+                        $error = 'The first row of the CSV is missing these columns: ' . implode(', ', $missing) . '.';
                         $report = null;
                         break;
                     }
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (count($row) !== count($headers)) {
                     $report['failed']++;
-                    $report['errors'][] = "Row $rowNum: Has " . count($row) . ' columns but the header has ' . count($headers) . ' — check for unquoted commas';
+                    $report['errors'][] = "Row $rowNum has " . count($row) . ' columns, but the header row has ' . count($headers) . '. Check for a comma that isn\'t inside double quotes.';
                     continue;
                 }
 
@@ -116,14 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($sku === '' || $name === '' || $price === '') {
                     $report['failed']++;
-                    $report['errors'][] = "Row $rowNum: Missing required fields (sku, name, price)";
+                    $report['errors'][] = "Row $rowNum: sku, name and price can't be empty.";
                     continue;
                 }
 
                 // Reject Indonesian thousands separators ("350.000" would otherwise import as Rp 350).
                 if (!is_numeric($price) || (float)$price < 0 || (float)$price > 99999999.99 || preg_match('/^\d{1,3}(\.\d{3})+$/', $price)) {
                     $report['failed']++;
-                    $report['errors'][] = "Row $rowNum (SKU: $sku): Invalid price \"$price\" — use plain digits, e.g. 350000";
+                    $report['errors'][] = "Row $rowNum (SKU $sku): the price \"$price\" isn't a plain number. Write it as digits only, like 350000.";
                     continue;
                 }
 
@@ -135,13 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     if (!$categoryExists) {
                         $report['failed']++;
-                        $report['errors'][] = "Row $rowNum (SKU: $sku): category_id \"$categoryId\" does not exist";
+                        $report['errors'][] = "Row $rowNum (SKU $sku): there's no category with ID \"$categoryId\".";
                         continue;
                     }
                 }
 
                 if ($imageUrl !== '' && (!preg_match('/^https?:\/\//i', $imageUrl) || strlen($imageUrl) > 500)) {
-                    $report['errors'][] = "Row $rowNum (SKU: $sku): image_url ignored — must start with http:// or https:// (max 500 characters)";
+                    $report['errors'][] = "Row $rowNum (SKU $sku): we skipped the image_url because it doesn't start with http:// or https://, or it's longer than 500 characters.";
                     $imageUrl = '';
                 }
 
@@ -212,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     error_log("CSV import row $rowNum (SKU: $sku) failed: " . $e->getMessage());
                     $report['failed']++;
-                    $report['errors'][] = "Row $rowNum (SKU: $sku): Import failed — check the values in this row";
+                    $report['errors'][] = "Row $rowNum (SKU $sku): we couldn't save this row. Check its values.";
                 }
             }
 
@@ -220,19 +220,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($report !== null) {
                 if ($report['rows_processed'] === 0) {
-                    $error = 'The CSV has a header row but no product rows';
+                    $error = 'The CSV has a header row but no products under it.';
                     $report = null;
                 } elseif ($report['failed'] === 0) {
-                    $message = 'CSV import completed successfully';
+                    $message = 'Import finished. We saved every row.';
                 } elseif ($report['inserted'] + $report['updated'] > 0) {
-                    $message = 'CSV import completed with some errors — see the list below';
+                    $message = 'Import finished, but we skipped some rows. The list below says why.';
                 } else {
-                    $error = 'No rows were imported — see the errors below';
+                    $error = 'We didn\'t import any rows. The list below says why.';
                 }
             }
         }
     } elseif ($action === 'import') {
-        $error = 'Please choose a CSV file to upload';
+        $error = 'Choose a CSV file to upload.';
     }
     } // end CSRF else
 }
@@ -247,7 +247,7 @@ $categories = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import Products</title>
+    <title>Import products</title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -261,7 +261,7 @@ $categories = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -270,23 +270,23 @@ $categories = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
         <div class="main-content">
             <div class="topbar">
-                <h1>Import Products</h1>
+                <h1>Import products</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to Products</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="back-link">← Back to products</a>
                 </div>
 
                 <?php if ($message): ?>
@@ -299,7 +299,7 @@ $categories = $stmt->fetchAll();
 
                 <?php if ($report): ?>
                     <div class="section">
-                        <h3>Import Summary</h3>
+                        <h3>Import summary</h3>
                         <div class="report-section">
                             <div class="report-card inserted">
                                 <div class="report-number"><?php echo $report['inserted']; ?></div>
@@ -321,7 +321,7 @@ $categories = $stmt->fetchAll();
 
                         <?php if (count($report['errors']) > 0): ?>
                             <div>
-                                <h4 style="margin-bottom: 1rem; color: #c53030;">Errors</h4>
+                                <h4 style="margin-bottom: 1rem; color: #c53030;">Skipped rows</h4>
                                 <ul class="errors-list">
                                     <?php foreach ($report['errors'] as $rowError): ?>
                                         <li><?php echo htmlspecialchars($rowError); ?></li>
@@ -333,14 +333,14 @@ $categories = $stmt->fetchAll();
                 <?php endif; ?>
 
                 <div class="section">
-                    <h3>Upload CSV File</h3>
+                    <h3>Upload a CSV file</h3>
 
                     <div class="template-section">
-                        <h4>CSV Format</h4>
+                        <h4>CSV format</h4>
                         <table class="template-table">
                             <thead>
                                 <tr>
-                                    <th>Column Name</th>
+                                    <th>Column</th>
                                     <th>Type</th>
                                     <th>Description</th>
                                 </tr>
@@ -349,7 +349,7 @@ $categories = $stmt->fetchAll();
                                 <tr>
                                     <td><strong>sku</strong> <span class="required">*</span></td>
                                     <td>String</td>
-                                    <td>Unique product identifier. Used to update existing products.</td>
+                                    <td>Your product code. A row with a SKU that already exists updates that product.</td>
                                 </tr>
                                 <tr>
                                     <td><strong>name</strong> <span class="required">*</span></td>
@@ -359,7 +359,7 @@ $categories = $stmt->fetchAll();
                                 <tr>
                                     <td><strong>price</strong> <span class="required">*</span></td>
                                     <td>Number</td>
-                                    <td>Price in Rupiah, plain digits (e.g., 350000 — not 350.000 or Rp 350.000)</td>
+                                    <td>Price in rupiah, digits only: 350000, not 350.000 or Rp 350.000</td>
                                 </tr>
                                 <tr>
                                     <td><strong>description</strong> <span class="optional">(optional)</span></td>
@@ -369,7 +369,7 @@ $categories = $stmt->fetchAll();
                                 <tr>
                                     <td><strong>category_id</strong> <span class="optional">(optional)</span></td>
                                     <td>Integer</td>
-                                    <td>Category ID (must exist in system)<?php if ($categories): ?><br><small><?php echo htmlspecialchars(implode(' · ', array_map(function ($c) { return $c['id'] . ' = ' . $c['name']; }, $categories))); ?></small><?php endif; ?></td>
+                                    <td>Category ID. It must already exist:<?php if ($categories): ?><br><small><?php echo htmlspecialchars(implode(' · ', array_map(function ($c) { return $c['id'] . ' = ' . $c['name']; }, $categories))); ?></small><?php endif; ?></td>
                                 </tr>
                                 <tr>
                                     <td><strong>image_url</strong> <span class="optional">(optional)</span></td>
@@ -384,7 +384,7 @@ $categories = $stmt->fetchAll();
 PRMB-101,Sogan Parang Batik Tulis,650000,"Hand-drawn parang motif, natural sogan dye",1,https://example.com/parang.jpg
 PRMB-102,Kawung Batik Shirt,275000,Cotton shirt with kawung motif,2,https://example.com/kawung.jpg
 PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
-                        <p style="color: #666; font-size: 0.8125rem; margin-top: 0.75rem;">Rows whose SKU already exists update that product (name, price, and any non-empty description/category). Wrap values that contain commas in double quotes. Files saved as "CSV UTF-8" from Excel work as-is.</p>
+                        <p style="color: #666; font-size: 0.8125rem; margin-top: 0.75rem;">If a row's SKU already exists, we update that product's name and price, plus its description and category when those cells aren't empty. Put double quotes around any value that contains a comma. Excel's "CSV UTF-8" format works as it is.</p>
                     </div>
 
                     <form method="POST" enctype="multipart/form-data">
@@ -392,7 +392,7 @@ PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                         <div class="form-group">
-                            <label>CSV File <span class="required">*</span></label>
+                            <label>CSV file <span class="required">*</span></label>
                             <div class="file-input-wrapper">
                                 <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
                                 <label for="csv_file" class="file-input-label">
@@ -406,7 +406,7 @@ PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
                         </div>
 
                         <div class="button-group">
-                            <button type="submit" class="btn">Import Products</button>
+                            <button type="submit" class="btn">Import products</button>
                             <a href="<?php echo SITE_PATH; ?>/admin/products.php" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>

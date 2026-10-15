@@ -19,15 +19,15 @@ if (isAdminLoggedIn()) {
 $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 
 if (isLoginRateLimited($pdo, $ip)) {
-    $error = 'Too many failed login attempts. Please try again in ' . LOGIN_LOCKOUT_MINUTES . ' minutes.';
+    $error = 'Too many failed attempts. Wait ' . LOGIN_LOCKOUT_MINUTES . ' minutes, then try again.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = is_string($_POST['email'] ?? null) ? trim($_POST['email']) : '';
     $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Your session expired. Please try again.';
+        $error = 'Your session expired. Try logging in again.';
     } elseif ($email === '' || $password === '') {
-        $error = 'Email and password are required';
+        $error = 'Enter your email address and password.';
     } else {
         $result = loginAdmin($pdo, $email, $password);
         if ($result['success']) {
@@ -47,7 +47,7 @@ if (isLoginRateLimited($pdo, $ip)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Admin login</title>
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo SITE_PATH; ?>/assets/favicon/apple-touch-icon.png">
@@ -191,7 +191,7 @@ if (isLoginRateLimited($pdo, $ip)) {
         <div class="login-box">
             <div class="login-brand">
                 <h1>Prambanan Batik</h1>
-                <p>Admin Panel</p>
+                <p>Admin panel</p>
             </div>
 
             <?php if ($error): ?>
@@ -231,7 +231,7 @@ if (isLoginRateLimited($pdo, $ip)) {
                     >
                 </div>
 
-                <button type="submit" class="btn-login">Login</button>
+                <button type="submit" class="btn-login">Log in</button>
             </form>
         </div>
     </div>

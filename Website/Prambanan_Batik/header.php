@@ -46,13 +46,13 @@ $og_image_url = absolute_url($og_image ?? SITE_PATH . '/assets/images/og-image.p
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo asset_url('assets/css/styles.css'); ?>">
-    <?php // Without JS, main.js never adds .is-visible — show the scroll-reveal content anyway. ?>
+    <?php // Without JS, main.js never adds .is-visible, so show the scroll-reveal content anyway. ?>
     <noscript><style>.reveal, .product-card { opacity: 1 !important; transform: none !important; }</style></noscript>
 </head>
 <body>
     <?php if (is_preview_mode()): ?>
         <div class="preview-banner">
-            ⚠ Preview Mode (no live product data) - Sample data displayed
+            Preview mode: we can't load our products right now, so these are sample items.
         </div>
     <?php endif; ?>
 
@@ -69,7 +69,7 @@ $og_image_url = absolute_url($og_image ?? SITE_PATH . '/assets/images/og-image.p
             <nav class="nav">
                 <ul>
                     <li><a href="<?php echo SITE_PATH; ?>/" class="<?php echo $current_page === 'index.php' ? 'active' : ''; ?>">Home</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/products.php" class="<?php echo $current_page === 'products.php' ? 'active' : ''; ?>">Batik Collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/products.php" class="<?php echo $current_page === 'products.php' ? 'active' : ''; ?>">Batik collection</a></li>
                 </ul>
             </nav>
         </div>

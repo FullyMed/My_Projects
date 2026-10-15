@@ -299,6 +299,7 @@ hr { border: none; border-top: 1px solid rgba(148,163,184,0.18); margin: 1.2rem 
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: #cbd5e1 !important; }
 [data-testid="stSidebar"] [data-testid="stIconMaterial"],
 [data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] { color: #94a3b8 !important; }
+[data-testid="stTooltipHoverTarget"] svg, [data-testid="stTooltipIcon"] svg { color: #94a3b8 !important; }  /* help= "?" icons */
 input, textarea { color: #f8fafc !important; }
 [data-baseweb="select"] span { color: #f8fafc !important; }
 hr { border: none; border-top: 1px solid rgba(148,163,184,0.2); }
@@ -465,6 +466,7 @@ _LIGHT_CSS = """
 [data-testid="stSliderTickBar"] * { color: #64748b !important; }
 [data-testid="stSidebar"] [data-testid="stIconMaterial"],
 [data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] { color: #64748b !important; }
+[data-testid="stTooltipHoverTarget"] svg, [data-testid="stTooltipIcon"] svg { color: #64748b !important; }  /* help= "?" icons */
 
 /* ── Inputs: indigo-tinted border ── */
 div[data-baseweb="input"] > div,

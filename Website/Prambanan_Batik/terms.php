@@ -4,7 +4,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
 $page_title = 'Terms of Use';
-$meta_description = 'The terms that govern your use of Prambanan Batik, including our partner marketplace links and customer review guidelines.';
+$meta_description = 'The rules for using Prambanan Batik: how our Shopee and Tokopedia links work, how we handle customer reviews, and who to contact.';
 $canonical_url = BASE_URL . '/terms.php';
 
 ?>
@@ -14,36 +14,36 @@ $canonical_url = BASE_URL . '/terms.php';
         <div class="container legal-content">
             <span class="hero-eyebrow">Legal</span>
             <h2>Terms of Use</h2>
-            <p class="legal-updated">Last updated: September 2026</p>
+            <p class="legal-updated">Last updated: October 2026</p>
 
-            <p>Welcome to <?php echo escape(SITE_NAME); ?>. By accessing or using this website, you agree to the following terms. If you do not agree with any part of these terms, please do not use the site.</p>
+            <p>These terms cover your use of <?php echo escape(SITE_NAME); ?>. By using the site you agree to them. If you don't agree, please don't use the site.</p>
 
-            <h3>1. About This Site</h3>
-            <p><?php echo escape(SITE_NAME); ?> is a product catalog and review website for authentic Indonesian batik. We showcase products and customer reviews, but we do not sell products directly or process payments ourselves. When you choose to buy a product, we redirect you to a third-party marketplace (such as Shopee or Tokopedia) where the actual purchase takes place.</p>
+            <h3>1. What this site is</h3>
+            <p><?php echo escape(SITE_NAME); ?> is a catalog of Indonesian batik with customer reviews. We don't take orders or payments on this site. When you click a buy button, we send you to a marketplace such as Shopee or Tokopedia, and you buy the product there.</p>
 
-            <h3>2. Third-Party Marketplace Links</h3>
-            <p>Links from our product pages to Shopee, Tokopedia, or other marketplaces are provided for your convenience. Once you leave <?php echo escape(SITE_NAME); ?>, your purchase, payment, shipping, returns, and any disputes are governed entirely by that marketplace's own terms of service and the individual seller's policies. We do not control, and are not responsible for, pricing, product availability, order fulfillment, or the conduct of third-party sellers.</p>
+            <h3>2. Marketplace links</h3>
+            <p>Once you leave <?php echo escape(SITE_NAME); ?>, the marketplace's own terms and the seller's policies cover your purchase, including payment, shipping, returns and any disputes. We don't control those marketplaces, and we aren't responsible for their prices, stock, deliveries or how their sellers behave.</p>
 
-            <h3>3. Customer Reviews</h3>
-            <p>Reviews displayed on this site may be submitted by customers or curated from other sources. By submitting a review, you confirm that the content is your own genuine opinion, is not defamatory, unlawful, or misleading, and you grant us a non-exclusive, royalty-free license to display, edit for length or clarity, or remove it at our discretion. We do not verify the accuracy of every review and reviews do not necessarily reflect our own views.</p>
+            <h3>3. Customer reviews</h3>
+            <p>Customers send us some of the reviews on this site, and we collect others from other places. If you send us a review, you confirm that it's your own honest opinion and that it isn't defamatory, unlawful or misleading. You also give us a free, non-exclusive licence to show it, shorten it or tidy it up for clarity, or remove it whenever we choose. We don't check every review, and a review doesn't necessarily reflect our own view.</p>
 
-            <h3>4. Intellectual Property</h3>
-            <p>The <?php echo escape(SITE_NAME); ?> name, logo, site design, and original written content are our property or used with permission. Product photos and descriptions may belong to their respective brands or sellers. You may not reproduce, redistribute, or use our branding without prior written permission.</p>
+            <h3>4. Our name and content</h3>
+            <p>We own the <?php echo escape(SITE_NAME); ?> name, logo, site design and the text we wrote, or we use them with permission. Some product photos and descriptions may belong to the brands or sellers who made them. Please don't copy, republish or use our branding without our written permission.</p>
 
-            <h3>5. No Warranties</h3>
-            <p>This site and its content are provided "as is," without warranties of any kind, express or implied. We do our best to keep product information, pricing, and ratings accurate and up to date, but we cannot guarantee that everything displayed is always current or error-free.</p>
+            <h3>5. No warranties</h3>
+            <p>We provide this site and its content "as is", without any warranty, express or implied. We try to keep product details, prices and ratings correct and up to date, but we can't promise that everything on the site is current or free of mistakes.</p>
 
-            <h3>6. Limitation of Liability</h3>
-            <p>To the fullest extent permitted by law, <?php echo escape(SITE_NAME); ?> is not liable for any indirect, incidental, or consequential damages arising from your use of this site or from any transaction completed on a third-party marketplace reached through our links.</p>
+            <h3>6. Limits on our liability</h3>
+            <p>As far as the law allows, <?php echo escape(SITE_NAME); ?> isn't liable for any indirect, incidental or consequential damage that comes from your use of this site, or from a purchase you make on a marketplace you reached through our links.</p>
 
-            <h3>7. Changes to These Terms</h3>
-            <p>We may update these Terms of Use from time to time. Continued use of the site after changes are posted means you accept the revised terms. We encourage you to review this page periodically.</p>
+            <h3>7. Changes to these terms</h3>
+            <p>We may update these terms. If you keep using the site after we post a change, you accept the new terms. The date at the top of this page shows when we last changed them.</p>
 
-            <h3>8. Governing Law</h3>
-            <p>These terms are governed by the laws of the Republic of Indonesia, without regard to conflict-of-law principles.</p>
+            <h3>8. Which law applies</h3>
+            <p>The laws of the Republic of Indonesia govern these terms, without regard to conflict-of-law rules.</p>
 
-            <h3>9. Contact Us</h3>
-            <p>Questions about these terms can be sent to <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a>.</p>
+            <h3>9. Contact us</h3>
+            <p>If you have a question about these terms, email us at <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a>.</p>
 
             <p class="legal-see-also">See also our <a href="<?php echo SITE_PATH; ?>/privacy.php">Privacy Policy</a>.</p>
         </div>

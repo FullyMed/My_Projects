@@ -4,7 +4,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/functions.php';
 
 $page_title = 'Privacy Policy';
-$meta_description = 'How Prambanan Batik collects and uses information, including customer reviews, outbound marketplace click tracking, and cookies.';
+$meta_description = 'What Prambanan Batik records about visitors (customer reviews, buy-button clicks and one session cookie), how long we keep it, and how to ask us to remove it.';
 $canonical_url = BASE_URL . '/privacy.php';
 
 ?>
@@ -14,40 +14,40 @@ $canonical_url = BASE_URL . '/privacy.php';
         <div class="container legal-content">
             <span class="hero-eyebrow">Legal</span>
             <h2>Privacy Policy</h2>
-            <p class="legal-updated">Last updated: September 2026</p>
+            <p class="legal-updated">Last updated: October 2026</p>
 
-            <p>This policy explains what information <?php echo escape(SITE_NAME); ?> collects, how we use it, and the choices you have. We collect only what's needed to run a product catalog and review site — we do not sell your data.</p>
+            <p>This page explains what <?php echo escape(SITE_NAME); ?> collects, what we do with it, and what you can ask us to change. We only collect what we need to run a catalog with reviews, and we don't sell your data.</p>
 
-            <h3>1. Information We Collect</h3>
-            <p><strong>Customer reviews.</strong> Reviews shown on product pages are added by our staff from feedback customers send us (for example by message or email) or from marketplace reviews — the site itself has no public review form. For each review we store the reviewer's name, an optional email address, the rating, an optional title, and the review text. The email is never shown publicly and is used only if we need to follow up about that review.</p>
-            <p><strong>Outbound click data.</strong> When you click a "Buy" link to Shopee, Tokopedia, or another marketplace, we log which product and platform you clicked, along with your IP address, browser user agent, and the page you came from. This is used in aggregate to understand which products and marketplaces are popular — it is not linked to any account, since the public site has no customer accounts.</p>
-            <p><strong>Cookies.</strong> We set one strictly necessary session cookie to keep the site working correctly (for example, to keep an admin signed in). It is <code>HttpOnly</code> and marked <code>SameSite=Lax</code>. We do not use advertising or third-party tracking cookies.</p>
-            <p><strong>Third-party content.</strong> Our pages load fonts from Google Fonts, and some product photos may be hosted on external image services. Like any website, those providers receive your IP address and browser details when your browser requests those files.</p>
-            <p><strong>Admin accounts.</strong> Store staff who manage this catalog have their own login (email + a securely hashed password). This is separate from anything collected about site visitors.</p>
+            <h3>1. What we collect</h3>
+            <p><strong>Customer reviews.</strong> Our staff add the reviews you see on product pages, using feedback customers send us (by message or email, for example) or reviews from marketplaces. You can't post a review on the site yourself. For each review we store the reviewer's name, an email address if we have one, the rating, a title if there is one, and the review text. We never show the email address, and we only use it if we need to ask about that review.</p>
+            <p><strong>Buy-button clicks.</strong> When you click a button that takes you to Shopee, Tokopedia or another marketplace, we record which product and marketplace you picked, your IP address, your browser's user agent and the page you came from. We look at these records in bulk to see which products and marketplaces people use. The public site has no customer accounts, so we can't link a click to an account.</p>
+            <p><strong>Cookies.</strong> We set one session cookie that the site needs to work, for example to keep a staff member signed in to the admin panel. It's <code>HttpOnly</code> and <code>SameSite=Lax</code>. We don't use advertising or third-party tracking cookies.</p>
+            <p><strong>Other services our pages use.</strong> Our pages load fonts from Google Fonts, and some product photos come from outside image hosts. When your browser fetches those files, those services see your IP address and browser details, as they would for any website.</p>
+            <p><strong>Staff accounts.</strong> The people who manage this catalog sign in with an email address and a password, which we store only as a secure hash. We keep these accounts separate from anything we record about visitors.</p>
 
-            <h3>2. How We Use Information</h3>
-            <p>We use the information above to: display and moderate reviews, understand which products and marketplace links are getting engagement, keep the admin panel secure (including rate-limiting repeated failed logins), and diagnose technical issues.</p>
+            <h3>2. How we use it</h3>
+            <p>We use this information to show and moderate reviews, to see which products and marketplace links people click, to keep the admin panel secure (for example, by blocking repeated failed logins), and to fix technical problems.</p>
 
-            <h3>3. Third-Party Marketplaces</h3>
-            <p>Once you follow a link to Shopee, Tokopedia, or another marketplace, that site's own privacy policy applies. We don't receive your payment details, shipping address, or order history from those marketplaces — the transaction happens entirely on their platform.</p>
+            <h3>3. Marketplaces</h3>
+            <p>Once you follow a link to Shopee, Tokopedia or another marketplace, that marketplace's privacy policy applies. You pay and give your delivery address on their site, and they don't send us your payment details, address or order history.</p>
 
-            <h3>4. Data Retention</h3>
-            <p>Failed admin login attempts (used only for brute-force protection) are automatically deleted after 24 hours. Reviews and outbound click logs are kept for as long as the associated product listing exists, or until you ask us to remove a review you submitted.</p>
+            <h3>4. How long we keep it</h3>
+            <p>We only use records of failed admin logins to block password guessing, and we clear them out once they're more than a day old. We keep reviews and click records for as long as the product they belong to is listed, or until you ask us to remove a review of yours.</p>
 
-            <h3>5. Data Security</h3>
-            <p>Admin passwords are hashed with bcrypt and never stored in plain text. All database queries use parameterized statements, admin forms are protected against CSRF, and admin sessions time out automatically after 30 minutes of inactivity.</p>
+            <h3>5. How we protect it</h3>
+            <p>We store staff passwords as bcrypt hashes, never as plain text. Every database query uses parameterized statements, the admin forms have CSRF protection, and an admin session ends after 30 minutes without activity.</p>
 
-            <h3>6. Your Choices</h3>
-            <p>If you'd like a review you submitted edited or removed, or have questions about data we hold, contact us at <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a> and we'll respond as soon as we can.</p>
+            <h3>6. Your choices</h3>
+            <p>If you'd like us to edit or remove a review of yours, or you have a question about the data we hold, email us at <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a> and we'll reply as soon as we can.</p>
 
-            <h3>7. Children's Privacy</h3>
-            <p>This site is not directed at children, and we do not knowingly collect personal information from children.</p>
+            <h3>7. Children</h3>
+            <p>This site isn't aimed at children, and we don't knowingly collect personal information from children.</p>
 
-            <h3>8. Changes to This Policy</h3>
-            <p>We may update this policy as the site evolves. The "last updated" date at the top of this page reflects the most recent revision.</p>
+            <h3>8. Changes to this policy</h3>
+            <p>We may update this policy when the site changes. The date at the top of this page shows when we last changed it.</p>
 
-            <h3>9. Contact Us</h3>
-            <p>Privacy questions can be sent to <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a>.</p>
+            <h3>9. Contact us</h3>
+            <p>Send privacy questions to <a href="mailto:<?php echo escape(CONTACT_EMAIL); ?>"><?php echo escape(CONTACT_EMAIL); ?></a>.</p>
 
             <p class="legal-see-also">See also our <a href="<?php echo SITE_PATH; ?>/terms.php">Terms of Use</a>.</p>
         </div>

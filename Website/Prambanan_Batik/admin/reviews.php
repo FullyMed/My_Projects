@@ -14,7 +14,7 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $error = 'Invalid request token';
+        $error = 'Your session expired. Reload the page and try again.';
     } else {
         $action = $_POST['action'] ?? '';
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)post_string('id');
 
             if ($id < 1) {
-                $error = 'Review ID is required';
+                $error = 'We couldn\'t find that review.';
             } else {
                 try {
                     // Fetch the product_id before deleting so we can update its rating
@@ -47,10 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $ratingStmt->execute([$deletedProductId]);
                     }
 
-                    $message = 'Review deleted successfully';
+                    $message = 'Review deleted.';
                 } catch (Exception $e) {
                     error_log('Failed to delete review: ' . $e->getMessage());
-                    $error = 'Failed to delete review';
+                    $error = 'We couldn\'t delete the review. Try again.';
                 }
             }
         }
@@ -67,7 +67,7 @@ $reviews = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Reviews</title>
+    <title>Manage reviews</title>
     
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="<?php echo SITE_PATH; ?>/assets/favicon/favicon.ico" sizes="any">
@@ -81,7 +81,7 @@ $reviews = $stmt->fetchAll();
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Admin Panel</h2>
+                <h2>Admin panel</h2>
             </div>
             <nav>
                 <ul class="sidebar-nav">
@@ -90,7 +90,7 @@ $reviews = $stmt->fetchAll();
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="active">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
@@ -100,13 +100,13 @@ $reviews = $stmt->fetchAll();
                 <h1>Reviews</h1>
                 <div class="topbar-user">
                     <span><?php echo htmlspecialchars($admin['email']); ?></span>
-                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Logout</a>
+                    <a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="page-header">
-                    <h2 class="page-title">Manage Reviews</h2>
+                    <h2 class="page-title">Manage reviews</h2>
                 </div>
 
                 <?php if ($message): ?>
@@ -132,7 +132,7 @@ $reviews = $stmt->fetchAll();
                                                 <span class="reviewer-name"><?php echo htmlspecialchars($review['reviewer_name'] ?? 'Anonymous'); ?></span>
                                             </div>
                                             <?php if ($review['verified_purchase']): ?>
-                                                <span class="verified-badge">Verified Purchase</span>
+                                                <span class="verified-badge">Verified purchase</span>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -165,7 +165,7 @@ $reviews = $stmt->fetchAll();
                     </div>
                 <?php else: ?>
                     <div class="empty-state">
-                        <p>No reviews yet</p>
+                        <p>No reviews yet.</p>
                     </div>
                 <?php endif; ?>
             </div>
