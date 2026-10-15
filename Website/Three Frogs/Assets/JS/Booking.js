@@ -4,27 +4,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const popup = document.getElementById("authPopup");
   const bookingResult = document.getElementById("bookingResult");
   const bookingLoadingState = document.getElementById("bookingLoadingState");
+  const verifyNotice = document.getElementById("verifyNotice");
 
-  // Keep in sync with booking.php
+  // Keep in sync with Assets/PHP/booking_rules.php
   const OPEN_TIME = "12:00";
   const CLOSE_TIME = "22:00";
   const MAX_PEOPLE = 8;
+  const MAX_DAYS_AHEAD = 30;
 
   document.getElementById("authPopupLoginBtn")?.addEventListener("click", () => {
-    window.location.href = "Login.html";
+    window.location.href = "Login.html?next=Booking.html";
   });
   document.getElementById("authPopupSignupBtn")?.addEventListener("click", () => {
     window.location.href = "Signup.html";
   });
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
 
   function showError(message) {
     bookingResult.innerHTML = `<p style="color:red;"><strong>${escapeHtml(message)}</strong></p>`;
@@ -32,6 +25,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function todayLocal() {
     return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+  }
+
+  function lastBookableDate() {
+    const d = new Date();
+    d.setDate(d.getDate() + MAX_DAYS_AHEAD);
+    return d.toLocaleDateString("en-CA");
   }
 
   function nowHHMM() {
@@ -63,6 +62,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  // Unverified accounts see the "verify your email" notice instead of the form.
+  function showVerifyNotice() {
+    bookingSection?.classList.add("hidden");
+    document.getElementById("verifyNoticeEmail").textContent = currentUser.email;
+    verifyNotice.classList.remove("hidden");
+  }
+
+  wireResendVerification(
+    document.getElementById("resendVerificationBtn"),
+    document.getElementById("resendVerificationResult"),
+    async () => { await checkSession(); return csrfToken; },
+    () => window.location.reload()
+  );
+
+  if (currentUser && !currentUser.emailVerified) {
+    showVerifyNotice();
+    return;
+  }
+
   if (bookingForm && currentUser) {
     // The `hidden` class lives on the wrapping <section>, not the <form>.
     bookingSection?.classList.remove("hidden");
@@ -77,7 +95,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
     lockEmailField();
-    if (dateField) dateField.min = todayLocal();
+    const nameField = document.getElementById("name");
+    if (nameField && !nameField.value) nameField.value = currentUser.name;
+    if (dateField) {
+      dateField.min = todayLocal();
+      dateField.max = lastBookableDate();
+    }
 
     bookingForm.addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -90,32 +113,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       const people = Number(peopleRaw);
 
       if (!name || !date || !start || !end || peopleRaw === "") {
-        showError("All fields are required.");
+        showError("Please fill in every field.");
         return;
       }
 
       if (date < todayLocal()) {
-        showError("Booking date cannot be in the past.");
+        showError("That date has already passed.");
+        return;
+      }
+
+      if (date > lastBookableDate()) {
+        showError(`You can book up to ${MAX_DAYS_AHEAD} days ahead.`);
         return;
       }
 
       if (start < OPEN_TIME || end > CLOSE_TIME) {
-        showError(`Booking must be between ${OPEN_TIME} and ${CLOSE_TIME}.`);
+        showError(`We take bookings between ${OPEN_TIME} and ${CLOSE_TIME}.`);
         return;
       }
 
       if (end <= start) {
-        showError("End time must be later than start time.");
+        showError("The end time needs to be after the start time.");
         return;
       }
 
       if (date === todayLocal() && start <= nowHHMM()) {
-        showError("That start time has already passed. Please choose a later time.");
+        showError("That start time has already passed today. Pick a later one.");
         return;
       }
 
       if (!Number.isInteger(people) || people < 1 || people > MAX_PEOPLE) {
-        showError(`Number of people must be between 1 and ${MAX_PEOPLE} per booking.`);
+        showError(`A booking can be for 1 to ${MAX_PEOPLE} people.`);
         return;
       }
 
@@ -146,24 +174,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (result.success) {
           const b = result.booking;
           const emailLine = result.emailSent
-            ? `<p>A confirmation has been sent to <strong>${escapeHtml(currentUser.email)}</strong>.</p>`
+            ? `<p>We've emailed a confirmation to <strong>${escapeHtml(currentUser.email)}</strong>.</p>`
             : `<p>You can see this booking any time on your <a href="Dashboard.html">Dashboard</a>.</p>`;
           bookingResult.innerHTML = `
-            <h3>Booking Confirmed!</h3>
-            <p>Thank you, <strong>${escapeHtml(name)}</strong>.</p>
-            <p>Your booking on <strong>${escapeHtml(b.date)}</strong> from <strong>${escapeHtml(b.start)}</strong> to <strong>${escapeHtml(b.end)}</strong> for <strong>${escapeHtml(b.people)} ${b.people === 1 ? "person" : "people"}</strong> is received.</p>
+            <h3>You're booked!</h3>
+            <p>Thanks, <strong>${escapeHtml(name)}</strong>. We've saved a table for <strong>${escapeHtml(b.people)} ${b.people === 1 ? "person" : "people"}</strong> on <strong>${escapeHtml(b.date)}</strong>, <strong>${escapeHtml(b.start)}</strong> to <strong>${escapeHtml(b.end)}</strong>.</p>
             ${emailLine}
           `;
           bookingForm.reset();
           // Re-populate the locked email field that reset() clears
           lockEmailField();
+          nameField.value = currentUser.name;
+        } else if (result.code === "email_unverified") {
+          showVerifyNotice();
         } else {
-          showError(result.error || "Booking failed. Please try again.");
+          showError(result.error || "We couldn't make that booking. Please try again.");
         }
       } catch (error) {
         console.error("Booking error:", error);
         clearButtonLoading(submitBtn);
-        showError("Server error. Please try again later.");
+        showError("We couldn't reach the server. Please try again in a moment.");
       }
     });
   }

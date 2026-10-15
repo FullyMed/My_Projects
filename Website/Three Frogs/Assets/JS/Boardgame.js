@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-4",
       duration: "60 min",
       image: "Assets/Images/Catan.jpg",
-      description: "Trade, build, and settle your way to victory!",
+      description: "Trade resources with the other players and build roads and towns until someone reaches 10 points.",
       tags: ["Resource Management", "Trading", "Dice Rolling"]
     },
     {
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "120 min",
       image: "Assets/Images/Monopoly.avif",
-      description: "Buy, trade, and bankrupt your opponents!",
+      description: "Buy up streets and charge rent until everyone else goes bankrupt.",
       tags: ["Roll and Move", "Economic", "Player Elimination"]
     },
     {
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "45 min",
       image: "Assets/Images/Carcassonne.jpg",
-      description: "Build cities and claim roads with strategic tiles.",
+      description: "Lay tiles to build a medieval landscape, then place your followers to claim its cities and roads.",
       tags: ["Tile Placement", "Area Control"]
     },
     {
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "15 min",
       image: "Assets/Images/Codenames.jpg",
-      description: "Guess the secret words using clever clues.",
+      description: "Two teams race to find their agents on a grid of words, guided by one-word clues.",
       tags: ["Team-Based", "Communication", "Deduction"]
     },
     {
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "60 min",
       image: "Assets/Images/Ticket to Ride.jpg",
-      description: "Collect train cards to claim routes across the map.",
+      description: "Collect colored train cards and claim railway routes to connect cities across the map.",
       tags: ["Route Building", "Set Collection"]
     },
     {
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/Pandemic.webp",
-      description: "Work together to stop global outbreaks!",
+      description: "Work as a team to stop four diseases from spreading around the world.",
       tags: ["Action Point Allowance", "Hand Management", "Player Powers"]
     },
     {
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20 min",
       image: "Assets/Images/Pandemic Rapid Response.jpg",
-      description: "Deliver aid to cities in crisis in this real-time dice-rolling spinoff of Pandemic.",
+      description: "Roll dice against the clock to fly supplies to cities in crisis. A fast, real-time spin-off of Pandemic.",
       tags: ["Real-Time", "Dice Rolling", "Crisis Management"]
     },
     {
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-45 min",
       image: "Assets/Images/Azul.jpg",
-      description: "Draft tiles to create stunning mosaic patterns.",
+      description: "Draft colored tiles and arrange them into a mosaic wall. Tiles you can't place cost you points.",
       tags: ["Pattern Building", "Drafting"]
     },
     {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-7",
       duration: "30 min",
       image: "Assets/Images/7 Wonders.jpg",
-      description: "Build an ancient city through science, war, and trade.",
+      description: "Draft cards over three ages to build an ancient city through science, trade and war.",
       tags: ["Card Drafting", "Set Collection", "Engine Building"]
     },
     {
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30 min",
       image: "Assets/Images/7 Wonders Duel.webp",
-      description: "A strategic head-to-head version of 7 Wonders with new twists and mechanics.",
+      description: "The two-player version of 7 Wonders, with its own card pyramid and new ways to win.",
       tags: ["Card Drafting", "Two Player", "Civ Building"]
     },
     {
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "15 min",
       image: "Assets/Images/Exploding Kittens.jpg",
-      description: "A fast and hilarious game of feline destruction.",
+      description: "A quick card game where drawing an exploding kitten knocks you out, unless you can defuse it.",
       tags: ["Player Elimination", "Push Your Luck"]
     },
     {
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "30 min",
       image: "Assets/Images/Dixit.jpg",
-      description: "Use imagination to match beautiful surreal cards.",
+      description: "Describe a dreamlike picture card in a word or phrase, then hope some players guess it, but not all of them.",
       tags: ["Storytelling", "Voting", "Creativity"]
     },
     {
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-8",
       duration: "15-20 min",
       image: "Assets/Images/Jenga.jpg",
-      description: "Pull and stack wooden blocks without toppling the tower!",
+      description: "Pull a block from the tower and stack it on top without knocking everything over.",
       tags: ["Stacking", "Tension", "Hand-Eye Coordination"]
     },
     {
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-100",
       duration: "25 min",
       image: "Assets/Images/Welcome to Your Perfect Home.jpg",
-      description: "Plan the perfect suburban neighborhood with clever number placement.",
+      description: "Write house numbers in order down your streets to plan the best 1950s-style neighborhood.",
       tags: ["Flip and Write", "Number Placement"]
     },
     {
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "40-70 min",
       image: "Assets/Images/Wingspan.jpg",
-      description: "Attract birds and build powerful combos in a beautiful engine-building game.",
+      description: "Attract birds to your wildlife preserve and chain their powers into bigger and bigger combos.",
       tags: ["Engine Building", "Card Drafting", "Set Collection"]
     },
     {
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "60-120 min",
       image: "Assets/Images/Risk.jpg",
-      description: "Conquer the world one territory at a time through dice and strategy.",
+      description: "Roll dice to attack your neighbors and take over the world, one territory at a time.",
       tags: ["Area Control", "Dice Rolling", "Elimination"]
     },
     {
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "120 min",
       image: "Assets/Images/Risk Europe.jpg",
-      description: "Command medieval armies and use tactics and economy to dominate Europe.",
+      description: "Lead medieval armies across Europe and balance your money against your battles.",
       tags: ["Area Control", "Dice Rolling", "War Game"]
     },
     {
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30 min",
       image: "Assets/Images/Patchwork.jpg",
-      description: "Compete to build the most aesthetically pleasing quilt using Tetris-like pieces.",
+      description: "Two players sew a quilt from Tetris-like patches, paying with buttons and time.",
       tags: ["Tile Placement", "Tetris-Like", "Resource Management"]
     },
     {
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "5-10",
       duration: "45 min",
       image: "Assets/Images/Secret Hitler.jpg",
-      description: "Deduce who is lying in this tense and strategic political thriller.",
+      description: "A hidden-role game of 1930s politics. The liberal majority tries to spot the liars before the fascists take over.",
       tags: ["Hidden Roles", "Bluffing", "Deduction"]
     },
     {
@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "30 min",
       image: "Assets/Images/Camel Up.webp",
-      description: "Bet on racing camels and manipulate their positions in wild ways!",
+      description: "Bet on a camel race where the camels stack on top of each other and the leader can change every turn.",
       tags: ["Betting", "Racing", "Dice Rolling"]
     },
     {
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Splendor.jpg",
-      description: "Collect gems and attract nobles in this elegant and strategic game.",
+      description: "Collect gems and buy cards that give you permanent discounts. Get enough and nobles come to visit.",
       tags: ["Engine Building", "Set Collection", "Card Drafting"]
     },
     {
@@ -204,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30 min",
       image: "Assets/Images/Splendor Duel.jpg",
-      description: "A tense and tactical two-player twist on the classic Splendor engine-building game.",
+      description: "A two-player take on Splendor with a shared gem board and more ways to mess with your opponent.",
       tags: ["Engine Building", "Card Drafting", "Two Player"]
     },
     {
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "20-60 min",
       image: "Assets/Images/Thats You.png",
-      description: "Answer hilarious personal questions and see how well you know your friends.",
+      description: "Answer questions about the people around the table and find out who knows the group best.",
       tags: ["Social", "Mobile Integration", "Humor"]
     },
     {
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "40-60 min",
       image: "Assets/Images/Forest Shuffle.jpg",
-      description: "Grow a thriving forest by strategically layering trees, animals, and plants.",
+      description: "Play trees, then tuck animals and plants around them to grow the richest forest.",
       tags: ["Card Drafting", "Nature-Themed", "Set Collection"]
     },
     {
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "2-5 min",
       image: "Assets/Images/Happy Salmon.png",
-      description: "Frantic, fast-paced fun where players race to perform silly actions and ditch their cards.",
+      description: "Everyone plays at once, shouting actions and hunting for a match so they can ditch their cards first.",
       tags: ["Real-Time", "Party Game", "High Energy"]
     },    
     {
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20 min",
       image: "Assets/Images/Love Letter.jpg",
-      description: "Use deduction and luck to deliver your love letter to the princess.",
+      description: "A tiny card game of deduction and luck. Get your letter to the princess before anyone else does.",
       tags: ["Hand Management", "Deduction", "Player Elimination"]
     },
     {
@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30 min",
       image: "Assets/Images/King of Tokyo.jpg",
-      description: "Battle monsters and roll dice to become the one and only King of Tokyo!",
+      description: "Play a giant monster, roll dice to smash the others, and try to hold on to Tokyo.",
       tags: ["Dice Rolling", "Player Elimination", "Push Your Luck"]
     },
     {
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "45 min",
       image: "Assets/Images/Tokaido.jpg",
-      description: "Take a peaceful journey through Japan, collecting souvenirs and experiences.",
+      description: "A slow, peaceful trip along the old Tokaido road in Japan, stopping for hot springs, meals and souvenirs.",
       tags: ["Point to Point Movement", "Set Collection", "Relaxing"]
     },
     {
@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/The Mind.jpg",
-      description: "Play cards in the right order—without talking. A game of timing and connection.",
+      description: "Play your numbered cards in rising order as a team, without saying a word.",
       tags: ["Cooperative", "Hand Management", "Timing"]
     },
     {
@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "45 min",
       image: "Assets/Images/Cluedo.jpg",
-      description: "Solve the murder mystery by deducing who, where, and with what.",
+      description: "Work out who killed Dr. Black, in which room, and with which weapon.",
       tags: ["Deduction", "Roll and Move", "Mystery"]
     },
     {
@@ -285,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "15-20 min",
       image: "Assets/Images/Onitama.jpg",
-      description: "A fast-paced strategy game with martial arts-inspired movement patterns.",
+      description: "A quick two-player game where move cards pass back and forth, so every move you make hands one to your opponent.",
       tags: ["Abstract Strategy", "Perfect Information", "Grid Movement"]
     },
     {
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "120 min",
       image: "Assets/Images/Terraforming Mars.jpg",
-      description: "Lead a corporation to terraform the red planet through engine building and resource management.",
+      description: "Run a corporation that helps make Mars livable, and build a card engine that earns you more each round.",
       tags: ["Engine Building", "Card Drafting", "Resource Management"]
     },
     {
@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "45-75 min",
       image: "Assets/Images/Terraforming Mars Ares.jpg",
-      description: "A faster, card-based take on Terraforming Mars with streamlined mechanics.",
+      description: "A faster, card-only version of Terraforming Mars where players choose which phases happen each round.",
       tags: ["Engine Building", "Card Game", "Science Fiction"]
     },
     {
@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Coup.jpg",
-      description: "Use deception, deduction, and strategy to manipulate your way to power.",
+      description: "Claim any role you like, true or not, and knock out the other players until you're the last one standing.",
       tags: ["Bluffing", "Player Elimination", "Hidden Roles"]
     },
     {
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-12",
       duration: "30-45 min",
       image: "Assets/Images/Wavelength.jpg",
-      description: "Give and guess clues on a hidden spectrum in this hilarious team game.",
+      description: "One player gives a clue, and their team turns a dial to guess where it sits on a scale like 'hot to cold'.",
       tags: ["Team-Based", "Communication", "Social"]
     },
     {
@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "75-150 min",
       image: "Assets/Images/Great Western Trail.webp",
-      description: "Herd cattle, upgrade your engine, and build your legacy in the Old West.",
+      description: "Drive cattle across the Old West to Kansas City and ship them off by rail for profit.",
       tags: ["Deck-Building", "Route Building", "Economic"]
     },
     {
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "20 min",
       image: "Assets/Images/The Crew_Planet Nine.jpg",
-      description: "Complete tricky space missions with limited communication in this cooperative trick-taking game.",
+      description: "A co-op trick-taking game in space. Complete each mission while barely talking to your team.",
       tags: ["Trick-Taking", "Mission-Based", "Limited Communication"]
     },
     {
@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "15 min",
       image: "Assets/Images/Spyfall.webp",
-      description: "Find the spy among you—or if you're the spy, figure out where you are!",
+      description: "Everyone knows the secret location except the spy. Ask questions to find them, or bluff your way through if you're the spy.",
       tags: ["Social Deduction", "Bluffing", "Hidden Roles"]
     },
     {
@@ -357,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "45-60 min",
       image: "Assets/Images/Menace Among Us.jpg",
-      description: "A hidden traitor game set in space where players work to fix their ship—or sabotage it.",
+      description: "Repair your spaceship as a crew while hidden traitors try to sabotage it.",
       tags: ["Hidden Roles", "Deduction", "Cooperative", "Bluffing"]
     },
     {
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-12",
       duration: "20-30 min",
       image: "Assets/Images/Hellapagos.jpg",
-      description: "Survive a shipwrecked island by working together... until resources run out!",
+      description: "Shipwrecked players work together to build a raft and escape the island, until the food and water run low and someone gets voted off.",
       tags: ["Cooperative", "Survival", "Negotiation", "Backstabbing"]
     },
     {
@@ -375,7 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Dream Home.jpg",
-      description: "Design your ideal house by choosing cards and furnishing each room with style.",
+      description: "Pick cards to build your house and furnish it room by room.",
       tags: ["Set Collection", "Drafting", "Family Friendly"]
     },
     {
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15 min",
       image: "Assets/Images/Baobab.jpg",
-      description: "Stack animals on a tree without letting them fall. Each type has a different rule!",
+      description: "Stack animal cards on a tree without letting any fall. Each animal has its own placement rule.",
       tags: ["Stacking", "Animal Theme", "Party"]
     },
     {
@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "90-120 min",
       image: "Assets/Images/Tapestry.jpg",
-      description: "Advance your civilization through eras of innovation and conquest in this grand strategy game.",
+      description: "Guide a civilization through history by advancing in science, technology, exploration and military.",
       tags: ["Civilization Building", "Engine Building", "Asymmetric Powers"]
     },
     {
@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "40-80 min",
       image: "Assets/Images/Everdell.png",
-      description: "Build a vibrant woodland city with critters and constructions in this beautiful tableau game.",
+      description: "Build a city of woodland critters and buildings over four seasons.",
       tags: ["Worker Placement", "Tableau Building", "Card Drafting"]
     },
     {
@@ -411,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30-45 min",
       image: "Assets/Images/Downforce.jpg",
-      description: "Bid, race, and bet in a fast-paced Formula 1 style board game.",
+      description: "Bid on race cars, play speed cards and place secret bets on who'll win the race.",
       tags: ["Betting", "Hand Management", "Racing"]
     },
     {
@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/My City.jpg",
-      description: "A legacy tile-laying game where players build a city that evolves over time.",
+      description: "A legacy game by Reiner Knizia. You build your city with tiles, and it changes from one game to the next.",
       tags: ["Legacy", "Tile Placement", "City Building"]
     },
     {
@@ -429,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-45 min",
       image: "Assets/Images/Barenpark.jpeg",
-      description: "Build your own bear park by placing polyomino tiles to maximize space.",
+      description: "Fill your bear park with polyomino tiles of enclosures, kiosks and paths.",
       tags: ["Tile Placement", "Tetris-Like", "Set Collection"]
     },
     {
@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-45 min",
       image: "Assets/Images/Blue Lagoon.webp",
-      description: "Explore islands and settle in this strategic area control game.",
+      description: "Explore a chain of islands and settle it, scoring for connected villages and the resources you gather.",
       tags: ["Area Control", "Set Collection", "Abstract"]
     },
     {
@@ -447,7 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-45 min",
       image: "Assets/Images/Reef.jpg",
-      description: "Create colorful coral patterns in a vibrant underwater setting.",
+      description: "Stack colorful coral pieces on your reef to match the patterns on your cards.",
       tags: ["Pattern Building", "Stacking", "Family Friendly"]
     },
     {
@@ -456,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Wombat.jpg",
-      description: "Help wombats dig and navigate their tunnels in this cute and clever game.",
+      description: "Help the wombats dig their tunnels and find their way through them.",
       tags: ["Animal Theme", "Movement", "Kids"]
     },
     {
@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20-30 min",
       image: "Assets/Images/Marrakech.jpg",
-      description: "Place your carpets on the market and earn the most money in this tactical game.",
+      description: "Lay carpets around the market square. When other players land on yours, they pay you.",
       tags: ["Tile Placement", "Area Influence", "Economic"]
     },
     {
@@ -474,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-45 min",
       image: "Assets/Images/Dragon Market.jpg",
-      description: "Collect items by moving through a dynamic floating market filled with shifting boats.",
+      description: "Move through a floating market of shifting boats to collect the items you need.",
       tags: ["Grid Movement", "Pickup and Deliver", "Strategy"]
     },
     {
@@ -483,7 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2 or 4",
       duration: "15-20 min",
       image: "Assets/Images/Quixo.webp",
-      description: "Align five of your symbols in a row by pushing and rotating blocks.",
+      description: "Slide cubes into the grid from the edges to get five of your symbols in a row.",
       tags: ["Abstract Strategy", "Alignment", "Quick Play"]
     },
     {
@@ -492,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "20 min",
       image: "Assets/Images/Pylos.jpeg",
-      description: "Stack your spheres to complete the pyramid while conserving your pieces.",
+      description: "Stack spheres into a pyramid and save your pieces. Whoever places the top sphere wins.",
       tags: ["Abstract Strategy", "3D", "Tactical"]
     },
     {
@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-30 min",
       image: "Assets/Images/Quoridor.jpg",
-      description: "Block your opponents and be the first to reach the other side of the board.",
+      description: "Race your pawn to the far side of the board while placing walls to slow everyone else down.",
       tags: ["Maze", "Blocking", "Abstract Strategy"]
     },
     {
@@ -510,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "10-15 min",
       image: "Assets/Images/Game of Cat and Mouth.webp",
-      description: "Use a magnetic cat paw to fling balls at your opponent's side in a fast-paced battle.",
+      description: "Use the magnetic cat paw to flick balls over to your opponent's side.",
       tags: ["Flicking", "Dexterity", "Real-Time"]
     },
     {
@@ -519,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20-30 min",
       image: "Assets/Images/Blokus.webp",
-      description: "Place as many of your pieces as you can while blocking your opponents in this strategic spatial game.",
+      description: "Fit as many of your pieces on the board as you can, touching only at the corners, and box your opponents in.",
       tags: ["Tile Placement", "Spatial Reasoning", "Abstract Strategy"]
     },
     {
@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30 min",
       image: "Assets/Images/Jaipur.jpg",
-      description: "A fast-paced card game of trading and tactics set in the Indian marketplace.",
+      description: "A two-player trading game set in a busy Indian market. Sell your goods at the right moment and grab camels when you need them.",
       tags: ["Trading", "Set Collection", "Hand Management"]
     },
     {
@@ -537,7 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "20 min",
       image: "Assets/Images/Schotten Totten.jpeg",
-      description: "Battle over stones using poker-style formations in this tactical 2-player duel.",
+      description: "Two players fight over nine stones by building poker-style card formations on each side.",
       tags: ["Hand Management", "Area Control", "Bluffing"]
     },
     {
@@ -546,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "15-20 min",
       image: "Assets/Images/Tacocat Spelled Backwards.webp",
-      description: "A palindrome-powered tug-of-war game of clever duels and bluffing.",
+      description: "A two-player tug-of-war card game themed around palindromes, with a bit of bluffing.",
       tags: ["Bluffing", "Card Game", "Humor"]
     },
     {
@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-12",
       duration: "30-45 min",
       image: "Assets/Images/Raise Your Goblets.jpg",
-      description: "Mix, poison, and toast as you try to eliminate your enemies without getting caught.",
+      description: "Slip poison into the goblets, swap them around and toast. Take out your enemies without getting caught.",
       tags: ["Bluffing", "Deduction", "Party"]
     },
     {
@@ -564,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/Kingdomino.jpg",
-      description: "Match and build your kingdom in this domino-style tile-laying game.",
+      description: "Pick domino tiles and connect matching terrain to build a 5x5 kingdom.",
       tags: ["Tile Placement", "Drafting", "Spatial"]
     },
     {
@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/Cacao.webp",
-      description: "Grow and sell cacao in this tile-laying game of timing and resource management.",
+      description: "Place worker and jungle tiles to grow cacao, then sell it at the best price you can get.",
       tags: ["Tile Placement", "Resource Management", "Economic"]
     },
     {
@@ -582,7 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "60 min",
       image: "Assets/Images/Game of Life.jpeg",
-      description: "Travel through life making choices about career, family, and fortune in this classic game.",
+      description: "Spin the wheel and drive through life, picking a career, starting a family and chasing a fortune.",
       tags: ["Roll and Move", "Life Simulation", "Classic"]
     },
     {
@@ -591,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "20 min",
       image: "Assets/Images/Dream On.jpeg",
-      description: "Build a dream together, then try to recall it in the right order!",
+      description: "Build a dream together from cards, then try to remember it in the right order.",
       tags: ["Memory", "Storytelling", "Cooperative"]
     },
     {
@@ -600,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "15-20 min",
       image: "Assets/Images/Bang The Dice.jpg",
-      description: "A faster version of Bang! with dice-rolling and hidden roles.",
+      description: "A faster dice version of Bang!. Roll to shoot, heal and find the hidden outlaws.",
       tags: ["Dice Rolling", "Hidden Roles", "Bluffing"]
     },
     {
@@ -609,7 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "20-40 min",
       image: "Assets/Images/Bang The Bullet.webp",
-      description: "A deluxe edition of the wild west shootout game—hidden roles, bluffing, and bullets fly.",
+      description: "A deluxe edition of the Wild West card game Bang!, with hidden roles, bluffing and plenty of shooting.",
       tags: ["Bluffing", "Hidden Roles", "Western"]
     },
     {
@@ -618,7 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "20-30 min",
       image: "Assets/Images/Fun Facts.jpg",
-      description: "Reveal hilarious and surprising facts about your friends in this light party game.",
+      description: "Find out surprising things about your friends in a light party game.",
       tags: ["Guessing", "Social", "Icebreaker"]
     },
     {
@@ -627,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-12",
       duration: "40 min",
       image: "Assets/Images/Concept.webp",
-      description: "Use icons to get your teammates to guess words or phrases in this abstract communication game.",
+      description: "Place markers on a board of icons to get your team to guess a word or phrase.",
       tags: ["Word Game", "Abstract", "Team-Based"]
     },
     {
@@ -636,7 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "15 min",
       image: "Assets/Images/Go Cuckoo.jpg",
-      description: "Build a nest from sticks and carefully place eggs without making them fall.",
+      description: "Build a nest of sticks and place eggs in it without making anything fall.",
       tags: ["Dexterity", "Balancing", "Kids"]
     },
     {
@@ -645,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-10",
       duration: "30 min",
       image: "Assets/Images/Take 6.jpg",
-      description: "Avoid collecting cards with bullheads in this fast-paced number game.",
+      description: "Play numbered cards into rows and try not to collect the bullheads that come with a full row.",
       tags: ["Hand Management", "Number Game", "Set Collection"]
     },
     {
@@ -654,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "20-30 min",
       image: "Assets/Images/Spirits of the Forest.webp",
-      description: "Collect sets of spirit tiles while managing resources and blocking opponents.",
+      description: "Collect sets of spirit tiles while managing your gems and blocking your opponents.",
       tags: ["Set Collection", "Abstract Strategy", "Tile Drafting"]
     },
     {
@@ -663,7 +663,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "30 min",
       image: "Assets/Images/Skull.jpg",
-      description: "A bluffing game of risk and deception using coasters with flowers and skulls.",
+      description: "A bluffing game played with coasters. Bid on how many flowers you can reveal without hitting a skull.",
       tags: ["Bluffing", "Risk Management", "Deduction"]
     },
     {
@@ -672,7 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "30-60 min",
       image: "Assets/Images/Room 25.webp",
-      description: "Escape a deadly maze filled with traps, suspicion, and betrayal.",
+      description: "Escape a maze of deadly rooms full of traps, while some players might be secretly working against you.",
       tags: ["Hidden Traitor", "Modular Board", "Action Programming"]
     },
     {
@@ -681,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "15-20 min",
       image: "Assets/Images/Ramen Fury.webp",
-      description: "Build the tastiest bowls of ramen by drafting ingredients and seasoning wisely.",
+      description: "Draft ingredients to build the tastiest bowls of ramen, and don't forget the seasoning.",
       tags: ["Drafting", "Set Collection", "Food Theme"]
     },
     {
@@ -690,7 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "20 min",
       image: "Assets/Images/Bag of Chips.webp",
-      description: "Bet on outcomes and crunch your way to victory in this push-your-luck snack game.",
+      description: "Bet on which chips come out of the bag in this quick push-your-luck game.",
       tags: ["Betting", "Push Your Luck", "Drafting"]
     },
     {
@@ -699,7 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "30-45 min",
       image: "Assets/Images/Waroong Wars.png",
-      description: "Build your food stall empire and serve customers in this flavorful Indonesian-themed game.",
+      description: "Build up your Indonesian food stall and serve the customers who come by.",
       tags: ["Resource Management", "Set Collection", "Local Theme"]
     },
     {
@@ -708,7 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Cabo.jpg",
-      description: "A memory and deduction game where the goal is to have the lowest score by game end.",
+      description: "Remember your hidden cards and swap them out to finish with the lowest score.",
       tags: ["Memory", "Deduction", "Card Game"]
     },
     {
@@ -717,7 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "30-45 min",
       image: "Assets/Images/Subastral.png",
-      description: "Explore the biomes of Earth while drafting cards to complete your journal.",
+      description: "Travel through Earth's biomes and draft cards to fill your journal.",
       tags: ["Set Collection", "Drafting", "Nature Theme"]
     },
     {
@@ -726,7 +726,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "20 min",
       image: "Assets/Images/Inside Job.webp",
-      description: "A hidden role game where an agent blends in with coworkers while sabotaging missions.",
+      description: "A hidden-role game where a secret agent blends in with coworkers and sabotages their missions.",
       tags: ["Hidden Roles", "Deduction", "Cooperative"]
     },
     {
@@ -735,7 +735,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "15-20 min",
       image: "Assets/Images/Boy Who Cried Wolf.webp",
-      description: "A storytelling and bluffing game based on the classic fable.",
+      description: "A storytelling and bluffing game based on the old fable.",
       tags: ["Bluffing", "Storytelling", "Family"]
     },
     {
@@ -744,7 +744,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Dice Academy.jpg",
-      description: "Match categories with letters as fast as you can using custom dice.",
+      description: "Roll the letter and category dice, then race to name something that fits both.",
       tags: ["Speed Game", "Dice Rolling", "Word Game"]
     },
     {
@@ -753,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "10-15 min",
       image: "Assets/Images/Dog Rush.jpg",
-      description: "Spot which dog is tangled up in leashes the fastest in this reflex-testing game.",
+      description: "Spot which dog is tangled in the leashes before anyone else does.",
       tags: ["Observation", "Speed", "Pattern Recognition"]
     },
     {
@@ -762,7 +762,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "10-15 min",
       image: "Assets/Images/Taco Cat Goat Cheese Pizza.jpg",
-      description: "Say words and slap cards fast—this chaotic game tests your reflexes and memory.",
+      description: "Say the words in order as you flip cards, and slap the pile when the card matches the word.",
       tags: ["Speed Game", "Party", "Reflex"]
     },
     {
@@ -771,7 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "10-15 min",
       image: "Assets/Images/Mimiq.jpg",
-      description: "Collect matching sets by mimicking facial expressions and reading others.",
+      description: "Copy facial expressions and read other players' faces to collect matching sets.",
       tags: ["Memory", "Facial Expression", "Kids"]
     },
     {
@@ -780,7 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "20-30 min",
       image: "Assets/Images/Sekata.png",
-      description: "Guess the same word as your teammate with only a single clue!",
+      description: "Guess the same word as your teammate from a single clue.",
       tags: ["Team-Based", "Word Guessing", "Communication"]
     },
     {
@@ -789,7 +789,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "15 min",
       image: "Assets/Images/Who Did It.jpg",
-      description: "Accuse your friends’ pets of making a mess before they accuse yours!",
+      description: "Blame your friends' pets for the mess before they blame yours.",
       tags: ["Bluffing", "Memory", "Reaction"]
     },
     {
@@ -798,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "20 min",
       image: "Assets/Images/Shadows Amsterdam.avif",
-      description: "Give clues using pictures in this fast-paced real-time deduction game.",
+      description: "Give picture clues to lead your team's detectives through Amsterdam, racing the other team in real time.",
       tags: ["Deduction", "Real-Time", "Wordless Clues"]
     },
     {
@@ -807,7 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-13",
       duration: "30 min",
       image: "Assets/Images/Trial by Trolley.jpg",
-      description: "A darkly humorous game of moral dilemmas and choosing who lives or dies.",
+      description: "A dark comedy about the trolley problem. Argue over who the runaway trolley should hit.",
       tags: ["Debate", "Bluffing", "Dark Humor"]
     },
     {
@@ -816,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "15 min",
       image: "Assets/Images/Dobble.jpg",
-      description: "Find matching symbols faster than your opponents in this speedy observation game.",
+      description: "Any two cards share exactly one symbol. Be the first to spot it.",
       tags: ["Observation", "Speed", "Reflex"]
     },
     {
@@ -825,7 +825,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-10",
       duration: "15-20 min",
       image: "Assets/Images/Yogi.jpg",
-      description: "Twist, stretch, and hold awkward poses in this hilarious physical challenge game.",
+      description: "Hold the awkward poses on your cards, and keep holding them as more cards pile up.",
       tags: ["Dexterity", "Physical", "Silly Fun"]
     },
     {
@@ -834,7 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-13",
       duration: "30 min",
       image: "Assets/Images/Mascarade.jpg",
-      description: "A game of hidden roles, fast swaps, and clever bluffing at a grand masquerade ball.",
+      description: "Swap role cards face down until nobody is sure who they are, then claim a role and hope you're right.",
       tags: ["Hidden Roles", "Memory", "Bluffing"]
     },
     {
@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "20-30 min",
       image: "Assets/Images/Scape Goat.webp",
-      description: "One player is the scapegoat—can they figure it out before they’re thrown under the bus?",
+      description: "One player is the scapegoat. Can they work it out before the others frame them?",
       tags: ["Deduction", "Hidden Identity", "Bluffing"]
     },
     {
@@ -852,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "5-10",
       duration: "30 min",
       image: "Assets/Images/Avalon.jpg",
-      description: "A hidden role game of good vs evil set in Arthurian legend.",
+      description: "Loyal knights of King Arthur try to complete quests while Mordred's hidden agents work against them.",
       tags: ["Social Deduction", "Bluffing", "Team-Based"]
     },
     {
@@ -861,7 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "6-30",
       duration: "15-20 min",
       image: "Assets/Images/Two Rooms and a Boom.webp",
-      description: "Split into two rooms and use hidden roles to protect or assassinate the president.",
+      description: "Split into two rooms, trade hostages, and work out who has the bomb and who's the president.",
       tags: ["Hidden Roles", "Social Deduction", "Party"]
     },
     {
@@ -870,7 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30-60 min",
       image: "Assets/Images/Here to Slay.jpg",
-      description: "Assemble a party of heroes and slay monsters or sabotage your rivals in this fantasy card game.",
+      description: "Build a party of heroes to slay monsters, or sabotage your rivals instead.",
       tags: ["Set Collection", "Card Game", "Take That"]
     },
     {
@@ -879,7 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "8-35",
       duration: "30-45 min",
       image: "Assets/Images/Werewolf Deluxe.webp",
-      description: "A social deduction classic where players must discover the werewolves hiding in the village.",
+      description: "The classic village game. Find the werewolves hiding among you before they get everyone.",
       tags: ["Social Deduction", "Hidden Roles", "Bluffing"]
     },
     {
@@ -888,7 +888,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-10",
       duration: "10 min",
       image: "Assets/Images/One Night Ultimate Werewolf.jpg",
-      description: "Figure out who among you is the werewolf — in just one chaotic night!",
+      description: "One night, one vote. Work out who the werewolf is in about ten minutes.",
       tags: ["Hidden Roles", "Bluffing", "Party Game"]
     },
     {
@@ -897,7 +897,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "15-20 min",
       image: "Assets/Images/Hamster Clan.jpg",
-      description: "Help the hamster family gather food for winter by moving through tunnels and collecting goods.",
+      description: "Help the hamster family gather food for winter by moving through their tunnels.",
       tags: ["Kids", "Movement", "Cooperative"]
     },
     {
@@ -906,7 +906,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/Animal Upon Animal.jpg",
-      description: "Stack wooden animals in this wobbly, fun dexterity game for all ages.",
+      description: "Stack wooden animals into a wobbly pile. Good for all ages.",
       tags: ["Stacking", "Dexterity", "Kids"]
     },
     {
@@ -915,7 +915,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-10",
       duration: "30-90 min",
       image: "Assets/Images/Texas Holdem.jpg",
-      description: "Classic poker experience with bluffing, betting, and bold moves.",
+      description: "Everything you need for Texas Hold'em: chips, cards and a good poker face.",
       tags: ["Betting", "Bluffing", "Card Game"]
     },
     {
@@ -924,7 +924,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20-30 min",
       image: "Assets/Images/Bendomino.webp",
-      description: "A curved twist on the classic domino game requiring smart placement and planning.",
+      description: "Dominoes with curved tiles, so you have to plan where the line can bend.",
       tags: ["Tile Placement", "Domino", "Abstract"]
     },
     {
@@ -933,7 +933,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "20 min",
       image: "Assets/Images/One Key.jpg",
-      description: "Find the key image through abstract clues before time runs out.",
+      description: "Work together to find the one key image from abstract clues before time runs out.",
       tags: ["Deduction", "Team-Based", "Clue Giving"]
     },
     {
@@ -942,7 +942,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "30 min",
       image: "Assets/Images/Stella.webp",
-      description: "Connect images through associations in the Dixit universe.",
+      description: "Link words to dreamy pictures in a game set in the Dixit world.",
       tags: ["Word Association", "Creativity", "Deduction"]
     },
     {
@@ -951,7 +951,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "20 min",
       image: "Assets/Images/Catch the Moon.png",
-      description: "Climb to the moon by balancing ladders—don't let your dreams crash!",
+      description: "Balance ladders on top of each other to climb toward the moon without knocking any down.",
       tags: ["Dexterity", "Balancing", "Tension"]
     },
     {
@@ -960,7 +960,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "30 min",
       image: "Assets/Images/Canvas.webp",
-      description: "Create beautiful paintings by layering transparent cards for points and aesthetics.",
+      description: "Layer transparent cards to make a painting that scores for both looks and points.",
       tags: ["Set Collection", "Art", "Drafting"]
     },
     {
@@ -969,7 +969,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "30 min",
       image: "Assets/Images/So Clover.webp",
-      description: "Write clues that connect word pairs and work as a team to solve the clover puzzle.",
+      description: "Write clues that link pairs of words, then work together to solve each other's clovers.",
       tags: ["Cooperative", "Word Game", "Clue Giving"]
     },
     {
@@ -978,7 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "20-30 min",
       image: "Assets/Images/Slide Quest.jpg",
-      description: "Guide a knight through traps and puzzles by tilting the board together.",
+      description: "Tilt the board together to guide a knight past the traps.",
       tags: ["Cooperative", "Dexterity", "Adventure"]
     },
     {
@@ -987,7 +987,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "5-10 min",
       image: "Assets/Images/Goblet Gobblers.jpg",
-      description: "A fun twist on Tic Tac Toe where bigger pieces can gobble up smaller ones!",
+      description: "Tic-tac-toe where bigger pieces can swallow smaller ones.",
       tags: ["Abstract Strategy", "Tic Tac Toe", "Blocking"]
     },
     {
@@ -996,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-30 min",
       image: "Assets/Images/Gummi Land.jpg",
-      description: "Collect colorful gummies and complete orders in this sweet strategy game.",
+      description: "Collect colorful gummies and fill the orders.",
       tags: ["Set Collection", "Kids", "Pattern Matching"]
     },
     {
@@ -1005,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "15-20 min",
       image: "Assets/Images/Mr Wolf.jpg",
-      description: "Work together to hide animals in their barns before the wolf arrives!",
+      description: "Work together to get the animals into their barns before the wolf arrives.",
       tags: ["Memory", "Cooperative", "Kids"]
     },
     {
@@ -1014,7 +1014,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "15 min",
       image: "Assets/Images/Happy Bunny.jpg",
-      description: "Help the bunny pick only ripe carrots for the farmer's basket.",
+      description: "Help the bunny pick only the ripe carrots for the farmer's basket.",
       tags: ["Memory", "Cooperative", "Kids"]
     },
     {
@@ -1023,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20-30 min",
       image: "Assets/Images/Harvest Dice.jpg",
-      description: "Draft dice to plant crops and feed your pig in this farm-themed roll and write.",
+      description: "A roll-and-write where you draft dice to plant crops and keep your pig fed.",
       tags: ["Dice Rolling", "Roll and Write", "Set Collection"]
     },
     {
@@ -1032,7 +1032,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-7",
       duration: "20 min",
       image: "Assets/Images/No Thanks.jpg",
-      description: "A quick, clever game of risk-taking and card avoidance with simple rules and tough decisions.",
+      description: "Each turn you take the card or pay a chip to pass it on. Easy to learn, with tough choices.",
       tags: ["Push Your Luck", "Card Game", "Minimalist"]
     },
     {
@@ -1041,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Halli Galli.png",
-      description: "A fast-reaction game where players race to ring the bell when fruit sets match!",
+      description: "Ring the bell as soon as you see exactly five of one fruit.",
       tags: ["Reaction", "Speed", "Pattern Recognition"]
     },
     {
@@ -1050,7 +1050,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "20 min",
       image: "Assets/Images/Geistes Blitz.jpg",
-      description: "Grab the right object first using lightning-fast reflexes and visual logic.",
+      description: "Grab the right wooden object first, based on what is (and isn't) pictured on the card.",
       tags: ["Speed Game", "Reflex", "Observation"]
     },
     {
@@ -1059,7 +1059,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15-20 min",
       image: "Assets/Images/Jungle Speed Safari.jpg",
-      description: "A wilder version of Jungle Speed with animal noises and quick reflex challenges.",
+      description: "A wilder Jungle Speed with animal noises and reflex challenges.",
       tags: ["Reflex", "Party", "Animal Theme"]
     },
     {
@@ -1068,7 +1068,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15 min",
       image: "Assets/Images/Cookie Box.webp",
-      description: "Stack, balance, and race to arrange cookies and boxes faster than your friends.",
+      description: "Race to stack and arrange cookies and boxes before your friends do.",
       tags: ["Stacking", "Speed", "Kids"]
     },
     {
@@ -1077,7 +1077,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "10-15 min",
       image: "Assets/Images/Bears in Barrels.jpg",
-      description: "Wind up the bears and race them across the table in this silly action game.",
+      description: "Wind up the bears and race them across the table.",
       tags: ["Dexterity", "Wind-Up Toys", "Racing"]
     },
     {
@@ -1086,7 +1086,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "20-30 min",
       image: "Assets/Images/Felicity.jpg",
-      description: "Bid blindly for mystery cats—and avoid dogs—in this quirky auction game.",
+      description: "Bid blind on sacks of mystery cats and try not to end up with the dogs.",
       tags: ["Auction", "Bluffing", "Set Collection"]
     },
     {
@@ -1095,7 +1095,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "10-15 min",
       image: "Assets/Images/Bam Bam Race.webp",
-      description: "Race your car across the floor in this slam-the-pawn action game!",
+      description: "Slam the pawn to send your car racing across the floor.",
       tags: ["Dexterity", "Racing", "Kids"]
     },
     {
@@ -1104,7 +1104,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20-30 min",
       image: "Assets/Images/Cat Lady.png",
-      description: "Collect cats, food, toys, and costumes to become the ultimate cat lover.",
+      description: "Collect cats, plus the food, toys and costumes to keep them happy.",
       tags: ["Set Collection", "Drafting", "Cute Theme"]
     },
     {
@@ -1113,7 +1113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Mantis.webp",
-      description: "A fast, colorful card-stealing game from the makers of Exploding Kittens.",
+      description: "A colorful card-stealing game from the makers of Exploding Kittens.",
       tags: ["Stealing", "Set Collection", "Color Matching"]
     },
     {
@@ -1122,7 +1122,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "30 min",
       image: "Assets/Images/Crash Octopus.webp",
-      description: "Flick and collect treasures while dodging the chaotic movements of a giant octopus!",
+      description: "Flick your boat to grab treasure while dodging a giant octopus.",
       tags: ["Flicking", "Dexterity", "Modular Board"]
     },
     {
@@ -1131,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "30 min",
       image: "Assets/Images/Smile.jpg",
-      description: "Capture cute creatures with glowworms—but be careful, some aren’t so friendly.",
+      description: "Catch cute creatures with your glowworms. Not all of them are friendly.",
       tags: ["Auction", "Set Collection", "Bluffing"]
     },
     {
@@ -1140,7 +1140,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "15-20 min",
       image: "Assets/Images/Who Is It.jpg",
-      description: "A kid-friendly guessing game where players try to find the mystery character.",
+      description: "Ask yes-or-no questions to find your opponent's mystery character. Good for kids.",
       tags: ["Guessing", "Deduction", "Kids"]
     },
     {
@@ -1149,7 +1149,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "45 min",
       image: "Assets/Images/Sheriff of Nottingham 1st.webp",
-      description: "Smuggle goods past the Sheriff or inspect players for contraband in this classic bluffing game.",
+      description: "Smuggle goods past the Sheriff with a straight face, or play the Sheriff and decide who's lying.",
       tags: ["Bluffing", "Negotiation", "Bribery"]
     },
     {
@@ -1167,7 +1167,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/Pengoloo.jpg",
-      description: "Roll dice, remember colors, and collect eggs in this adorable memory game.",
+      description: "Roll dice and remember which colored eggs are hiding under which penguins.",
       tags: ["Memory", "Dice Rolling", "Animal Theme"]
     },
     {
@@ -1176,7 +1176,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "15-30 min",
       image: "Assets/Images/Get Packing.jpg",
-      description: "Fit all the vacation items into your suitcase before your opponents.",
+      description: "Fit all your vacation things into your suitcase before the other players do.",
       tags: ["Spatial Reasoning", "Puzzle", "Race"]
     },
     {
@@ -1185,7 +1185,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "45 min",
       image: "Assets/Images/Meeple Circus.jpg",
-      description: "Stack and balance meeples to create daring circus performances.",
+      description: "Stack and balance meeples into daring circus acts.",
       tags: ["Stacking", "Dexterity", "Timed"]
     },
     {
@@ -1194,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20 min",
       image: "Assets/Images/Panic Mansion.jpg",
-      description: "Shake your box to move the right objects into the right rooms the fastest.",
+      description: "Shake your box to move the right items into the right rooms first.",
       tags: ["Real-Time", "Dexterity", "Speed"]
     },
     {
@@ -1203,7 +1203,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Peek a Mouse.jpg",
-      description: "Spot the objects the mice borrowed while they’re still lit up!",
+      description: "Spot which objects the mice borrowed while they're lit up.",
       tags: ["Memory", "Observation", "Flashlight"]
     },
     {
@@ -1212,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-7",
       duration: "10-15 min",
       image: "Assets/Images/Tock Tock Woodman.webp",
-      description: "Chop the tree carefully without knocking it all down in this light-hearted game.",
+      description: "Chop the bark off the tree without knocking the trunk over.",
       tags: ["Dexterity", "Stacking", "Tension"]
     },
     {
@@ -1221,7 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "15 min",
       image: "Assets/Images/Rhino Hero.webp",
-      description: "Stack walls and roofs while helping Rhino Hero climb up the building.",
+      description: "Build a card tower of walls and roofs while Rhino Hero climbs to the top.",
       tags: ["Stacking", "Dexterity", "Kids"]
     },
     {
@@ -1230,7 +1230,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "30-45 min",
       image: "Assets/Images/Nyctophobia.jpg",
-      description: "Play in near-darkness and try to survive a stalker you can’t see.",
+      description: "Play almost blind in blackout glasses and try to escape a hunter you can't see.",
       tags: ["Unique Mechanic", "Survival", "Cooperative"]
     },
     {
@@ -1239,7 +1239,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "60-90 min",
       image: "Assets/Images/Chronicles of Crime.jpg",
-      description: "Use VR and QR codes to investigate murder cases and solve mysteries.",
+      description: "Scan QR codes with the app to search crime scenes and solve murders. VR is optional.",
       tags: ["Crime Solving", "Technology", "Story Driven"]
     },
     {
@@ -1248,7 +1248,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "60 min",
       image: "Assets/Images/Unlock Escape Adventures.jpg",
-      description: "Escape room in a box! Solve puzzles cooperatively using cards and a free app.",
+      description: "An escape room in a box. Solve card puzzles together, with help from a free app.",
       tags: ["Escape Room", "Puzzle", "Cooperative"]
     },
     {
@@ -1257,7 +1257,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "60 min",
       image: "Assets/Images/Unlock Timeless Adventures.webp",
-      description: "Solve new escape scenarios spanning past, present, and future.",
+      description: "More Unlock escape rooms, with scenarios set in the past, present and future.",
       tags: ["Escape Room", "Time Travel", "Puzzle"]
     },
     {
@@ -1266,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "60 min",
       image: "Assets/Images/Unlock Heroic Adventures.jpg",
-      description: "Face off against heroic challenges in this narrative escape game pack.",
+      description: "More Unlock escape scenarios with a heroic adventure theme.",
       tags: ["Puzzle", "Storytelling", "Adventure"]
     },
     {
@@ -1275,7 +1275,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "60 min",
       image: "Assets/Images/Unlock Exotic Adventures.jpg",
-      description: "Embark on three exotic themed escape room adventures using clever logic and teamwork.",
+      description: "Three Unlock escape rooms in faraway settings.",
       tags: ["Escape Room", "Exploration", "Puzzle"]
     },
     {
@@ -1284,7 +1284,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "60 min",
       image: "Assets/Images/Unlock Mystery Adventures.jpg",
-      description: "Delve into mysteries and unravel complex scenarios with creative thinking.",
+      description: "Unlock escape rooms built around mysteries for your team to crack.",
       tags: ["Puzzle", "Mystery", "Narrative"]
     },
     {
@@ -1293,7 +1293,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "90-150 min",
       image: "Assets/Images/Ark Nova.jpg",
-      description: "Design a modern zoo and support conservation projects in this deep strategy game.",
+      description: "Design a modern zoo and fund conservation projects. A long, deep strategy game.",
       tags: ["Engine Building", "Tile Placement", "Card Drafting"]
     },
     {
@@ -1302,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30 min",
       image: "Assets/Images/Celestia.avif",
-      description: "Push your luck as you explore floating cities in a flying ship—stay onboard or bail out early?",
+      description: "Fly an airship between cities in the clouds. Stay on board for bigger rewards, or jump off before it crashes.",
       tags: ["Push Your Luck", "Bluffing", "Adventure"]
     },
     {
@@ -1311,7 +1311,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "30-45 min",
       image: "Assets/Images/Cascadia.jpg",
-      description: "Build beautiful natural habitats in the Pacific Northwest with clever tile and token placement.",
+      description: "Lay habitat tiles and place wildlife tokens to build a corner of the Pacific Northwest.",
       tags: ["Tile Placement", "Pattern Building", "Nature"]
     },
     {
@@ -1320,7 +1320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15-30 min",
       image: "Assets/Images/Point Salad.png",
-      description: "Draft veggies and scoring conditions to make the tastiest (and most strategic) salad.",
+      description: "Draft veggies and the cards that score them. Each card can be used as either one.",
       tags: ["Card Drafting", "Set Collection", "Quick Play"]
     },
     {
@@ -1329,7 +1329,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-7",
       duration: "45 min",
       image: "Assets/Images/Bohnanza.jpg",
-      description: "Plant, trade, and harvest beans—but you can't rearrange your hand!",
+      description: "Plant, trade and harvest beans, but you can't change the order of your hand.",
       tags: ["Trading", "Hand Management", "Set Collection"]
     },
     {
@@ -1338,7 +1338,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-50 min",
       image: "Assets/Images/Tokyo Highway.jpg",
-      description: "Stack roads and pillars to build your highway in this delicate and artistic dexterity game.",
+      description: "Build highways from tiny pillars and road pieces, weaving over and under your opponent's.",
       tags: ["Dexterity", "Construction", "Precision"]
     },
     {
@@ -1347,7 +1347,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-8",
       duration: "45-75 min",
       image: "Assets/Images/Awkward Guests.webp",
-      description: "Solve a mysterious murder using variable clues in this replayable deduction game.",
+      description: "Work out who killed Mr. Walton by trading clues with other players. The solution changes every game.",
       tags: ["Deduction", "Mystery", "Card Game"]
     },
     {
@@ -1356,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "30-60 min",
       image: "Assets/Images/Citadels.jpg",
-      description: "Use character roles to build a medieval city while bluffing and outwitting opponents.",
+      description: "Pick a secret character each round and use its power to build your medieval city.",
       tags: ["Bluffing", "Role Selection", "City Building"]
     },
     {
@@ -1365,7 +1365,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "20 min",
       image: "Assets/Images/Cockroach Poker.png",
-      description: "Lie about disgusting creatures and call your friends' bluffs in this cheeky bluffing game.",
+      description: "Pass a card face down and lie about which creature it is. Guess wrong when you call a bluff, and the card is yours.",
       tags: ["Bluffing", "Party", "Lying"]
     },
     {
@@ -1374,7 +1374,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "30 min",
       image: "Assets/Images/Decrypto.jpg",
-      description: "Communicate secret codes to your team while intercepting your opponents’ clues.",
+      description: "Give clues so your team can decode a secret number, while the other team listens in and tries to crack it.",
       tags: ["Word Game", "Deduction", "Team-Based"]
     },
     {
@@ -1383,7 +1383,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/Cubitos.webp",
-      description: "Roll, push your luck, and race across a wild track in this cube-chucking race game.",
+      description: "Roll dice cubes and push your luck to race your runner around the track.",
       tags: ["Dice Rolling", "Racing", "Push Your Luck"]
     },
     {
@@ -1392,7 +1392,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-10",
       duration: "30 min",
       image: "Assets/Images/Saboteur.jpg",
-      description: "Work together to mine gold—or secretly sabotage your team in this hidden role game.",
+      description: "Dig tunnels toward the gold together, unless you're secretly a saboteur.",
       tags: ["Hidden Roles", "Bluffing", "Team-Based"]
     },
     {
@@ -1401,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "60 min",
       image: "Assets/Images/Chinatown.jpg",
-      description: "Buy lots, trade deals, and build shops in this pure negotiation classic set in 1960s NYC.",
+      description: "Trade lots and make deals to build shops in 1960s New York. Almost everything is up for negotiation.",
       tags: ["Negotiation", "Economic", "Tile Placement"]
     },
     {
@@ -1410,7 +1410,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "10-15 min",
       image: "Assets/Images/Cubeez.jpg",
-      description: "Race to arrange cubes and match faces in this quick, silly puzzle game.",
+      description: "Race to arrange cubes so their faces match the card.",
       tags: ["Pattern Recognition", "Speed", "Puzzle"]
     },
     {
@@ -1419,7 +1419,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "45-90 min",
       image: "Assets/Images/Earth.jpg",
-      description: "Grow an ecosystem using cards and combos in this nature-themed tableau builder.",
+      description: "Plant cards into your tableau and chain their abilities to grow an ecosystem.",
       tags: ["Engine Building", "Card Game", "Nature"]
     },
     {
@@ -1428,7 +1428,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/Dice Forge.jpg",
-      description: "Craft your own dice and compete in divine trials to gain glory!",
+      description: "Change the faces of your own dice as you play, then roll them to win favor with the gods.",
       tags: ["Dice Crafting", "Resource Management", "Mythology"]
     },
     {
@@ -1437,7 +1437,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "40 min",
       image: "Assets/Images/Colt Express.png",
-      description: "Program your bandit’s actions and loot a 3D train in this chaotic western adventure.",
+      description: "Program your bandit's moves, then watch them play out on a 3D train as everyone tries to rob it.",
       tags: ["Action Programming", "Thematic", "Wild West"]
     },
     {
@@ -1446,7 +1446,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "60-90 min",
       image: "Assets/Images/God of War.jpeg",
-      description: "Team up to defeat monsters and change your fate in this Norse mythology card game.",
+      description: "Team up as Norse heroes to fight monsters and change your fate.",
       tags: ["Cooperative", "Card Drafting", "Scenario-Based"]
     },
     {
@@ -1455,7 +1455,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30-60 min",
       image: "Assets/Images/Jamaica.webp",
-      description: "Race around the island, plunder treasures, and fight pirates in this colorful adventure game.",
+      description: "Race pirate ships around Jamaica, collecting treasure and fighting other pirates on the way.",
       tags: ["Racing", "Resource Management", "Pirates"]
     },
     {
@@ -1464,7 +1464,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30-60 min",
       image: "Assets/Images/Memoir 44.jpg",
-      description: "Relive World War II battles in this historical scenario-based war game.",
+      description: "Replay World War II battles with miniatures and command cards.",
       tags: ["Wargame", "Scenario-Based", "Tactical"]
     },
     {
@@ -1473,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Planet.jpg",
-      description: "Build a 3D planet by placing magnetic terrain tiles to create habitats for animals.",
+      description: "Stick magnetic terrain tiles onto a 3D planet to build habitats for animals.",
       tags: ["Tile Placement", "3D", "Nature"]
     },
     {
@@ -1482,7 +1482,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "15-20 min",
       image: "Assets/Images/Insider.jpg",
-      description: "One player knows the secret word… and must help others guess it without being caught.",
+      description: "One player secretly knows the answer and has to steer everyone toward it without getting caught.",
       tags: ["Hidden Roles", "Deduction", "Word Game"]
     },
     {
@@ -1491,7 +1491,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "90 min",
       image: "Assets/Images/Letter from Whitechapel.webp",
-      description: "Track down Jack the Ripper—or play as Jack and try to escape detection.",
+      description: "Chase Jack the Ripper through the streets of London, or play as Jack and slip away.",
       tags: ["Hidden Movement", "Deduction", "Historical"]
     },
     {
@@ -1500,7 +1500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "20 min",
       image: "Assets/Images/Scout.jpg",
-      description: "Climb the ladder with clever card combos in this fast-paced, award-winning card game.",
+      description: "A card game where you can't rearrange your hand. Play sets to beat the table, or take cards to build better ones.",
       tags: ["Ladder Climbing", "Hand Management", "Tactical"]
     },
     {
@@ -1509,7 +1509,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Speed Cups.jpg",
-      description: "Stack and arrange colorful cups quickly to match patterns on challenge cards.",
+      description: "Stack and arrange colored cups to match the card, then ring the bell first.",
       tags: ["Speed", "Pattern Matching", "Reflex"]
     },
     {
@@ -1518,7 +1518,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Sticky Chameleons.jpg",
-      description: "Use sticky tongues to grab insects in this hilarious, fast-paced reaction game.",
+      description: "Use sticky tongues to snatch the right insect before everyone else.",
       tags: ["Dexterity", "Speed", "Kids"]
     },
     {
@@ -1527,7 +1527,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/Survive from Atlantis.jpg",
-      description: "Escape the sinking island while avoiding sea monsters and sabotaging your friends.",
+      description: "Get your people off a sinking island and past the sharks, whales and sea monsters.",
       tags: ["Survival", "Tile Removal", "Take That"]
     },
     {
@@ -1536,7 +1536,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "20 min",
       image: "Assets/Images/Sushi Go Party.jpg",
-      description: "Draft your favorite sushi dishes and create point-winning combos in this delicious party edition.",
+      description: "Pass hands of sushi cards around and pick dishes that score well together. This edition fits up to 8 players.",
       tags: ["Card Drafting", "Set Collection", "Family"]
     },
     {
@@ -1545,7 +1545,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "20 min",
       image: "Assets/Images/Tussie Mussie.webp",
-      description: "Offer flowers with hidden meanings in this elegant game of bluffing and set collection.",
+      description: "Offer flowers with hidden meanings and collect sets, with a little bluffing.",
       tags: ["Bluffing", "Set Collection", "Pocket Game"]
     },
     {
@@ -1554,7 +1554,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-8",
       duration: "30-45 min",
       image: "Assets/Images/Unstable Unicorns.webp",
-      description: "Build your unicorn army and betray your friends in this chaotic and adorable card game.",
+      description: "Build an army of unicorns and betray your friends along the way.",
       tags: ["Take That", "Set Collection", "Humor"]
     },
     {
@@ -1563,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "15 min",
       image: "Assets/Images/Braintopia.jpg",
-      description: "Test your brain across 8 types of challenges—from memory to coordination.",
+      description: "Quick brain challenges of 8 different kinds, from memory to coordination.",
       tags: ["Brain Teaser", "Speed", "Variety"]
     },
     {
@@ -1572,7 +1572,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-12",
       duration: "20-30 min",
       image: "Assets/Images/Deception.jpg",
-      description: "Solve a murder case—but the killer is among you in this hidden role deduction game.",
+      description: "Investigators try to solve a murder while the killer, sitting among them, tries to mislead them.",
       tags: ["Hidden Roles", "Deduction", "Social"]
     },
     {
@@ -1581,7 +1581,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "60-120 min",
       image: "Assets/Images/Fog of Love.webp",
-      description: "Roleplay a romantic comedy where each player’s choices shape a unique love story.",
+      description: "Two players act out a romantic comedy, and their choices decide how the relationship ends.",
       tags: ["Storytelling", "Roleplaying", "Negotiation"]
     },
     {
@@ -1590,7 +1590,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30-45 min",
       image: "Assets/Images/Dice Throne Marvel.webp",
-      description: "Battle using Marvel heroes in this Yahtzee-style combat game with asymmetric powers.",
+      description: "Pick a Marvel hero with their own dice and powers, and roll Yahtzee-style to fight.",
       tags: ["Dice Rolling", "Combat", "Marvel"]
     },
     {
@@ -1599,7 +1599,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "20-40 min",
       image: "Assets/Images/Dice Throne Santa vs Krampus.jpg",
-      description: "Battle it out with holiday flair in this stand-alone Dice Throne showdown.",
+      description: "A stand-alone Dice Throne duel: Santa against Krampus.",
       tags: ["Dice Rolling", "Combat", "Holiday-Themed"]
     },
     {
@@ -1608,7 +1608,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-8",
       duration: "60-120 min",
       image: "Assets/Images/Sherlock Holmes Consulting Detective.jpg",
-      description: "Solve cases by interviewing suspects, finding clues, and reading through immersive mysteries.",
+      description: "Visit London locations and interview people to crack the case, then compare your answer with Holmes.",
       tags: ["Deduction", "Cooperative", "Story-Driven"]
     },
     {
@@ -1617,7 +1617,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-7",
       duration: "45 min",
       image: "Assets/Images/Mysterium.jpg",
-      description: "Communicate with a ghost using visions to solve a murder mystery in a haunted mansion.",
+      description: "One player is a ghost who sends dreamlike picture clues so the others can solve the murder.",
       tags: ["Cooperative", "Deduction", "Visual Clues"]
     },
     {
@@ -1626,7 +1626,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/Rhino Hero Super Battle.jpg",
-      description: "Build skyscrapers and battle with superheroes in this wobbly stacking challenge.",
+      description: "Build a wobbly skyscraper while superheroes climb it and battle each other.",
       tags: ["Dexterity", "Stacking", "Kids"]
     },
     {
@@ -1635,7 +1635,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "60-90 min",
       image: "Assets/Images/Blood Rage.jpg",
-      description: "Control Viking clans, gain glory through battle, and face Ragnarok in epic Norse warfare.",
+      description: "Lead a Viking clan through Ragnarok, winning glory in battle before the world ends.",
       tags: ["Area Control", "Card Drafting", "Mythology"]
     },
     {
@@ -1644,7 +1644,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2",
       duration: "30 min",
       image: "Assets/Images/Mr Jack.png",
-      description: "Play as Jack the Ripper or the detective trying to catch him in this tense two-player duel.",
+      description: "A two-player duel in Victorian London. One plays Jack the Ripper, the other the detective chasing him.",
       tags: ["Hidden Movement", "Bluffing", "Asymmetric"]
     },
     {
@@ -1653,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "90-120 min",
       image: "Assets/Images/Bureau of Investigations.webp",
-      description: "Solve Lovecraftian mysteries in the 1920s as investigators uncover strange happenings.",
+      description: "Investigate strange Lovecraftian cases in 1920s America.",
       tags: ["Deduction", "Storytelling", "Cthulhu Mythos"]
     },
     {
@@ -1662,7 +1662,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "6-12",
       duration: "30 min",
       image: "Assets/Images/Dead Last.jpeg",
-      description: "Conspire, betray, and outlast everyone else in this social collusion game.",
+      description: "Secretly team up to vote someone out, then betray your partners until one player is left.",
       tags: ["Social Deduction", "Voting", "Bluffing"]
     },
     {
@@ -1671,7 +1671,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-12",
       duration: "10 min",
       image: "Assets/Images/In Vino Morte.png",
-      description: "Choose wine or poison... and try not to die in this micro bluffing game.",
+      description: "Pass out cups of wine, one of them poisoned, and try not to drink it.",
       tags: ["Bluffing", "Microgame", "Social"]
     },
     {
@@ -1680,7 +1680,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "15 min",
       image: "Assets/Images/Exploding Kittens Blue.webp",
-      description: "More chaos and card combos in this hilarious expansion to the feline-fueled base game.",
+      description: "More Exploding Kittens chaos, with new cards and combos.",
       tags: ["Expansion", "Humor", "Push Your Luck"]
     },
     {
@@ -1689,7 +1689,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-2",
       duration: "10-20 min",
       image: "Assets/Images/Katamino Family.webp",
-      description: "A clever spatial challenge for all ages—fit the pieces perfectly in increasingly difficult puzzles.",
+      description: "Fit pentomino pieces into a space that gets harder to fill each round. Good for all ages.",
       tags: ["Tetris-Like", "Spatial", "Kids Friendly"]
     },
     {
@@ -1698,7 +1698,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-7",
       duration: "30-45 min",
       image: "Assets/Images/Not Alone.png",
-      description: "One player hunts the others on an alien planet in this asymmetrical survival game.",
+      description: "One player is an alien creature hunting the others, who are stranded on its planet.",
       tags: ["Asymmetric", "Bluffing", "Sci-Fi"]
     },
     {
@@ -1707,7 +1707,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2+",
       duration: "30+ min",
       image: "Assets/Images/Obrolan Hati.png",
-      description: "A local card game for deep, meaningful, or spicy relationship conversations.",
+      description: "A local card game of questions for couples, from deep to spicy.",
       tags: ["Conversation", "Local", "Relationship"]
     },
     {
@@ -1716,7 +1716,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "20 min",
       image: "Assets/Images/Memoarr.jpg",
-      description: "Escape from a sinking island by remembering matching images and avoiding traps.",
+      description: "Remember where the matching pictures are to escape a sinking island and avoid the traps.",
       tags: ["Memory", "Animal Theme", "Kids Friendly"]
     },
     {
@@ -1725,7 +1725,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-8",
       duration: "60-90 min",
       image: "Assets/Images/House of Danger.jpg",
-      description: "Explore a haunted mansion in this choose-your-own-adventure mystery game.",
+      description: "A choose-your-own-adventure mystery in a haunted mansion.",
       tags: ["Storytelling", "Exploration", "Solo-Friendly"]
     },
     {
@@ -1734,7 +1734,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "30-150 min",
       image: "Assets/Images/Agricola.webp",
-      description: "Build and manage your farm through careful planning and resource allocation.",
+      description: "Grow your farm and feed your family, one carefully planned action at a time.",
       tags: ["Worker Placement", "Resource Management", "Farming"]
     },
     {
@@ -1743,7 +1743,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-8",
       duration: "30 min",
       image: "Assets/Images/Stupefy.webp",
-      description: "Cast spells and outwit your opponents in this fast-paced wizard duel.",
+      description: "Cast spells to outwit the other wizards in a fast duel.",
       tags: ["Bluffing", "Party Game", "Magic-Themed"]
     },
     {
@@ -1752,7 +1752,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "10-20 min",
       image: "Assets/Images/Cupcake Academy.webp",
-      description: "Work together in real-time to organize colorful cupcake trays and complete challenges.",
+      description: "Work together in real time to sort cupcake trays and finish the orders.",
       tags: ["Real-Time", "Cooperative", "Pattern Recognition"]
     },    
     {
@@ -1761,7 +1761,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-6",
       duration: "30 min",
       image: "Assets/Images/Santai Aja Lagi.jpeg",
-      description: "A chill game about taking it easy, making choices, and vibing with friends.",
+      description: "A relaxed game about taking it easy and hanging out with friends.",
       tags: ["Relaxing", "Conversation", "Light Strategy"]
     },
     {
@@ -1770,7 +1770,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-12",
       duration: "30 min",
       image: "Assets/Images/Sequence.avif",
-      description: "Play cards and place chips to get five in a row before your opponents do.",
+      description: "Play a card and put a chip on the matching space. Get five in a row to win.",
       tags: ["Card Game", "Pattern Building", "Strategy"]
     },
     {
@@ -1779,7 +1779,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15 min",
       image: "Assets/Images/Go Go Gelato.png",
-      description: "Race to match ice cream cone challenges using coordination and speed.",
+      description: "Race to rearrange ice cream scoops on your cones to match the challenge card.",
       tags: ["Dexterity", "Pattern Matching", "Real-Time"]
     },
     {
@@ -1788,7 +1788,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Duck Duck Go.png",
-      description: "Race rubber duckies through a bathtub obstacle course with strategic moves.",
+      description: "Race rubber ducks through a bathtub obstacle course.",
       tags: ["Programming", "Racing", "Family Friendly"]
     },
     {
@@ -1797,7 +1797,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-20",
       duration: "20 min",
       image: "Assets/Images/Herd Mentality.jpg",
-      description: "Write the same answer as the herd to win — but avoid being the odd one out!",
+      description: "Write the same answer as everyone else. Be the odd one out and you get stuck with the pink cow.",
       tags: ["Party Game", "Social", "Humor"]
     },
     {
@@ -1806,7 +1806,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "15-20 min",
       image: "Assets/Images/Battle Sheep.jpg",
-      description: "Spread your sheep across the pasture while blocking your opponents.",
+      description: "Split your stack of sheep across the pasture and claim more ground than everyone else.",
       tags: ["Area Control", "Tile Placement", "Abstract"]
     },
     {
@@ -1815,7 +1815,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "20-30 min",
       image: "Assets/Images/Little Red Riding Hood.jpg",
-      description: "Guide Little Red through the forest in this cooperative fairy tale adventure.",
+      description: "Help Little Red through the forest to grandma's house in a co-op fairy tale game.",
       tags: ["Cooperative", "Story-Driven", "Family"]
     },
     {
@@ -1824,7 +1824,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-5",
       duration: "30-40 min",
       image: "Assets/Images/Snow Time.jpg",
-      description: "Collect magical fruits during a festive snowfall while outwitting opponents.",
+      description: "Collect magical fruits in the snow and outwit the other players.",
       tags: ["Simultaneous Play", "Bluffing", "Area Control"]
     },
     {
@@ -1833,7 +1833,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "3-6",
       duration: "30 min",
       image: "Assets/Images/Geometric Art.webp",
-      description: "Draw geometric patterns to communicate clues in this artistic deduction game.",
+      description: "Draw geometric shapes as clues and get the others to guess what you mean.",
       tags: ["Drawing", "Deduction", "Creativity"]
     },
     {
@@ -1842,7 +1842,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-9",
       duration: "20-40 min",
       image: "Assets/Images/Tortuga.webp",
-      description: "Swear loyalty to a side and fight for treasure aboard the pirate ship Tortuga.",
+      description: "Pick a secret side and fight for the treasure aboard a pirate ship.",
       tags: ["Hidden Roles", "Voting", "Thematic"]
     },
     {
@@ -1851,7 +1851,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-5",
       duration: "30 min",
       image: "Assets/Images/The Grizzled.jpg",
-      description: "Survive the emotional toll of WWI in this poignant and challenging card game.",
+      description: "A co-op card game about a group of friends trying to get through World War I together.",
       tags: ["Cooperative", "Hand Management", "War-Themed"]
     },
     {
@@ -1860,7 +1860,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30 min",
       image: "Assets/Images/Machi Koro.webp",
-      description: "Roll dice, earn income, and develop your city faster than your rivals.",
+      description: "Roll dice to earn money from your buildings, and grow your city faster than your rivals.",
       tags: ["Dice Rolling", "Engine Building", "Light Strategy"]
     },
     {
@@ -1869,7 +1869,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-6",
       duration: "30 min",
       image: "Assets/Images/Chromino.jpg",
-      description: "Match colorful tiles in this domino-style strategy game with a twist.",
+      description: "Domino-style tiles with three colors each. Place them so the colors line up.",
       tags: ["Tile Placement", "Color Matching", "Abstract"]
     },
     {
@@ -1878,7 +1878,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "90-120 min",
       image: "Assets/Images/Spirit Island.webp",
-      description: "Become powerful spirits defending your island from invading colonizers.",
+      description: "Play as spirits of the land and work together to drive the colonizers off your island.",
       tags: ["Cooperative", "Area Control", "Asymmetric Powers"]
     },
     {
@@ -1887,7 +1887,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "60-90 min",
       image: "Assets/Images/Iki.webp",
-      description: "Live the life of an Edo-period merchant and become the most respected citizen.",
+      description: "Live as a merchant in Edo-period Tokyo and become the city's most respected citizen.",
       tags: ["Resource Management", "Worker Placement", "Historical"]
     },
     {
@@ -1896,7 +1896,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "30-60 min",
       image: "Assets/Images/Happy Little Dinosaurs.jpg",
-      description: "Dodge disasters and be the last dino standing in this hilarious survival game.",
+      description: "Dodge one disaster after another and be the last dinosaur standing.",
       tags: ["Humor", "Take That", "Light Strategy"]
     },
     {
@@ -1905,7 +1905,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-5",
       duration: "120-180 min",
       image: "Assets/Images/Mansions of Madness.jpg",
-      description: "Explore haunted mansions, solve mysteries, and battle Lovecraftian horrors.",
+      description: "An app-guided horror game. Explore haunted mansions, solve mysteries and fight Lovecraftian monsters.",
       tags: ["Cooperative", "App-Driven", "Exploration", "Horror"]
     },
     {
@@ -1914,7 +1914,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-20+",
       duration: "30-90 min",
       image: "Assets/Images/Cards Against Humanity.jpeg",
-      description: "A game for horrible people. Match cards for the funniest (or darkest) combos.",
+      description: "Fill in the blanks with the funniest (or worst) card you have. Adults only.",
       tags: ["Humor", "Adult", "Fill-in-the-Blank"]
     },
     {
@@ -1923,7 +1923,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "30 min",
       image: "Assets/Images/Cash n Guns.webp",
-      description: "Point foam guns at your friends to split the loot — or go down in a standoff.",
+      description: "Point foam guns at each other and decide who's bluffing before the loot gets split.",
       tags: ["Bluffing", "Party Game", "Action Selection"]
     },
     {
@@ -1932,7 +1932,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "30-60 min",
       image: "Assets/Images/Aquatica.png",
-      description: "Dive into an underwater kingdom and rise to power through tactical depth.",
+      description: "Rule an underwater kingdom by recruiting characters and conquering locations.",
       tags: ["Engine Building", "Hand Management", "Underwater Theme"]
     },
     {
@@ -1941,7 +1941,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4-8",
       duration: "30 min",
       image: "Assets/Images/Telestrations.webp",
-      description: "Draw, guess, and laugh your way through a telephone-style drawing game.",
+      description: "Draw a word, guess the drawing, and watch the message go wrong as it moves around the table.",
       tags: ["Drawing", "Party Game", "Laugh-Out-Loud"]
     },
     {
@@ -1950,7 +1950,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "1-4",
       duration: "90-120 min",
       image: "Assets/Images/Unconscious Mind.jpg",
-      description: "Explore dreamscapes and psychology in this deep Euro game set in Freud's era.",
+      description: "Work as a psychoanalyst in Freud's Vienna, analyzing dreams in a heavy Euro game.",
       tags: ["Worker Placement", "Tableau Building", "Narrative"]
     },
     {
@@ -1959,7 +1959,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "2-4",
       duration: "45 min",
       image: "Assets/Images/YAK.webp",
-      description: "Build stone towers and trade with yak caravans in this serene yet tactical game by Michael Luu.",
+      description: "Build stone towers and trade with yak caravans. Calm, but tactical. Designed by Michael Luu.",
       tags: ["Resource Management", "Tile Placement", "Visual Strategy"]
     },
     {
@@ -1968,7 +1968,7 @@ document.addEventListener("DOMContentLoaded", () => {
       players: "4",
       duration: "60-120 min",
       image: "Assets/Images/Mahjong.jpg",
-      description: "A traditional Chinese tile game of matching patterns, strategy, and memory.",
+      description: "The traditional Chinese tile game. Draw and discard tiles to build matching sets.",
       tags: ["Tile Game", "Pattern Recognition", "Classic"]
     },      
   ];
@@ -1978,7 +1978,7 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = "";
 
     if (filteredGames.length === 0) {
-      container.innerHTML = "<p>No boardgames found.</p>";
+      container.innerHTML = "<p>No games match that search.</p>";
       return;
     }
 
@@ -2056,13 +2056,13 @@ document.addEventListener("DOMContentLoaded", () => {
           .then(data => {
               seeMoreBox.classList.remove("hidden");
             seeMoreBox.innerHTML = data.loggedIn
-            ? `<a href="Collection.html" class="see-more-button">See Other Boardgames</a>`
-            : `<p style="margin-top: 20px;">Please <a href="Login.html" style="color: #2563eb; font-weight: bold;">Login</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">Sign Up</a> to see the full collection.</p>`;
+            ? `<a href="Collection.html" class="see-more-button">See all ${boardgames.length} games</a>`
+            : `<p style="margin-top: 20px;"><a href="Login.html" style="color: #2563eb; font-weight: bold;">Log in</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">sign up</a> to see all ${boardgames.length} games.</p>`;
           })
           .catch(err => {
             console.error("Error checking session in Boardgame.js:", err);
             seeMoreBox.classList.remove("hidden");
-            seeMoreBox.innerHTML = `<p style="margin-top: 20px;">Please <a href="Login.html" style="color: #2563eb; font-weight: bold;">Login</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">Sign Up</a> to see the full collection.</p>`;
+            seeMoreBox.innerHTML = `<p style="margin-top: 20px;"><a href="Login.html" style="color: #2563eb; font-weight: bold;">Log in</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">sign up</a> to see all ${boardgames.length} games.</p>`;
           });
         }
       }
@@ -2078,8 +2078,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(data => {
           if (!data.loggedIn) {
-            alert("You must be logged in to view the full boardgame collection.");
-            window.location.href = "Login.html";
+            redirectWithMessage("Login.html", "login_required", "Collection.html");
             return;
           }
           
@@ -2102,7 +2101,7 @@ document.addEventListener("DOMContentLoaded", () => {
           function renderGroupedBoardgames(games) {
             container.innerHTML = "";
             if (games.length === 0) {
-              container.innerHTML = `<p style="text-align:center;">No boardgames found.</p>`;
+              container.innerHTML = `<p style="text-align:center;">No games match that search.</p>`;
               return;
             }
             const grouped = groupBoardgamesByLetter(games);
@@ -2170,8 +2169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(err => {
           console.error("Error checking session in Collection.html:", err);
-          alert("Error checking session. Please login again.");
-          window.location.href = "Login.html";
+          redirectWithMessage("Login.html", "session_error", "Collection.html");
         });
       }
   });

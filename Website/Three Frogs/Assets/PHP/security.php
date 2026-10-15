@@ -115,6 +115,34 @@ function site_url(): string {
     return rtrim(defined('SITE_URL') ? SITE_URL : 'https://threefrogsboardgame.com', '/');
 }
 
+// Replaces any outstanding verification link for $email with a fresh one
+// (24-hour expiry) and emails it. Returns whether the email was handed off.
+function send_verification_email(mysqli $conn, string $email, string $name): bool {
+    $del = $conn->prepare("DELETE FROM email_verification_tokens WHERE email = ?");
+    $del->bind_param("s", $email);
+    $del->execute();
+    $del->close();
+
+    $token     = bin2hex(random_bytes(32));
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+    $ins = $conn->prepare("INSERT INTO email_verification_tokens (email, token, expires_at) VALUES (?, ?, ?)");
+    $ins->bind_param("sss", $email, $token, $expiresAt);
+    $ins->execute();
+    $ins->close();
+
+    return send_site_email(
+        $email,
+        "Three Frogs - Please verify your email",
+        "Hi $name,\r\n\r\n"
+        . "Thanks for signing up at Three Frogs! Open this link to confirm your email address. It works for 24 hours:\r\n\r\n"
+        . site_url() . "/Verify-email.html?token=" . urlencode($token) . "\r\n\r\n"
+        . "Once that's done, you can book a table.\r\n\r\n"
+        . "If you didn't sign up, you can ignore this email.\r\n\r\n"
+        . "See you at the table,\r\n"
+        . "Three Frogs Boardgame"
+    );
+}
+
 // Plain-text email from the café's no-reply address. Returns false (and logs)
 // if the server couldn't hand the message off — callers should never fail
 // the user's actual request because of that.

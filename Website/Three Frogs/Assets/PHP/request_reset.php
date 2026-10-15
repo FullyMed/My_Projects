@@ -28,7 +28,7 @@ function respond($status, $data) {
 $email = strtolower(trim($_POST['email'] ?? ''));
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-    respond(400, ["success" => false, "error" => "Invalid email format."]);
+    respond(400, ["success" => false, "error" => "That email address doesn't look right."]);
 }
 
 $ip = client_ip();
@@ -63,13 +63,13 @@ if ($exists) {
     $ins->close();
 
     $resetLink = site_url() . "/Forgot-password.html?token=" . urlencode($token);
-    $subject   = "Three Frogs - Password Reset Request";
-    $body      = "Hello,\r\n\r\n"
-               . "We received a request to reset your Three Frogs account password.\r\n\r\n"
-               . "Click the link below to set a new password (expires in 1 hour):\r\n\r\n"
+    $subject   = "Three Frogs - Reset your password";
+    $body      = "Hi,\r\n\r\n"
+               . "Someone (hopefully you) asked to reset the password for your Three Frogs account. "
+               . "Open this link to choose a new one. It works for 1 hour:\r\n\r\n"
                . $resetLink . "\r\n\r\n"
-               . "If you did not request this, you can safely ignore this email.\r\n\r\n"
-               . "-- Three Frogs Boardgame";
+               . "If you didn't ask for this, ignore this email and your password stays the same.\r\n\r\n"
+               . "Three Frogs Boardgame";
     send_site_email($email, $subject, $body);
 }
 

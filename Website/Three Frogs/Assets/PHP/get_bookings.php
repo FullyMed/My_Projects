@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 header("Content-Type: application/json");
 require_once("db_connect.php");
+require_once("booking_rules.php");
 
 function respond($status, $data) {
     http_response_code($status);
@@ -14,22 +15,24 @@ function respond($status, $data) {
 }
 
 if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
-    respond(401, ["success" => false, "error" => "You must be logged in to view bookings."]);
+    respond(401, ["success" => false, "error" => "Please log in to see your bookings."]);
 }
 
 $email = $_SESSION['user']['email'];
-$cancelLimit = 2;
+$cancelLimit = CANCEL_LIMIT;
 $historyDays = 90;
 
 // Upcoming bookings plus the last $historyDays days of past ones (for the
 // Dashboard's "Booking history" list). The frontend splits them by end time.
+// Bookings the café cancelled (staff_cancel_booking.php) are included so the
+// customer sees what happened; ones they cancelled themselves are deleted.
 $stmt = $conn->prepare("
     SELECT id, date,
            TIME_FORMAT(start_time, '%H:%i') AS start_time,
            TIME_FORMAT(end_time, '%H:%i')   AS end_time,
-           people
+           people, status
     FROM bookings
-    WHERE email = ? AND status = 'active' AND date >= (CURDATE() - INTERVAL ? DAY)
+    WHERE email = ? AND status IN ('active', 'cancelled_by_cafe') AND date >= (CURDATE() - INTERVAL ? DAY)
     ORDER BY date, start_time
 ");
 $stmt->bind_param("si", $email, $historyDays);

@@ -1,13 +1,4 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   async function checkSession() {
     try {
       const response = await fetch("Assets/PHP/check_session.php", {
@@ -54,13 +45,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         const response = await fetch("Assets/PHP/request_reset.php", { method: "POST", body: formData });
         const result   = await response.json();
         if (result.success) {
-          requestResult.innerHTML = `<p style="color:green;"><strong>If that email is registered, a reset link has been sent. Check your inbox.</strong></p>`;
+          requestResult.innerHTML = `<p style="color:green;"><strong>If we have an account with that email, we've sent it a reset link. Check your inbox and spam folder.</strong></p>`;
           requestForm.reset();
         } else {
-          requestResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Something went wrong. Please try again later.")}</p>`;
+          requestResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Something went wrong. Please try again in a moment.")}</p>`;
         }
       } catch (err) {
-        requestResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
+        requestResult.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
         console.error("Request reset error:", err);
       } finally {
         clearButtonLoading(submitBtn);
@@ -79,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const submitBtn = forgotForm.querySelector("button[type='submit']");
 
       if (password.length < 8) {
-        forgotResult.innerHTML = `<p style="color:red;"><strong>Password must be at least 8 characters long.</strong></p>`;
+        forgotResult.innerHTML = `<p style="color:red;"><strong>Your password needs at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -95,16 +86,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (result.success) {
           forgotResult.innerHTML = `
-            <h3>Password Reset Successful!</h3>
-            <p>Your password has been updated. Redirecting to login...</p>
+            <h3>Password changed</h3>
+            <p>Taking you to the login page…</p>
           `;
-          setTimeout(() => { window.location.href = "Login.html"; }, 1500);
+          setTimeout(() => redirectWithMessage("Login.html", "password_reset"), 1500);
         } else {
-          forgotResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Password reset failed.")}</p>`;
+          forgotResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "We couldn't reset your password. Please try again.")}</p>`;
           clearButtonLoading(submitBtn);
         }
       } catch (err) {
-        forgotResult.innerHTML = `<p style="color:red;">Server error. Please try again later.</p>`;
+        forgotResult.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
         console.error("Reset password error:", err);
         clearButtonLoading(submitBtn);
       }

@@ -8,13 +8,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
         <title>User Dashboard | Three Frogs Boardgame</title>
-        <meta name="description" content="Manage your profile, view upcoming bookings, and check your booking history at Three Frogs Surabaya." />
+        <meta name="description" content="Your profile and bookings at Three Frogs Boardgame." />
         <meta name="author" content="Maximilliano Felix" />
 
         <!-- Open Graph Meta Tags -->
         <meta property="og:site_name" content="Three Frogs" />
         <meta property="og:title" content="User Dashboard | Three Frogs Boardgame" />
-        <meta property="og:description" content="Manage your profile, view upcoming bookings, and check your booking history at Three Frogs Surabaya." />
+        <meta property="og:description" content="Your profile and bookings at Three Frogs Boardgame." />
         <meta property="og:url" content="https://threefrogsboardgame.com/Dashboard.html" />
         
         <!-- Favicon Support -->
@@ -49,17 +49,24 @@
         </div>
 
         <section class="dashboard-container hidden">
-            <h2>Your Profile</h2>
+            <h2>Your profile</h2>
             
             <div class="avatar-profile">
                 <img id="currentAvatar" src="Assets/Images/Avatars/Clam.jpg" alt="Avatar" class="user-avatar" />
-                <span class="edit-avatar" id="editAvatarBtn" title="Change Avatar" role="button" tabindex="0" aria-label="Change avatar">🖉</span>
+                <span class="edit-avatar" id="editAvatarBtn" title="Change avatar" role="button" tabindex="0" aria-label="Change avatar">🖉</span>
             </div>
 
             <div id="userInfo"></div>
+
+            <div id="verifyNotice" class="notice-box hidden">
+                <h3>Please verify your email</h3>
+                <p>Check your inbox for the link we sent when you signed up. You can look around already, but you need to verify before you book a table.</p>
+                <button type="button" id="resendVerificationBtn">Resend email</button>
+                <p class="notice-result" id="resendVerificationResult"></p>
+            </div>
             
             <div id="avatarChangeContainer" class="hidden">
-                <h3>Change Avatar</h3>
+                <h3>Change avatar</h3>
                 
                 <form id="changeAvatarForm" action="Assets/PHP/update_avatar.php" method="POST">
                     <div class="avatar-scroll-wrapper">
@@ -119,37 +126,39 @@
                         </div>
                     </div>
                     
-                    <button type="submit" style="margin-top: 10px;">Update Avatar</button>
+                    <button type="submit" style="margin-top: 10px;">Save avatar</button>
                 </form>
 
                 <div id="avatarUpdateMessage" style="margin-top: 10px;"></div>
             </div>
 
-            <h2 style="margin-top: 40px;">Upcoming Bookings</h2>
+            <h2 style="margin-top: 40px;">Upcoming bookings</h2>
             <div id="upcomingBookings"></div>
 
-            <h2 style="margin-top: 30px;">Booking History</h2>
+            <h2 style="margin-top: 30px;">Past bookings</h2>
             <div id="bookingHistory"></div>
 
             <div id="cancelPopup" class="cancel-popup hidden">
                 <div class="popup-content">
                     <p id="cancelText"></p>
-                    <button id="confirmCancel" class="popup-btn">Yes, Cancel</button>
-                    <button id="closePopup" class="popup-btn cancel">No</button>
+                    <button id="confirmCancel" class="popup-btn">Yes, cancel it</button>
+                    <button id="closePopup" class="popup-btn cancel">Keep it</button>
                 </div>
             </div>
 
-            <button id="logoutBtn">Logout</button>
+            <button id="logoutBtn">Log out</button>
         </section>
 
         <footer>
-            <p>© 2025 Three Frogs Boardgame Surabaya</p>
+            <p>&copy; <span class="copyright-years">2025–2026</span> Three Frogs Boardgame Surabaya</p>
             <p class="footer-links"><a href="Terms-of-Use.html">Terms of Use</a> · <a href="Privacy-Policy.html">Privacy Policy</a></p>
         </footer>
 
         <button id="scrollTopBtn" title="Back to Top">⬆️</button>
         
+        <script src="Assets/JS/Notify.js"></script>
         <script src="Assets/JS/Loading.js"></script>
+        <script src="Assets/JS/Verify.js"></script>
         <script src="Assets/JS/Dashboard.js"></script>
         <script src="Assets/JS/Navbar.js"></script>
 

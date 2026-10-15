@@ -5,16 +5,30 @@
 -- production DB, which predates password_reset_tokens and rate_limits) only
 -- creates the missing ones and never touches existing data.
 --
+-- It does NOT add columns to tables that already exist. Older databases also
+-- need the one-time scripts in Data/migrations/ (run each once, in date order).
+--
 -- Not web-accessible: Data/.htaccess denies the whole folder, and the root
 -- .htaccess also denies *.sql.
 
 CREATE TABLE IF NOT EXISTS users (
+  id                INT AUTO_INCREMENT PRIMARY KEY,
+  name              VARCHAR(100) NOT NULL,
+  email             VARCHAR(255) NOT NULL UNIQUE,
+  password          VARCHAR(255) NOT NULL,
+  avatar            VARCHAR(255) NOT NULL DEFAULT 'Assets/Images/Avatars/Clam.jpg',
+  email_verified_at DATETIME     NULL,
+  is_staff          TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
   id         INT AUTO_INCREMENT PRIMARY KEY,
-  name       VARCHAR(100) NOT NULL,
-  email      VARCHAR(255) NOT NULL UNIQUE,
-  password   VARCHAR(255) NOT NULL,
-  avatar     VARCHAR(255) NOT NULL DEFAULT 'Assets/Images/Avatars/Clam.jpg',
-  created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+  email      VARCHAR(255) NOT NULL,
+  token      VARCHAR(64)  NOT NULL UNIQUE,
+  expires_at DATETIME     NOT NULL,
+  INDEX idx_token (token),
+  INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS bookings (

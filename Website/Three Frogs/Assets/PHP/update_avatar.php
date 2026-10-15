@@ -12,7 +12,7 @@ if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
     http_response_code(401);
     echo json_encode([
         "success" => false,
-        "error" => "You must be logged in to update your avatar."
+        "error" => "Please log in to change your avatar."
     ]);
     exit;
 }
@@ -21,7 +21,7 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     http_response_code(403);
     echo json_encode([
         "success" => false,
-        "error" => "Your session expired. Please refresh the page and try again."
+        "error" => "Your session timed out. Refresh the page and try again."
     ]);
     exit;
 }
@@ -34,7 +34,7 @@ if (empty($newAvatar)) {
     http_response_code(400);
     echo json_encode([
         "success" => false,
-        "error" => "Avatar selection is required."
+        "error" => "Please pick an avatar."
     ]);
     exit;
 }
@@ -59,41 +59,23 @@ if (!in_array($newAvatar, $allowedAvatars)) {
     http_response_code(400);
     echo json_encode([
         "success" => false,
-        "error" => "Invalid avatar selection."
+        "error" => "Please pick one of the avatars shown."
     ]);
     exit;
 }
 
+// DB errors throw (MYSQLI_REPORT_STRICT) and are answered by db_connect.php's handler.
 $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE email = ?");
-if (!$stmt) {
-    error_log("update_avatar.php: prepare failed: " . $conn->error);
-    http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "error" => "Something went wrong. Please try again later."
-    ]);
-    $conn->close();
-    exit;
-}
-
 $stmt->bind_param("ss", $newAvatar, $email);
-if ($stmt->execute()) {
-    $_SESSION['user']['avatar'] = $newAvatar;
-
-    http_response_code(200);
-    echo json_encode([
-        "success" => true,
-        "message" => "Avatar updated successfully."
-    ]);
-} else {
-    error_log("update_avatar.php: update failed: " . $stmt->error);
-    http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "error" => "Failed to update avatar. Please try again later."
-    ]);
-}
-
+$stmt->execute();
 $stmt->close();
 $conn->close();
+
+$_SESSION['user']['avatar'] = $newAvatar;
+
+http_response_code(200);
+echo json_encode([
+    "success" => true,
+    "message" => "Avatar updated successfully."
+]);
 ?>

@@ -1,0 +1,42 @@
+# Apache config template for local testing / dev serving. Filled in by
+# tests/run-tests.sh and tests/dev-server.sh (they replace the @PLACEHOLDERS@
+# and write the result to tests/.tmp/). Uses XAMPP's Apache + PHP binaries,
+# with this project as the document root so .htaccess applies like production.
+ServerRoot "@XAMPP@/apache"
+Listen 127.0.0.1:@PORT@
+ServerName localhost:@PORT@
+PidFile "@TMP@/httpd-@PORT@.pid"
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule access_compat_module modules/mod_access_compat.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule headers_module modules/mod_headers.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule alias_module modules/mod_alias.so
+LoadModule setenvif_module modules/mod_setenvif.so
+LoadModule env_module modules/mod_env.so
+LoadFile "@XAMPP@/php/php8ts.dll"
+LoadFile "@XAMPP@/php/libpq.dll"
+LoadFile "@XAMPP@/php/libsqlite3.dll"
+LoadModule php_module "@XAMPP@/php/php8apache2_4.dll"
+PHPIniDir "@XAMPP@/php"
+TypesConfig conf/mime.types
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+# Outgoing mail goes to tests/smtp_sink.py instead of the internet.
+php_admin_value SMTP 127.0.0.1
+php_admin_value smtp_port @SMTP_PORT@
+php_admin_value error_log "@TMP@/php_errors-@PORT@.log"
+# Read by the local (gitignored) Assets/PHP/db_config.php.
+SetEnv THREEFROGS_DB_NAME @DB_NAME@
+ErrorLog "@TMP@/apache_error-@PORT@.log"
+LogFormat "%h %t \"%r\" %>s" short
+CustomLog "@TMP@/apache_access-@PORT@.log" short
+DocumentRoot "@DOCROOT@"
+<Directory "@DOCROOT@">
+    AllowOverride All
+    Require all granted
+</Directory>
+DirectoryIndex index.html

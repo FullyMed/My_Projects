@@ -1,201 +1,273 @@
-# Three Frogs Boardgame Café — Website
+# Three Frogs Boardgame Café website
 
-Website for **Three Frogs**, a boardgame café in Surabaya, Indonesia. Visitors can browse the game catalogue, create an account, and book table time.
+The website for Three Frogs, a boardgame café in Surabaya, Indonesia. Visitors can browse the games, create an account and book a table.
 
-**Live site:** [threefrogsboardgame.com](https://threefrogsboardgame.com)
-
----
-
-## ⚠ Pending / Next Steps (as of 2026-09-29)
-
-Recent work (security hardening, 404 page, loading states, legal pages, image compression, the 2026-09-29 bug-fix pass) is **not yet live**. It **has** been tested end-to-end against a real local database (66 API checks + a full browser run-through of every page). Check items off or remove them as they're actually completed:
-
-- [ ] **Run `Data/schema.sql` on the production DB** (phpMyAdmin → SQL). It only creates missing tables — `rate_limits` / `password_reset_tokens` status on production is unknown, and if `password_reset_tokens` is missing, **forgot-password is currently broken on the live site**.
-- [ ] **Confirm production `bookings` has an `id` column** (`SHOW COLUMNS FROM bookings;`). The new cancel flow identifies bookings by `id`. If missing, run `ALTER TABLE bookings ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST;` **before** uploading the new PHP.
-- [ ] **Deploy to Hostinger** — upload the changed files via FTP/File Manager (see [Deployment](#deployment)). Do **not** upload the local `Assets/PHP/db_config.php`.
-- [ ] **After deploying, make one real booking and one password reset on the live site** and confirm both emails arrive (check spam; the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM in Hostinger).
-- [ ] **Get a lawyer to review `Terms-of-Use.html` / `Privacy-Policy.html`** before relying on them as final/binding — written to be accurate to the site's actual behavior, but not reviewed against Indonesia's UU PDP or any other law.
+Live site: [threefrogsboardgame.com](https://threefrogsboardgame.com)
 
 ---
 
-## Recent Changes (2026-09-29 bug-fix pass — not yet deployed)
+## Before you deploy (as of 2026-10-15)
 
-**Bugs fixed:**
-- **Logged-in users saw a blank Booking page.** `Booking.js` revealed the `<form>`, but the `hidden` class sits on the wrapping `<section>`.
-- **Login, signup and password reset crashed** (empty 500) if the `rate_limits` table was missing, even though the docs said this "fails open". Strict mysqli mode threw an exception nobody caught; the helpers now catch it.
-- **The first login or signup in a fresh browser could fail with "Your session expired".** Two parallel session checks started separate sessions, so the token is now re-fetched at submit time.
-- **Duplicate bookings, and cancels that deleted both.** A user could book the same slot twice, and a cancel then deleted both rows while counting only one cancellation. Cancels are now by booking `id` and ownership-checked, and self-overlapping bookings are blocked.
-- **Dashboard "Booking history" was always empty.** The server now returns the last 90 days too.
-- **Start times that had already passed today** could be booked.
-- **Cancelling an already-started booking** was allowed.
-- **A DB error message was sent to the browser** by `get_bookings.php`.
-- **Dates and times depended on the server's timezone.** They are now pinned to Surabaya time (UTC+7).
-- **Smaller fixes:**
-  - Login email matching now ignores letter case.
-  - All game categories are filterable.
-  - Collection search matches tags.
-  - The home page no longer renders all 218 cards before showing 10.
-  - Output is HTML-escaped.
-  - The unused jQuery CDN script was removed, and the CSP tightened to `script-src 'self'`.
+None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix and improvement passes from 2026-09-29, 2026-10-15 and the writing pass after it. All of it passes the local test suite (`bash tests/run-tests.sh`, 171 checks) and a run-through in the browser.
 
-**New behaviour (owner's decisions):**
-- 4 bookable tables, max 8 people per booking.
-- Emailed booking confirmations.
-- Terms of Use and Privacy Policy updated to match.
+Do these production steps in order:
 
-**Tooling:**
-- `Data/schema.sql` (all tables, idempotent).
-- Optional `DB_PORT`/`SITE_URL` in `db_config.php`.
-- A working local dev DB (see [Local Setup](#local-setup)).
+- [ ] 1. In phpMyAdmin, run `SHOW COLUMNS FROM bookings;`. If there's no `id` column, run `ALTER TABLE bookings ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST;`
+- [ ] 2. Run `Data/schema.sql`. It only creates tables that are missing. If `password_reset_tokens` is missing today, forgot-password is broken on the live site right now.
+- [ ] 3. Run `Data/migrations/2026-10-15-verification-and-staff.sql` once. It adds the email-verified and staff columns and marks every existing account as verified. Running it a second time gives an error.
+- [ ] 4. Upload the changed files straight after step 3 (see [Deployment](#deployment)). Leave out your local `Assets/PHP/db_config.php` and the `tests/` folder.
+- [ ] 5. Make staff accounts with `UPDATE users SET is_staff = 1 WHERE email = '...';`. Staff log out and back in to see the "Staff" link.
+- [ ] 6. On the live site, check that all four emails arrive: verification (sign up a test account), booking confirmation, password reset, and café cancellation (from the Staff page). Check spam too. If they land there, the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM set up in Hostinger. New accounts can't book until their verification email arrives, so this one matters.
+- [ ] 7. Ask a lawyer to review `Terms-of-Use.html` and `Privacy-Policy.html` before you treat them as final.
+
+Known gap: resetting a password doesn't log that account out on other devices.
 
 ---
 
-## Tech Stack
+## What changed recently
+
+### Writing pass (after 2026-10-15, not deployed)
+
+We ran the visitor-facing text and these docs through two editing guides (Humanizer and Stop Slop) to strip out the patterns that make text read as machine-written.
+
+- The pages, error messages, toasts and the four emails now use a friendly café voice ("we"), sentence-case headings and "Log in"/"Log out" as verbs. No rules or behaviour changed.
+- The Terms of Use and Privacy Policy say the same things in plainer words. The legal substance is unchanged, and they still need the lawyer review.
+- The About page now says we're open every day, 12:00 PM to 10:00 PM. It used to say weekdays only, which didn't match the booking system.
+- All 218 game descriptions in `Boardgame.js` were rewritten to say what you do in each game, instead of box-blurb phrases like "in this thrilling strategy game".
+- README.md and CLAUDE.md were rewritten in plain language with the same facts.
+
+### Improvement pass (2026-10-15, not deployed)
+
+- Email verification. New accounts get a link that works for 24 hours. Until they open it they can browse everything but can't book, and the Dashboard and Booking page show a notice with a "Resend email" button (3 per hour at most). A password reset also counts as verification, and accounts that existed before this change count as verified.
+- Staff page (`Staff.html`) for accounts with `is_staff = 1`. It shows every booking on any date and a grid of tables in use per hour. Staff can cancel a booking: the customer gets an email with an optional reason, it doesn't count toward their 2 cancellations a month, and their Dashboard shows "Cancelled by the café".
+- Booking limits. You can book up to 30 days ahead and hold 3 upcoming bookings at a time. All the booking numbers now live in `Assets/PHP/booking_rules.php`.
+- Names. Signup accepts apostrophes, hyphens, periods and accents (Nur'aini, Jean-Luc, José). Text that isn't valid UTF-8 now gets a clear error, where it used to get a misleading "required" message and a PHP warning.
+- No more `alert()` pop-ups. The site shows on-page toasts instead (`Assets/JS/Notify.js`), logging in sends you back to the page you came from, and the footer year updates itself.
+- A test suite in the repo. `bash tests/run-tests.sh` runs 171 end-to-end checks on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
+- The legal pages describe verification, the booking limits, café cancellations and staff access.
+- On this PC, XAMPP MariaDB's `mysql.db` system table was corrupt, so database permissions vanished every time MariaDB restarted. Repairing it also brought back Prambanan Batik's dev access.
+
+### Bug-fix pass (2026-09-29, not deployed)
+
+Bugs fixed:
+
+- Logged-in users saw a blank Booking page. `Booking.js` revealed the `<form>`, but the `hidden` class sits on the `<section>` around it.
+- Login, signup and password reset crashed with an empty 500 if the `rate_limits` table was missing, even though the docs said rate limiting "fails open". Strict mysqli mode threw an exception that nothing caught. The helpers catch it now.
+- The first login or signup in a fresh browser could fail with "Your session expired". Two session checks ran at the same time and started separate sessions, so the scripts now fetch the token again when you submit.
+- A user could book the same slot twice, and one cancel then deleted both rows while counting only one cancellation. Cancels now go by booking `id` with an ownership check, and the site blocks bookings that overlap your own.
+- The Dashboard's booking history was always empty. The server now returns the last 90 days too.
+- You could book a start time that had already passed today, and cancel a booking that had already started.
+- `get_bookings.php` sent a raw database error to the browser.
+- Dates and times followed the server's timezone. They're now fixed to Surabaya time (UTC+7).
+- Smaller fixes: login ignores letter case in emails, every game category has a filter option, Collection search matches tags, the home page no longer builds all 218 cards before showing 10, output is HTML-escaped, and the unused jQuery script is gone, which let us tighten the CSP to `script-src 'self'`.
+
+Rules the owner chose: 4 bookable tables, up to 8 people per booking, and a confirmation email for every booking. The Terms of Use and Privacy Policy were updated to match.
+
+New tooling: `Data/schema.sql` (every table, safe to re-run), optional `DB_PORT` and `SITE_URL` settings in `db_config.php`, and a working local database (see [Local setup](#local-setup)).
+
+---
+
+## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Vanilla HTML, CSS, JavaScript (no libraries) |
+| Frontend | Plain HTML, CSS and JavaScript (no libraries) |
 | Backend | PHP 8 with MySQLi (OOP style) |
 | Database | MySQL (Hostinger) |
 | Hosting | Hostinger shared hosting |
 | Deployment | Manual file upload (no CI/CD) |
 
-No build step, no bundler, no npm. Every page is a plain `.html` file.
+There's no build step, bundler or npm. Every page is a plain `.html` file.
 
 ---
 
-## Local Setup
+## Local setup
 
-**Requirements:** PHP 8+, MySQL/MariaDB, a local server (XAMPP / Laragon / Herd).
+You need XAMPP (Apache, PHP 8, MariaDB), Python 3 and Git Bash.
 
-1. Serve the project folder **as the document root** (e.g. an Apache vhost on port 8080 with `AllowOverride All`) — not as a subfolder of `htdocs`, or `.htaccess`/`404.html` won't behave like production.
-2. Create a database and run **`Data/schema.sql`** against it.
-3. Copy `Assets/PHP/db_config.example.php` → `Assets/PHP/db_config.php` and fill in your local credentials. Optional extras: `DB_PORT` (if not 3306) and `SITE_URL` (e.g. `http://localhost:8080`, so emailed reset links point at your local site). This file is gitignored and must never be committed.
-4. Open the site in your browser.
+1. Copy `Assets/PHP/db_config.example.php` to `Assets/PHP/db_config.php` and fill in your local credentials. The example also documents three optional settings: `DB_PORT`, `SITE_URL` and the test-database override. Git ignores this file, and it must never be committed.
+2. Create a database and run `Data/schema.sql` against it.
+3. Start MariaDB from the XAMPP Control Panel, then run this in Git Bash:
 
-**This machine's setup (2026-09-29):** XAMPP's MariaDB runs on **port 3307** (a separate `MySQL80` service holds 3306; `my.ini` and phpMyAdmin's `config.inc.php` were updated to match), with database `threefrogs_local` and user `threefrogs_dev`. Start MariaDB from the XAMPP Control Panel.
+```bash
+bash tests/dev-server.sh
+```
 
-> `db_config.php` is the single source of DB credentials. `db_connect.php` requires it at runtime — do not hardcode credentials anywhere else.
->
-> Locally, PHP `mail()` has no mail server to talk to, so booking-confirmation and reset emails aren't delivered — the requests still succeed. Read reset tokens straight from the `password_reset_tokens` table when testing.
+The site runs at http://localhost:8080 with this folder as the document root, so `.htaccess`, the CSP and the 404 page behave as they do in production. Every email the site sends lands in `tests/.tmp/mail-dev/` instead of an inbox, so you can open the verification and reset links. Press Ctrl+C to stop.
+
+Run the tests after any change. It's one command, and it never touches your dev data:
+
+```bash
+bash tests/run-tests.sh
+```
+
+It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 171 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
+
+This PC's setup (2026-09-29, updated 2026-10-15):
+
+- XAMPP's MariaDB runs on port 3307, because a separate `MySQL80` service holds 3306. `my.ini` and phpMyAdmin's `config.inc.php` were changed to match.
+- The database is `threefrogs_local` and the user is `threefrogs_dev`.
+- If the dev user suddenly gets "Access denied", run `CHECK TABLE mysql.db;` and repair it if needed (see CLAUDE.md).
+
+`db_config.php` is the only place the database credentials live. `db_connect.php` loads it at runtime, so don't put credentials anywhere else.
 
 ---
 
-## File Structure
+## File structure
 
 ```
 /
-├── .htaccess                       HTTPS redirect, security headers/CSP, ErrorDocument 404, file lockdown
-├── .gitignore                      Excludes db_config.php
-├── robots.txt                      Disallows /Assets/PHP/ and /Data/
-├── index.html                      Home — 10 random games, login prompt for full list
-├── Collection.html                 Full A–Z game catalogue (login-gated)
-├── Booking.html                    Table booking form (login-gated)
-├── Dashboard.html                  User account & booking history (login-gated)
+├── .htaccess                       HTTPS redirect, security headers and CSP, ErrorDocument 404, file lockdown
+├── .gitignore                      Ignores db_config.php and tests/.tmp/
+├── robots.txt                      Disallows /Assets/PHP/, /Data/, /tests/, Staff.html, Verify-email.html
+├── index.html                      Home: 10 random games, and a login prompt for the full list
+├── Collection.html                 All games, A to Z (login required)
+├── Booking.html                    Booking form (login required)
+├── Dashboard.html                  Your account and bookings (login required)
 ├── Login.html
 ├── Signup.html
-├── Forgot-password.html            Two-step password reset (email → token link → new password)
+├── Forgot-password.html            Two-step password reset (email, then the emailed link, then a new password)
+├── Verify-email.html               Where the emailed verification link lands
+├── Staff.html                      Staff only: every booking per date, and café cancellation
 ├── About.html
-├── 404.html                        Custom error page — see Security Hardening below for the <base> tag gotcha
-├── Terms-of-Use.html                Legal — linked from every page's footer
-├── Privacy-Policy.html              Legal — linked from every page's footer
+├── 404.html                        Custom error page (see "404 page" below for the <base> tag)
+├── Terms-of-Use.html               Legal, linked from every page's footer
+├── Privacy-Policy.html             Legal, linked from every page's footer
 │
 ├── Assets/
 │   ├── CSS/
-│   │   └── Boardgame.css           Single shared stylesheet
+│   │   └── Boardgame.css           The one shared stylesheet
 │   ├── JS/
-│   │   ├── Navbar.js               Shared navbar — injected dynamically on every page
-│   │   ├── Loading.js              Shared button loading-state helpers (setButtonLoading/clearButtonLoading)
-│   │   ├── Boardgame.js            Game data array (~218 games) + index & collection page logic
+│   │   ├── Notify.js               escapeHtml, showToast, redirect-with-message; loads first on every page
+│   │   ├── Navbar.js               Builds the navbar on every page and sets the footer year
+│   │   ├── Verify.js               The "Resend verification email" button (Dashboard and Booking)
+│   │   ├── Loading.js              Button loading states (setButtonLoading / clearButtonLoading)
+│   │   ├── Boardgame.js            The 218-game list, plus the home and Collection page logic
 │   │   ├── Booking.js
 │   │   ├── Dashboard.js
 │   │   ├── Login.js
 │   │   ├── Signup.js
-│   │   └── Forgot-password.js
+│   │   ├── Forgot-password.js
+│   │   ├── Verify-email.js
+│   │   └── Staff.js
 │   ├── PHP/
-│   │   ├── db_config.php           GITIGNORED — holds DB credentials (copy from example)
-│   │   ├── db_config.example.php   Credential template (safe to commit)
-│   │   ├── db_connect.php          Opens MySQLi via db_config.php; Surabaya timezone; JSON error handler
-│   │   ├── security.php            CSRF tokens, hardened sessions, rate limiting, email helper — shared by every endpoint below
-│   │   ├── check_session.php       Returns { loggedIn, user, csrfToken } — called on every page load
+│   │   ├── db_config.php           Git-ignored: database credentials (copy from the example)
+│   │   ├── db_config.example.php   Credentials template, safe to commit
+│   │   ├── db_connect.php          Opens MySQLi, sets Surabaya time, answers DB errors with JSON
+│   │   ├── security.php            CSRF tokens, hardened sessions, rate limiting and email helpers
+│   │   ├── booking_rules.php       Booking limits: tables, people, hours, 30 days, 3 upcoming, 2 cancels a month
+│   │   ├── check_session.php       Returns { loggedIn, user, csrfToken }; every page calls it
 │   │   ├── login.php
 │   │   ├── logout.php
 │   │   ├── signup.php
-│   │   ├── request_reset.php       Step 1 of password reset: generates token, sends email
-│   │   ├── forgot_password.php     Step 2 of password reset: validates token, updates password
+│   │   ├── request_reset.php       Password reset step 1: creates a token and emails the link
+│   │   ├── forgot_password.php     Password reset step 2: checks the token and saves the new password
+│   │   ├── verify_email.php        Marks an account verified from the emailed token
+│   │   ├── resend_verification.php Sends a fresh verification link
+│   │   ├── staff_bookings.php      Staff: every booking on a date, plus tables in use per hour
+│   │   ├── staff_cancel_booking.php Staff: café cancellation and the email to the customer
 │   │   ├── booking.php
 │   │   ├── get_bookings.php
 │   │   ├── cancel_booking.php
 │   │   └── update_avatar.php
-│   └── Images/                     Game covers (jpg/png/webp/avif) + UI assets
-│       └── Avatars/                13 selectable user avatars
+│   └── Images/                     Game covers (jpg/png/webp/avif) and UI images
+│       └── Avatars/                The 13 avatars users can pick
 │
 └── Data/
-    ├── .htaccess                   Denies all direct web access to this folder
-    ├── schema.sql                  Full DB schema (all 5 tables), safe to re-run
-    └── Three Frogs.xlsx            Offline reference spreadsheet for the game catalogue
+    ├── .htaccess                   Blocks all web access to this folder
+    ├── schema.sql                  The full schema (all 6 tables), safe to re-run
+    ├── migrations/                 One-time column changes for older databases like production; run each once
+    └── Three Frogs.xlsx            Offline spreadsheet of the game list
+
+tests/                              Blocked by tests/.htaccess; don't upload it to Hostinger
+├── run-tests.sh                    The whole end-to-end test run in one command (throwaway database)
+├── dev-server.sh                   Local server on :8080 that catches emails
+├── api_test.sh                     The 171 checks
+├── smtp_sink.py                    Saves outgoing emails as .eml files
+├── lib.sh / httpd.conf.template    Shared helpers and the Apache config template
+└── .tmp/                           Generated and git-ignored: configs, logs, caught emails
 ```
 
 ---
 
-## Architecture
+## How it works
 
-### Authentication
+### Login state
 
-Every page POSTs to `Assets/PHP/check_session.php` on load. It returns:
+Every page sends a POST to `Assets/PHP/check_session.php` when it loads. The answer looks like this:
 
 ```json
-{ "loggedIn": true, "user": { "name": "...", "email": "...", "avatar": "..." } }
+{ "loggedIn": true, "csrfToken": "...", "user": { "name": "...", "email": "...", "avatar": "...", "emailVerified": true, "isStaff": false } }
 ```
 
-The navbar is injected by `Navbar.js` after this response — HTML pages ship with only an empty `<ul id="navLinks"></ul>`. **Never add static `<li>` elements to HTML pages.**
+`Navbar.js` builds the navbar from that answer. The HTML pages ship with an empty `<ul id="navLinks"></ul>`, and nobody should add static `<li>` items to it.
 
-### Session-gating
+### Pages that need a login
 
-| Page | Behaviour when logged out |
+| Page | What a logged-out visitor sees |
 |---|---|
-| `index.html` | Shows 10 random games; prompts login for the full list |
-| `Collection.html` | Redirects to `Login.html` |
-| `Booking.html` | Hides the form; shows `#authPopup` |
-| `Dashboard.html` | Redirects to `Login.html` |
+| `index.html` | 10 random games and a prompt to log in for the rest |
+| `Collection.html` | A redirect to `Login.html` |
+| `Booking.html` | A "please log in" popup instead of the form |
+| `Dashboard.html` | A redirect to `Login.html` |
+| `Staff.html` | A redirect to `Login.html`; logged-in non-staff see "Staff only" |
 
-Note the phrasing above: the form/dashboard content is **hidden by default** (`class="hidden"` in the HTML, alongside a `.loading-state` spinner shown in its place) and only revealed by JS once `check_session.php` confirms the right state — not shown-then-hidden reactively. See [Loading States](#loading-states) below.
+Redirects to Login carry `?msg=login_required&next=<page>`, so Login shows a message and sends you back after you log in. Logged-in users who haven't verified their email see a notice on the Dashboard, and on the Booking page in place of the form.
 
-### Loading States
+These pages hide their real content by default (`class="hidden"`, with a `.loading-state` spinner showing instead). The page script only reveals it after `check_session.php` answers. That stops a logged-out visitor from glimpsing the form or the game list before the redirect kicks in.
 
-| Where | What |
+### Loading states
+
+| Where | What happens |
 |---|---|
-| Any async-submitting button | `Assets/JS/Loading.js`'s `setButtonLoading(button, text)` swaps in a spinner + disables the button; `clearButtonLoading(button)` restores it. Used by `Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js`, `Forgot-password.js`. |
-| `Booking.html` / `Dashboard.html` | Real content ships `class="hidden"`; a sibling `.loading-state` is visible by default. Revealed only once `check_session.php` resolves — prevents a flash of the real form/dashboard before the login gate kicks in. |
-| `Collection.html` | `Boardgame.js` renders a `.loading-state` into `#boardgame-list` instead of the full unfiltered game array while the login check is pending — prevents an unauthenticated visitor from briefly seeing the entire ~218-game collection before the redirect fires. |
-| Dashboard bookings list | `#upcomingBookings`/`#bookingHistory` show a `.loading-state` while `get_bookings.php` is in flight. |
-| Navbar | `#navLinks` shows a single spinner `<li>` (JS-injected, not part of the HTML source) until `check_session.php` resolves. |
+| Any button that sends a request | `setButtonLoading(button, text)` from `Assets/JS/Loading.js` shows a spinner and disables the button, and `clearButtonLoading(button)` puts it back. `Login.js`, `Signup.js`, `Booking.js`, `Dashboard.js` and `Forgot-password.js` use them. |
+| `Booking.html` and `Dashboard.html` | The real content ships hidden, with a `.loading-state` next to it. The script reveals it once `check_session.php` answers. |
+| `Collection.html` | `Boardgame.js` shows a `.loading-state` in `#boardgame-list` while the login check runs, so a logged-out visitor never sees the 218 games before the redirect. |
+| Dashboard bookings | `#upcomingBookings` shows a `.loading-state` while `get_bookings.php` loads. |
+| Navbar | `#navLinks` shows one spinner `<li>` (added by the script, not in the HTML) until `check_session.php` answers. |
 
-All loading UI reuses the existing `.spinner`/`.loading-state`/`.btn-loading` classes in `Boardgame.css` — no new colors or fonts.
+All of these reuse the `.spinner`, `.loading-state` and `.btn-loading` classes in `Boardgame.css`, with no new colors or fonts.
 
-### Legal Pages
+### Legal pages
 
-`Terms-of-Use.html` and `Privacy-Policy.html` are linked from a `.footer-links` line in every page's footer (added right after the copyright notice). They reuse the `.about-section` card styling already used by `About.html` — no new content styling was introduced.
+Every page's footer links to `Terms-of-Use.html` and `Privacy-Policy.html` (the `.footer-links` line under the copyright). Both pages reuse the `.about-section` card style from `About.html`.
 
-> **Not a substitute for legal advice.** The Terms of Use and Privacy Policy text was written to honestly describe what this Site actually does (the real fields collected at signup/booking, the real security measures documented under [Security Hardening](#security-hardening), the real booking/cancellation rules) rather than generic template text. It has **not** been reviewed by a lawyer, including against Indonesia's Personal Data Protection Law (UU PDP). Have it reviewed before treating it as your business's final legal terms — and if you change how the Site collects or handles data, update these pages to match, since letting them drift from reality is worse than not having them.
+A lawyer hasn't reviewed either page yet, including against Indonesia's Personal Data Protection Law (UU PDP). They describe what the site does: the fields it collects, the security measures listed under [Security](#security), and the booking rules. Get them reviewed before you rely on them. If you change how the site collects or uses data, update these pages in the same change, because a policy that no longer matches the site is worse than none.
 
-### Password Reset Flow
+### Email verification
 
-Two-step, token-based — no unauthenticated password changes:
+1. Signup creates the account as unverified and emails a `Verify-email.html?token=...` link that works for 24 hours.
+2. Opening the link calls `verify_email.php`, which marks the account verified.
+3. Until then the user can browse everything, but `booking.php` refuses to book and answers 403 with `email_unverified`. The "Resend email" button (`resend_verification.php`) sends a fresh link, up to 3 times an hour.
+4. Finishing a password reset also verifies the account, because it proves the user can read that inbox.
 
-1. User enters email → `request_reset.php` generates a 64-char random token, stores it in `password_reset_tokens` with a 1-hour expiry, and emails a link (`Forgot-password.html?token=...`).
-2. User clicks the link → JS reads `?token=` from the URL and shows the "set new password" form → `forgot_password.php` validates the token, resets the password, and deletes the used token.
+### Staff page
 
-### Game Catalogue
+Staff accounts (`users.is_staff = 1`, set in phpMyAdmin) get a "Staff" link in the navbar that opens `Staff.html`. It shows:
 
-All ~218 boardgame entries are a **hardcoded JavaScript array** in `Boardgame.js` — they are not stored in the database. `Boardgame.js` branches on `window.location.pathname` to run either the index (10 random games, shuffled with a spread copy) or the Collection (full A–Z grouping) logic.
+- every booking for a chosen date, with prev, next and today buttons;
+- the number of bookings and people that day;
+- a grid of tables in use per hour, 12:00 to 21:00, out of 4.
 
-To add a game: append an object to the `boardgames` array and drop the cover image in `Assets/Images/`.
+"Cancel booking" marks a booking `cancelled_by_cafe` and emails the customer, with an optional reason. It doesn't count toward their 2 cancellations a month. The server checks the staff role in the database on every request, so granting or removing it takes effect straight away.
+
+### Password reset
+
+Resetting takes two steps, and nobody can change a password without the emailed token:
+
+1. The user enters their email. `request_reset.php` creates a random 64-character token, stores it in `password_reset_tokens` for 1 hour, and emails a `Forgot-password.html?token=...` link.
+2. The link opens the "new password" form. `forgot_password.php` checks the token, saves the new password and deletes the token.
+
+### Game list
+
+The 218 games are a hard-coded JavaScript array in `Boardgame.js`, not database rows. `Boardgame.js` looks at `window.location.pathname` to decide whether to run the home page logic (10 random games, shuffled from a copy of the array) or the Collection logic (every game, grouped A to Z).
+
+To add a game, add an object to the `boardgames` array and put its cover image in `Assets/Images/`:
 
 ```js
 {
   name: "Game Name",
-  category: "Strategy",       // must match a value in the Collection.html filter dropdown
+  category: "Strategy",       // must match an option in the Collection.html filter dropdown
   players: "2–4",
   duration: "60–120 min",
   image: "Assets/Images/Game Name.jpg",
@@ -204,50 +276,56 @@ To add a game: append an object to the `boardgames` array and drop the cover ima
 }
 ```
 
-**Resize new cover images to ~900px max dimension before adding them.** There's no build step or image pipeline here — whatever you commit is exactly what ships to visitors. See [Image Optimization](#image-optimization) below.
+Write the description the way the others read: one or two plain sentences about what you do in the game. Avoid "in this exciting ___ game".
 
-### Image Optimization
+Resize new cover images to about 900px on the longest side before adding them. There's no build step or image pipeline, so whatever file you commit is what every visitor downloads. See [Image sizes](#image-sizes).
 
-Every image in `Assets/Images/` was resized to a 900px max dimension and recompressed in place (same filenames/extensions, so no code changes were needed) — the folder went from ~96MB to ~24MB (~75% smaller) with no visible quality loss at actual display sizes. `Avatars/`, `favicon_io/`, and the `.avif` files were already small and were left untouched.
+### Image sizes
 
-`ThreeFrogsPlace.jpg` (the homepage hero background, `background: url(...) cover` in `Boardgame.css`) is sized to 1920px wide instead of 900px, since it's displayed full-bleed across the page rather than as a small card — check for `background: url(` in the CSS before assuming every image is a card thumbnail if you ever bulk-process this folder again.
+Every image in `Assets/Images/` was resized to 900px on its longest side and recompressed, keeping the same file names and formats, so no code had to change. The folder went from about 96MB to about 24MB (75% smaller) with no visible loss at the sizes the site shows. `Avatars/`, `favicon_io/` and the `.avif` files were already small and weren't touched.
 
-Both card-rendering templates in `Boardgame.js` also carry `loading="lazy" decoding="async"` on their `<img>` tags, so `Collection.html` (which renders all ~218 cards into the DOM at once) doesn't download every image up front — only the ones actually scrolled into view.
+`ThreeFrogsPlace.jpg` is the exception. It's the home page hero background (`background: url(...) cover` in `Boardgame.css`) and stretches across the whole page, so it's 1920px wide. If you ever batch-process this folder again, search the CSS for `background: url(` first so you don't shrink it.
+
+Both card templates in `Boardgame.js` put `loading="lazy" decoding="async"` on their `<img>` tags. `Collection.html` adds all 218 cards to the page at once, and this way the browser only downloads the images you scroll to.
 
 ---
 
-## Database Schema
+## Database
 
 ### `users`
 
 | Column | Type | Notes |
 |---|---|---|
 | id | INT PK AUTO_INCREMENT | |
-| name | VARCHAR | Letters and spaces only |
-| email | VARCHAR UNIQUE | Lowercased on insert |
-| password | VARCHAR | bcrypt via `password_hash` |
-| avatar | VARCHAR | Relative path, e.g. `Assets/Images/Avatars/Clam.jpg`; validated against a server-side whitelist |
+| name | VARCHAR(100) | Letters in any language, spaces, apostrophes, hyphens and periods; must start with a letter |
+| email | VARCHAR UNIQUE | Stored in lowercase |
+| password | VARCHAR | bcrypt hash from `password_hash` |
+| avatar | VARCHAR | Relative path such as `Assets/Images/Avatars/Clam.jpg`, checked against a server-side whitelist |
+| email_verified_at | DATETIME NULL | `NULL` until the user opens the verification link or resets their password |
+| is_staff | TINYINT(1) | `1` means the account can use `Staff.html`; set by hand |
 
 ### `bookings`
 
 | Column | Type | Notes |
 |---|---|---|
-| id | INT PK AUTO_INCREMENT | Used to identify a booking when cancelling |
+| id | INT PK AUTO_INCREMENT | Identifies the booking when someone cancels it |
 | name | VARCHAR | |
-| email | VARCHAR | Always the logged-in user's email (taken from the session) |
-| date | DATE | Must not be in the past |
-| start_time | TIME | Must be ≥ 12:00 (and not already passed, if today) |
-| end_time | TIME | Must be ≤ 22:00, after start_time |
-| people | INT | 1–8 |
-| status | VARCHAR | `'active'` |
+| email | VARCHAR | Always the logged-in user's email, taken from the session |
+| date | DATE | Can't be in the past |
+| start_time | TIME | 12:00 or later, and not already passed if the date is today |
+| end_time | TIME | 22:00 or earlier, and after start_time |
+| people | INT | 1 to 8 |
+| status | VARCHAR | `'active'`, or `'cancelled_by_cafe'` after a staff cancellation. A customer's own cancellation deletes the row. |
 
-**Booking rules** (constants at the top of `booking.php`, mirrored in `Booking.js`, `Booking.html`, and Terms of Use §4 — change them together):
+The booking numbers live in `Assets/PHP/booking_rules.php`. `Booking.js`, `Booking.html` and section 4 of the Terms of Use repeat them, so change them all together.
 
-- **4 tables**, one booking = one table, **max 8 people** per booking. A new booking is rejected only if all 4 tables are in use at *some moment* inside its window (back-to-back bookings don't count as overlapping).
-- A user can't hold two overlapping bookings.
-- Check + insert run under a MySQL lock, so simultaneous requests can't overbook the last table.
-- A plain-text confirmation email is sent on success; the page only says "a confirmation has been sent" if it actually was.
-- Everything uses Surabaya time (`Asia/Jakarta`, UTC+7) for both PHP and MySQL, whatever the server's own timezone.
+- Only verified accounts can book.
+- There are 4 tables, one booking takes one table, and a booking can have up to 8 people. The server refuses a booking only if all 4 tables are taken at some moment during it. A booking that ends at 15:00 doesn't clash with one that starts at 15:00.
+- You can book up to 30 days ahead and hold up to 3 upcoming bookings.
+- You can't hold two bookings that overlap.
+- The checks and the insert run under a MySQL lock, so two people booking at the same moment can't both get the last table or go over the per-account limit.
+- The server emails a plain-text confirmation, and the page only says it sent one if it did.
+- PHP and MySQL both run on Surabaya time (`Asia/Jakarta`, UTC+7), whatever the server's own timezone.
 
 ### `cancellations`
 
@@ -257,9 +335,9 @@ Both card-rendering templates in `Boardgame.js` also carry `loading="lazy" decod
 | date | DATE | |
 | start | TIME | |
 | end | TIME | |
-| cancel_time | DATETIME | Set to `NOW()` on insert |
+| cancel_time | DATETIME | Set to `NOW()` when the row is added |
 
-Cancellations are capped at **2 per user per calendar month**, enforced in `cancel_booking.php` (and reported by `get_bookings.php`). A booking can only be cancelled before its start time.
+Customers can cancel 2 bookings per calendar month. `cancel_booking.php` enforces it and `get_bookings.php` reports how many are left. A booking can only be cancelled before it starts. Café cancellations from the Staff page aren't logged here, so they never count against the customer.
 
 ### `password_reset_tokens`
 
@@ -267,116 +345,135 @@ Cancellations are capped at **2 per user per calendar month**, enforced in `canc
 |---|---|---|
 | id | INT PK AUTO_INCREMENT | |
 | email | VARCHAR | |
-| token | VARCHAR(64) UNIQUE | 64-char hex string from `random_bytes` |
-| expires_at | DATETIME | 1 hour from creation; stale tokens are rejected and deleted |
+| token | VARCHAR(64) UNIQUE | 64-character hex string from `random_bytes` |
+| expires_at | DATETIME | 1 hour after creation; expired tokens are refused and deleted |
 
-Required for the forgot-password flow (created by `Data/schema.sql`).
+Forgot-password needs this table. `Data/schema.sql` creates it.
+
+### `email_verification_tokens`
+
+| Column | Type | Notes |
+|---|---|---|
+| id | INT PK AUTO_INCREMENT | |
+| email | VARCHAR | One live token per email; a resend replaces it |
+| token | VARCHAR(64) UNIQUE | 64-character hex string from `random_bytes` |
+| expires_at | DATETIME | 24 hours after creation |
 
 ### `rate_limits`
 
 | Column | Type | Notes |
 |---|---|---|
 | id | INT PK AUTO_INCREMENT | |
-| action | VARCHAR(50) | e.g. `login_ip`, `login_email`, `signup_ip`, `reset_request_ip` |
-| identifier | VARCHAR(255) | IP address or email being throttled |
-| created_at | DATETIME | Set to `NOW()` on each recorded attempt |
+| action | VARCHAR(50) | e.g. `login_ip`, `login_email`, `signup_ip`, `reset_request_ip`, `verify_email_ip`, `resend_verification` |
+| identifier | VARCHAR(255) | The IP address or email being limited |
+| created_at | DATETIME | Set to `NOW()` for each attempt |
 
-Backs the brute-force/abuse throttling described below (created by `Data/schema.sql`). Rate limiting **fails open** — i.e. does nothing, not "locks everyone out" — if this table is missing.
+This table backs the rate limiting described under [Security](#security), and `Data/schema.sql` creates it. If the table is missing, rate limiting switches off instead of locking anyone out.
 
-> All five tables are defined in **`Data/schema.sql`**. It uses `CREATE TABLE IF NOT EXISTS` throughout, so it's safe to run on a database that already has some of them.
+`Data/schema.sql` defines all six tables with `CREATE TABLE IF NOT EXISTS`, so you can run it on a database that already has some of them. It can't add columns to existing tables, though. A database created before a change needs the matching one-time script from `Data/migrations/`.
 
 ---
 
-## PHP API Endpoints
+## PHP endpoints
 
-All endpoints set `Content-Type: application/json`, `ini_set('display_errors', 0)`, and use a local `respond($status, $data)` helper that echoes JSON and exits. Session endpoints call `secure_session_start()` (never raw `session_start()`). Any uncaught database error is logged and returned as a generic JSON 500 by the handler in `db_connect.php`.
+Every endpoint sets `Content-Type: application/json` and `ini_set('display_errors', 0)`, and answers through a local `respond($status, $data)` helper that prints JSON and exits. Endpoints that use the session call `secure_session_start()`, never plain `session_start()`. If a database error slips through, the handler in `db_connect.php` logs it and answers with a generic JSON 500.
 
-| Endpoint | Method | Auth required | Description |
+| Endpoint | Method | Login | What it does |
 |---|---|---|---|
-| `check_session.php` | POST | — | Returns current session state |
-| `login.php` | POST (form) | — | Validates credentials, sets `$_SESSION['user']` |
-| `logout.php` | POST | — | Destroys session and clears cookie |
-| `signup.php` | POST (form) | — | Creates user, validates avatar against whitelist, sets session; 409 if email taken |
-| `request_reset.php` | POST (form) | — | Generates password-reset token and emails link; always returns 200 to prevent email enumeration |
-| `forgot_password.php` | POST (form) | — | Validates token from DB, resets password, deletes token |
-| `booking.php` | POST (JSON body) | Yes | Creates booking; enforces date/time rules, 4-table capacity, 8-person limit, no self-overlap; emails a confirmation |
-| `get_bookings.php` | POST | Yes | Returns the user's upcoming + last-90-days bookings (with `id`) and remaining cancel count |
-| `cancel_booking.php` | POST (JSON body: `id`) | Yes | Cancels the user's own not-yet-started booking; enforces the monthly limit |
-| `update_avatar.php` | POST (form) | Yes | Updates avatar; validates against allowed set |
+| `check_session.php` | POST | No | Returns the current session |
+| `login.php` | POST (form) | No | Checks the password and sets `$_SESSION['user']` |
+| `logout.php` | POST | No | Ends the session and clears the cookie |
+| `signup.php` | POST (form) | No | Creates an unverified account, checks the name and avatar, logs the user in and emails a verification link. Answers 409 if the email is taken. |
+| `request_reset.php` | POST (form) | No | Creates a reset token and emails the link. Always answers 200, so nobody can use it to find out which emails have accounts. |
+| `forgot_password.php` | POST (form) | No | Checks the token, saves the new password, deletes the token and marks the email verified |
+| `verify_email.php` | POST (form: `token`) | No | Marks the account verified; each link works once, for 24 hours |
+| `resend_verification.php` | POST (form) | Yes | Emails a fresh verification link, up to 3 an hour |
+| `booking.php` | POST (JSON) | Yes, verified | Creates a booking. Checks the date and time rules, the 30-day window, the 3-booking limit, the 4 tables, the 8-person limit and overlaps with your own bookings, then emails a confirmation. |
+| `get_bookings.php` | POST | Yes | Returns your upcoming bookings and the last 90 days (with `id` and `status`), plus how many cancellations you have left |
+| `cancel_booking.php` | POST (JSON: `id`) | Yes | Cancels one of your bookings that hasn't started, within the monthly limit |
+| `update_avatar.php` | POST (form) | Yes | Changes your avatar to one of the allowed images |
+| `staff_bookings.php` | POST (JSON: `date`) | Staff | Every booking on that date, tables in use per hour, and totals |
+| `staff_cancel_booking.php` | POST (JSON: `id`, `reason`) | Staff | Café cancellation; emails the customer |
 
 ---
 
-## Security Hardening
+## Security
 
 | Measure | Where |
 |---|---|
-| CSRF tokens on every state-changing request | `Assets/PHP/security.php` (`csrf_token()`/`verify_csrf_token()`); enforced in `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, `update_avatar.php` |
-| Brute-force / abuse rate limiting | `security.php` (`rate_limit_exceeded()`/`record_attempt()` against the `rate_limits` table); applied to `login.php`, `signup.php`, `request_reset.php`, `forgot_password.php` |
-| Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `security.php`'s `secure_session_start()` — used everywhere instead of raw `session_start()` |
-| Session fixation prevention | `session_regenerate_id(true)` in `login.php` and `signup.php` after authentication |
-| No internal error leakage | DB/statement errors are `error_log()`'d server-side, never echoed in JSON responses |
-| Security headers, forced HTTPS, no directory listing | root `.htaccess` (CSP with `script-src 'self'` only — no third-party scripts, `X-Frame-Options`, HSTS, etc. — skips the HTTPS redirect when `HTTP_HOST` is `localhost`/`127.0.0.1`, with or without a port, for local dev) |
-| Sensitive files blocked from direct web access | `.htaccess` denies `db_config.php`, `*.xlsx`/`*.sql`/`*.log`/`*.md`, `.git*`; `Data/.htaccess` denies the whole folder |
-| Reverse-tabnabbing protection | `rel="noopener noreferrer"` on all `target="_blank"` links |
+| CSRF tokens on every request that changes data | `csrf_token()` and `verify_csrf_token()` in `Assets/PHP/security.php`. `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, `update_avatar.php`, `resend_verification.php` and `staff_cancel_booking.php` check them. |
+| Rate limiting against brute force and abuse | `rate_limit_exceeded()` and `record_attempt()` in `security.php`, using the `rate_limits` table. Used by `login.php`, `signup.php`, `request_reset.php`, `forgot_password.php`, `verify_email.php` and `resend_verification.php`. |
+| Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `secure_session_start()` in `security.php`, used everywhere instead of `session_start()` |
+| Session fixation protection | `login.php` and `signup.php` call `session_regenerate_id(true)` after logging the user in |
+| No internal errors shown to users | Database errors go to the server log with `error_log()`, never into a JSON response |
+| Security headers, forced HTTPS, no directory listings | The root `.htaccess`. The CSP allows scripts from this site only (`script-src 'self'`). It also sets `X-Frame-Options`, HSTS and more, and skips the HTTPS redirect when `HTTP_HOST` is `localhost` or `127.0.0.1` (with or without a port) for local development. |
+| Private files blocked from the web | `.htaccess` blocks `db_config.php`, `*.xlsx`, `*.sql`, `*.log`, `*.md` and `.git*`. `Data/.htaccess` blocks that whole folder. |
+| Reverse-tabnabbing protection | Every `target="_blank"` link has `rel="noopener noreferrer"` |
+| No open redirect | Login's `?next=` only accepts bare page names like `Booking.html` (`safeNextPage()` in `Notify.js`) |
+| Staff role checked on the server | `staff_bookings.php` and `staff_cancel_booking.php` read `users.is_staff` from the database on every request |
 
-New state-changing endpoints should follow the same pattern: `require_once("security.php")`, call `secure_session_start()` instead of `session_start()`, and validate a CSRF token before doing anything.
+A new endpoint that changes data should follow the same pattern: `require_once("security.php")`, call `secure_session_start()`, and check the CSRF token before doing anything else.
 
 ### 404 page
 
-`404.html` is served via `ErrorDocument 404 /404.html` in the root `.htaccess`. Two things make this work correctly:
+The root `.htaccess` serves `404.html` with `ErrorDocument 404 /404.html`. Two things make it work:
 
-1. **The project must be the server's document root** — not nested inside some other `htdocs` folder — since Apache resolves `/404.html` from the server/vhost root, not from wherever the missing URL happened to be. This is already what the [Local Setup](#local-setup) instructions above tell you to do.
-2. **`404.html` has `<base href="/" />` in its `<head>`.** Apache serves the page's content under the visitor's original (bogus) URL without redirecting, so without a `<base>` tag every relative link/script/fetch on the page would resolve against that bogus path instead of the site root. Every other page in this project deliberately omits a `<base>` tag and uses plain relative paths — `404.html` is the one intentional exception.
+1. The project has to be the server's document root, not a folder inside some other `htdocs`. Apache looks for `/404.html` at the root of the server, not next to the missing URL. The [Local setup](#local-setup) steps already serve it this way.
+2. `404.html` has `<base href="/" />` in its `<head>`. Apache shows the 404 page at whatever wrong URL the visitor typed, without redirecting. Without the `<base>` tag, every relative link, script and fetch on the page would point at that wrong path instead of the site root. Every other page uses plain relative paths with no `<base>` tag; `404.html` is the only exception.
 
 ---
 
-## Design System
+## Design
 
-### CSS Custom Properties
+### CSS variables
 
-| Token | Value | Usage |
+| Variable | Value | Used for |
 |---|---|---|
 | `--color-primary` | `#1a3c2e` | Navbar, headings, buttons, footer |
 | `--color-accent` | `#c9a227` | Highlights, tags, borders, hover states |
 | `--color-bg` | `#faf8f2` | Page background (warm cream) |
-| `--color-surface` | `#ffffff` | Cards, form panels |
+| `--color-surface` | `#ffffff` | Cards and form panels |
 | `--color-surface-alt` | `#f3ede1` | Read-only inputs, card image backgrounds |
 | `--color-text-muted` | `#6b7280` | Secondary text |
-| `--navbar-height` | `68px` / `60px` mobile | Used for sticky offset calculations |
-| `--alphabet-nav-w` | `48px` | Fixed side rail width on Collection page |
-| `--page-padding-x` | `clamp(1rem, 4vw, 3rem)` | Horizontal gutter |
+| `--navbar-height` | `68px` (`60px` on mobile) | Offsets for sticky elements |
+| `--alphabet-nav-w` | `48px` | Width of the A to Z rail on the Collection page |
+| `--page-padding-x` | `clamp(1rem, 4vw, 3rem)` | Side margins |
 
-### Typography
+### Fonts
 
-- **Headings:** `Righteous` (Google Fonts)
-- **Body:** `Poppins` (Google Fonts)
+Headings use Righteous and body text uses Poppins, both from Google Fonts.
 
-### Responsive Grid (game cards)
+### Game card grid
 
-| Viewport | Columns |
+| Screen width | Columns |
 |---|---|
-| ≤ 360 px | 1 |
-| 361–480 px | 2 |
-| 481–768 px | 3 |
-| 769–1024 px | 3 |
-| 1025–1400 px | 4 |
-| ≥ 1401 px | 5 |
+| 360px or less | 1 |
+| 361 to 480px | 2 |
+| 481 to 768px | 3 |
+| 769 to 1024px | 3 |
+| 1025 to 1400px | 4 |
+| 1401px or more | 5 |
 
 ---
 
-## Key Conventions
+## Conventions
 
-- **Inputs stay at `font-size: 1rem`** — prevents iOS auto-zoom on focus. Don't override with sub-16 px values.
-- **Touch targets use `min-height: 44px`** — maintain this on any new interactive element.
-- **Hover effects use `@media (hover: hover)`** — so they only apply to pointer devices; touch devices get static details.
-- **Fixed/sticky elements include `env(safe-area-inset-*)`** — for notch / Dynamic Island / home bar support.
-- **`Collection.html` requires `<body class="page-collection">`** — CSS uses this to apply `padding-left` that clears the fixed alphabet nav.
-- **Alphabet nav is desktop-only** — hidden via `display: none` below 769 px.
+- Inputs stay at `font-size: 1rem`. Anything smaller makes iOS zoom in when you tap the field.
+- Anything you can tap is at least 44px tall.
+- Hover effects sit inside `@media (hover: hover)`, so they only apply to mouse and trackpad users. Touch devices show the details without hovering.
+- Fixed and sticky elements use `env(safe-area-inset-*)` so they clear the notch and home bar on phones.
+- `Collection.html` needs `<body class="page-collection">`. The CSS uses it to add the `padding-left` that clears the A to Z rail.
+- The A to Z rail only shows on screens 769px and wider.
+- Don't use `alert()`. Use `showToast()` from `Notify.js`, or `redirectWithMessage()` when you navigate, and `escapeHtml()` for any text you put into `innerHTML`.
+- Write visitor-facing text in the café's voice: friendly, plain, "we", sentence-case headings, and no em dashes.
+- A new page loads `Notify.js` first and `Navbar.js` last, copies the footer (legal links and `.copyright-years`), and gets added to the page list in `tests/api_test.sh`.
 
 ---
 
 ## Deployment
 
-1. Upload changed files to Hostinger via FTP or the File Manager.
-2. There is no build or compilation step — what's in the repo is what runs.
-3. `Assets/PHP/db_config.php` must exist on the server with production credentials. It is gitignored and is **not** uploaded from the repo — create or edit it directly on the server.
+1. Upload the changed files to Hostinger with FTP or the File Manager.
+2. There's no build step. The files in the repo are the files that run.
+3. `Assets/PHP/db_config.php` has to exist on the server with the production credentials. Git ignores it and you don't upload it from the repo; create or edit it on the server.
+4. Don't upload `tests/`. Its own `.htaccess` blocks it anyway.
+5. If a change adds database columns, run its `Data/migrations/` script in phpMyAdmin before you upload the PHP that uses them.

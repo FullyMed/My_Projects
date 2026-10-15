@@ -16,11 +16,22 @@ function respond($status, $data) {
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     respond(403, [
         "success" => false,
-        "error" => "Your session expired. Please refresh the page and try again."
+        "error" => "Your session timed out. Refresh the page and try again."
     ]);
 }
 
-$name = trim($_POST['name'] ?? '');
+// Text that isn't valid UTF-8 (e.g. a client sending Latin-1) would make the
+// /u regexes below return null — reject it up front with a clear message.
+$rawName = (string) ($_POST['name'] ?? '');
+if (!mb_check_encoding($rawName, 'UTF-8')) {
+    respond(400, [
+        "success" => false,
+        "error" => "That name has characters we can't accept."
+    ]);
+}
+
+// Collapse runs of whitespace so "Siti   Nur'aini" is stored as "Siti Nur'aini".
+$name = trim(preg_replace('/\s+/u', ' ', $rawName));
 $email = strtolower(filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL));
 $password = trim($_POST['password'] ?? '');
 $avatar = trim($_POST['avatar'] ?? '');
@@ -47,35 +58,38 @@ if (!in_array($avatar, $allowedAvatars)) {
 if (!$name || !$email || !$password) {
     respond(400, [
         "success" => false,
-        "error" => "Name, email, and password are required."
+        "error" => "Please fill in your name, email and password."
     ]);
 }
 
-if (strlen($name) > 100 || strlen($email) > 255 || strlen($password) > 200) {
+if (mb_strlen($name) > 100 || strlen($email) > 255 || strlen($password) > 200) {
     respond(400, [
         "success" => false,
-        "error" => "One or more fields exceed the maximum allowed length."
+        "error" => "Something you typed is too long. Names can be up to 100 characters and passwords up to 200."
     ]);
 }
 
-if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+// Letters from any language (incl. accents), plus spaces, apostrophes,
+// hyphens and periods between them — e.g. "Nur'aini", "Jean-Luc", "M. Rizky".
+// Keep in sync with the hint in Signup.html.
+if (!preg_match("/^\p{L}[\p{L}\p{M} '’.\-]*$/u", $name)) {
     respond(400, [
         "success" => false,
-        "error" => "Name can only contain letters and spaces."
+        "error" => "Names can use letters, spaces, apostrophes ('), hyphens (-) and periods (.), and have to start with a letter."
     ]);
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     respond(400, [
         "success" => false,
-        "error" => "Invalid email format."
+        "error" => "That email address doesn't look right."
     ]);
 }
 
 if (strlen($password) < 8) {
     respond(400, [
         "success" => false,
-        "error" => "Password must be at least 8 characters long."
+        "error" => "Your password needs at least 8 characters."
     ]);
 }
 
@@ -83,7 +97,7 @@ $ip = client_ip();
 if (rate_limit_exceeded($conn, 'signup_ip', $ip, 8, 60)) {
     respond(429, [
         "success" => false,
-        "error" => "Too many signup attempts from this network. Please try again later."
+        "error" => "Too many sign-ups from this network. Please try again in an hour."
     ]);
 }
 record_attempt($conn, 'signup_ip', $ip);
@@ -97,43 +111,38 @@ if ($checkStmt->num_rows > 0) {
     $checkStmt->close();
     respond(409, [
         "success" => false,
-        "error" => "Email already registered."
+        "error" => "There's already an account with that email. Try logging in, or use \"Forgot your password?\" if it's yours."
     ]);
 }
 $checkStmt->close();
 
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+// New accounts start unverified (email_verified_at NULL) — booking is blocked
+// until the emailed link is opened (verify_email.php).
 $stmt = $conn->prepare("INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)");
-if (!$stmt) {
-    error_log("signup.php: prepare failed: " . $conn->error);
-    respond(500, [
-        "success" => false,
-        "error" => "Something went wrong. Please try again later."
-    ]);
-}
-
 $stmt->bind_param("ssss", $name, $email, $hashedPassword, $avatar);
+$stmt->execute();
+$userId = $stmt->insert_id;
+$stmt->close();
 
-if ($stmt->execute()) {
-    session_regenerate_id(true);
-    $_SESSION['user'] = [
-        "id" => $stmt->insert_id,
-        "name" => $name,
-        "email" => $email,
-        "avatar" => $avatar
-    ];
-    respond(201, [
-        "success" => true,
-        "user" => [
-            "name" => $name
-        ]
-    ]);
-} else {
-    error_log("signup.php: insert failed: " . $stmt->error);
-    respond(500, [
-        "success" => false,
-        "error" => "Signup failed. Please try again later."
-    ]);
-}
-?>
+session_regenerate_id(true);
+$_SESSION['user'] = [
+    "id" => $userId,
+    "name" => $name,
+    "email" => $email,
+    "avatar" => $avatar,
+    "verified" => false,
+    "is_staff" => false
+];
+
+$emailSent = send_verification_email($conn, $email, $name);
+$conn->close();
+
+respond(201, [
+    "success" => true,
+    "verificationEmailSent" => $emailSent,
+    "user" => [
+        "name" => $name
+    ]
+]);

@@ -9,7 +9,7 @@ if (!secure_session_start()) {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "Failed to start session."
+        "error" => "We couldn't log you out. Please try again."
     ]);
     exit;
 }
@@ -37,7 +37,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error"   => "Server error during logout."
+        "error"   => "We couldn't log you out. Please try again."
     ]);
 }
 ?>

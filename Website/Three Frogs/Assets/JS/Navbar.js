@@ -11,6 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Footer: "© 2025–<current year>" (the HTML ships a static fallback)
+  const thisYear = new Date().getFullYear();
+  document.querySelectorAll(".copyright-years").forEach(el => {
+    el.textContent = thisYear > 2025 ? `2025–${thisYear}` : "2025";
+  });
+
   navLinks.innerHTML = `<li class="nav-loading" aria-hidden="true"><span class="spinner spinner-sm"></span></li>`;
 
   fetch("Assets/PHP/check_session.php")
@@ -19,18 +25,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return res.json();
     })
     .then(data => {
-      const userName = data.loggedIn && data.user?.name ? data.user.name : "User";
+      const userName = escapeHtml(data.loggedIn && data.user?.name ? data.user.name : "User");
 
       navLinks.innerHTML = `
         <li><a href="index.html">Home</a></li>
         <li><a href="Booking.html">Booking</a></li>
         <li><a href="About.html">About</a></li>
+        ${data.loggedIn && data.user?.isStaff ? `<li><a href="Staff.html">Staff</a></li>` : ""}
         ${
           data.loggedIn
             ? `<li><a href="Dashboard.html">👤 ${userName}</a></li>
-               <li><a href="#" class="logout-link">Logout</a></li>`
-            : `<li><a href="Login.html">Login</a></li>
-               <li><a href="Signup.html">Sign Up</a></li>`
+               <li><a href="#" class="logout-link">Log out</a></li>`
+            : `<li><a href="Login.html">Log in</a></li>
+               <li><a href="Signup.html">Sign up</a></li>`
         }
       `;
 
@@ -43,14 +50,14 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(result => {
               if (result.success) {
-                window.location.href = "Login.html";
+                redirectWithMessage("Login.html", "logged_out");
               } else {
-                alert("Logout failed.");
+                showToast("We couldn't log you out. Please try again.", "error");
               }
             })
             .catch(err => {
               console.error("Logout error:", err);
-              alert("Server error during logout.");
+              showToast("We couldn't reach the server. Please try again in a moment.", "error");
             });
         });
       }
@@ -66,8 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <li><a href="index.html">Home</a></li>
         <li><a href="Booking.html">Booking</a></li>
         <li><a href="About.html">About</a></li>
-        <li><a href="Login.html">Login</a></li>
-        <li><a href="Signup.html">Sign Up</a></li>
+        <li><a href="Login.html">Log in</a></li>
+        <li><a href="Signup.html">Sign up</a></li>
       `;
     });
 

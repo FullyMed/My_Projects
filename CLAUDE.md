@@ -95,8 +95,8 @@ Then run `claude` to start Claude Code in that project.
 ### Website / Three Frogs
 - **Type:** Vanilla HTML/CSS/JS (no libraries) + PHP 8 + MySQL, no build step
 - **Purpose:** Boardgame café website (live: threefrogsboardgame.com) — game browsing, accounts, bookings
-- **Key traits:** Session-based auth with CSRF + rate limiting, token-based password reset, booking system (4 tables, max 8 people per booking, emailed confirmations, 2 cancellations/month). A 2026-09-29 bug-fix pass is tested locally but **not yet deployed** — see the Pending checklist at the top of its `CLAUDE.md` before deploying.
-- **Run:** Local DB is XAMPP MariaDB on **port 3307** (`threefrogs_local`, schema in `Data/schema.sql`); serve the project folder as the web server's document root. Requires `Assets/PHP/db_config.php` (gitignored).
+- **Key traits:** Session-based auth with CSRF and rate limiting, email verification (required before booking), and token-based password reset. Booking system: 4 tables, max 8 people, up to 30 days ahead, max 3 upcoming per account, emailed confirmations, 2 self-cancellations/month. A staff page (`users.is_staff`) shows all bookings and lets staff cancel with a customer email. On-page toasts instead of `alert()`. All visitor-facing text, the 218 game descriptions and both docs were rewritten with the Humanizer and Stop Slop skills in a friendly café voice (see "Writing style" in its `CLAUDE.md`). The café is open every day, 12:00–22:00. The 2026-09-29 fix pass, the 2026-10-15 improvement pass and the writing pass are tested locally (171 checks + browser) but **not yet deployed**. Production needs a one-time migration first; follow the ordered Pending checklist at the top of its `CLAUDE.md`.
+- **Run:** `bash tests/dev-server.sh` (site on :8080, emails caught locally) · `bash tests/run-tests.sh` (full test run on a throwaway DB). Both need XAMPP MariaDB on **port 3307** started. Requires `Assets/PHP/db_config.php` (gitignored). If a dev DB user gets "Access denied" after a MariaDB restart, check `CHECK TABLE mysql.db;` (it was corrupt and was repaired 2026-10-15).
 
 ---
 

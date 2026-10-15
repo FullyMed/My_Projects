@@ -27,12 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!isValidEmail) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Invalid email format.</strong></p>`;
+        resultBox.innerHTML = `<p style="color:red;"><strong>That email address doesn't look right.</strong></p>`;
         return;
       }
 
       if (password.length < 8) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Password must be at least 8 characters long.</strong></p>`;
+        resultBox.innerHTML = `<p style="color:red;"><strong>That password is too short. Passwords have at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -59,18 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!response.ok) {
           clearButtonLoading(submitBtn);
-          errorMessage.textContent = result.error || "Invalid email or password.";
+          errorMessage.textContent = result.error || "That email and password don't match.";
           errorMessage.classList.remove("hidden");
           return;
         }
 
-        alert("Login successful!");
-        window.location.href = "index.html";
+        // Back to the page that sent them here (e.g. Booking.html), if any
+        window.location.href = safeNextPage() || "index.html";
 
       } catch (err) {
         console.error("Error during login:", err);
         clearButtonLoading(submitBtn);
-        errorMessage.textContent = "Server error: " + err.message;
+        errorMessage.textContent = "We couldn't reach the server. Please try again in a moment.";
         errorMessage.classList.remove("hidden");
       }
     });

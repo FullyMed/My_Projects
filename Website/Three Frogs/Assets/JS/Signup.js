@@ -39,19 +39,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const email = document.getElementById("signupEmail").value;
       if (!validateEmail(email)) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Invalid email format.</strong></p>`;
+        resultBox.innerHTML = `<p style="color:red;"><strong>That email address doesn't look right.</strong></p>`;
         return;
       }
 
-      const name = document.getElementById("signupName").value;
-      if (!name.trim()) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Name cannot be empty.</strong></p>`;
+      const name = document.getElementById("signupName").value.trim().replace(/\s+/g, " ");
+      if (!name) {
+        resultBox.innerHTML = `<p style="color:red;"><strong>Please enter your name.</strong></p>`;
+        return;
+      }
+      // Same rule as signup.php: letters (any language), spaces, ' ’ - .
+      if (!/^\p{L}[\p{L}\p{M} '’.\-]*$/u.test(name)) {
+        resultBox.innerHTML = `<p style="color:red;"><strong>Names can use letters, spaces, apostrophes ('), hyphens (-) and periods (.), and have to start with a letter.</strong></p>`;
         return;
       }
 
       const password = document.getElementById("signupPassword").value;
       if (password.length < 8) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Password must be at least 8 characters long.</strong></p>`;
+        resultBox.innerHTML = `<p style="color:red;"><strong>Your password needs at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -74,19 +79,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         const result = await response.json();
 
         if (result.success) {
+          const emailNote = result.verificationEmailSent
+            ? `We've sent a verification link to <strong>${escapeHtml(email)}</strong>. Open it before your first booking.`
+            : `Please verify your email before your first booking. You can ask for the link on your Dashboard.`;
           resultBox.innerHTML = `
-            <h3>Sign Up Successful!</h3>
-            <p>Welcome, <strong>${result.user.name}</strong>. Redirecting to homepage...</p>
+            <h3>Welcome, ${escapeHtml(result.user.name)}!</h3>
+            <p>${emailNote}</p>
+            <p>Taking you to your dashboard…</p>
           `;
-          setTimeout(() => window.location.href = "index.html", 1500);
+          setTimeout(() => window.location.href = "Dashboard.html", 3500);
           signupForm.reset();
         } else {
           clearButtonLoading(submitBtn);
-          resultBox.innerHTML = `<p style="color:red;"><strong>${result.error || "Signup failed."}</strong></p>`;
+          resultBox.innerHTML = `<p style="color:red;"><strong>${escapeHtml(result.error || "We couldn't create your account. Please try again.")}</strong></p>`;
         }
       } catch (err) {
         clearButtonLoading(submitBtn);
-        resultBox.innerHTML = `<p style="color:red;"><strong>Server error. Please try again later.</strong></p>`;
+        resultBox.innerHTML = `<p style="color:red;"><strong>We couldn't reach the server. Please try again in a moment.</strong></p>`;
         console.error("Signup error:", err);
       }
     });

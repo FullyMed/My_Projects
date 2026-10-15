@@ -35,15 +35,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   let cancelLimit = 2;
   let csrfToken = null;
 
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   async function checkSession() {
     try {
       const response = await fetch("Assets/PHP/check_session.php", {
@@ -65,13 +56,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loggedInUser = await checkSession();
   if (!loggedInUser) {
-    alert("You are not logged in. Redirecting to login page...");
-    window.location.href = "Login.html";
+    redirectWithMessage("Login.html", "login_required", "Dashboard.html");
     return;
   }
 
   dashboardLoadingState?.classList.add("hidden");
   dashboardContainer?.classList.remove("hidden");
+
+  const verifyNotice = document.getElementById("verifyNotice");
+  if (!loggedInUser.emailVerified) verifyNotice?.classList.remove("hidden");
+  wireResendVerification(
+    document.getElementById("resendVerificationBtn"),
+    document.getElementById("resendVerificationResult"),
+    async () => { await checkSession(); return csrfToken; },
+    () => {
+      verifyNotice?.classList.add("hidden");
+      showToast("Your email is already verified, so you're all set to book.", "success");
+    }
+  );
 
   function updateUserInfo() {
     if (currentAvatar) currentAvatar.src = loggedInUser.avatar;
@@ -86,12 +88,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function bookingCard(b, withCancel) {
+    const cancelledByCafe = b.status === "cancelled_by_cafe";
     return `
-      <div class="booking-card">
+      <div class="booking-card${cancelledByCafe ? " is-cancelled" : ""}">
         <p><strong>Date:</strong> ${escapeHtml(b.date)}</p>
         <p><strong>Time:</strong> ${escapeHtml(b.start_time)} - ${escapeHtml(b.end_time)}</p>
         <p><strong>People:</strong> ${escapeHtml(b.people)}</p>
-        ${withCancel ? `<button class="cancelBtn" data-id="${escapeHtml(b.id)}" style="margin-top:10px;">Cancel</button>` : ""}
+        ${cancelledByCafe ? `<span class="status-badge">Cancelled by the café</span>` : ""}
+        ${withCancel && !cancelledByCafe ? `<button class="cancelBtn" data-id="${escapeHtml(b.id)}">Cancel</button>` : ""}
       </div>
     `;
   }
@@ -108,12 +112,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         cancelLimit = result.cancel_limit ?? cancelLimit;
         renderBookings(result.bookings);
       } else {
-        upcomingContainer.innerHTML = "<p>Error fetching bookings.</p>";
+        upcomingContainer.innerHTML = "<p>We couldn't load your bookings. Please refresh the page.</p>";
         historyContainer.innerHTML = "";
       }
     } catch (err) {
       console.error("Fetch bookings error:", err);
-      upcomingContainer.innerHTML = "<p>Server error.</p>";
+      upcomingContainer.innerHTML = "<p>We couldn't reach the server. Please try again in a moment.</p>";
       historyContainer.innerHTML = "";
     }
   }
@@ -137,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Most recent first
     historyContainer.innerHTML = history.length === 0
-      ? "<p>No past bookings found.</p>"
+      ? "<p>No past bookings yet.</p>"
       : history.reverse().map(b => bookingCard(b, false)).join("");
   }
 
@@ -155,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `You have ${remainingCancels} of ${cancelLimit} cancellations left this month.`;
       popup.classList.remove("hidden");
     } else {
-      alert(`You have reached the cancel limit (${cancelLimit}/month). Cannot cancel more bookings.`);
+      showToast(`You've already used your ${cancelLimit} cancellations this month, so you can't cancel this one online.`, "error");
     }
   });
 
@@ -185,15 +189,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (result.success) {
             loggedInUser.avatar = newAvatar;
             updateUserInfo();
-            avatarMsg.innerHTML = `<p style="color:green;">Avatar updated successfully!</p>`;
+            avatarMsg.innerHTML = `<p style="color:green;">Avatar saved.</p>`;
             setTimeout(() => avatarMsg.innerHTML = "", 3000);
           } else {
-            avatarMsg.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Failed to update avatar.")}</p>`;
+            avatarMsg.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "We couldn't save your avatar.")}</p>`;
           }
         } catch (err) {
           console.error("Avatar update error:", err);
           clearButtonLoading(submitBtn);
-          avatarMsg.innerHTML = `<p style="color:red;">Server error.</p>`;
+          avatarMsg.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
         }
       }
     });
@@ -225,15 +229,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         selectedBooking = null;
         if (result.success) {
           remainingCancels = result.remaining_cancels ?? Math.max(0, remainingCancels - 1);
-          alert("Booking cancelled successfully.");
+          showToast("Booking cancelled.", "success");
         } else {
-          alert("Failed to cancel booking: " + (result.error || "Unknown error."));
+          showToast("Couldn't cancel the booking. " + (result.error || "Please try again."), "error");
         }
         fetchBookingsFromServer();
       } catch (err) {
         console.error("Cancel booking error:", err);
         clearButtonLoading(confirmCancel);
-        alert("Server error.");
+        showToast("We couldn't reach the server. Please try again in a moment.", "error");
       }
     });
   }
@@ -253,14 +257,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         const result = await response.json();
         if (result.success) {
-          alert("You have been logged out.");
-          window.location.href = "Login.html";
+          redirectWithMessage("Login.html", "logged_out");
         } else {
-          alert("Logout failed.");
+          showToast("We couldn't log you out. Please try again.", "error");
         }
       } catch (err) {
         console.error("Logout error:", err);
-        alert("Server error during logout.");
+        showToast("We couldn't reach the server. Please try again in a moment.", "error");
       }
     });
   }

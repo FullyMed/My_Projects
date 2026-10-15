@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 
 header("Content-Type: application/json");
 require_once("db_connect.php");
+require_once("booking_rules.php");
 
 function respond($status, $data) {
     http_response_code($status);
@@ -18,7 +19,7 @@ function respond($status, $data) {
 if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
     respond(401, [
         "success" => false,
-        "error" => "You must be logged in to cancel a booking."
+        "error" => "Please log in to cancel a booking."
     ]);
 }
 
@@ -27,25 +28,25 @@ $input = json_decode(file_get_contents("php://input"), true);
 if (!is_array($input)) {
     respond(400, [
         "success" => false,
-        "error" => "Invalid JSON input."
+        "error" => "Something went wrong with that request. Refresh the page and try again."
     ]);
 }
 
 if (!verify_csrf_token(get_submitted_csrf_token($input))) {
     respond(403, [
         "success" => false,
-        "error" => "Your session expired. Please refresh the page and try again."
+        "error" => "Your session timed out. Refresh the page and try again."
     ]);
 }
 
 $email = $_SESSION['user']['email'];
 $bookingId = filter_var($input['id'] ?? '', FILTER_VALIDATE_INT);
-$cancelLimit = 2;
+$cancelLimit = CANCEL_LIMIT;
 
 if ($bookingId === false || $bookingId < 1) {
     respond(400, [
         "success" => false,
-        "error" => "Invalid booking."
+        "error" => "We couldn't find that booking."
     ]);
 }
 
@@ -90,14 +91,14 @@ $findStmt->close();
 if (!$booking) {
     release_and_respond($conn, $lockName, 404, [
         "success" => false,
-        "error" => "Booking not found."
+        "error" => "We couldn't find that booking."
     ]);
 }
 
 if (!(int) $booking['not_started']) {
     release_and_respond($conn, $lockName, 400, [
         "success" => false,
-        "error" => "This booking has already started and can no longer be cancelled."
+        "error" => "This booking has already started, so you can't cancel it now."
     ]);
 }
 
@@ -117,7 +118,7 @@ $cancelCount = (int) $cancelCount;
 if ($cancelCount >= $cancelLimit) {
     release_and_respond($conn, $lockName, 403, [
         "success" => false,
-        "error" => "You have reached the monthly cancellation limit ($cancelLimit per month)."
+        "error" => "You've already used your $cancelLimit cancellations for this month."
     ]);
 }
 
@@ -133,7 +134,7 @@ if ($deleted !== 1) {
     $conn->rollback();
     release_and_respond($conn, $lockName, 404, [
         "success" => false,
-        "error" => "Booking not found."
+        "error" => "We couldn't find that booking."
     ]);
 }
 
