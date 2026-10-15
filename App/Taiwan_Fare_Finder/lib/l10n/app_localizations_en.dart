@@ -42,7 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchFares => 'Search fares';
 
   @override
-  String get compareFares => 'Fare comparison';
+  String get compareFares => 'Compare fares';
 
   @override
   String get results => 'Fare results';
@@ -52,51 +52,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noResultsBody =>
-      'Select an origin, destination, and mode to see fares.';
+      'Pick an origin, a destination and a mode to see fares.';
 
   @override
-  String get searchEmptyPickTitle => 'Select a route';
+  String get searchEmptyPickTitle => 'Pick a route';
 
   @override
   String get searchEmptyPickBody =>
-      'Select an origin, destination, and mode to continue.';
+      'Choose where you\'re leaving from, where you\'re going, and how.';
 
   @override
   String get searchEmptyReadyTitle => 'Ready to search';
 
   @override
   String get searchEmptyReadyBody =>
-      'Select Search fares to see prices and travel time.';
+      'Tap Search fares to see the price and travel time.';
 
   @override
-  String get searchEmptyNoResultsTitle => 'No results found';
+  String get searchEmptyNoResultsTitle => 'Nothing found';
 
   @override
-  String get searchEmptyNoResultsBody =>
-      'Try a different route or review your selections.';
+  String get searchEmptyNoResultsBody => 'Try another route or mode.';
 
   @override
   String get offlineNoCache =>
-      'No saved results yet. Search while online to make results available offline.';
+      'Nothing saved for this route yet. Search it once while you\'re online and it\'ll be here offline too.';
 
   @override
   String get offlineDataBadge => 'Saved offline';
 
   @override
-  String get showingCachedResults => 'Showing saved results.';
+  String get showingCachedResults =>
+      'Couldn\'t reach the server. These are your saved results.';
 
   @override
   String get manageOfflineData => 'Manage offline data';
 
   @override
   String get manageOfflineDataBody =>
-      'Review what’s saved for offline use and clear it anytime.';
+      'See what\'s saved for offline use, and clear it whenever you like.';
 
   @override
-  String get cachedQueries => 'Saved routes';
+  String get cachedQueries => 'Saved searches';
 
   @override
-  String get cachedResults => 'Saved results';
+  String get cachedResults => 'Saved fares';
 
   @override
   String get clearOfflineData => 'Clear offline data';
@@ -141,17 +141,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get history => 'History';
 
   @override
-  String get emptyFavorites => 'No favorites yet';
+  String get emptyFavorites => 'No saved routes yet';
 
   @override
-  String get emptyFavoritesBody => 'Save a route to access it quickly.';
+  String get emptyFavoritesBody =>
+      'Tap the bookmark on a search result to keep that route here.';
 
   @override
   String get emptyHistory => 'No history yet';
 
   @override
-  String get emptyHistoryBody =>
-      'No history yet. Your searches will appear here.';
+  String get emptyHistoryBody => 'Routes you search will show up here.';
 
   @override
   String get rerun => 'Search again';
@@ -185,7 +185,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataModeBody =>
-      'Mock data is stable and offline-friendly. API mode fetches real HSR and TRA fares; other modes use mock data.';
+      'Mock shows made-up but consistent fares and works offline. API gets real HSR and TRA fares from TDX; the other modes still use mock data.';
 
   @override
   String get dataModeMock => 'Mock';
@@ -198,7 +198,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineModeBody =>
-      'Show saved results only. New searches won’t generate mock results.';
+      'Only show fares you\'ve already looked up. The app won\'t fetch or make up anything new.';
 
   @override
   String get dataManagement => 'Data management';
@@ -210,7 +210,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearHistory => 'Clear history';
 
   @override
-  String get clearFavorites => 'Clear favorites';
+  String get clearFavorites => 'Clear saved routes';
 
   @override
   String get cancel => 'Cancel';
@@ -219,7 +219,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
-  String get confirmDialogBody => 'Are you sure? This can’t be undone.';
+  String get confirmDialogBody => 'You can\'t undo this.';
 
   @override
   String get cleared => 'Cleared';
@@ -250,27 +250,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get compareHint =>
-      'Select multiple modes to compare price and time side-by-side.';
+      'Pick a few modes to see their prices and times next to each other.';
 
   @override
-  String get selectAtLeastOneMode => 'Select at least one mode';
+  String get selectAtLeastOneMode => 'Pick at least one mode';
 
   @override
-  String get pickRouteFirst => 'Select a route first';
+  String get pickRouteFirst => 'Pick a route first';
 
   @override
   String get searchDisabledHelper =>
-      'Select an origin, destination, and mode to search.';
+      'Pick an origin, a destination and a mode to search.';
 
   @override
   String get compareDisabledHelper =>
-      'Select an origin, destination, and at least one mode to compare.';
+      'Pick an origin, a destination and at least one mode to compare.';
 
   @override
-  String get locationPickerSearchTitle => 'Find locations';
+  String get locationPickerSearchTitle => 'Search for a place';
 
   @override
-  String get locationPickerCtaChoose => 'Select a location';
+  String get locationPickerCtaChoose => 'Choose a place';
 
   @override
   String get locationPickerRecentTitle => 'Recent';
@@ -282,10 +282,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationPickerBrowseByCity => 'Browse by city';
 
   @override
-  String get locationPickerNoResultsTitle => 'No locations found';
+  String get locationPickerNoResultsTitle => 'No matches';
 
   @override
-  String get locationPickerNoResultsBody => 'Try a different name or city.';
+  String get locationPickerNoResultsBody =>
+      'Try another spelling, or the Chinese name.';
 
   @override
   String get lastUpdated => 'Last updated';
@@ -325,18 +326,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferOneToTwo => '1–2 transfers';
 
   @override
-  String get transferDockSwap => 'Dock swap recommended';
+  String get transferDockSwap => 'Swap bikes midway';
 
   @override
-  String get errorTitle => 'Something went wrong';
+  String get errorTitle => 'Couldn\'t get fares';
 
   @override
   String get errorSearchFailed =>
-      'We couldn’t load fares right now. Please try again.';
+      'Check your internet connection and try again.';
 
   @override
   String get errorApiNotReady =>
-      'API mode isn’t available yet. Switch back to Mock in Settings.';
+      'Live fares aren\'t available in this build. Switch Data source to Mock in Settings.';
 
   @override
   String get retry => 'Retry';
@@ -366,7 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyBody =>
-      'Your searches, saved routes, history, and offline data are stored locally on your device. No account required. No tracking by default.';
+      'Everything you search and save stays on this device. You don\'t need an account, and the app doesn\'t track you.';
 
   @override
   String get privacyReadMore => 'Read more';
@@ -384,8 +385,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notFoundTitle => 'Page not found';
 
   @override
-  String get notFoundBody =>
-      'The page you’re looking for doesn’t exist or may have moved.';
+  String get notFoundBody => 'We couldn\'t find that page.';
 
   @override
   String get notFoundBackToSearch => 'Back to search';
@@ -394,124 +394,124 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsOfUse => 'Terms of Use';
 
   @override
-  String get termsLastUpdated => 'Last updated: September 21, 2026';
+  String get termsLastUpdated => 'Last updated: October 15, 2026';
 
   @override
   String get termsIntro =>
-      'These Terms of Use (\"Terms\") govern your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to these Terms. If you don\'t agree, please don\'t use the App.';
+      'These terms cover your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to them. If you don\'t agree, please don\'t use it.';
 
   @override
-  String get termsSection1Title => 'Acceptance of These Terms';
+  String get termsSection1Title => 'Accepting these terms';
 
   @override
   String get termsSection1Body =>
-      'By downloading, installing, or using Taiwan Fare Finder, you accept these Terms in full. We may update these Terms from time to time; continuing to use the App after an update means you accept the revised Terms.';
+      'By downloading, installing or using the App, you accept these terms. We may update them. If you keep using the App after an update, you accept the new version.';
 
   @override
-  String get termsSection2Title => 'The Service';
+  String get termsSection2Title => 'What the App does';
 
   @override
   String get termsSection2Body =>
-      'Taiwan Fare Finder is an informational tool for searching, comparing, and saving public transportation fares across Taiwan. It does not sell tickets, process payments, or connect to any transit operator\'s booking system.';
+      'Taiwan Fare Finder helps you look up, compare and save public transport fares in Taiwan. It doesn\'t sell tickets, take payments or connect to any operator\'s booking system.';
 
   @override
-  String get termsSection3Title => 'Fare Accuracy & Data Sources';
+  String get termsSection3Title => 'Fare accuracy and data sources';
 
   @override
   String get termsSection3Body =>
-      'High Speed Rail (HSR) and Taiwan Railway (TRA) fares are retrieved from Taiwan\'s official TDX open-data platform when API mode is enabled. MRT, Bus, and YouBike fares use a consistent internal estimate, not official pricing. In all cases, fares and travel times may be outdated, cached, or inaccurate. Always confirm the actual fare with the relevant transit operator before you travel.';
+      'With API mode on, the App gets High Speed Rail (HSR) and Taiwan Railway (TRA) fares from Taiwan\'s official TDX open-data platform. MRT, bus and YouBike fares are the App\'s own estimates, not official prices, and so is the student fare for HSR and TRA. Any fare or travel time can be out of date or wrong, so check with the operator before you travel.';
 
   @override
-  String get termsSection4Title => 'Acceptable Use';
+  String get termsSection4Title => 'Acceptable use';
 
   @override
   String get termsSection4Body =>
-      'The App is for your personal, non-commercial use. You agree not to misuse the App or its backend services — for example, by sending an excessive volume of automated requests, attempting to extract API credentials, or interfering with the App\'s normal operation.';
+      'The App is for personal, non-commercial use. Please don\'t misuse it or the server behind it, for example by sending large volumes of automated requests, trying to extract API credentials, or interfering with how the App works.';
 
   @override
-  String get termsSection5Title => 'No Warranty & Limitation of Liability';
+  String get termsSection5Title => 'No warranty and limitation of liability';
 
   @override
   String get termsSection5Body =>
-      'The App is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we are not liable for any loss or damage arising from your use of the App, including missed trips or fare discrepancies.';
+      'We provide the App \"as is\" and \"as available\", without warranties of any kind, express or implied, including accuracy, reliability or fitness for a particular purpose. To the fullest extent the law allows, we are not liable for any loss or damage from your use of the App, including missed trips or fare differences.';
 
   @override
-  String get termsSection6Title => 'Third-Party Services';
+  String get termsSection6Title => 'Third-party services';
 
   @override
   String get termsSection6Body =>
-      'Live HSR and TRA fare data is sourced from Taiwan\'s TDX (Transport Data eXchange) open-data platform, operated by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). Use of that data is subject to TDX\'s own terms, which we do not control.';
+      'Live HSR and TRA fares come from TDX (Transport Data eXchange), the open-data platform run by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). TDX\'s own terms apply to that data, and we don\'t control them.';
 
   @override
-  String get termsSection7Title => 'Changes to These Terms';
+  String get termsSection7Title => 'Changes to these terms';
 
   @override
   String get termsSection7Body =>
-      'We may revise these Terms as the App evolves. The \"Last updated\" date above reflects the most recent revision. We encourage you to review these Terms periodically.';
+      'We may revise these terms as the App changes. The \"Last updated\" date at the top shows the latest revision.';
 
   @override
   String get termsSection8Title => 'Contact';
 
   @override
   String get termsSection8Body =>
-      'Questions about these Terms can be sent to maxfelix05@gmail.com.';
+      'Questions about these terms? Email maxfelix05@gmail.com.';
 
   @override
   String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
-  String get privacyLastUpdated => 'Last updated: October 1, 2026';
+  String get privacyLastUpdated => 'Last updated: October 15, 2026';
 
   @override
   String get privacyPolicyIntro =>
-      'Taiwan Fare Finder does not require an account, has no login, and keeps none of your data on a server. This policy explains the little data the App does handle, and where it goes.';
+      'Taiwan Fare Finder has no accounts or logins, and we don\'t keep any of your data on a server. This policy covers the little data the App handles and where it goes.';
 
   @override
-  String get privacySection1Title => 'Information We Store On Your Device';
+  String get privacySection1Title => 'What stays on your device';
 
   @override
   String get privacySection1Body =>
-      'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode, data source) are stored locally on your device using standard app storage. This data is never uploaded anywhere.';
+      'The App keeps your search history, saved routes, cached fares and settings (language, theme, offline mode, data source) in normal app storage on your device. It never uploads any of it.';
 
   @override
-  String get privacySection2Title => 'Information Sent To Third Parties';
+  String get privacySection2Title => 'What gets sent, and to whom';
 
   @override
   String get privacySection2Body =>
-      'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent to our small relay server (a proxy hosted on Cloudflare), which forwards them to Taiwan\'s official TDX open-data platform to retrieve real fares. The relay holds the TDX access key so it never ships inside the App; it caches fare data for a few hours to stay fast, but does not record who made a request. No name, account, or device identifier is attached to these requests, because the App has none to send. As with any internet request, your IP address is visible to the networks that carry it.';
+      'In Mock mode, nothing you search leaves your device. In API mode, the App sends the origin and destination station codes of HSR and TRA searches to our small relay server, a proxy hosted on Cloudflare. The relay passes them to Taiwan\'s official TDX open-data platform to get real fares. The relay holds the TDX access key, so the key never ships inside the App. It caches fare data for a few hours to stay fast, but it doesn\'t record who asked. The requests carry no name, account or device ID, because the App doesn\'t have any. Like any internet request, they reveal your IP address to the networks that carry them.';
 
   @override
   String get privacySection3Title => 'Analytics';
 
   @override
   String get privacySection3Body =>
-      'The App currently logs a few event names locally for debugging purposes only (visible in developer logs on your own device) and does not transmit them anywhere. If we ever add real analytics or tracking, we will ask for your consent first.';
+      'The App writes a few event names to the developer log on your own device, for debugging. It doesn\'t send them anywhere. If we ever add real analytics, we\'ll ask for your consent first.';
 
   @override
-  String get privacySection4Title => 'Children\'s Privacy';
+  String get privacySection4Title => 'Children\'s privacy';
 
   @override
   String get privacySection4Body =>
-      'The App does not knowingly collect personal information from anyone, including children, because it does not collect personal information from anyone. It is suitable for a general audience.';
+      'The App doesn\'t collect personal information from anyone, children included, and it\'s suitable for all ages.';
 
   @override
-  String get privacySection5Title => 'Your Choices & Data Deletion';
+  String get privacySection5Title => 'Your choices and deleting your data';
 
   @override
   String get privacySection5Body =>
-      'You can clear cached fares (Settings → Manage offline data) and your search history or favorites (Settings → Data management) at any time. Uninstalling the App removes all data it stored on your device.';
+      'You can clear cached fares (Settings → Manage offline data) and your history or saved routes (Settings → Data management) at any time. Uninstalling the App deletes everything it stored on your device.';
 
   @override
-  String get privacySection6Title => 'Changes to This Policy';
+  String get privacySection6Title => 'Changes to this policy';
 
   @override
   String get privacySection6Body =>
-      'We may update this Privacy Policy as the App evolves. The \"Last updated\" date above reflects the most recent revision.';
+      'We may update this policy as the App changes. The \"Last updated\" date at the top shows the latest revision.';
 
   @override
   String get privacySection7Title => 'Contact';
 
   @override
   String get privacySection7Body =>
-      'Questions about this Privacy Policy can be sent to maxfelix05@gmail.com.';
+      'Questions about this policy? Email maxfelix05@gmail.com.';
 }

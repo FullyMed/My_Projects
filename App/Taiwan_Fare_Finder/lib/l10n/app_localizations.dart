@@ -170,7 +170,7 @@ abstract class AppLocalizations {
   /// No description provided for @compareFares.
   ///
   /// In en, this message translates to:
-  /// **'Fare comparison'**
+  /// **'Compare fares'**
   String get compareFares;
 
   /// No description provided for @results.
@@ -188,19 +188,19 @@ abstract class AppLocalizations {
   /// No description provided for @noResultsBody.
   ///
   /// In en, this message translates to:
-  /// **'Select an origin, destination, and mode to see fares.'**
+  /// **'Pick an origin, a destination and a mode to see fares.'**
   String get noResultsBody;
 
   /// No description provided for @searchEmptyPickTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select a route'**
+  /// **'Pick a route'**
   String get searchEmptyPickTitle;
 
   /// No description provided for @searchEmptyPickBody.
   ///
   /// In en, this message translates to:
-  /// **'Select an origin, destination, and mode to continue.'**
+  /// **'Choose where you\'re leaving from, where you\'re going, and how.'**
   String get searchEmptyPickBody;
 
   /// No description provided for @searchEmptyReadyTitle.
@@ -212,25 +212,25 @@ abstract class AppLocalizations {
   /// No description provided for @searchEmptyReadyBody.
   ///
   /// In en, this message translates to:
-  /// **'Select Search fares to see prices and travel time.'**
+  /// **'Tap Search fares to see the price and travel time.'**
   String get searchEmptyReadyBody;
 
   /// No description provided for @searchEmptyNoResultsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No results found'**
+  /// **'Nothing found'**
   String get searchEmptyNoResultsTitle;
 
   /// No description provided for @searchEmptyNoResultsBody.
   ///
   /// In en, this message translates to:
-  /// **'Try a different route or review your selections.'**
+  /// **'Try another route or mode.'**
   String get searchEmptyNoResultsBody;
 
   /// No description provided for @offlineNoCache.
   ///
   /// In en, this message translates to:
-  /// **'No saved results yet. Search while online to make results available offline.'**
+  /// **'Nothing saved for this route yet. Search it once while you\'re online and it\'ll be here offline too.'**
   String get offlineNoCache;
 
   /// No description provided for @offlineDataBadge.
@@ -242,7 +242,7 @@ abstract class AppLocalizations {
   /// No description provided for @showingCachedResults.
   ///
   /// In en, this message translates to:
-  /// **'Showing saved results.'**
+  /// **'Couldn\'t reach the server. These are your saved results.'**
   String get showingCachedResults;
 
   /// No description provided for @manageOfflineData.
@@ -254,19 +254,19 @@ abstract class AppLocalizations {
   /// No description provided for @manageOfflineDataBody.
   ///
   /// In en, this message translates to:
-  /// **'Review what’s saved for offline use and clear it anytime.'**
+  /// **'See what\'s saved for offline use, and clear it whenever you like.'**
   String get manageOfflineDataBody;
 
   /// No description provided for @cachedQueries.
   ///
   /// In en, this message translates to:
-  /// **'Saved routes'**
+  /// **'Saved searches'**
   String get cachedQueries;
 
   /// No description provided for @cachedResults.
   ///
   /// In en, this message translates to:
-  /// **'Saved results'**
+  /// **'Saved fares'**
   String get cachedResults;
 
   /// No description provided for @clearOfflineData.
@@ -356,13 +356,13 @@ abstract class AppLocalizations {
   /// No description provided for @emptyFavorites.
   ///
   /// In en, this message translates to:
-  /// **'No favorites yet'**
+  /// **'No saved routes yet'**
   String get emptyFavorites;
 
   /// No description provided for @emptyFavoritesBody.
   ///
   /// In en, this message translates to:
-  /// **'Save a route to access it quickly.'**
+  /// **'Tap the bookmark on a search result to keep that route here.'**
   String get emptyFavoritesBody;
 
   /// No description provided for @emptyHistory.
@@ -374,7 +374,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyHistoryBody.
   ///
   /// In en, this message translates to:
-  /// **'No history yet. Your searches will appear here.'**
+  /// **'Routes you search will show up here.'**
   String get emptyHistoryBody;
 
   /// No description provided for @rerun.
@@ -440,7 +440,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataModeBody.
   ///
   /// In en, this message translates to:
-  /// **'Mock data is stable and offline-friendly. API mode fetches real HSR and TRA fares; other modes use mock data.'**
+  /// **'Mock shows made-up but consistent fares and works offline. API gets real HSR and TRA fares from TDX; the other modes still use mock data.'**
   String get dataModeBody;
 
   /// No description provided for @dataModeMock.
@@ -464,7 +464,7 @@ abstract class AppLocalizations {
   /// No description provided for @offlineModeBody.
   ///
   /// In en, this message translates to:
-  /// **'Show saved results only. New searches won’t generate mock results.'**
+  /// **'Only show fares you\'ve already looked up. The app won\'t fetch or make up anything new.'**
   String get offlineModeBody;
 
   /// No description provided for @dataManagement.
@@ -488,7 +488,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearFavorites.
   ///
   /// In en, this message translates to:
-  /// **'Clear favorites'**
+  /// **'Clear saved routes'**
   String get clearFavorites;
 
   /// No description provided for @cancel.
@@ -506,7 +506,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure? This can’t be undone.'**
+  /// **'You can\'t undo this.'**
   String get confirmDialogBody;
 
   /// No description provided for @cleared.
@@ -566,43 +566,43 @@ abstract class AppLocalizations {
   /// No description provided for @compareHint.
   ///
   /// In en, this message translates to:
-  /// **'Select multiple modes to compare price and time side-by-side.'**
+  /// **'Pick a few modes to see their prices and times next to each other.'**
   String get compareHint;
 
   /// No description provided for @selectAtLeastOneMode.
   ///
   /// In en, this message translates to:
-  /// **'Select at least one mode'**
+  /// **'Pick at least one mode'**
   String get selectAtLeastOneMode;
 
   /// No description provided for @pickRouteFirst.
   ///
   /// In en, this message translates to:
-  /// **'Select a route first'**
+  /// **'Pick a route first'**
   String get pickRouteFirst;
 
   /// No description provided for @searchDisabledHelper.
   ///
   /// In en, this message translates to:
-  /// **'Select an origin, destination, and mode to search.'**
+  /// **'Pick an origin, a destination and a mode to search.'**
   String get searchDisabledHelper;
 
   /// No description provided for @compareDisabledHelper.
   ///
   /// In en, this message translates to:
-  /// **'Select an origin, destination, and at least one mode to compare.'**
+  /// **'Pick an origin, a destination and at least one mode to compare.'**
   String get compareDisabledHelper;
 
   /// No description provided for @locationPickerSearchTitle.
   ///
   /// In en, this message translates to:
-  /// **'Find locations'**
+  /// **'Search for a place'**
   String get locationPickerSearchTitle;
 
   /// No description provided for @locationPickerCtaChoose.
   ///
   /// In en, this message translates to:
-  /// **'Select a location'**
+  /// **'Choose a place'**
   String get locationPickerCtaChoose;
 
   /// No description provided for @locationPickerRecentTitle.
@@ -626,13 +626,13 @@ abstract class AppLocalizations {
   /// No description provided for @locationPickerNoResultsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No locations found'**
+  /// **'No matches'**
   String get locationPickerNoResultsTitle;
 
   /// No description provided for @locationPickerNoResultsBody.
   ///
   /// In en, this message translates to:
-  /// **'Try a different name or city.'**
+  /// **'Try another spelling, or the Chinese name.'**
   String get locationPickerNoResultsBody;
 
   /// No description provided for @lastUpdated.
@@ -704,25 +704,25 @@ abstract class AppLocalizations {
   /// No description provided for @transferDockSwap.
   ///
   /// In en, this message translates to:
-  /// **'Dock swap recommended'**
+  /// **'Swap bikes midway'**
   String get transferDockSwap;
 
   /// No description provided for @errorTitle.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong'**
+  /// **'Couldn\'t get fares'**
   String get errorTitle;
 
   /// No description provided for @errorSearchFailed.
   ///
   /// In en, this message translates to:
-  /// **'We couldn’t load fares right now. Please try again.'**
+  /// **'Check your internet connection and try again.'**
   String get errorSearchFailed;
 
   /// No description provided for @errorApiNotReady.
   ///
   /// In en, this message translates to:
-  /// **'API mode isn’t available yet. Switch back to Mock in Settings.'**
+  /// **'Live fares aren\'t available in this build. Switch Data source to Mock in Settings.'**
   String get errorApiNotReady;
 
   /// No description provided for @retry.
@@ -776,7 +776,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyBody.
   ///
   /// In en, this message translates to:
-  /// **'Your searches, saved routes, history, and offline data are stored locally on your device. No account required. No tracking by default.'**
+  /// **'Everything you search and save stays on this device. You don\'t need an account, and the app doesn\'t track you.'**
   String get privacyBody;
 
   /// No description provided for @privacyReadMore.
@@ -812,7 +812,7 @@ abstract class AppLocalizations {
   /// No description provided for @notFoundBody.
   ///
   /// In en, this message translates to:
-  /// **'The page you’re looking for doesn’t exist or may have moved.'**
+  /// **'We couldn\'t find that page.'**
   String get notFoundBody;
 
   /// No description provided for @notFoundBackToSearch.
@@ -830,97 +830,97 @@ abstract class AppLocalizations {
   /// No description provided for @termsLastUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last updated: September 21, 2026'**
+  /// **'Last updated: October 15, 2026'**
   String get termsLastUpdated;
 
   /// No description provided for @termsIntro.
   ///
   /// In en, this message translates to:
-  /// **'These Terms of Use (\"Terms\") govern your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to these Terms. If you don\'t agree, please don\'t use the App.'**
+  /// **'These terms cover your use of Taiwan Fare Finder (the \"App\"). By using the App, you agree to them. If you don\'t agree, please don\'t use it.'**
   String get termsIntro;
 
   /// No description provided for @termsSection1Title.
   ///
   /// In en, this message translates to:
-  /// **'Acceptance of These Terms'**
+  /// **'Accepting these terms'**
   String get termsSection1Title;
 
   /// No description provided for @termsSection1Body.
   ///
   /// In en, this message translates to:
-  /// **'By downloading, installing, or using Taiwan Fare Finder, you accept these Terms in full. We may update these Terms from time to time; continuing to use the App after an update means you accept the revised Terms.'**
+  /// **'By downloading, installing or using the App, you accept these terms. We may update them. If you keep using the App after an update, you accept the new version.'**
   String get termsSection1Body;
 
   /// No description provided for @termsSection2Title.
   ///
   /// In en, this message translates to:
-  /// **'The Service'**
+  /// **'What the App does'**
   String get termsSection2Title;
 
   /// No description provided for @termsSection2Body.
   ///
   /// In en, this message translates to:
-  /// **'Taiwan Fare Finder is an informational tool for searching, comparing, and saving public transportation fares across Taiwan. It does not sell tickets, process payments, or connect to any transit operator\'s booking system.'**
+  /// **'Taiwan Fare Finder helps you look up, compare and save public transport fares in Taiwan. It doesn\'t sell tickets, take payments or connect to any operator\'s booking system.'**
   String get termsSection2Body;
 
   /// No description provided for @termsSection3Title.
   ///
   /// In en, this message translates to:
-  /// **'Fare Accuracy & Data Sources'**
+  /// **'Fare accuracy and data sources'**
   String get termsSection3Title;
 
   /// No description provided for @termsSection3Body.
   ///
   /// In en, this message translates to:
-  /// **'High Speed Rail (HSR) and Taiwan Railway (TRA) fares are retrieved from Taiwan\'s official TDX open-data platform when API mode is enabled. MRT, Bus, and YouBike fares use a consistent internal estimate, not official pricing. In all cases, fares and travel times may be outdated, cached, or inaccurate. Always confirm the actual fare with the relevant transit operator before you travel.'**
+  /// **'With API mode on, the App gets High Speed Rail (HSR) and Taiwan Railway (TRA) fares from Taiwan\'s official TDX open-data platform. MRT, bus and YouBike fares are the App\'s own estimates, not official prices, and so is the student fare for HSR and TRA. Any fare or travel time can be out of date or wrong, so check with the operator before you travel.'**
   String get termsSection3Body;
 
   /// No description provided for @termsSection4Title.
   ///
   /// In en, this message translates to:
-  /// **'Acceptable Use'**
+  /// **'Acceptable use'**
   String get termsSection4Title;
 
   /// No description provided for @termsSection4Body.
   ///
   /// In en, this message translates to:
-  /// **'The App is for your personal, non-commercial use. You agree not to misuse the App or its backend services — for example, by sending an excessive volume of automated requests, attempting to extract API credentials, or interfering with the App\'s normal operation.'**
+  /// **'The App is for personal, non-commercial use. Please don\'t misuse it or the server behind it, for example by sending large volumes of automated requests, trying to extract API credentials, or interfering with how the App works.'**
   String get termsSection4Body;
 
   /// No description provided for @termsSection5Title.
   ///
   /// In en, this message translates to:
-  /// **'No Warranty & Limitation of Liability'**
+  /// **'No warranty and limitation of liability'**
   String get termsSection5Title;
 
   /// No description provided for @termsSection5Body.
   ///
   /// In en, this message translates to:
-  /// **'The App is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we are not liable for any loss or damage arising from your use of the App, including missed trips or fare discrepancies.'**
+  /// **'We provide the App \"as is\" and \"as available\", without warranties of any kind, express or implied, including accuracy, reliability or fitness for a particular purpose. To the fullest extent the law allows, we are not liable for any loss or damage from your use of the App, including missed trips or fare differences.'**
   String get termsSection5Body;
 
   /// No description provided for @termsSection6Title.
   ///
   /// In en, this message translates to:
-  /// **'Third-Party Services'**
+  /// **'Third-party services'**
   String get termsSection6Title;
 
   /// No description provided for @termsSection6Body.
   ///
   /// In en, this message translates to:
-  /// **'Live HSR and TRA fare data is sourced from Taiwan\'s TDX (Transport Data eXchange) open-data platform, operated by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). Use of that data is subject to TDX\'s own terms, which we do not control.'**
+  /// **'Live HSR and TRA fares come from TDX (Transport Data eXchange), the open-data platform run by Taiwan\'s Ministry of Transportation and Communications (tdx.transportdata.tw). TDX\'s own terms apply to that data, and we don\'t control them.'**
   String get termsSection6Body;
 
   /// No description provided for @termsSection7Title.
   ///
   /// In en, this message translates to:
-  /// **'Changes to These Terms'**
+  /// **'Changes to these terms'**
   String get termsSection7Title;
 
   /// No description provided for @termsSection7Body.
   ///
   /// In en, this message translates to:
-  /// **'We may revise these Terms as the App evolves. The \"Last updated\" date above reflects the most recent revision. We encourage you to review these Terms periodically.'**
+  /// **'We may revise these terms as the App changes. The \"Last updated\" date at the top shows the latest revision.'**
   String get termsSection7Body;
 
   /// No description provided for @termsSection8Title.
@@ -932,7 +932,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection8Body.
   ///
   /// In en, this message translates to:
-  /// **'Questions about these Terms can be sent to maxfelix05@gmail.com.'**
+  /// **'Questions about these terms? Email maxfelix05@gmail.com.'**
   String get termsSection8Body;
 
   /// No description provided for @privacyPolicyTitle.
@@ -944,37 +944,37 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLastUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last updated: October 1, 2026'**
+  /// **'Last updated: October 15, 2026'**
   String get privacyLastUpdated;
 
   /// No description provided for @privacyPolicyIntro.
   ///
   /// In en, this message translates to:
-  /// **'Taiwan Fare Finder does not require an account, has no login, and keeps none of your data on a server. This policy explains the little data the App does handle, and where it goes.'**
+  /// **'Taiwan Fare Finder has no accounts or logins, and we don\'t keep any of your data on a server. This policy covers the little data the App handles and where it goes.'**
   String get privacyPolicyIntro;
 
   /// No description provided for @privacySection1Title.
   ///
   /// In en, this message translates to:
-  /// **'Information We Store On Your Device'**
+  /// **'What stays on your device'**
   String get privacySection1Title;
 
   /// No description provided for @privacySection1Body.
   ///
   /// In en, this message translates to:
-  /// **'Your search history, saved (favorite) routes, cached fare results, and app settings (language, theme, offline mode, data source) are stored locally on your device using standard app storage. This data is never uploaded anywhere.'**
+  /// **'The App keeps your search history, saved routes, cached fares and settings (language, theme, offline mode, data source) in normal app storage on your device. It never uploads any of it.'**
   String get privacySection1Body;
 
   /// No description provided for @privacySection2Title.
   ///
   /// In en, this message translates to:
-  /// **'Information Sent To Third Parties'**
+  /// **'What gets sent, and to whom'**
   String get privacySection2Title;
 
   /// No description provided for @privacySection2Body.
   ///
   /// In en, this message translates to:
-  /// **'In Mock data mode, nothing you search ever leaves your device. In API data mode, the origin and destination station identifiers for High Speed Rail and Taiwan Railway searches are sent to our small relay server (a proxy hosted on Cloudflare), which forwards them to Taiwan\'s official TDX open-data platform to retrieve real fares. The relay holds the TDX access key so it never ships inside the App; it caches fare data for a few hours to stay fast, but does not record who made a request. No name, account, or device identifier is attached to these requests, because the App has none to send. As with any internet request, your IP address is visible to the networks that carry it.'**
+  /// **'In Mock mode, nothing you search leaves your device. In API mode, the App sends the origin and destination station codes of HSR and TRA searches to our small relay server, a proxy hosted on Cloudflare. The relay passes them to Taiwan\'s official TDX open-data platform to get real fares. The relay holds the TDX access key, so the key never ships inside the App. It caches fare data for a few hours to stay fast, but it doesn\'t record who asked. The requests carry no name, account or device ID, because the App doesn\'t have any. Like any internet request, they reveal your IP address to the networks that carry them.'**
   String get privacySection2Body;
 
   /// No description provided for @privacySection3Title.
@@ -986,43 +986,43 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection3Body.
   ///
   /// In en, this message translates to:
-  /// **'The App currently logs a few event names locally for debugging purposes only (visible in developer logs on your own device) and does not transmit them anywhere. If we ever add real analytics or tracking, we will ask for your consent first.'**
+  /// **'The App writes a few event names to the developer log on your own device, for debugging. It doesn\'t send them anywhere. If we ever add real analytics, we\'ll ask for your consent first.'**
   String get privacySection3Body;
 
   /// No description provided for @privacySection4Title.
   ///
   /// In en, this message translates to:
-  /// **'Children\'s Privacy'**
+  /// **'Children\'s privacy'**
   String get privacySection4Title;
 
   /// No description provided for @privacySection4Body.
   ///
   /// In en, this message translates to:
-  /// **'The App does not knowingly collect personal information from anyone, including children, because it does not collect personal information from anyone. It is suitable for a general audience.'**
+  /// **'The App doesn\'t collect personal information from anyone, children included, and it\'s suitable for all ages.'**
   String get privacySection4Body;
 
   /// No description provided for @privacySection5Title.
   ///
   /// In en, this message translates to:
-  /// **'Your Choices & Data Deletion'**
+  /// **'Your choices and deleting your data'**
   String get privacySection5Title;
 
   /// No description provided for @privacySection5Body.
   ///
   /// In en, this message translates to:
-  /// **'You can clear cached fares (Settings → Manage offline data) and your search history or favorites (Settings → Data management) at any time. Uninstalling the App removes all data it stored on your device.'**
+  /// **'You can clear cached fares (Settings → Manage offline data) and your history or saved routes (Settings → Data management) at any time. Uninstalling the App deletes everything it stored on your device.'**
   String get privacySection5Body;
 
   /// No description provided for @privacySection6Title.
   ///
   /// In en, this message translates to:
-  /// **'Changes to This Policy'**
+  /// **'Changes to this policy'**
   String get privacySection6Title;
 
   /// No description provided for @privacySection6Body.
   ///
   /// In en, this message translates to:
-  /// **'We may update this Privacy Policy as the App evolves. The \"Last updated\" date above reflects the most recent revision.'**
+  /// **'We may update this policy as the App changes. The \"Last updated\" date at the top shows the latest revision.'**
   String get privacySection6Body;
 
   /// No description provided for @privacySection7Title.
@@ -1034,7 +1034,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection7Body.
   ///
   /// In en, this message translates to:
-  /// **'Questions about this Privacy Policy can be sent to maxfelix05@gmail.com.'**
+  /// **'Questions about this policy? Email maxfelix05@gmail.com.'**
   String get privacySection7Body;
 }
 

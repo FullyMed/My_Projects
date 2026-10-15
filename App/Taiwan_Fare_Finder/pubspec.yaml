@@ -1,5 +1,5 @@
 name: taiwan_fare_finder
-description: "Navigate Taiwan's vibrant public transport with ease! This Flutter app is your ultimate fare guide, helping you quickly search, compare, and save routes across all major modes, all in one friendly, multilingual interface."
+description: "Look up and compare public transport fares across Taiwan: HSR, TRA, MRT, bus and YouBike."
 publish_to: "none"
 version: 1.0.0+1
 

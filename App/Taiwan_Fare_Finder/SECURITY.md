@@ -1,88 +1,57 @@
 # Security
 
-Taiwan Fare Finder is a client-only Flutter app: no backend of its own beyond
-a stateless TDX relay (the Cloudflare Worker in `proxy/`, which stores nothing
-per user), no accounts, no login, no payments, no personal data, no WebView,
-no deep links. The only network dependency is Taiwan's public **TDX**
-open-data API, reached through that relay. The
-realistic threat model is therefore narrow — it's about protecting the TDX
-account and the release build, not user data.
+Taiwan Fare Finder runs on the user's device. The only server is a small TDX relay (the Cloudflare Worker in `proxy/`), and it stores nothing about users. The app has no accounts, logins, payments, personal data, WebViews or deep links, and its only outside data source is Taiwan's public TDX open-data API, reached through that relay. So the risks worth worrying about are the TDX account and the release build, not user data.
 
-## Hardening in place
+## What's in place
 
-### TDX credentials never ship in the app
-- **No secret in source.** All config comes from `--dart-define`
-  (`AppConfig`, `lib/config/app_config.dart`), normally via a gitignored
-  `tdx.env.json` passed with `--dart-define-from-file`. There is no credentials
-  `.dart` file compiled into the app.
-- `proxy/` is a Cloudflare Worker that holds `TDX_CLIENT_ID` / `TDX_CLIENT_SECRET`
-  as Worker secrets and forwards only read-only `Rail/THSR/*` and `Rail/TRA/*`
-  requests. It manages its own bearer token and edge-caches responses for 6h.
-- The app is pointed at it with `--dart-define=TFF_PROXY_BASE_URL=...`. In proxy
-  mode `TdxAuthService` is never called.
-- Direct mode (`TDX_CLIENT_ID` / `TDX_CLIENT_SECRET` defines) is local-dev only.
-  A release built with them embeds the secret as a **plaintext string** —
-  R8 and Dart `--obfuscate` do *not* hide string constants (verified against a
-  release APK). Use the proxy for anything shipped.
-- Web builds **refuse** a direct TDX call when no proxy is configured
-  (`TdxFareService.fetch` throws), so the secret can't reach `main.dart.js`.
-- `getToken()` throws when no credentials are present → caller falls back to
-  cache, then to the deterministic mock.
+### The TDX secret stays out of the app
+
+- No secret lives in the source. `AppConfig` (`lib/config/app_config.dart`) reads everything from `--dart-define`, normally passed in from a gitignored `tdx.env.json` passed with `--dart-define-from-file`. The app compiles in no credentials file.
+- The Worker in `proxy/` holds `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` as Worker secrets. It forwards only read-only `Rail/THSR/*` and `Rail/TRA/*` requests, gets its own bearer token, and caches responses at the edge for 6 hours.
+- You point the app at the Worker with `--dart-define=TFF_PROXY_BASE_URL=...`. In proxy mode the app never calls `TdxAuthService`.
+- Direct mode (the `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` defines) is for local development only. A release built that way contains the secret as a plain string. R8 and Dart's `--obfuscate` don't hide string constants; this was checked against a release APK. Ship with the proxy.
+- Web builds refuse to call TDX directly when no proxy is set (`TdxFareService.fetch` throws), so the secret can't end up in `main.dart.js`.
+- Without credentials, `getToken()` throws and the search falls back to cached results. There's no mock fallback for HSR and TRA.
 
 ### Network
-- All TDX traffic is HTTPS. No cleartext endpoints anywhere in `lib/`.
-- The bearer token is kept in memory only — never written to disk.
-- TDX responses are parsed defensively (`is List` / `is Map` / positive-int
-  checks); malformed or hostile responses raise a handled exception and the app
-  falls back to cache, then to the deterministic mock.
-- Station IDs are validated against `^[0-9A-Za-z]{2,10}$` before they reach the
-  OData `$filter` string, so that path stays safe if the station maps ever
-  become dynamic.
+
+- All TDX traffic uses HTTPS, and `lib/` contains no cleartext endpoints.
+- The bearer token lives in memory only. The app never writes it to disk.
+- The app decodes TDX responses as UTF-8 and checks their shape (`is List`, `is Map`, positive integers). A malformed or hostile response raises a handled exception, and the app falls back to cached results.
+- Station IDs must match `^[0-9A-Za-z]{2,10}$` before they go into the OData `$filter` string. That keeps the filter safe if the station maps ever come from an API instead of constants.
 
 ### Local storage
-- `shared_preferences` holds only low-sensitivity, device-local data: search
-  history, favorites, the fare cache, and a random `userId`. No secrets, no PII.
-- `android:allowBackup="false"` keeps that data out of Android cloud backup.
+
+- `shared_preferences` holds only low-risk data that never leaves the device: search history, saved routes, the fare cache and a random user ID. No secrets, no personal data.
+- `android:allowBackup="false"` keeps that data out of Android cloud backups.
 
 ### Android release build
-- Real app id `com.felix.taiwanfarefinder` (was the template's
-  `com.mycompany.CounterApp`); `MainActivity.kt` moved to the matching package.
-- R8 `minifyEnabled` + `shrinkResources` on release, with `proguard-rules.pro`.
-- Toolchain aligned to this Flutter version's tested set (Gradle 8.12,
-  AGP 8.7.3, Kotlin 2.1.0) — the previous mix (AGP 8.3.2 + Kotlin 2.2.21)
-  crashed R8. The root `android/build.gradle` also had a pre-existing
-  "sourceCompatibility has been finalized" failure, now fixed.
-- Release signing uses `android/key.properties` when present (gitignored),
-  falling back to debug signing only for local `flutter run --release`.
-- Store builds must add Dart obfuscation:
+
+- The app ID is `com.felix.taiwanfarefinder` (it used to be the template's `com.mycompany.CounterApp`), and `MainActivity.kt` lives in the matching package.
+- Release builds turn on R8 `minifyEnabled` and `shrinkResources`, with rules in `proguard-rules.pro`.
+- The toolchain matches the versions this Flutter release was tested with: Gradle 8.12, AGP 8.7.3, Kotlin 2.1.0. The earlier mix of AGP 8.3.2 and Kotlin 2.2.21 crashed R8. The root `android/build.gradle` also had a "sourceCompatibility has been finalized" failure, which is fixed.
+- Release signing uses `android/key.properties` (gitignored) only when it's filled in and points at a keystore that exists. Otherwise the build falls back to debug signing so local `flutter run --release` still works. That fallback build can't go to the Play Store.
+- Store builds also need Dart obfuscation:
   `flutter build apk --release --dart-define-from-file=tdx.env.json --obfuscate --split-debug-info=build/symbols`
 
 ### Dependencies
-- Fonts are bundled (`assets/fonts/PlusJakartaSans-VariableFont_wght.ttf`,
-  SIL OFL) — the `google_fonts` runtime download was removed.
-- Remaining deps are mainstream and current: `http`, `shared_preferences`,
-  `provider`, `go_router`, `intl`, `package_info_plus`.
 
-## Operational checklist
+- The font ships with the app (`assets/fonts/PlusJakartaSans-VariableFont_wght.ttf`, SIL OFL). The `google_fonts` runtime download is gone.
+- The remaining packages are mainstream and current: `http`, `shared_preferences`, `provider`, `go_router`, `intl`, `package_info_plus`.
 
-- [ ] **Rotate the TDX client secret** — the previous value sat in plaintext
-      and is baked into the local `app-release.apk` test build. Regenerate it in
-      the TDX portal.
-- [ ] `cd proxy && npm install && npx wrangler login`
-- [ ] `npx wrangler secret put TDX_CLIENT_ID` / `... TDX_CLIENT_SECRET`
-- [ ] `npx wrangler deploy`, then build the app with `--dart-define-from-file=tdx.env.json`
-      (containing `TFF_PROXY_BASE_URL`).
-- [ ] Delete the now-unused `lib/config/tdx_credentials.dart` once its values are
-      in the Worker, and delete the local `build/app/outputs/flutter-apk/*.apk`
-      test builds.
-- [ ] (Optional) Add a Cloudflare Rate Limiting rule on the Worker route.
-- [ ] Generate an upload keystore, create `android/key.properties`, store the
-      `.jks` outside the repo.
-- [ ] Keep `build/symbols/` from obfuscated builds so crash traces can be
-      symbolized.
-- [ ] Run `flutter pub outdated` periodically.
+## Checklist
+
+Done:
+- [x] Worker deployed with its TDX secrets set (the live proxy answers).
+- [x] `lib/config/tdx_credentials.dart` and the old local test APKs are deleted.
+
+Still open:
+- [ ] Rotate the TDX client secret in the TDX portal, then update the Worker with `npx wrangler secret put TDX_CLIENT_SECRET`. An earlier value sat in plain text in a local file and a test APK, so treat it as exposed. This hasn't been confirmed as done.
+- [ ] Add rate limiting to the Worker route. Right now anyone who finds the URL can burn through your TDX quota, and the 6-hour edge cache only softens that. A Cloudflare Rate Limiting rule (Security → WAF → Rate limiting rules), for example 60 requests a minute per IP, fixes it.
+- [ ] Create an upload keystore, fill in `android/key.properties`, and keep the `.jks` file outside the repo.
+- [ ] Keep `build/symbols/` from every obfuscated build so you can read crash traces.
+- [ ] Run `flutter pub outdated` now and then.
 
 ## Reporting
 
-This is a personal project. Open a private issue or contact the maintainer
-directly for anything security-sensitive.
+This is a personal project. For anything security-sensitive, open a private issue or contact the maintainer directly.

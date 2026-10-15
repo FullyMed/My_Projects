@@ -1,67 +1,56 @@
 # Taiwan Fare Finder
 
-A cross-platform Flutter app for searching and comparing public transportation fares across Taiwan. Supports HSR, TRA, MRT, Bus, and YouBike — with real-time TDX API data, offline caching, and a multilingual interface.
+A Flutter app that shows what a trip across Taiwan costs before you go. You pick an origin, a destination and a way to travel (HSR, TRA, MRT, bus or YouBike), and it shows the fare for adults, students, children and seniors with a rough travel time. HSR and TRA fares come live from Taiwan's TDX open-data platform; the other modes are estimates.
 
 ---
 
-## Features
+## What it does
 
-- **Fare search** — look up fares between 13 locations in 12 cities by selecting origin, destination, and transport mode
-- **Fare comparison** — compare multiple modes side-by-side on the Compare page (its results are kept separately from the Search page's)
-- **Passenger tiers** — adult, student, child, and senior fares. For live HSR/TRA results, child and senior are the real concession fares; the student price is an estimate (neither railway has a fixed student ticket) and is labelled "est."
-- **Saved routes** — bookmark frequently used routes for quick access
-- **Search history** — automatically tracks recent searches per user; re-running a saved route opens it on Search (one mode) or Compare (several modes) with the form filled in
-- **Offline support** — LRU cache (up to 100 queries) stored in `shared_preferences`; works without a connection
-- **Responsive layout** — adapts from phone to tablet to desktop (bottom nav → nav rail → extended nav rail)
-- **Multilingual** — English, Traditional Chinese, and Indonesian (route names are localized too)
-- **Custom 404 page** — unmatched routes render a themed "page not found" screen with a way back to Search
-- **Shimmer loading states** — fare results, comparisons, and saved routes/history show content-shaped skeleton placeholders while loading, instead of a generic spinner
-- **In-app Terms of Use & Privacy Policy** — full, localized legal pages reachable from Settings, describing exactly what the app stores locally and what it sends to TDX in API mode
+- Search one mode between 13 locations in 12 cities, or compare several modes side by side on the Compare page. Search and Compare keep their own results, so running one never wipes the other.
+- Show four passenger fares. For live HSR and TRA results, child and senior are the real concession fares. Neither railway has a fixed student ticket, so the student price is an estimate and the app labels it "est.".
+- Save routes you take often, and keep a history of recent searches. Re-running a saved route opens it on Search (one mode) or Compare (several modes) with the form filled in.
+- Work offline. The app caches your last 100 searches in `shared_preferences`, and offline mode shows only those.
+- Speak English, Traditional Chinese and Indonesian, including the city names in saved routes.
+- Fit phones, tablets and desktops: a bottom bar on narrow screens, a side rail on wide ones, and two-column pages from 840 dp.
+- Show shimmer placeholders shaped like the real content while results load, and a themed 404 page for unknown routes.
+- Include a Terms of Use and a Privacy Policy, both translated, that say what the app stores and what it sends in API mode.
 
 ---
 
-## Supported Cities
+## Cities
 
-Taipei, New Taipei (Banqiao), Taoyuan, Hsinchu, Miaoli, Taichung, Changhua, Yunlin, Chiayi, Tainan, Kaohsiung, Keelung. That's 12 cities; Banqiao is also listed as its own stop, for 13 pickable locations.
+Taipei, New Taipei (Banqiao), Taoyuan, Hsinchu, Miaoli, Taichung, Changhua, Yunlin, Chiayi, Tainan, Kaohsiung and Keelung. That's 12 cities. Banqiao is also listed as its own stop, which makes 13 locations to pick from.
 
 ---
 
-## Transport Modes
+## Where the fares come from
 
-| Mode | Data Source |
+| Mode | Source |
 |---|---|
-| HSR (高鐵) | TDX live API |
-| TRA (台鐵) | TDX live API |
-| MRT | Deterministic mock |
-| Bus | Deterministic mock |
-| YouBike | Deterministic mock |
+| HSR (高鐵) | TDX, live |
+| TRA (台鐵) | TDX, live |
+| MRT | Mock estimate |
+| Bus | Mock estimate |
+| YouBike | Mock estimate |
 
-HSR and TRA fares are fetched from Taiwan's [TDX platform](https://tdx.transportdata.tw/). All other modes use a seeded mock that produces consistent results for a given route. On any API failure, the app falls back to the local cache.
+The app fetches HSR and TRA fares from Taiwan's [TDX platform](https://tdx.transportdata.tw/). The other modes use a seeded mock, so the same route always gets the same numbers. If a live request fails, the app falls back to the results it cached earlier.
 
-If a city has no station for a mode, that mode is reported as **not served** and the other modes are still shown. For example, Keelung has no HSR. New Taipei uses Banqiao station.
+When a city has no station for a mode, the app marks that mode as not served on this route and still shows the others. Keelung has no HSR station, for example. New Taipei uses Banqiao station.
 
 ---
 
-## Getting Started
+## Getting started
 
-### Prerequisites
-
-- Flutter SDK `^3.6.0`
-- Dart SDK `^3.6.0`
-- A TDX API account (free) for live HSR/TRA fares
-
-### Install & run
+You need Flutter and Dart `^3.6.0`. Live HSR and TRA fares also need a free TDX account.
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-### TDX credentials
+### TDX access
 
-Live HSR and TRA fares require TDX API credentials. No secret is ever stored in
-source — everything comes from `--dart-define` at build time. Put your values in
-a gitignored `tdx.env.json` at the project root:
+Nothing secret lives in the source code. The app reads its settings from `--dart-define` at build time, which you keep in a gitignored `tdx.env.json` at the project root:
 
 ```json
 {
@@ -73,15 +62,9 @@ a gitignored `tdx.env.json` at the project root:
 flutter run --dart-define-from-file=tdx.env.json
 ```
 
-**Recommended — the proxy (no secret in the app).** Deploy the Cloudflare Worker
-in [`proxy/`](proxy/README.md); it holds the TDX secret server-side. Then only
-`TFF_PROXY_BASE_URL` is needed, as above. This is the only supported way to ship
-a release — an embedded secret is a plaintext string in the binary (R8 and Dart
-obfuscation do not hide string constants), and **web builds refuse a direct TDX
-call**.
+Use the proxy for anything you ship. Deploy the Cloudflare Worker in [`proxy/`](proxy/README.md), which keeps the TDX secret on the server, and set only `TFF_PROXY_BASE_URL` as above. A secret baked into the app is a plain string anyone can pull out of the binary (R8 and Dart obfuscation don't hide string constants), and web builds refuse to call TDX directly.
 
-**Local development without the proxy.** Add the raw credentials to the same
-file instead:
+For local development without the proxy, put the raw credentials in the same file instead:
 
 ```json
 {
@@ -90,85 +73,79 @@ file instead:
 }
 ```
 
-With neither a proxy URL nor credentials, the app uses mock data for all modes.
-
-See [`SECURITY.md`](SECURITY.md) for the full threat model and hardening notes.
+With neither a proxy URL nor credentials, every mode uses mock data. [`SECURITY.md`](SECURITY.md) covers the threat model.
 
 ---
 
-## Store Listings
+## Store listings
 
-Ready-to-paste App Store Connect / Play Console copy (title, subtitle, short
-and full description, keywords, release notes) for each supported language
-lives in [`store_listing/app_store.md`](store_listing/app_store.md) and
-[`store_listing/play_store.md`](store_listing/play_store.md). Update these
-alongside any change to features, supported cities, or supported languages so
-the listing copy doesn't drift from what the app actually does.
+[`store_listing/app_store.md`](store_listing/app_store.md) and [`store_listing/play_store.md`](store_listing/play_store.md) hold the App Store Connect and Play Console copy for each language: name, subtitle, descriptions, keywords and release notes. Update them whenever features, cities or languages change, so the store page matches the app.
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 lib/
-├── config/          # TDX credentials and station ID maps
-├── controllers/     # ChangeNotifier controllers (Fare, Favorites, History, Settings, Session)
-├── l10n/            # ARB locale files (en, zh_Hant, id; zh is a Traditional-character fallback)
-├── localization/    # TffLocalizations — runtime ARB loader (source of truth for i18n)
-├── models/          # Data classes (Location, FareResult, RouteQuery, …)
-├── nav.dart         # go_router route definitions
-├── pages/           # Search, Compare, Saved, Settings, Shell
-├── services/        # Business logic (FareService, TdxFareService, TdxAuthService, …)
-├── theme.dart       # Material 3 theme, AppSpacing, AppRadius tokens
-├── ui/              # Reusable design-system widgets (TffCard, TffButton, TffSkeleton, …)
-└── utils/           # IdGenerator, travel_duration (shared speed/boarding estimate)
+├── config/          # build-time settings and TDX station ID maps
+├── controllers/     # ChangeNotifier controllers (Fare, CompareFare, Favorites, History, Settings, Session)
+├── l10n/            # ARB string files (en, zh_Hant, id; zh is a Traditional-character fallback)
+├── localization/    # TffLocalizations, which loads the ARB files at runtime
+├── models/          # data classes (Location, FareResult, RouteQuery, …)
+├── nav.dart         # go_router routes
+├── pages/           # Search, Compare, Saved, Settings, Terms, Privacy, Shell, 404
+├── services/        # FareService, TdxFareService, TdxAuthService, storage, …
+├── theme.dart       # Material 3 theme, spacing and radius tokens
+├── ui/              # shared widgets (TffCard, TffButton, TffSkeleton, …)
+└── utils/           # IdGenerator, travel_duration (the speed and boarding-time estimate)
 
 test/
-├── fixtures/        # real TDX responses (THSR/TRA fares + timetable sample), captured 2026-10-01
-├── services/        # TDX parsing, FareService (mock / API / cache / offline / LRU), favorites + history
-├── controllers/     # stale-response guard, Search vs Compare independence
-└── widgets/         # full-app flows + no-overflow checks on phone (Indonesian) and desktop sizes
+├── fixtures/        # real TDX responses (THSR and TRA fares, a timetable sample), captured 2026-10-01
+├── services/        # TDX parsing, FareService (mock, API, cache, offline, LRU), favorites and history
+├── controllers/     # stale-response guard, Search and Compare staying separate
+└── widgets/         # full-app flows, plus overflow checks at phone size (Indonesian) and desktop size
 ```
 
 ---
 
-## Tech Stack
+## Tech stack
 
 | Concern | Library |
 |---|---|
-| UI framework | Flutter (Material 3) |
-| Fonts | Plus Jakarta Sans — bundled variable font (`assets/fonts/`, SIL OFL) |
-| State management | `provider` |
+| UI | Flutter (Material 3) |
+| Font | Plus Jakarta Sans, bundled as a variable font (`assets/fonts/`, SIL OFL) |
+| State | `provider` |
 | Navigation | `go_router` |
 | Local storage | `shared_preferences` |
 | HTTP | `http` |
-| Localization | `flutter_localizations` + custom `TffLocalizations` |
+| Localization | `flutter_localizations` plus the custom `TffLocalizations` |
 
 ---
 
-## Localization
+## Adding a string
 
-The app uses a custom `TffLocalizations` class that loads ARB files from `lib/l10n/` at runtime. To add a new string:
+`TffLocalizations` loads the ARB files in `lib/l10n/` at runtime. To add a string:
 
-1. Add the key/value to all four ARB files: `app_en.arb`, `app_zh.arb`, `app_zh_Hant.arb`, `app_id.arb`
-2. Add a getter to `lib/localization/tff_localizations.dart`
+1. Add the key and its text to all four ARB files: `app_en.arb`, `app_zh.arb`, `app_zh_Hant.arb` and `app_id.arb`.
+2. Add a getter for it in `lib/localization/tff_localizations.dart`.
 
-Do not use the generated `AppLocalizations` class — it is not wired to the app.
+Leave the generated `AppLocalizations` class alone. The app doesn't use it.
+
+The app's copy follows a plain, friendly style: short sentences, written to "you", no hype, and honest about which fares are estimates. "Writing style" in [`CLAUDE.md`](CLAUDE.md) lists the rules.
 
 ---
 
-## Useful Commands
+## Commands
 
 ```bash
 flutter pub get       # install dependencies
-flutter run           # run on connected device/emulator
+flutter run           # run on a connected device or emulator
 flutter analyze       # lint
-dart format .         # format all Dart files
-flutter test          # run unit + widget tests (about 30, no network needed)
-flutter gen-l10n      # regenerate ARB stubs (rarely needed)
-dart run flutter_launcher_icons  # regenerate Android/iOS/web icons from assets/icons/app_icon.png
+flutter test          # unit and widget tests (about 30, no network needed)
+flutter gen-l10n      # regenerate the ARB stubs (rarely needed)
+dart run flutter_launcher_icons  # regenerate Android, iOS and web icons from assets/icons/app_icon.png
 
-# Release builds — pass the proxy config file, and obfuscate the Dart code:
+# Release builds: pass the proxy settings and obfuscate the Dart code
 flutter build apk --release \
   --dart-define-from-file=tdx.env.json \
   --obfuscate --split-debug-info=build/symbols
@@ -177,17 +154,19 @@ flutter build ios --release \
   --obfuscate --split-debug-info=build/symbols
 ```
 
-A Play Store build also needs `android/key.properties` (see `android/key.properties.example`). Keep `build/symbols/` to de-obfuscate crash reports.
+Run `dart format` on new files only. Most existing files predate the formatter, and formatting the whole project rewraps about 50 of them.
+
+A Play Store build also needs `android/key.properties` (gitignored) with `storePassword`, `keyPassword`, `keyAlias` and `storeFile` pointing at your upload keystore. The current file still holds `CHANGE_ME` placeholders, and the build falls back to debug signing until you fill them in. Keep `build/symbols/` so you can read obfuscated crash reports.
 
 ---
 
-## Known TODOs / Open Items
+## Open items
 
-Carried over between chat sessions — pick any of these up without needing prior context:
+- [ ] Register the iOS App ID. The bundle ID is `com.felix.taiwanfarefinder`, the same as Android. Create the matching App ID and provisioning profile in the Apple Developer account before the App Store Connect record. Nobody has built the app in Xcode yet.
+- [ ] Host the Privacy Policy and a support page at public URLs. Both stores want a URL, and an in-app screen doesn't count. The text is ready in `lib/pages/privacy_page.dart` and the `privacy*` ARB keys. The store listing files list every field that's still empty.
+- [ ] Confirm category, age rating and price for both stores. The store listing files suggest Travel, Everyone/4+ and Free, and Felix still needs to say yes.
+- [ ] Set up Android release signing. Create the upload keystore and fill in `android/key.properties`.
+- [ ] Run the app on a real Android or iOS device, or an emulator. The 2026-10-01 fix pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy, but not on a phone.
+- [ ] `.flutter-plugins-dependencies` is committed even though `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies`.
 
-- [ ] **Register the iOS App ID.** The bundle ID is now `com.felix.taiwanfarefinder`, matching Android. Create the matching App ID / provisioning profile in the Apple Developer account before the App Store Connect record. No Xcode build has been done yet.
-- [ ] **Store listings need real hosted URLs.** Apple/Google require a public *URL* for Privacy Policy (and Apple wants a Support URL too) — an in-app screen alone doesn't satisfy the field. The content is ready to copy/host as-is: `lib/pages/privacy_page.dart` (and its ARB `privacy*` keys). See `store_listing/app_store.md` / `store_listing/play_store.md` for the full unfilled-fields list.
-- [ ] **Confirm category, age rating, and price for both stores.** Suggested defaults are already written into `store_listing/app_store.md` / `store_listing/play_store.md` (Travel / Everyone-4+ / Free) — just needs a final yes from Felix before submission.
-- [ ] **Run on a real Android/iOS device or emulator.** The 2026-10-01 fix pass was verified with `flutter analyze`, the test suite, and a release web build clicked through against the live proxy, but not on a phone.
-- [ ] `.flutter-plugins-dependencies` is committed although `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies`.
-- Not urgent, just noting: the Terms/Privacy "Contact" sections use `maxfelix05@gmail.com` — Felix's own address, explicitly approved as a placeholder-for-now. Fine to leave until a dedicated support address exists.
+The Terms and Privacy contact sections use `maxfelix05@gmail.com`, Felix's own address, which he approved as a stand-in until a dedicated support address exists.

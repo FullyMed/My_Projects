@@ -470,7 +470,12 @@ Currently NOT integrated with real PX Mart systems. All data is prototype/demo d
 See [Route-level code-splitting](#route-level-code-splitting). 629KB → ~506KB main chunk, no build warning.
 
 ### Deployment
-Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` (Node 22), publishes `dist/public`, and sets security headers including a CSP whose only allowed remote image host is `images.unsplash.com`. `.netlify/state.json` holds only the site ID, so it's **unverified whether pushing to git auto-deploys** or whether deploys go through the Netlify CLI. Don't tell the owner a push will deploy until that's confirmed. The live site keeps serving the previous build until a deploy happens.
+Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` (Node 22), publishes `dist/public`, and sets security headers including a CSP whose only allowed remote image host is `images.unsplash.com`. **Verified 2026-10-15: pushing to git does NOT deploy.** The 2026-09-30 fixes were committed (`9a0f4a3`) and pushed to `origin/main` (GitHub `FullyMed/My_Projects`, a monorepo), yet the live site still serves a build from **before 2026-09-21**:
+- Its `index.html` has no `#app-boot-loader` (added in `082461d`, 2026-09-21), still has `Logo.jpg`, `maximum-scale=1` and the Inter/Noto Sans SC stylesheet, and serves bundle `index-DWdJhDve.js`.
+- `/robots.txt` and `/sitemap.xml` fall through to `index.html`.
+- **None of `netlify.toml`'s headers are present** (no CSP, `X-Frame-Options` or `X-Content-Type-Options`; only Netlify's default HSTS). So `netlify.toml` isn't being applied, which fits a manual drag-and-drop of a `dist` folder, or a git link without base directory `Website/PX_Mart_Finder`.
+
+To check a deploy: `curl -s https://px-mart-finder.netlify.app/ | grep -c app-boot-loader` should print `1`, and `curl -sI` should show `Content-Security-Policy`.
 
 ### SEO Follow-ups — done 2026-09-30
 - `client/public/robots.txt` — allow all + `Sitemap:` line.

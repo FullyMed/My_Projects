@@ -42,7 +42,7 @@ Then run `claude` to start Claude Code in that project.
 ### App / Taiwan Fare Finder
 - **Type:** Flutter (Dart), cross-platform mobile/desktop app
 - **Purpose:** Search and compare public transit fares across Taiwan (HSR, TRA, MRT, Bus, YouBike)
-- **Key traits:** live HSR/TRA fares via TDX (through a Cloudflare Worker proxy in `proxy/`), offline LRU cache, English / Traditional Chinese / Indonesian (no Simplified), responsive layout. A 2026-10-01 fix pass (separate Search/Compare state, "not served" modes, real concession fares, re-run fixes, layout fixes, ~30 tests) passed analyze, tests and a live web run, and was committed + pushed by the owner (`7b9e6f6`); not yet run on a phone. See "Known TODOs" in its `CLAUDE.md`.
+- **Key traits:** live HSR/TRA fares via TDX (through a Cloudflare Worker proxy in `proxy/`), offline LRU cache, English / Traditional Chinese / Indonesian (no Simplified), responsive layout. A 2026-10-01 fix pass (separate Search/Compare state, "not served" modes, real concession fares, re-run fixes, layout fixes, ~30 tests) passed analyze, tests and a live web run, and was committed + pushed by the owner (`7b9e6f6`); not yet run on a phone. A 2026-10-15 writing pass ran all app strings (en / zh / id), the store listings and the docs through the Humanizer and Stop Slop skills in a plain, friendly voice that's honest about which fares are estimates (rules under "Writing style" in its `CLAUDE.md`). Analyze and tests pass; uncommitted, for the owner to review. See "Open items" in its `CLAUDE.md`.
 - **Run:** `flutter run --dart-define-from-file=tdx.env.json` · `flutter test`
 
 ### Data Science / BoardGames Analyzer
@@ -89,7 +89,7 @@ Then run `claude` to start Claude Code in that project.
 ### Website / PX Mart Finder
 - **Type:** React + TypeScript + Vite SPA
 - **Purpose:** Retail product discovery prototype for PX Mart (全聯) — single-branch demo
-- **Key traits:** Fuse.js fuzzy search, Framer Motion, shadcn/ui, Traditional Chinese + English, dark mode, route-level code-splitting, build-generated sitemap. Live at https://px-mart-finder.netlify.app/ (whether pushing auto-deploys is unverified). A 2026-09-30 fix pass was verified in the browser but is uncommitted, for the owner to review; see "2026-09-30 fix pass" in its `CLAUDE.md`. Read query params with wouter's `useSearch()`, never `window.location.search`.
+- **Key traits:** Fuse.js fuzzy search, Framer Motion, shadcn/ui, Traditional Chinese + English, dark mode, route-level code-splitting, build-generated sitemap. Live at https://px-mart-finder.netlify.app/, but **pushing does not deploy**. The 2026-09-30 fix pass is committed and pushed (`9a0f4a3`), yet as of 2026-10-15 the live site still serves a pre-09-21 build without `netlify.toml`'s headers; see "Deployment" in its `CLAUDE.md`. Read query params with wouter's `useSearch()`, never `window.location.search`.
 - **Run:** `npm run dev:client` (use WSL2 for `npm ci`)
 
 ### Website / Three Frogs

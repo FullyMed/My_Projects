@@ -59,44 +59,44 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get searchEmptyPickBody =>
-      'Pilih asal, tujuan, dan moda untuk melanjutkan.';
+      'Pilih dari mana Anda berangkat, ke mana tujuan Anda, dan naik apa.';
 
   @override
   String get searchEmptyReadyTitle => 'Siap untuk mencari';
 
   @override
   String get searchEmptyReadyBody =>
-      'Tekan Cari tarif untuk melihat harga dan durasi.';
+      'Ketuk Cari tarif untuk melihat harga dan waktu tempuh.';
 
   @override
   String get searchEmptyNoResultsTitle => 'Tidak ada hasil';
 
   @override
-  String get searchEmptyNoResultsBody =>
-      'Coba rute lain atau periksa pilihan Anda.';
+  String get searchEmptyNoResultsBody => 'Coba rute atau moda lain.';
 
   @override
   String get offlineNoCache =>
-      'Belum ada hasil tersimpan. Lakukan pencarian saat online untuk menyimpan hasil agar bisa digunakan offline.';
+      'Belum ada hasil tersimpan untuk rute ini. Cari sekali saat online, nanti hasilnya tetap ada saat offline.';
 
   @override
   String get offlineDataBadge => 'Data offline';
 
   @override
-  String get showingCachedResults => 'Menampilkan hasil tersimpan.';
+  String get showingCachedResults =>
+      'Server tidak bisa dihubungi. Ini hasil yang sudah Anda simpan.';
 
   @override
   String get manageOfflineData => 'Kelola Data Offline';
 
   @override
   String get manageOfflineDataBody =>
-      'Lihat data yang tersimpan untuk offline dan hapus kapan saja.';
+      'Lihat apa yang tersimpan untuk offline, dan hapus kapan pun Anda mau.';
 
   @override
-  String get cachedQueries => 'Rute tersimpan';
+  String get cachedQueries => 'Pencarian tersimpan';
 
   @override
-  String get cachedResults => 'Hasil tersimpan';
+  String get cachedResults => 'Tarif tersimpan';
 
   @override
   String get clearOfflineData => 'Hapus data offline';
@@ -141,18 +141,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get history => 'Riwayat';
 
   @override
-  String get emptyFavorites => 'Belum ada favorit';
+  String get emptyFavorites => 'Belum ada rute tersimpan';
 
   @override
   String get emptyFavoritesBody =>
-      'Belum ada favorit. Simpan rute agar bisa diakses dengan cepat.';
+      'Ketuk ikon penanda pada hasil pencarian untuk menyimpan rutenya di sini.';
 
   @override
   String get emptyHistory => 'Belum ada riwayat';
 
   @override
-  String get emptyHistoryBody =>
-      'Belum ada riwayat. Pencarian Anda akan muncul di sini.';
+  String get emptyHistoryBody => 'Rute yang Anda cari akan muncul di sini.';
 
   @override
   String get rerun => 'Jalankan lagi';
@@ -186,7 +185,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get dataModeBody =>
-      'Data simulasi stabil dan ramah offline. Mode API mengambil tarif HSR dan TRA secara nyata; moda lain menggunakan data simulasi.';
+      'Simulasi menampilkan tarif rekaan yang konsisten dan bisa dipakai offline. Mode API mengambil tarif HSR dan TRA asli dari TDX; moda lain tetap memakai data simulasi.';
 
   @override
   String get dataModeMock => 'Simulasi';
@@ -199,7 +198,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get offlineModeBody =>
-      'Hanya tampilkan tarif yang tersimpan. Pencarian baru tidak akan mengambil data simulasi.';
+      'Hanya tampilkan tarif yang sudah pernah Anda cari. Aplikasi tidak akan mengambil atau membuat data baru.';
 
   @override
   String get dataManagement => 'Kelola data';
@@ -211,7 +210,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get clearHistory => 'Hapus riwayat';
 
   @override
-  String get clearFavorites => 'Hapus favorit';
+  String get clearFavorites => 'Hapus rute tersimpan';
 
   @override
   String get cancel => 'Batal';
@@ -220,8 +219,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get confirm => 'Konfirmasi';
 
   @override
-  String get confirmDialogBody =>
-      'Apakah Anda yakin? Tindakan ini tidak bisa dibatalkan.';
+  String get confirmDialogBody => 'Tindakan ini tidak bisa dibatalkan.';
 
   @override
   String get cleared => 'Sudah dibersihkan';
@@ -252,27 +250,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get compareHint =>
-      'Pilih beberapa moda untuk membandingkan harga dan waktu berdampingan.';
+      'Pilih beberapa moda untuk melihat harga dan waktunya berdampingan.';
 
   @override
   String get selectAtLeastOneMode => 'Pilih minimal satu moda';
 
   @override
-  String get pickRouteFirst => 'Pilih rute terlebih dahulu';
+  String get pickRouteFirst => 'Pilih rute dulu';
 
   @override
   String get searchDisabledHelper =>
-      'Pilih asal, tujuan, dan satu moda untuk mencari.';
+      'Pilih asal, tujuan, dan moda untuk mencari.';
 
   @override
   String get compareDisabledHelper =>
       'Pilih asal, tujuan, dan minimal satu moda untuk membandingkan.';
 
   @override
-  String get locationPickerSearchTitle => 'Cari lokasi';
+  String get locationPickerSearchTitle => 'Cari tempat';
 
   @override
-  String get locationPickerCtaChoose => 'Pilih lokasi';
+  String get locationPickerCtaChoose => 'Pilih tempat';
 
   @override
   String get locationPickerRecentTitle => 'Lokasi terbaru';
@@ -284,11 +282,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get locationPickerBrowseByCity => 'Telusuri berdasarkan kota';
 
   @override
-  String get locationPickerNoResultsTitle => 'Lokasi tidak ditemukan';
+  String get locationPickerNoResultsTitle => 'Tidak ada yang cocok';
 
   @override
   String get locationPickerNoResultsBody =>
-      'Coba cari berdasarkan nama atau kota';
+      'Coba ejaan lain, atau nama Mandarinnya.';
 
   @override
   String get lastUpdated => 'Terakhir diperbarui';
@@ -328,18 +326,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get transferOneToTwo => '1–2 kali transit';
 
   @override
-  String get transferDockSwap => 'Disarankan ganti docking';
+  String get transferDockSwap => 'Ganti sepeda di tengah jalan';
 
   @override
-  String get errorTitle => 'Terjadi kesalahan';
+  String get errorTitle => 'Tarif tidak bisa dimuat';
 
   @override
   String get errorSearchFailed =>
-      'Tarif tidak dapat dimuat saat ini. Silakan coba lagi.';
+      'Periksa koneksi internet Anda, lalu coba lagi.';
 
   @override
   String get errorApiNotReady =>
-      'Mode API belum tersedia. Silakan kembali ke Simulasi di Pengaturan.';
+      'Tarif langsung tidak tersedia di versi ini. Ubah sumber data ke Simulasi di Pengaturan.';
 
   @override
   String get retry => 'Coba lagi';
@@ -369,7 +367,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get privacyBody =>
-      'Pencarian, favorit, riwayat, dan hasil cache disimpan secara lokal di perangkat Anda. Tidak perlu akun. Tanpa pelacakan secara default.';
+      'Semua yang Anda cari dan simpan tetap ada di perangkat ini. Anda tidak perlu akun, dan aplikasi ini tidak melacak Anda.';
 
   @override
   String get privacyReadMore => 'Baca selengkapnya';
@@ -387,8 +385,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get notFoundTitle => 'Halaman tidak ditemukan';
 
   @override
-  String get notFoundBody =>
-      'Halaman yang Anda cari tidak ada atau mungkin telah dipindahkan.';
+  String get notFoundBody => 'Halaman itu tidak ditemukan.';
 
   @override
   String get notFoundBackToSearch => 'Kembali ke pencarian';
@@ -397,125 +394,124 @@ class AppLocalizationsId extends AppLocalizations {
   String get termsOfUse => 'Ketentuan Penggunaan';
 
   @override
-  String get termsLastUpdated => 'Terakhir diperbarui: 21 September 2026';
+  String get termsLastUpdated => 'Terakhir diperbarui: 15 Oktober 2026';
 
   @override
   String get termsIntro =>
-      'Ketentuan Penggunaan ini (\"Ketentuan\") mengatur penggunaan Anda atas Taiwan Fare Finder (\"Aplikasi\"). Dengan menggunakan Aplikasi, Anda menyetujui Ketentuan ini. Jika Anda tidak setuju, mohon untuk tidak menggunakan Aplikasi.';
+      'Ketentuan ini mengatur penggunaan Taiwan Fare Finder (\"Aplikasi\") oleh Anda. Dengan memakai Aplikasi, Anda menyetujuinya. Jika tidak setuju, mohon jangan gunakan Aplikasi.';
 
   @override
-  String get termsSection1Title => 'Penerimaan Ketentuan Ini';
+  String get termsSection1Title => 'Penerimaan ketentuan ini';
 
   @override
   String get termsSection1Body =>
-      'Dengan mengunduh, memasang, atau menggunakan Taiwan Fare Finder, Anda menerima sepenuhnya Ketentuan ini. Kami dapat memperbarui Ketentuan ini dari waktu ke waktu; melanjutkan penggunaan Aplikasi setelah pembaruan berarti Anda menerima Ketentuan yang telah direvisi.';
+      'Dengan mengunduh, memasang, atau memakai Aplikasi, Anda menerima ketentuan ini. Kami bisa memperbaruinya. Jika Anda tetap memakai Aplikasi setelah pembaruan, Anda menerima versi barunya.';
 
   @override
-  String get termsSection2Title => 'Layanan Ini';
+  String get termsSection2Title => 'Apa yang dilakukan Aplikasi';
 
   @override
   String get termsSection2Body =>
-      'Taiwan Fare Finder adalah alat informasi untuk mencari, membandingkan, dan menyimpan tarif transportasi umum di Taiwan. Aplikasi ini tidak menjual tiket, tidak memproses pembayaran, dan tidak terhubung ke sistem pemesanan operator transportasi mana pun.';
+      'Taiwan Fare Finder membantu Anda mencari, membandingkan, dan menyimpan tarif transportasi umum di Taiwan. Aplikasi ini tidak menjual tiket, tidak menerima pembayaran, dan tidak terhubung ke sistem pemesanan operator mana pun.';
 
   @override
-  String get termsSection3Title => 'Akurasi Tarif & Sumber Data';
+  String get termsSection3Title => 'Akurasi tarif dan sumber data';
 
   @override
   String get termsSection3Body =>
-      'Tarif High Speed Rail (HSR) dan Taiwan Railway (TRA) diambil dari platform data terbuka resmi TDX Taiwan saat mode API diaktifkan. Tarif MRT, Bus, dan YouBike menggunakan estimasi internal yang konsisten, bukan harga resmi. Dalam semua kasus, tarif dan waktu tempuh dapat sudah usang, tersimpan dalam cache, atau tidak akurat. Selalu konfirmasi tarif sebenarnya kepada operator transportasi terkait sebelum bepergian.';
+      'Saat mode API aktif, Aplikasi mengambil tarif High Speed Rail (HSR) dan Taiwan Railway (TRA) dari platform data terbuka resmi TDX Taiwan. Tarif MRT, bus, dan YouBike adalah perkiraan Aplikasi sendiri, bukan harga resmi, begitu pula tarif pelajar untuk HSR dan TRA. Tarif dan waktu tempuh apa pun bisa usang atau keliru, jadi pastikan dulu ke operator sebelum Anda berangkat.';
 
   @override
-  String get termsSection4Title => 'Penggunaan yang Diizinkan';
+  String get termsSection4Title => 'Penggunaan yang diizinkan';
 
   @override
   String get termsSection4Body =>
-      'Aplikasi ini ditujukan untuk penggunaan pribadi dan non-komersial. Anda setuju untuk tidak menyalahgunakan Aplikasi atau layanan backend-nya — misalnya dengan mengirim permintaan otomatis dalam jumlah berlebihan, mencoba mengambil kredensial API, atau mengganggu operasional normal Aplikasi.';
+      'Aplikasi ini untuk penggunaan pribadi dan non-komersial. Mohon jangan menyalahgunakan Aplikasi atau server di baliknya, misalnya dengan mengirim permintaan otomatis dalam jumlah besar, mencoba mengambil kredensial API, atau mengganggu cara kerja Aplikasi.';
 
   @override
-  String get termsSection5Title => 'Tanpa Jaminan & Batasan Tanggung Jawab';
+  String get termsSection5Title => 'Tanpa jaminan dan batasan tanggung jawab';
 
   @override
   String get termsSection5Body =>
       'Aplikasi ini disediakan \"apa adanya\" dan \"sebagaimana tersedia\", tanpa jaminan dalam bentuk apa pun, baik tersurat maupun tersirat, termasuk keakuratan, keandalan, atau kesesuaian untuk tujuan tertentu. Sejauh diizinkan oleh hukum, kami tidak bertanggung jawab atas kerugian atau kerusakan apa pun yang timbul dari penggunaan Aplikasi, termasuk keterlambatan perjalanan atau selisih tarif.';
 
   @override
-  String get termsSection6Title => 'Layanan Pihak Ketiga';
+  String get termsSection6Title => 'Layanan pihak ketiga';
 
   @override
   String get termsSection6Body =>
-      'Data tarif HSR dan TRA langsung bersumber dari platform data terbuka TDX (Transport Data eXchange) Taiwan, yang dioperasikan oleh Kementerian Perhubungan dan Komunikasi Taiwan (tdx.transportdata.tw). Penggunaan data tersebut tunduk pada ketentuan TDX sendiri, yang tidak kami kendalikan.';
+      'Tarif HSR dan TRA langsung berasal dari TDX (Transport Data eXchange), platform data terbuka yang dikelola Kementerian Perhubungan dan Komunikasi Taiwan (tdx.transportdata.tw). Ketentuan TDX sendiri berlaku untuk data tersebut, dan kami tidak mengendalikannya.';
 
   @override
-  String get termsSection7Title => 'Perubahan Ketentuan Ini';
+  String get termsSection7Title => 'Perubahan ketentuan ini';
 
   @override
   String get termsSection7Body =>
-      'Kami dapat merevisi Ketentuan ini seiring perkembangan Aplikasi. Tanggal \"Terakhir diperbarui\" di atas mencerminkan revisi terbaru. Kami menyarankan Anda meninjau Ketentuan ini secara berkala.';
+      'Kami bisa merevisi ketentuan ini seiring berubahnya Aplikasi. Tanggal \"Terakhir diperbarui\" di atas menunjukkan revisi terbaru.';
 
   @override
   String get termsSection8Title => 'Kontak';
 
   @override
   String get termsSection8Body =>
-      'Pertanyaan mengenai Ketentuan ini dapat dikirimkan ke maxfelix05@gmail.com.';
+      'Ada pertanyaan tentang ketentuan ini? Kirim email ke maxfelix05@gmail.com.';
 
   @override
   String get privacyPolicyTitle => 'Kebijakan Privasi';
 
   @override
-  String get privacyLastUpdated => 'Terakhir diperbarui: 1 Oktober 2026';
+  String get privacyLastUpdated => 'Terakhir diperbarui: 15 Oktober 2026';
 
   @override
   String get privacyPolicyIntro =>
-      'Taiwan Fare Finder tidak memerlukan akun, tidak memiliki sistem login, dan tidak menyimpan data Anda di server mana pun. Kebijakan ini menjelaskan sedikit data yang ditangani Aplikasi, dan ke mana data tersebut pergi.';
+      'Taiwan Fare Finder tidak memakai akun atau login, dan kami tidak menyimpan data Anda di server. Kebijakan ini menjelaskan sedikit data yang ditangani Aplikasi dan ke mana data itu pergi.';
 
   @override
-  String get privacySection1Title =>
-      'Informasi yang Kami Simpan di Perangkat Anda';
+  String get privacySection1Title => 'Yang tetap ada di perangkat Anda';
 
   @override
   String get privacySection1Body =>
-      'Riwayat pencarian, rute favorit yang disimpan, hasil tarif yang di-cache, dan pengaturan aplikasi (bahasa, tema, mode offline, sumber data) disimpan secara lokal di perangkat Anda menggunakan penyimpanan aplikasi standar. Data ini tidak pernah diunggah ke mana pun.';
+      'Aplikasi menyimpan riwayat pencarian, rute tersimpan, tarif yang di-cache, dan pengaturan (bahasa, tema, mode offline, sumber data) di penyimpanan aplikasi biasa di perangkat Anda. Aplikasi tidak pernah mengunggah data itu ke mana pun.';
 
   @override
-  String get privacySection2Title => 'Informasi yang Dikirim ke Pihak Ketiga';
+  String get privacySection2Title => 'Apa yang dikirim, dan ke mana';
 
   @override
   String get privacySection2Body =>
-      'Dalam mode data Simulasi, tidak ada yang Anda cari yang pernah meninggalkan perangkat Anda. Dalam mode data API, ID stasiun asal dan tujuan untuk pencarian High Speed Rail dan Taiwan Railway dikirim ke server perantara kecil kami (proxy yang di-hosting di Cloudflare), yang meneruskannya ke platform data terbuka resmi TDX Taiwan untuk mengambil tarif sebenarnya. Server perantara menyimpan kunci akses TDX sehingga kunci tersebut tidak pernah disertakan di dalam Aplikasi; server ini menyimpan sementara data tarif selama beberapa jam agar tetap cepat, tetapi tidak mencatat siapa yang mengirim permintaan. Tidak ada nama, akun, atau ID perangkat yang disertakan dalam permintaan tersebut, karena Aplikasi memang tidak memilikinya untuk dikirim. Seperti permintaan internet lainnya, alamat IP Anda terlihat oleh jaringan yang membawanya.';
+      'Dalam mode Simulasi, apa pun yang Anda cari tidak keluar dari perangkat Anda. Dalam mode API, Aplikasi mengirim kode stasiun asal dan tujuan pencarian HSR dan TRA ke server perantara kecil kami, sebuah proxy di Cloudflare. Server itu meneruskannya ke platform data terbuka resmi TDX Taiwan untuk mengambil tarif asli. Server perantara menyimpan kunci akses TDX, jadi kunci itu tidak ikut di dalam Aplikasi. Server ini menyimpan data tarif selama beberapa jam agar tetap cepat, tetapi tidak mencatat siapa yang bertanya. Permintaan itu tidak membawa nama, akun, atau ID perangkat, karena Aplikasi tidak punya data semacam itu. Seperti permintaan internet lainnya, alamat IP Anda terlihat oleh jaringan yang membawanya.';
 
   @override
   String get privacySection3Title => 'Analitik';
 
   @override
   String get privacySection3Body =>
-      'Saat ini Aplikasi hanya mencatat beberapa nama peristiwa secara lokal untuk tujuan debugging (terlihat di log developer pada perangkat Anda sendiri) dan tidak mengirimkannya ke mana pun. Jika suatu saat kami menambahkan analitik atau pelacakan sungguhan, kami akan meminta persetujuan Anda terlebih dahulu.';
+      'Aplikasi mencatat beberapa nama peristiwa di log developer pada perangkat Anda sendiri untuk keperluan debugging, dan tidak mengirimkannya ke mana pun. Jika kami menambahkan analitik sungguhan, kami akan meminta persetujuan Anda lebih dulu.';
 
   @override
-  String get privacySection4Title => 'Privasi Anak-Anak';
+  String get privacySection4Title => 'Privasi anak';
 
   @override
   String get privacySection4Body =>
-      'Aplikasi ini tidak dengan sengaja mengumpulkan informasi pribadi dari siapa pun, termasuk anak-anak, karena Aplikasi memang tidak mengumpulkan informasi pribadi dari siapa pun. Aplikasi ini cocok untuk pengguna umum.';
+      'Aplikasi ini tidak mengumpulkan informasi pribadi dari siapa pun, termasuk anak-anak, dan cocok untuk semua usia.';
 
   @override
-  String get privacySection5Title => 'Pilihan Anda & Penghapusan Data';
+  String get privacySection5Title => 'Pilihan Anda dan penghapusan data';
 
   @override
   String get privacySection5Body =>
-      'Anda dapat menghapus tarif yang di-cache (Pengaturan → Kelola Data Offline) serta riwayat pencarian atau favorit (Pengaturan → Kelola data) kapan saja. Menghapus instalasi Aplikasi akan menghapus semua data yang disimpannya di perangkat Anda.';
+      'Anda bisa menghapus tarif yang di-cache (Pengaturan → Kelola Data Offline) serta riwayat atau rute tersimpan (Pengaturan → Kelola data) kapan saja. Menghapus instalasi Aplikasi akan menghapus semua data yang disimpannya di perangkat Anda.';
 
   @override
-  String get privacySection6Title => 'Perubahan Kebijakan Ini';
+  String get privacySection6Title => 'Perubahan kebijakan ini';
 
   @override
   String get privacySection6Body =>
-      'Kami dapat memperbarui Kebijakan Privasi ini seiring perkembangan Aplikasi. Tanggal \"Terakhir diperbarui\" di atas mencerminkan revisi terbaru.';
+      'Kami bisa memperbarui kebijakan ini seiring berubahnya Aplikasi. Tanggal \"Terakhir diperbarui\" di atas menunjukkan revisi terbaru.';
 
   @override
   String get privacySection7Title => 'Kontak';
 
   @override
   String get privacySection7Body =>
-      'Pertanyaan mengenai Kebijakan Privasi ini dapat dikirimkan ke maxfelix05@gmail.com.';
+      'Ada pertanyaan tentang kebijakan ini? Kirim email ke maxfelix05@gmail.com.';
 }

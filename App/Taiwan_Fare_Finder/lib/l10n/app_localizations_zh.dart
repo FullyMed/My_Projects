@@ -51,46 +51,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noResults => '尚無結果';
 
   @override
-  String get noResultsBody => '選擇起點、終點與交通方式即可查看票價。';
+  String get noResultsBody => '選好起點、終點和交通方式，就能看到票價。';
 
   @override
-  String get searchEmptyPickTitle => '先選擇路線';
+  String get searchEmptyPickTitle => '先選路線';
 
   @override
-  String get searchEmptyPickBody => '請選擇起點、終點與交通方式。';
+  String get searchEmptyPickBody => '選好從哪裡出發、要去哪裡，以及怎麼去。';
 
   @override
   String get searchEmptyReadyTitle => '準備好了';
 
   @override
-  String get searchEmptyReadyBody => '按下「查詢票價」即可查看票價與時間。';
+  String get searchEmptyReadyBody => '按「查詢票價」就能看到票價和時間。';
 
   @override
   String get searchEmptyNoResultsTitle => '找不到結果';
 
   @override
-  String get searchEmptyNoResultsBody => '請改用其他路線或重新確認選項。';
+  String get searchEmptyNoResultsBody => '換條路線或交通方式試試。';
 
   @override
-  String get offlineNoCache => '目前沒有可離線使用的結果。請先在線查詢一次以儲存結果。';
+  String get offlineNoCache => '這條路線還沒有儲存的結果。連上網路查一次，之後離線也看得到。';
 
   @override
   String get offlineDataBadge => '離線資料';
 
   @override
-  String get showingCachedResults => '正在顯示已儲存的結果。';
+  String get showingCachedResults => '連不上伺服器，先顯示你儲存的結果。';
 
   @override
   String get manageOfflineData => '管理離線資料';
 
   @override
-  String get manageOfflineDataBody => '查看已儲存的離線資料，並可隨時清除。';
+  String get manageOfflineDataBody => '查看哪些資料存起來供離線使用，隨時都能清除。';
 
   @override
-  String get cachedQueries => '快取路線';
+  String get cachedQueries => '已存的查詢';
 
   @override
-  String get cachedResults => '快取結果';
+  String get cachedResults => '已存的票價';
 
   @override
   String get clearOfflineData => '清除離線資料';
@@ -135,16 +135,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get history => '搜尋紀錄';
 
   @override
-  String get emptyFavorites => '還沒有收藏';
+  String get emptyFavorites => '還沒有收藏的路線';
 
   @override
-  String get emptyFavoritesBody => '還沒有收藏。先儲存一條路線，之後就能快速開啟。';
+  String get emptyFavoritesBody => '在查詢結果上按書籤圖示，就能把路線收藏在這裡。';
 
   @override
   String get emptyHistory => '還沒有紀錄';
 
   @override
-  String get emptyHistoryBody => '還沒有搜尋紀錄。你的查詢會出現在這裡。';
+  String get emptyHistoryBody => '你查過的路線會出現在這裡。';
 
   @override
   String get rerun => '再查一次';
@@ -177,7 +177,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dataMode => '資料來源';
 
   @override
-  String get dataModeBody => '模擬資料穩定且可離線使用。API 模式可取得高鐵與台鐵的真實票價，其他方式仍使用模擬資料。';
+  String get dataModeBody =>
+      '模擬資料是虛構但固定的票價，離線也能用。API 模式會從 TDX 取得高鐵與台鐵的真實票價，其他交通方式仍使用模擬資料。';
 
   @override
   String get dataModeMock => '模擬';
@@ -189,7 +190,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get offlineMode => '離線模式';
 
   @override
-  String get offlineModeBody => '僅顯示已快取的票價；不會產生新的模擬資料。';
+  String get offlineModeBody => '只顯示你查過的票價，不會連網取得或產生新資料。';
 
   @override
   String get dataManagement => '資料管理';
@@ -201,7 +202,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearHistory => '清除搜尋紀錄';
 
   @override
-  String get clearFavorites => '清除收藏';
+  String get clearFavorites => '清除收藏路線';
 
   @override
   String get cancel => '取消';
@@ -210,7 +211,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirm => '確認';
 
   @override
-  String get confirmDialogBody => '確定要執行此操作嗎？此動作無法復原。';
+  String get confirmDialogBody => '這個動作無法復原。';
 
   @override
   String get cleared => '已清除';
@@ -240,19 +241,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modesYouBike => 'YouBike';
 
   @override
-  String get compareHint => '可選多種交通方式，並排比較票價與時間。';
+  String get compareHint => '選幾種交通方式，就能並排比較價格和時間。';
 
   @override
-  String get selectAtLeastOneMode => '至少選擇一種方式';
+  String get selectAtLeastOneMode => '至少選一種交通方式';
 
   @override
-  String get pickRouteFirst => '請先選擇路線';
+  String get pickRouteFirst => '請先選路線';
 
   @override
-  String get searchDisabledHelper => '請先選擇起點、終點與交通方式後再查詢。';
+  String get searchDisabledHelper => '選好起點、終點和交通方式後再查詢。';
 
   @override
-  String get compareDisabledHelper => '請先選擇起點、終點並至少選一種交通方式後再比較。';
+  String get compareDisabledHelper => '選好起點、終點，並至少選一種交通方式後再比較。';
 
   @override
   String get locationPickerSearchTitle => '搜尋地點';
@@ -270,10 +271,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get locationPickerBrowseByCity => '依城市瀏覽';
 
   @override
-  String get locationPickerNoResultsTitle => '找不到地點';
+  String get locationPickerNoResultsTitle => '沒有符合的地點';
 
   @override
-  String get locationPickerNoResultsBody => '請嘗試以名稱或城市搜尋';
+  String get locationPickerNoResultsBody => '試試其他名稱，或輸入英文名稱。';
 
   @override
   String get lastUpdated => '更新時間';
@@ -313,16 +314,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transferOneToTwo => '1–2 次轉乘';
 
   @override
-  String get transferDockSwap => '建議更換停靠站';
+  String get transferDockSwap => '途中換車';
 
   @override
-  String get errorTitle => '發生錯誤';
+  String get errorTitle => '無法取得票價';
 
   @override
-  String get errorSearchFailed => '目前無法載入票價，請稍後再試。';
+  String get errorSearchFailed => '請檢查網路連線後再試一次。';
 
   @override
-  String get errorApiNotReady => '目前尚未提供 API 模式，請到設定切回「模擬」。';
+  String get errorApiNotReady => '這個版本無法使用即時票價，請到設定把資料來源切回「模擬」。';
 
   @override
   String get retry => '重試';
@@ -351,7 +352,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacy => '隱私';
 
   @override
-  String get privacyBody => '你的搜尋、收藏、紀錄與快取結果只會儲存在本機裝置。不需要帳號。預設不進行追蹤。';
+  String get privacyBody => '你查詢和收藏的內容都只存在這台裝置上。不需要帳號，App 也不會追蹤你。';
 
   @override
   String get privacyReadMore => '查看更多';
@@ -369,7 +370,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notFoundTitle => '找不到頁面';
 
   @override
-  String get notFoundBody => '您要找的頁面不存在，或可能已經移動。';
+  String get notFoundBody => '找不到這個頁面。';
 
   @override
   String get notFoundBackToSearch => '返回查詢';
@@ -378,7 +379,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get termsOfUse => '使用條款';
 
   @override
-  String get termsLastUpdated => '最後更新：2026年9月21日';
+  String get termsLastUpdated => '最後更新：2026年10月15日';
 
   @override
   String get termsIntro =>
@@ -403,7 +404,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get termsSection3Body =>
-      '當開啟 API 模式時，高鐵與台鐵的票價資料取自交通部 TDX 運輸資料流通服務平台；捷運、公車、YouBike 的票價則採用內部估算模式，並非官方定價。無論何種模式，票價與時間都可能為過期、快取或不準確的資料。出發前請務必以各運輸業者公告之票價為準。';
+      '開啟 API 模式時，本應用程式的高鐵與台鐵票價取自交通部 TDX 運輸資料流通服務平台。捷運、公車、YouBike 的票價，以及高鐵與台鐵的學生票價，都是本應用程式自行估算的數字，並非官方定價。任何票價與時間都可能過期或有誤，出發前請以各運輸業者公告為準。';
 
   @override
   String get termsSection4Title => '使用規範';
@@ -430,20 +431,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get termsSection7Title => '條款變更';
 
   @override
-  String get termsSection7Body =>
-      '隨著本應用程式的發展，我們可能修訂本條款。上方「最後更新」日期即為最近一次修訂時間，建議您定期查看本條款。';
+  String get termsSection7Body => '隨著本應用程式更新，我們可能修訂本條款。上方的「最後更新」日期即為最近一次修訂的時間。';
 
   @override
   String get termsSection8Title => '聯絡我們';
 
   @override
-  String get termsSection8Body => '如對本條款有任何疑問，請聯絡 maxfelix05@gmail.com。';
+  String get termsSection8Body => '對本條款有疑問嗎？請寄信至 maxfelix05@gmail.com。';
 
   @override
   String get privacyPolicyTitle => '隱私權政策';
 
   @override
-  String get privacyLastUpdated => '最後更新：2026年10月1日';
+  String get privacyLastUpdated => '最後更新：2026年10月15日';
 
   @override
   String get privacyPolicyIntro =>
@@ -457,7 +457,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式、資料來源）皆以標準應用程式儲存方式，儲存在您的裝置本機，不會上傳至任何地方。';
 
   @override
-  String get privacySection2Title => '提供給第三方的資訊';
+  String get privacySection2Title => '會傳送哪些資料、傳給誰';
 
   @override
   String get privacySection2Body =>
@@ -468,21 +468,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacySection3Body =>
-      '目前本應用程式僅會在本機記錄少數事件名稱以供除錯（僅顯示於您自己裝置的開發者紀錄中），不會傳送至任何地方。若日後新增真正的分析或追蹤功能，我們會事先徵求您的同意。';
+      '本應用程式會在您自己裝置的開發者紀錄中寫入少數事件名稱，用於除錯，不會傳送到任何地方。如果日後加入真正的分析功能，我們會先徵求您的同意。';
 
   @override
   String get privacySection4Title => '兒童隱私';
 
   @override
-  String get privacySection4Body =>
-      '本應用程式不會向任何人（包括兒童）蒐集個人資料，因為它本來就不向任何人蒐集個人資料，適合一般大眾使用。';
+  String get privacySection4Body => '本應用程式不向任何人（包括兒童）蒐集個人資料，適合所有年齡層使用。';
 
   @override
   String get privacySection5Title => '您的選擇與資料刪除';
 
   @override
   String get privacySection5Body =>
-      '您可隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏（設定 → 資料管理）。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
+      '您可以隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏路線（設定 → 資料管理）。解除安裝本應用程式，就會刪除它存在您裝置上的所有資料。';
 
   @override
   String get privacySection6Title => '政策變更';
@@ -495,7 +494,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get privacySection7Title => '聯絡我們';
 
   @override
-  String get privacySection7Body => '如對本隱私權政策有任何疑問，請聯絡 maxfelix05@gmail.com。';
+  String get privacySection7Body => '對本隱私權政策有疑問嗎？請寄信至 maxfelix05@gmail.com。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -545,46 +544,46 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get noResults => '尚無結果';
 
   @override
-  String get noResultsBody => '選擇起點、終點與交通方式即可查看票價。';
+  String get noResultsBody => '選好起點、終點和交通方式，就能看到票價。';
 
   @override
-  String get searchEmptyPickTitle => '先選擇路線';
+  String get searchEmptyPickTitle => '先選路線';
 
   @override
-  String get searchEmptyPickBody => '請選擇起點、終點與交通方式。';
+  String get searchEmptyPickBody => '選好從哪裡出發、要去哪裡，以及怎麼去。';
 
   @override
   String get searchEmptyReadyTitle => '準備好了';
 
   @override
-  String get searchEmptyReadyBody => '按下「查詢票價」即可查看票價與時間。';
+  String get searchEmptyReadyBody => '按「查詢票價」就能看到票價和時間。';
 
   @override
   String get searchEmptyNoResultsTitle => '找不到結果';
 
   @override
-  String get searchEmptyNoResultsBody => '請改用其他路線或重新確認選項。';
+  String get searchEmptyNoResultsBody => '換條路線或交通方式試試。';
 
   @override
-  String get offlineNoCache => '目前沒有可離線使用的結果。請先在線查詢一次以儲存結果。';
+  String get offlineNoCache => '這條路線還沒有儲存的結果。連上網路查一次，之後離線也看得到。';
 
   @override
   String get offlineDataBadge => '離線資料';
 
   @override
-  String get showingCachedResults => '正在顯示已儲存的結果。';
+  String get showingCachedResults => '連不上伺服器，先顯示你儲存的結果。';
 
   @override
   String get manageOfflineData => '管理離線資料';
 
   @override
-  String get manageOfflineDataBody => '查看已儲存的離線資料，並可隨時清除。';
+  String get manageOfflineDataBody => '查看哪些資料存起來供離線使用，隨時都能清除。';
 
   @override
-  String get cachedQueries => '快取路線';
+  String get cachedQueries => '已存的查詢';
 
   @override
-  String get cachedResults => '快取結果';
+  String get cachedResults => '已存的票價';
 
   @override
   String get clearOfflineData => '清除離線資料';
@@ -629,16 +628,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get history => '搜尋紀錄';
 
   @override
-  String get emptyFavorites => '還沒有收藏';
+  String get emptyFavorites => '還沒有收藏的路線';
 
   @override
-  String get emptyFavoritesBody => '還沒有收藏。先儲存一條路線，之後就能快速開啟。';
+  String get emptyFavoritesBody => '在查詢結果上按書籤圖示，就能把路線收藏在這裡。';
 
   @override
   String get emptyHistory => '還沒有紀錄';
 
   @override
-  String get emptyHistoryBody => '還沒有搜尋紀錄。你的查詢會出現在這裡。';
+  String get emptyHistoryBody => '你查過的路線會出現在這裡。';
 
   @override
   String get rerun => '再查一次';
@@ -671,7 +670,8 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get dataMode => '資料來源';
 
   @override
-  String get dataModeBody => '模擬資料穩定且可離線使用。API 模式可取得高鐵與台鐵的真實票價，其他方式仍使用模擬資料。';
+  String get dataModeBody =>
+      '模擬資料是虛構但固定的票價，離線也能用。API 模式會從 TDX 取得高鐵與台鐵的真實票價，其他交通方式仍使用模擬資料。';
 
   @override
   String get dataModeMock => '模擬';
@@ -683,7 +683,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get offlineMode => '離線模式';
 
   @override
-  String get offlineModeBody => '僅顯示已快取的票價；不會產生新的模擬資料。';
+  String get offlineModeBody => '只顯示你查過的票價，不會連網取得或產生新資料。';
 
   @override
   String get dataManagement => '資料管理';
@@ -695,7 +695,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get clearHistory => '清除搜尋紀錄';
 
   @override
-  String get clearFavorites => '清除收藏';
+  String get clearFavorites => '清除收藏路線';
 
   @override
   String get cancel => '取消';
@@ -704,7 +704,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get confirm => '確認';
 
   @override
-  String get confirmDialogBody => '確定要執行此操作嗎？此動作無法復原。';
+  String get confirmDialogBody => '這個動作無法復原。';
 
   @override
   String get cleared => '已清除';
@@ -734,19 +734,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get modesYouBike => 'YouBike';
 
   @override
-  String get compareHint => '可選多種交通方式，並排比較票價與時間。';
+  String get compareHint => '選幾種交通方式，就能並排比較價格和時間。';
 
   @override
-  String get selectAtLeastOneMode => '至少選擇一種方式';
+  String get selectAtLeastOneMode => '至少選一種交通方式';
 
   @override
-  String get pickRouteFirst => '請先選擇路線';
+  String get pickRouteFirst => '請先選路線';
 
   @override
-  String get searchDisabledHelper => '請先選擇起點、終點與交通方式後再查詢。';
+  String get searchDisabledHelper => '選好起點、終點和交通方式後再查詢。';
 
   @override
-  String get compareDisabledHelper => '請先選擇起點、終點並至少選一種交通方式後再比較。';
+  String get compareDisabledHelper => '選好起點、終點，並至少選一種交通方式後再比較。';
 
   @override
   String get locationPickerSearchTitle => '搜尋地點';
@@ -764,10 +764,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get locationPickerBrowseByCity => '依城市瀏覽';
 
   @override
-  String get locationPickerNoResultsTitle => '找不到地點';
+  String get locationPickerNoResultsTitle => '沒有符合的地點';
 
   @override
-  String get locationPickerNoResultsBody => '請嘗試以名稱或城市搜尋';
+  String get locationPickerNoResultsBody => '試試其他名稱，或輸入英文名稱。';
 
   @override
   String get lastUpdated => '更新時間';
@@ -807,16 +807,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get transferOneToTwo => '1–2 次轉乘';
 
   @override
-  String get transferDockSwap => '建議更換停靠站';
+  String get transferDockSwap => '途中換車';
 
   @override
-  String get errorTitle => '發生錯誤';
+  String get errorTitle => '無法取得票價';
 
   @override
-  String get errorSearchFailed => '目前無法載入票價，請稍後再試。';
+  String get errorSearchFailed => '請檢查網路連線後再試一次。';
 
   @override
-  String get errorApiNotReady => '目前尚未提供 API 模式，請到設定切回「模擬」。';
+  String get errorApiNotReady => '這個版本無法使用即時票價，請到設定把資料來源切回「模擬」。';
 
   @override
   String get retry => '重試';
@@ -845,7 +845,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get privacy => '隱私';
 
   @override
-  String get privacyBody => '你的搜尋、收藏、紀錄與快取結果只會儲存在本機裝置。不需要帳號。預設不進行追蹤。';
+  String get privacyBody => '你查詢和收藏的內容都只存在這台裝置上。不需要帳號，App 也不會追蹤你。';
 
   @override
   String get privacyReadMore => '查看更多';
@@ -863,7 +863,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get notFoundTitle => '找不到頁面';
 
   @override
-  String get notFoundBody => '您要找的頁面不存在，或可能已經移動。';
+  String get notFoundBody => '找不到這個頁面。';
 
   @override
   String get notFoundBackToSearch => '返回查詢';
@@ -872,7 +872,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get termsOfUse => '使用條款';
 
   @override
-  String get termsLastUpdated => '最後更新：2026年9月21日';
+  String get termsLastUpdated => '最後更新：2026年10月15日';
 
   @override
   String get termsIntro =>
@@ -897,7 +897,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get termsSection3Body =>
-      '當開啟 API 模式時，高鐵與台鐵的票價資料取自交通部 TDX 運輸資料流通服務平台；捷運、公車、YouBike 的票價則採用內部估算模式，並非官方定價。無論何種模式，票價與時間都可能為過期、快取或不準確的資料。出發前請務必以各運輸業者公告之票價為準。';
+      '開啟 API 模式時，本應用程式的高鐵與台鐵票價取自交通部 TDX 運輸資料流通服務平台。捷運、公車、YouBike 的票價，以及高鐵與台鐵的學生票價，都是本應用程式自行估算的數字，並非官方定價。任何票價與時間都可能過期或有誤，出發前請以各運輸業者公告為準。';
 
   @override
   String get termsSection4Title => '使用規範';
@@ -924,20 +924,19 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get termsSection7Title => '條款變更';
 
   @override
-  String get termsSection7Body =>
-      '隨著本應用程式的發展，我們可能修訂本條款。上方「最後更新」日期即為最近一次修訂時間，建議您定期查看本條款。';
+  String get termsSection7Body => '隨著本應用程式更新，我們可能修訂本條款。上方的「最後更新」日期即為最近一次修訂的時間。';
 
   @override
   String get termsSection8Title => '聯絡我們';
 
   @override
-  String get termsSection8Body => '如對本條款有任何疑問，請聯絡 maxfelix05@gmail.com。';
+  String get termsSection8Body => '對本條款有疑問嗎？請寄信至 maxfelix05@gmail.com。';
 
   @override
   String get privacyPolicyTitle => '隱私權政策';
 
   @override
-  String get privacyLastUpdated => '最後更新：2026年10月1日';
+  String get privacyLastUpdated => '最後更新：2026年10月15日';
 
   @override
   String get privacyPolicyIntro =>
@@ -951,7 +950,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
       '您的搜尋紀錄、收藏路線、快取的票價結果，以及應用程式設定（語言、外觀、離線模式、資料來源）皆以標準應用程式儲存方式，儲存在您的裝置本機，不會上傳至任何地方。';
 
   @override
-  String get privacySection2Title => '提供給第三方的資訊';
+  String get privacySection2Title => '會傳送哪些資料、傳給誰';
 
   @override
   String get privacySection2Body =>
@@ -962,21 +961,20 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get privacySection3Body =>
-      '目前本應用程式僅會在本機記錄少數事件名稱以供除錯（僅顯示於您自己裝置的開發者紀錄中），不會傳送至任何地方。若日後新增真正的分析或追蹤功能，我們會事先徵求您的同意。';
+      '本應用程式會在您自己裝置的開發者紀錄中寫入少數事件名稱，用於除錯，不會傳送到任何地方。如果日後加入真正的分析功能，我們會先徵求您的同意。';
 
   @override
   String get privacySection4Title => '兒童隱私';
 
   @override
-  String get privacySection4Body =>
-      '本應用程式不會向任何人（包括兒童）蒐集個人資料，因為它本來就不向任何人蒐集個人資料，適合一般大眾使用。';
+  String get privacySection4Body => '本應用程式不向任何人（包括兒童）蒐集個人資料，適合所有年齡層使用。';
 
   @override
   String get privacySection5Title => '您的選擇與資料刪除';
 
   @override
   String get privacySection5Body =>
-      '您可隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏（設定 → 資料管理）。解除安裝本應用程式即會移除其儲存於您裝置上的所有資料。';
+      '您可以隨時清除快取票價（設定 → 管理離線資料），以及搜尋紀錄或收藏路線（設定 → 資料管理）。解除安裝本應用程式，就會刪除它存在您裝置上的所有資料。';
 
   @override
   String get privacySection6Title => '政策變更';
@@ -989,5 +987,5 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get privacySection7Title => '聯絡我們';
 
   @override
-  String get privacySection7Body => '如對本隱私權政策有任何疑問，請聯絡 maxfelix05@gmail.com。';
+  String get privacySection7Body => '對本隱私權政策有疑問嗎？請寄信至 maxfelix05@gmail.com。';
 }
