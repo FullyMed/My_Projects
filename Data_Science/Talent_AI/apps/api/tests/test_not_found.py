@@ -87,5 +87,5 @@ def test_other_postgrest_errors_are_json_500_with_cors_headers():
     )
     resp = _call("GET", "/jobs/job-1", scoped, "jobs")
     assert resp.status_code == 500
-    assert resp.json() == {"detail": "Database error"}
+    assert resp.json() == {"detail": "Something went wrong on our side. Try again in a moment."}
     assert resp.headers.get("access-control-allow-origin") == ORIGIN

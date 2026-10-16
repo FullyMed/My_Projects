@@ -126,7 +126,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
     setSaving(false);
 
     if (!saved) {
-      setModalError("Couldn't save this event — check your connection and try again.");
+      setModalError("We couldn't save this event. Check your connection and try again.");
       return;
     }
     setEvents(prev =>
@@ -142,7 +142,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
       setEvents(prev => prev.filter(event => event.id !== eventId));
       if (editingEvent?.id === eventId) closeModal();
     } else if (showEventModal) {
-      setModalError("Couldn't delete this event — check your connection and try again.");
+      setModalError("We couldn't delete this event. Check your connection and try again.");
     } else {
       setError(SAVE_ERROR);
     }
@@ -400,7 +400,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
         </div>
       </div>
 
-      {/* Event Modal — bottom sheet on mobile, centred on sm+ */}
+      {/* Event modal: bottom sheet on mobile, centred on sm+ */}
       {showEventModal && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
@@ -474,8 +474,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                   <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl">
                     <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-700 dark:text-amber-300">
-                      <span className="font-semibold">Conflict: </span>
-                      {timeConflicts[0].title} is already at this time
+                      You already have <span className="font-semibold">&quot;{timeConflicts[0].title}&quot;</span> at this time.
                     </p>
                   </div>
                 )}
@@ -542,7 +541,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {editingEvent ? 'Update' : 'Create'}
+                    {editingEvent ? 'Save changes' : 'Add event'}
                   </button>
                 </div>
               </div>
@@ -554,7 +553,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
       {deletingEvent && (
         <ConfirmDialog
           title="Delete event?"
-          message={<>“{deletingEvent.title}” will be permanently deleted.</>}
+          message={<>&quot;{deletingEvent.title}&quot; will be deleted. You can't undo this.</>}
           onConfirm={async () => {
             await deleteEventHandler(deletingEvent.id);
             setDeletingEvent(null);

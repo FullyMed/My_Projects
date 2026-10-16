@@ -54,7 +54,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
     },
   ];
 
-  // Product facts, not usage numbers — keep these true.
+  // Product facts, not usage numbers. Keep these true.
   const stats = [
     { label: 'Planner, goals & calendar', value: '3-in-1' },
     { label: 'Colour themes', value: '5' },
@@ -134,7 +134,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onShowAuth }) => {
             Add tasks to each day, count your way towards a goal and keep your appointments on a monthly calendar.
           </p>
 
-          {/* CTAs — stacked on mobile, side-by-side on xs+ */}
+          {/* CTAs: stacked on mobile, side by side on xs+ */}
           <div className="flex flex-col xs:flex-row gap-3 xs:gap-4 justify-center mb-12 xs:mb-16 px-4 xs:px-0">
             <button
               onClick={() => onShowAuth('register')}

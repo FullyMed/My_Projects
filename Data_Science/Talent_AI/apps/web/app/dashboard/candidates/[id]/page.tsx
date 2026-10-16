@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { Badge, Button, Card, ErrorText, Spinner } from "@/components/ui";
 import { InsightsPanel } from "@/components/insights";
 
@@ -31,7 +31,7 @@ export default function CandidateDetailPage() {
   useEffect(() => {
     apiFetch<CandidateDetail>(`/candidates/${id}`)
       .then(setCandidate)
-      .catch((err) => setError(String(err)))
+      .catch((err) => setError(errorMessage(err)))
       .finally(() => setLoading(false));
     apiFetch<{ id: string; title: string }[]>(`/jobs?limit=100`)
       .then(setJobs)
@@ -44,20 +44,20 @@ export default function CandidateDetailPage() {
       const { url } = await apiFetch<{ url: string }>(`/candidates/${id}/resume-url`);
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setResumeLoading(false);
     }
   }
 
   async function handleDelete() {
-    if (!window.confirm("Delete this candidate? This can't be undone.")) return;
+    if (!window.confirm("This candidate and their resume will be deleted. You can't undo this.")) return;
     setDeleting(true);
     try {
       await apiFetch(`/candidates/${id}`, { method: "DELETE" });
       router.push("/dashboard/candidates");
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
       setDeleting(false);
     }
   }
@@ -71,7 +71,7 @@ export default function CandidateDetailPage() {
   }
 
   if (error || !candidate) {
-    return <ErrorText>{error ?? "Candidate not found."}</ErrorText>;
+    return <ErrorText>{error ?? "We couldn't find that candidate."}</ErrorText>;
   }
 
   return (
@@ -113,7 +113,7 @@ export default function CandidateDetailPage() {
               </Badge>
             ))
           ) : (
-            <span className="text-sm text-muted">None detected</span>
+            <span className="text-sm text-muted">None found</span>
           )}
         </div>
       </Card>
@@ -126,7 +126,7 @@ export default function CandidateDetailPage() {
             onChange={(event) => setSelectedJobId(event.target.value)}
             className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none focus:border-accent"
           >
-            <option value="">Evaluate against a job…</option>
+            <option value="">Choose a job…</option>
             {jobs.map((job) => (
               <option key={job.id} value={job.id}>
                 {job.title}
@@ -146,7 +146,7 @@ export default function CandidateDetailPage() {
             ))}
           </ul>
         ) : (
-          <span className="text-sm text-muted">None detected</span>
+          <span className="text-sm text-muted">None found</span>
         )}
       </Card>
 
@@ -159,17 +159,16 @@ export default function CandidateDetailPage() {
             ))}
           </ul>
         ) : (
-          <span className="text-sm text-muted">None detected</span>
+          <span className="text-sm text-muted">None found</span>
         )}
       </Card>
 
       <Card className="p-5">
-        <h2 className="mb-3 text-sm font-medium text-muted">
-          Anonymized resume text
-          <span className="ml-2 font-normal text-muted/70">
-            (PII stripped — this is what matching runs against)
-          </span>
-        </h2>
+        <h2 className="mb-1 text-sm font-medium text-muted">Resume text used for matching</h2>
+        <p className="mb-3 text-xs text-muted">
+          We remove the names, email addresses and phone numbers we can find before ranking or
+          AI review. We can miss some, especially unusual name formats.
+        </p>
         <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap text-sm text-foreground">
           {candidate.anonymized_text}
         </pre>

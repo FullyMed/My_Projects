@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { Badge, Button, Card, EmptyState, ErrorText, Spinner } from "@/components/ui";
 import { InsightsPanel } from "@/components/insights";
 
@@ -63,7 +63,7 @@ export default function JobDetailPage() {
       });
       setJob((prev) => (prev ? { ...prev, email_reports_enabled: updated.email_reports_enabled } : prev));
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setEmailReportsBusy(false);
     }
@@ -97,7 +97,7 @@ export default function JobDetailPage() {
         setJob(jobData);
         setResults(resultsData);
       })
-      .catch((err) => setError(String(err)))
+      .catch((err) => setError(errorMessage(err)))
       .finally(() => setLoading(false));
     loadSkillGap();
   }, [id, loadSkillGap]);
@@ -113,7 +113,7 @@ export default function JobDetailPage() {
       setTfidfResults(null); // stale after a top_k change
       loadSkillGap();
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setRanking(false);
     }
@@ -127,7 +127,7 @@ export default function JobDetailPage() {
         await fetchTfidf();
         setMethod(next);
       } catch (err) {
-        setError(String(err));
+        setError(errorMessage(err));
       } finally {
         setRanking(false);
       }
@@ -148,7 +148,7 @@ export default function JobDetailPage() {
     return <ErrorText>{error}</ErrorText>;
   }
   if (!job) {
-    return <ErrorText>Job not found.</ErrorText>;
+    return <ErrorText>We couldn&apos;t find that job.</ErrorText>;
   }
 
   const displayed = method === "tfidf" ? tfidfResults : results;
@@ -173,7 +173,7 @@ export default function JobDetailPage() {
         {method === "semantic" && (
           <div className="flex shrink-0 items-center gap-2">
             <label className="flex items-center gap-1.5 text-xs text-muted">
-              Top
+              Show top
               <input
                 type="number"
                 min={5}
@@ -212,6 +212,11 @@ export default function JobDetailPage() {
           />
           Email me a weekly shortlist for this job
         </label>
+        {/* Remove this note once SMTP + the Cloud Scheduler job are live (see README, Phase E Part 2b). */}
+        <p className="mt-1 pl-6 text-xs text-muted">
+          Weekly emails aren&apos;t being sent yet. Your choice is saved, and we&apos;ll start
+          sending once they&apos;re switched on.
+        </p>
       </Card>
 
       {error && <ErrorText>{error}</ErrorText>}
@@ -225,14 +230,16 @@ export default function JobDetailPage() {
               onClick={() => selectMethod(m)}
               className="px-3 py-1.5"
             >
-              {m === "semantic" ? "Semantic" : m === "tfidf" ? "Keyword (TF-IDF)" : "Compare"}
+              {m === "semantic" ? "Semantic" : m === "tfidf" ? "Keyword" : "Compare"}
             </Button>
           ))}
         </div>
-        {method !== "semantic" && (
-          <span className="text-xs text-muted">Comparison only — not saved</span>
-        )}
       </div>
+      <p className="-mt-4 text-xs text-muted">
+        {method === "semantic"
+          ? "Semantic ranking compares meaning, so different wording for the same skill can still match."
+          : "Keyword ranking counts shared words with the job description. It's here to compare against, and we don't save it."}
+      </p>
 
       {ranking && method !== "semantic" && (
         <div className="flex justify-center py-8">
@@ -244,7 +251,7 @@ export default function JobDetailPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {[
             { label: "Semantic", rows: results },
-            { label: "Keyword (TF-IDF)", rows: tfidfResults },
+            { label: "Keyword", rows: tfidfResults },
           ].map(({ label, rows }) => (
             <div key={label} className="flex flex-col gap-2">
               <h3 className="text-sm font-medium text-muted">{label}</h3>
@@ -331,7 +338,7 @@ export default function JobDetailPage() {
         <Card className="p-5">
           <h2 className="mb-1 text-sm font-medium text-muted">Skill gaps in your shortlist</h2>
           <p className="mb-4 text-xs text-muted">
-            Share of the ranked candidates missing each required skill.
+            How many of the ranked candidates are missing each required skill.
           </p>
           <div className="flex flex-col gap-3">
             {skillGap!.map(({ skill, missing_fraction }) => (

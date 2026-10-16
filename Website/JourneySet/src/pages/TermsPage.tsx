@@ -5,120 +5,115 @@ import { usePageMeta } from '../hooks/usePageMeta';
 const TermsPage: React.FC = () => {
   usePageMeta(
     'Terms of Use | JourneySet',
-    'The terms and conditions that govern your use of JourneySet.'
+    'The rules for using JourneySet, in plain English.'
   );
 
   return (
-    <LegalPageLayout title="Terms of Use" lastUpdated="October 6, 2026">
+    <LegalPageLayout title="Terms of Use" lastUpdated="October 16, 2026">
       <section>
-        <h2>1. Acceptance of Terms</h2>
+        <h2>1. Accepting these terms</h2>
         <p>
-          By creating an account or otherwise using JourneySet (the "Service"), you agree to be
-          bound by these Terms of Use. If you do not agree to these terms, please do not use the
-          Service.
+          By creating an account or using JourneySet (the "Service"), you agree to these Terms of
+          Use. If you don't agree, please don't use the Service.
         </p>
       </section>
 
       <section>
-        <h2>2. Description of Service</h2>
+        <h2>2. What JourneySet is</h2>
         <p>
-          JourneySet is a personal productivity planner that lets you schedule weekly tasks, track
-          goals, and manage calendar events. The Service is provided on an as-is basis and may be
-          changed, suspended, or discontinued at any time without notice.
+          JourneySet is a personal planner for weekly tasks, goals and calendar events. We provide
+          it as it is, and we may change, pause or shut it down at any time without notice.
         </p>
       </section>
 
       <section>
-        <h2>3. Accounts and Eligibility</h2>
+        <h2>3. Your account</h2>
         <p>
-          You need an account to use most features of the Service. You are responsible for
-          maintaining the confidentiality of your login credentials and for all activity that
-          occurs under your account. Provide accurate information when you register, and let us
-          know if you believe your account has been accessed without authorization.
+          You need an account for most features. Keep your password to yourself: you're
+          responsible for everything that happens under your account. Give accurate details when
+          you sign up, and tell us if you think someone else has got into your account.
         </p>
       </section>
 
       <section>
-        <h2>4. Acceptable Use</h2>
+        <h2>4. Acceptable use</h2>
         <p>You agree not to:</p>
         <ul>
-          <li>Use the Service for any unlawful purpose or in violation of any applicable law.</li>
-          <li>Attempt to gain unauthorized access to another user's account or data.</li>
-          <li>Interfere with or disrupt the integrity or performance of the Service.</li>
-          <li>Reverse engineer, scrape, or misuse the Service beyond normal, personal use.</li>
+          <li>Use the Service for anything illegal, or in a way that breaks any law that applies to you.</li>
+          <li>Try to get into another user's account or data.</li>
+          <li>Interfere with the Service or disrupt how it runs.</li>
+          <li>Reverse engineer or scrape the Service, or use it beyond normal personal use.</li>
         </ul>
       </section>
 
       <section>
-        <h2>5. Your Content</h2>
+        <h2>5. Your content</h2>
         <p>
-          You retain ownership of the tasks, goals, events, and other content you create in
-          JourneySet ("Your Content"). You grant us the limited right to store and process Your
-          Content solely to operate and provide the Service to you. You are solely responsible for
-          Your Content and for keeping backups if that matters to you — use the built-in{' '}
-          <strong>Export &amp; Print</strong> feature at any time.
+          The tasks, goals, events and anything else you add to JourneySet ("Your Content") stay
+          yours. You let us store and process Your Content only so we can run the Service for you.
+          You're responsible for Your Content and for keeping your own copies if they matter to
+          you. You can print any of it, or save it as a PDF, with the <strong>Export</strong>{' '}
+          button at any time.
         </p>
       </section>
 
       <section>
-        <h2>6. Third-Party Services</h2>
+        <h2>6. Services we rely on</h2>
         <p>
-          JourneySet relies on <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>{' '}
-          for authentication and data storage. Your use of the Service is also subject to
-          Supabase's own terms and privacy practices for the infrastructure it provides on our
-          behalf.
+          JourneySet uses <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>{' '}
+          for sign-in and data storage. Supabase's own terms and privacy practices also apply to
+          the parts of the Service it runs for us.
         </p>
       </section>
 
       <section>
-        <h2>7. Service Availability &amp; Changes</h2>
+        <h2>7. Availability and changes</h2>
         <p>
-          We aim to keep the Service available and reliable, but we don't guarantee uninterrupted
-          access. Features, design, and functionality may change over time as JourneySet evolves.
+          We try to keep the Service running, but we can't promise it will always be available.
+          Features and design may change over time.
         </p>
       </section>
 
       <section>
-        <h2>8. Termination</h2>
+        <h2>8. Ending your account</h2>
         <p>
-          You may stop using the Service and delete your account at any time from
-          <strong> Settings → Delete account</strong>. We may suspend or
-          terminate access to the Service for accounts that violate these Terms or the Acceptable
-          Use section above.
+          You can stop using the Service and delete your account at any time from{' '}
+          <strong>Settings → Delete account</strong>. We may suspend or close accounts that break
+          these Terms or the Acceptable use section above.
         </p>
       </section>
 
       <section>
-        <h2>9. Disclaimer of Warranties</h2>
+        <h2>9. No warranties</h2>
         <p>
-          The Service is provided "as is" and "as available," without warranties of any kind,
-          express or implied, including but not limited to fitness for a particular purpose,
-          reliability, or availability.
+          We provide the Service "as is" and "as available", without warranties of any kind,
+          express or implied, including (but not limited to) fitness for a particular purpose,
+          reliability or availability.
         </p>
       </section>
 
       <section>
-        <h2>10. Limitation of Liability</h2>
+        <h2>10. Limits on liability</h2>
         <p>
-          To the fullest extent permitted by law, JourneySet and its developer shall not be liable
-          for any indirect, incidental, or consequential damages arising from your use of, or
-          inability to use, the Service.
+          As far as the law allows, JourneySet and its developer aren't liable for any indirect,
+          incidental or consequential damages that come from using the Service or from not being
+          able to use it.
         </p>
       </section>
 
       <section>
-        <h2>11. Changes to These Terms</h2>
+        <h2>11. Changes to these Terms</h2>
         <p>
-          We may update these Terms from time to time. Material changes will be reflected by
-          updating the "Last updated" date above. Continued use of the Service after changes take
-          effect constitutes acceptance of the revised Terms.
+          We may update these Terms. When we make a material change, we'll update the "Last
+          updated" date above. If you keep using the Service after a change takes effect, you
+          accept the new Terms.
         </p>
       </section>
 
       <section>
         <h2>12. Contact</h2>
         <p>
-          Questions about these Terms can be raised via the project's{' '}
+          You can send questions about these Terms through the project's{' '}
           <a href="https://github.com/FullyMed/My_Projects" target="_blank" rel="noopener noreferrer">
             GitHub repository
           </a>.

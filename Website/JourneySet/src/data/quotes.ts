@@ -7,7 +7,7 @@ export const quotes: Quote[] = [
   { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
   { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
   { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
-  { text: "Your limitation—it's only your imagination.", author: "Unknown" },
+  { text: "Your limitation is only your imagination.", author: "Unknown" },
   { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
   { text: "Great things never come from comfort zones.", author: "Unknown" },
   { text: "Dream it. Wish it. Do it.", author: "Unknown" },

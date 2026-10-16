@@ -20,6 +20,9 @@ from .config import settings
 from .services.db_utils import fetch_one
 
 
+SESSION_EXPIRED = "Your session has expired. Log in again."
+
+
 @dataclass
 class CurrentUser:
     user_id: str
@@ -39,21 +42,24 @@ def get_scoped_client(token: str) -> Client:
 
 async def get_current_user(authorization: str = Header(...)) -> CurrentUser:
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing bearer token")
+        raise HTTPException(status_code=401, detail="You need to log in first.")
     token = authorization.removeprefix("Bearer ").strip()
 
     try:
         auth_response = _anon_client().auth.get_user(token)
     except Exception as exc:  # expired/invalid token, network error talking to Supabase Auth
-        raise HTTPException(status_code=401, detail="Invalid or expired token") from exc
+        raise HTTPException(status_code=401, detail=SESSION_EXPIRED) from exc
     if auth_response is None or auth_response.user is None:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail=SESSION_EXPIRED)
     user_id = auth_response.user.id
 
     scoped_client = get_scoped_client(token)
     profile = fetch_one(scoped_client.table("profiles").select("tenant_id").eq("id", user_id))
     if not profile:
         # Shouldn't happen -- the handle_new_user trigger creates this row at signup.
-        raise HTTPException(status_code=403, detail="No tenant profile found for this user")
+        raise HTTPException(
+            status_code=403,
+            detail="We couldn't find the company account for this login. Contact support.",
+        )
 
     return CurrentUser(user_id=user_id, tenant_id=profile["tenant_id"], token=token)

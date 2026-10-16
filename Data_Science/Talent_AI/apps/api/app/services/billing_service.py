@@ -29,6 +29,7 @@ from supabase import Client
 
 from ..config import settings
 from ..deps import CurrentUser
+from ..messages import BILLING_NOT_SET_UP
 from .admin_client import get_admin_client
 from .db_utils import fetch_one
 
@@ -41,7 +42,7 @@ DEFAULT_PLAN = "trial"
 
 def _require_configured() -> None:
     if not (settings.stripe_secret_key and settings.stripe_price_id):
-        raise RuntimeError("Stripe is not configured on this service yet.")
+        raise RuntimeError(BILLING_NOT_SET_UP)
     stripe.api_key = settings.stripe_secret_key
 
 
@@ -85,7 +86,7 @@ def create_billing_portal_session(*, client: Client, user: CurrentUser, return_u
     )
     customer_id = (tenant_row or {}).get("stripe_customer_id")
     if not customer_id:
-        raise ValueError("No subscription yet -- upgrade first before managing billing.")
+        raise ValueError("You don't have a subscription yet. Upgrade to Pro first, then you can manage billing here.")
 
     session = stripe.billing_portal.Session.create(customer=customer_id, return_url=return_url)
     return session.url
@@ -114,7 +115,7 @@ def _tenant_id_for_customer(customer_id: str) -> str | None:
 
 def handle_stripe_event(*, payload: bytes, sig_header: str) -> None:
     if not (settings.stripe_secret_key and settings.stripe_webhook_secret):
-        raise RuntimeError("Stripe is not configured on this service yet.")
+        raise RuntimeError(BILLING_NOT_SET_UP)
     stripe.api_key = settings.stripe_secret_key
 
     # Raises stripe.error.SignatureVerificationError / ValueError on a bad or

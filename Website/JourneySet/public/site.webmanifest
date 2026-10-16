@@ -1,7 +1,7 @@
 {
-  "name": "JourneySet - Personal Productivity Planner",
+  "name": "JourneySet",
   "short_name": "JourneySet",
-  "description": "Plan your weekly schedules, set and track goals, and manage events with JourneySet.",
+  "description": "Plan your week, track goals and keep a calendar of events. JourneySet is free and works in your browser.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",

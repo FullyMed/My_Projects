@@ -37,9 +37,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   };
 
   const navigation = [
-    { path: '/app/planner', name: 'Weekly Planner', icon: CheckSquare },
-    { path: '/app/goals', name: 'Goal Tracker', icon: Target },
-    { path: '/app/calendar', name: 'Event Calendar', icon: Calendar },
+    { path: '/app/planner', name: 'Weekly planner', icon: CheckSquare },
+    { path: '/app/goals', name: 'Goal tracker', icon: Target },
+    { path: '/app/calendar', name: 'Event calendar', icon: Calendar },
     { path: '/app/settings', name: 'Settings', icon: Settings },
   ];
 

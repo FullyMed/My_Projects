@@ -15,8 +15,8 @@ const getWeekKey = (date: Date) => {
 
 const PlannerPage: React.FC = () => {
   usePageMeta(
-    'Weekly Planner | JourneySet',
-    "Organise your week with tasks, time slots, and recurring to-dos in JourneySet's Weekly Planner."
+    'Weekly planner | JourneySet',
+    'Plan each day of your week with tasks, times and weekly repeats.'
   );
   const [printView, setPrintView] = useState(false);
   // Initialise to the current ISO week so PrintView is correct even before
@@ -26,7 +26,7 @@ const PlannerPage: React.FC = () => {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Weekly Planner</h1>
+        <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Weekly planner</h1>
         <ExportButton onPrint={() => setPrintView(true)} label="Export" />
       </div>
       <WeeklyPlanner onWeekChange={setCurrentWeekKey} />

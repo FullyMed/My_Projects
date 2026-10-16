@@ -14,7 +14,7 @@ import DeleteAccountDialog from '../components/DeleteAccountDialog';
 const SettingsPage: React.FC = () => {
   usePageMeta(
     'Settings | JourneySet',
-    'Manage your account, sync status, theme, and data preferences in JourneySet.'
+    'Change your theme, see when your changes were last saved, or delete your account.'
   );
   const { user, logout } = useAuth();
   const { theme, setTheme, themes } = useTheme();
@@ -67,7 +67,7 @@ const SettingsPage: React.FC = () => {
         <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5">
             <Wifi className="h-4 w-4 text-indigo-500" />
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Data sync</h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Sync</h2>
           </div>
           <div className="px-6 py-5">
             <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ const SettingsPage: React.FC = () => {
                     <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Synced</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Last saved</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {formatDistanceToNow(new Date(lastSync), { addSuffix: true })}
                     </p>
@@ -89,8 +89,8 @@ const SettingsPage: React.FC = () => {
                     <Clock className="h-4 w-4 text-slate-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Awaiting first sync</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Changes sync automatically</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Nothing saved yet</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Your changes save as you make them.</p>
                   </div>
                 </>
               )}
@@ -110,7 +110,7 @@ const SettingsPage: React.FC = () => {
                 <Palette className="h-4 w-4 text-indigo-500" />
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-white">Theme</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Choose your colour theme</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Pick a colour theme</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2.5">
@@ -149,15 +149,15 @@ const SettingsPage: React.FC = () => {
                   <Minimize2 className="h-4 w-4 text-slate-500" />
                 )}
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{isCompact ? 'Compact mode' : 'Normal mode'}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Reduce sidebar and spacing</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">Compact mode</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">A narrower sidebar and tighter spacing</p>
                 </div>
               </div>
               <button
                 onClick={toggleCompact}
                 className="px-4 min-h-[44px] text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
               >
-                Toggle
+                {isCompact ? 'Turn off' : 'Turn on'}
               </button>
             </div>
           </div>
@@ -174,7 +174,7 @@ const SettingsPage: React.FC = () => {
               className="w-full flex items-center gap-3 px-4 py-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors border border-rose-200 dark:border-rose-900/50 cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
-              <span className="text-sm font-medium">Reset all local data</span>
+              <span className="text-sm font-medium">Clear offline copy</span>
             </button>
             <button
               onClick={logout}
@@ -191,7 +191,7 @@ const SettingsPage: React.FC = () => {
               <span className="text-sm font-semibold">Delete account</span>
             </button>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Permanently deletes your account and all your tasks, goals and events.
+              Deletes your account and all your tasks, goals and events for good.
             </p>
           </div>
         </section>
@@ -223,10 +223,10 @@ const SettingsPage: React.FC = () => {
               <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
             </div>
             <h3 id="reset-modal-title" className="text-base font-bold text-center text-slate-900 dark:text-white mb-2">
-              Reset all data?
+              Clear the offline copy?
             </h3>
             <p className="text-sm text-center text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-              This will clear your local cache. Your data in the cloud remains safe.
+              This removes the copy of your tasks, goals and events kept in this browser. Everything in your account stays as it is.
             </p>
             <div className="flex gap-3">
               <button

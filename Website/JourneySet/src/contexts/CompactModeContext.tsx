@@ -20,7 +20,7 @@ export const CompactModeProvider: React.FC<{ children: React.ReactNode }> = ({ c
     try {
       localStorage.setItem('journeyset_compact_mode', JSON.stringify(isCompact));
     } catch {
-      // Storage unavailable (private mode / quota) — the setting just won't persist.
+      // Storage unavailable (private mode or full quota): the setting won't persist.
     }
   }, [isCompact]);
 

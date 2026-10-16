@@ -12,7 +12,7 @@
  *   referenced by the og:image / twitter:image tags in index.html.
  *
  * Text uses system sans-serif fonts (librsvg can't load Google Fonts), so the
- * OG image renders slightly differently per OS — re-check it visually after
+ * OG image renders slightly differently per OS. Re-check it visually after
  * regenerating.
  */
 import { readFile, writeFile } from 'node:fs/promises';
@@ -71,8 +71,8 @@ const ogSvg = `
   </g>
   <text x="252" y="182" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="64" font-weight="800" fill="#ffffff" letter-spacing="-1">JourneySet</text>
 
-  <text x="96" y="340" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="72" font-weight="800" fill="#ffffff" letter-spacing="-2">The productivity planner</text>
-  <text x="96" y="424" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="72" font-weight="800" fill="url(#accent)" letter-spacing="-2">you'll love.</text>
+  <text x="96" y="340" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="64" font-weight="800" fill="#ffffff" letter-spacing="-1.5">Plan your week</text>
+  <text x="96" y="424" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="64" font-weight="800" fill="url(#accent)" letter-spacing="-1.5">and keep your goals in sight.</text>
 
   <text x="96" y="510" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="30" fill="#94a3b8">Weekly planner  ·  Goal tracker  ·  Event calendar</text>
 

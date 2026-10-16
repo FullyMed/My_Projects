@@ -28,12 +28,13 @@ from talent_ai_core.schemas import CandidateProfile, JobDescription
 
 from .db_utils import fetch_one, format_embedding, parse_embedding
 from ..deps import CurrentUser
+from ..messages import JOB_NOT_FOUND
 
 
 def _require_job(client: Client, job_id: str, columns: str = "*") -> dict:
     row = fetch_one(client.table("job_descriptions").select(columns).eq("id", job_id))
     if not row:
-        raise ValueError("Job description not found")
+        raise ValueError(JOB_NOT_FOUND)
     return row
 
 

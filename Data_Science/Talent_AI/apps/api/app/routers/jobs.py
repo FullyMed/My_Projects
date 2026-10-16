@@ -7,6 +7,7 @@ from talent_ai_core.embeddings.embedder import embed_text
 from talent_ai_core.extraction.nlp_extractor import extract_skills
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
+from ..messages import JOB_NOT_FOUND
 from ..services.db_utils import fetch_one
 from ..services.ranking_service import (
     get_latest_ranking,
@@ -82,7 +83,7 @@ async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) ->
         .eq("id", job_id)
     )
     if not job:
-        raise HTTPException(status_code=404, detail="Job description not found")
+        raise HTTPException(status_code=404, detail=JOB_NOT_FOUND)
     return job
 
 
@@ -102,7 +103,7 @@ async def set_email_reports(
         .execute()
     )
     if not result.data:
-        raise HTTPException(status_code=404, detail="Job description not found")
+        raise HTTPException(status_code=404, detail=JOB_NOT_FOUND)
     return result.data[0]
 
 

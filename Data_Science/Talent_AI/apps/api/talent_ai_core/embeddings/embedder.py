@@ -1,4 +1,4 @@
-"""Sentence Transformers wrapper — local, free, reproducible embeddings.
+"""Sentence Transformers wrapper: local, free, reproducible embeddings.
 
 Vendored as-is from the original Talent_AI project
 (src/talent_ai/embeddings/embedder.py), except EMBEDDING_MODEL_NAME is now a
@@ -15,7 +15,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-"""384-dim, L2-normalized output — must match the pgvector column dimension
+"""384-dim, L2-normalized output. Must match the pgvector column dimension
 (supabase/migrations/0003_candidates_jobs_matches.sql: `vector(384)`)."""
 
 _MODEL: SentenceTransformer | None = None

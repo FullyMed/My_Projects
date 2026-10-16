@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage, toApiError } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, EmptyState, ErrorText, Input, Spinner } from "@/components/ui";
 
@@ -37,7 +37,7 @@ export default function CandidatesPage() {
       );
       setCandidates(data);
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setLoadingList(false);
     }
@@ -73,7 +73,7 @@ export default function CandidatesPage() {
         body: formData,
       });
       if (!response.ok) {
-        throw new Error(await response.text());
+        throw await toApiError(response);
       }
 
       if (!single) {
@@ -84,12 +84,7 @@ export default function CandidatesPage() {
       setOffset(0);
       await loadCandidates(0);
     } catch (err) {
-      const msg = String(err);
-      setError(
-        msg.includes("402")
-          ? "Trial plan is limited to 10 candidates. Upgrade to add more."
-          : msg,
-      );
+      setError(errorMessage(err));
     } finally {
       setUploading(false);
     }
@@ -99,7 +94,7 @@ export default function CandidatesPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Candidates</h1>
-        <p className="text-sm text-muted">Resumes parsed, anonymized, and ready to rank.</p>
+        <p className="text-sm text-muted">Upload resumes here, then rank them against any of your jobs.</p>
       </div>
 
       <Card className="p-5">
@@ -115,15 +110,15 @@ export default function CandidatesPage() {
             />
             <span className="text-sm font-medium text-foreground">
               {files.length === 0
-                ? "Click to choose resume PDF(s)"
+                ? "Choose resume PDFs"
                 : files.length === 1
                   ? files[0].name
                   : `${files.length} files selected`}
             </span>
-            <span className="text-xs text-muted">PDF, up to 10MB each — select several to bulk-upload</span>
+            <span className="text-xs text-muted">PDF files up to 10 MB each. You can pick several at once.</span>
           </label>
           <Input
-            placeholder="Category (optional)"
+            placeholder="Category, e.g. Engineering (optional)"
             value={category}
             onChange={(event) => setCategory(event.target.value)}
           />
@@ -144,7 +139,7 @@ export default function CandidatesPage() {
                   {r.status === "ok" ? "✓" : "✗"}
                 </span>
                 <span className="text-foreground">{r.filename}</span>
-                {r.detail && <span className="text-xs text-muted">— {r.detail}</span>}
+                {r.detail && <span className="text-xs text-muted">{r.detail}</span>}
               </div>
             ))}
           </div>
@@ -160,7 +155,7 @@ export default function CandidatesPage() {
       ) : candidates.length === 0 && offset === 0 ? (
         <EmptyState
           title="No candidates yet"
-          description="Upload a resume above to get started."
+          description="Upload a resume above and it will show up here."
         />
       ) : (
         <>
@@ -181,7 +176,7 @@ export default function CandidatesPage() {
                         href={`/dashboard/candidates/${candidate.id}`}
                         className="block px-4 py-3 hover:text-accent"
                       >
-                        {candidate.category ?? "—"}
+                        {candidate.category ?? "Uncategorized"}
                       </a>
                     </td>
                     <td className="px-4 py-3">
@@ -189,7 +184,7 @@ export default function CandidatesPage() {
                         {candidate.skills.slice(0, 5).map((skill) => (
                           <Badge key={skill}>{skill}</Badge>
                         ))}
-                        {candidate.skills.length === 0 && <span className="text-muted">—</span>}
+                        {candidate.skills.length === 0 && <span className="text-muted">None found</span>}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted">

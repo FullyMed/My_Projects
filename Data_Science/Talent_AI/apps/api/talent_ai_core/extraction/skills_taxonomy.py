@@ -5,7 +5,7 @@ Vendored as-is from the original Talent_AI project
 
 The Kaggle source dataset spans ~24 job categories (IT, finance, healthcare, design,
 sales, ...), so this taxonomy is broad rather than tech-only. It's intentionally a
-flat, editable list — extend it as gaps are found rather than trying to be exhaustive
+flat, editable list: extend it as gaps are found rather than trying to be exhaustive
 up front.
 """
 

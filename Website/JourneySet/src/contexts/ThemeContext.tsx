@@ -20,7 +20,8 @@ interface ThemeProviderProps {
 
 /**
  * Resolve the initial theme synchronously so the first render already matches
- * the value the pre-paint script in index.html applied — no flash, no stomp.
+ * the value the pre-paint script (public/theme-init.js) applied, so the page
+ * neither flashes nor overwrites it.
  */
 const resolveInitialTheme = (): ThemeName => {
   if (typeof document !== 'undefined') {

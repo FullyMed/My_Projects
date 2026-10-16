@@ -30,9 +30,9 @@ from .db_utils import format_embedding, parse_embedding
 def _build_digest(job: dict, ranked: list[dict]) -> str:
     required_skills = job.get("required_skills") or []
     lines = [
-        f"Weekly shortlist: {job['title']}",
+        f"Here's this week's shortlist for {job['title']}.",
         "",
-        f"Required skills: {', '.join(required_skills) or '(none detected)'}",
+        f"Required skills: {', '.join(required_skills) or 'none found in the job description'}",
         "",
     ]
 
@@ -41,8 +41,9 @@ def _build_digest(job: dict, ranked: list[dict]) -> str:
         skills = row.get("skills") or []
         matched = sorted(set(skills) & set(required_skills))
         lines.append(
-            f"#{row['rank']}  {row.get('category') or 'Uncategorized'}  "
-            f"({row['score'] * 100:.1f}% match)  -- matched: {', '.join(matched) or '-'}"
+            f"{row['rank']}. {row.get('category') or 'Uncategorized'}, "
+            f"{row['score'] * 100:.1f}% match. "
+            f"Matching skills: {', '.join(matched) or 'none'}"
         )
         shortlist.append(
             CandidateProfile(
@@ -51,13 +52,24 @@ def _build_digest(job: dict, ranked: list[dict]) -> str:
         )
 
     if not ranked:
-        lines.append("(no candidates ranked yet)")
+        lines.append(
+            "You don't have any candidates to rank yet. Upload resumes in Talent AI "
+            "and they'll show up here next week."
+        )
 
     gaps = skill_gap_analysis(shortlist, required_skills)
     if gaps:
-        lines += ["", "Skill gaps in this shortlist:"]
-        lines += [f"  {skill}: {fraction * 100:.0f}% missing" for skill, fraction in gaps]
+        lines += ["", "Skills this shortlist is missing:"]
+        lines += [
+            f"- {skill}: missing for {fraction * 100:.0f}% of these candidates"
+            for skill, fraction in gaps
+        ]
 
+    lines += [
+        "",
+        "You're getting this because weekly emails are on for this job. "
+        "To stop them, untick the weekly email box on the job's page in Talent AI.",
+    ]
     return "\n".join(lines)
 
 
@@ -100,7 +112,7 @@ def _report_for_job(admin, job: dict) -> dict:
 
     digest = _build_digest(job, ranked_with_rank)
     sent = email_service.send_email(
-        to=to, subject=f"Talent AI weekly shortlist: {job['title']}", body=digest
+        to=to, subject=f"Your weekly shortlist for {job['title']}", body=digest
     )
     return {"job_id": job["id"], "status": "sent" if sent else "not_sent"}
 

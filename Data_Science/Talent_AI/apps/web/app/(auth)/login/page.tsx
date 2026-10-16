@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/authErrors";
 import { Button, Card, ErrorText, Input, Logo } from "@/components/ui";
 
 export default function LoginPage() {
@@ -22,7 +23,7 @@ export default function LoginPage() {
 
     setLoading(false);
     if (signInError) {
-      setError(signInError.message);
+      setError(friendlyAuthError(signInError, "log in"));
       return;
     }
     router.push("/dashboard/candidates");
@@ -34,7 +35,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm p-6">
         <div className="mb-6 flex flex-col gap-1">
           <h1 className="text-lg font-semibold">Log in</h1>
-          <p className="text-sm text-muted">Welcome back.</p>
+          <p className="text-sm text-muted">Good to see you again.</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input

@@ -8,7 +8,7 @@
 
   - SECURITY DEFINER: only the function owner (postgres) can delete from
     auth.users, so the function runs with the owner's rights. It can only
-    ever touch `auth.uid()` — the caller's own id from their JWT.
+    ever touch `auth.uid()`, the caller's own id from their JWT.
   - search_path pinned to '' (Supabase linter: function_search_path_mutable).
   - EXECUTE revoked from PUBLIC/anon and granted only to `authenticated`.
 

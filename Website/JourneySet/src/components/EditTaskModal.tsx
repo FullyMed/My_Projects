@@ -31,7 +31,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
     e.preventDefault();
     const title = formData.title.trim();
     if (!title) {
-      setError('Title is required.');
+      setError('Give the task a title.');
       return;
     }
     setSaving(true);
@@ -47,7 +47,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
       onClose();
     } else {
       setSaving(false);
-      setError("Couldn't save your changes — check your connection and try again.");
+      setError("We couldn't save your changes. Check your connection and try again.");
     }
   };
 

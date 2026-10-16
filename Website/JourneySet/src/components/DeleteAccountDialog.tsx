@@ -32,7 +32,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onClose }) =>
     const result = await deleteAccount();
     if (!result.success) {
       setDeleting(false);
-      setError(result.error || "Couldn't delete your account. Please try again.");
+      setError(result.error || "We couldn't delete your account. Try again in a moment.");
       return;
     }
     navigate('/', { replace: true });
@@ -61,8 +61,8 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onClose }) =>
           Delete your account?
         </h3>
         <p id="delete-account-desc" className="text-sm text-center text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-          This permanently deletes your account and <strong className="text-slate-700 dark:text-slate-300">all</strong> your
-          tasks, goals and events. It can't be undone — export anything you want to keep first.
+          This deletes your account and <strong className="text-slate-700 dark:text-slate-300">all</strong> your tasks,
+          goals and events for good. You can't undo it, so print or save anything you want to keep first.
         </p>
 
         <label htmlFor="delete-confirm-email" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">

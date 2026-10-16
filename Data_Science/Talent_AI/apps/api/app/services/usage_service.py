@@ -76,10 +76,15 @@ def ensure_within_budget(*, client: Client, user: CurrentUser) -> None:
     cost before making it) -- the next call after that is what gets blocked."""
     summary = get_usage_summary(client=client, user=user)
     if summary["tokens_used"] >= summary["token_limit"]:
+        # The ledger counts from the 1st of the month (UTC), see _month_start_iso.
+        next_step = (
+            "Upgrade to Pro for a bigger allowance, or wait until it resets on the 1st."
+            if summary["plan"] == "trial"
+            else "It resets on the 1st."
+        )
         raise PermissionError(
-            f"Monthly AI usage limit reached ({summary['tokens_used']:,} / "
-            f"{summary['token_limit']:,} tokens on the {summary['plan']} plan). "
-            "Upgrade to continue generating insights this month."
+            f"You've used this month's AI allowance ({summary['tokens_used']:,} of "
+            f"{summary['token_limit']:,} tokens). {next_step}"
         )
 
 
@@ -97,7 +102,13 @@ def record_usage(
 
 
 def _ensure_under_count_limit(
-    *, client: Client, user: CurrentUser, table: str, limits: dict[str, int | None], noun: str
+    *,
+    client: Client,
+    user: CurrentUser,
+    table: str,
+    limits: dict[str, int | None],
+    noun: str,
+    other_option: str = "",
 ) -> None:
     plan = get_tenant_plan(client=client, user=user)
     limit = limits.get(plan, limits.get("trial"))
@@ -106,17 +117,23 @@ def _ensure_under_count_limit(
     count = len(client.table(table).select("id").execute().data)
     if count >= limit:
         raise PermissionError(
-            f"Trial plan is limited to {limit} {noun}. Upgrade to add more."
+            f"The Trial plan includes up to {limit} {noun}. Upgrade to Pro to add more{other_option}."
         )
 
 
 def ensure_can_add_candidate(*, client: Client, user: CurrentUser) -> None:
     _ensure_under_count_limit(
-        client=client, user=user, table="candidates", limits=PLAN_CANDIDATE_LIMITS, noun="candidates"
+        client=client,
+        user=user,
+        table="candidates",
+        limits=PLAN_CANDIDATE_LIMITS,
+        noun="candidates",
+        # Candidates can be deleted (jobs can't yet), so that's a real way out.
+        other_option=", or delete a candidate you no longer need",
     )
 
 
 def ensure_can_add_job(*, client: Client, user: CurrentUser) -> None:
     _ensure_under_count_limit(
-        client=client, user=user, table="job_descriptions", limits=PLAN_JOB_LIMITS, noun="job descriptions"
+        client=client, user=user, table="job_descriptions", limits=PLAN_JOB_LIMITS, noun="jobs"
     )

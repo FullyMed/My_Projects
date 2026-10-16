@@ -7,20 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev        # Start dev server (Vite, http://localhost:5173)
 npm run typecheck  # tsc --noEmit on tsconfig.app.json + tsconfig.node.json (0 errors expected)
-npm run build      # typecheck, then vite build — a type error fails the build (and the Vercel deploy)
+npm run build      # typecheck, then vite build; a type error fails the build (and the Vercel deploy)
 npm run lint       # ESLint (0 errors, 0 warnings expected)
 npm run preview    # Serve the production build locally
 npm run icons      # Regenerate favicons + public/og-image.png (scripts/generate-icons.mjs; `-- og` / `-- favicons` for one set)
 ```
 
-`vite build` alone does **not** type-check (esbuild just strips types). Before 2026-09-30 `build` was plain `vite build` and 4 type errors had piled up unnoticed — keep `typecheck` in the build.
+`vite build` alone does **not** type-check (esbuild just strips types). Before 2026-09-30 `build` was plain `vite build` and 4 type errors had piled up unnoticed. Keep `typecheck` in the build.
 
 **WSL / Linux note**: `node_modules` is installed on Windows. If Vite fails with `Cannot find module @rollup/rollup-linux-x64-gnu`, run:
 ```bash
 npm install @rollup/rollup-linux-x64-gnu --no-save
 ```
 
-There is no test suite — verify changes by running the dev server and exercising the affected flow.
+There is no test suite. Verify changes by running the dev server and exercising the affected flow.
 
 ## Environment
 
@@ -44,8 +44,8 @@ Live at https://journeyset.vercel.app/ (Vercel project `journeyset`, team `fully
 |---|---|
 | UI framework | React 18 + TypeScript |
 | Build tool | Vite 5 |
-| Styling | Tailwind CSS 3 — dark mode via `dark:` class on `<html>` |
-| Icons | lucide-react only — do **not** add other icon packages |
+| Styling | Tailwind CSS 3, dark mode via `dark:` class on `<html>` |
+| Icons | lucide-react only. Do **not** add other icon packages |
 | Routing | react-router-dom v7 |
 | Backend / auth | Supabase (`@supabase/supabase-js`) |
 | Date utilities | date-fns |
@@ -101,8 +101,8 @@ Each API file (`plannerApi`, `goalsApi`, `eventsApi`) follows the same pattern:
 
 ### Loading states
 
-- **`LoadingScreen`** (`src/components/LoadingScreen.tsx`): the single full-viewport loading UI (logo + `Loader2` spinner) shown while auth is resolving. Used by both `App.tsx` (top-level `isLoading` from `useAuth`) and `ProtectedRoute`. Don't reintroduce a bespoke spinner in either place — route any new "waiting on auth" case through this component so the loading UI stays visually consistent and on-theme.
-- **Per-feature data fetches**: `WeeklyPlanner`, `GoalTracker`, and `EventCalendar` each track their own `[tasks|goals|events]Loading` boolean around their initial Supabase fetch (and, for `WeeklyPlanner`, each week change) and render a centered `Loader2` block (`h-8 w-8 text-indigo-500 animate-spin` + a muted caption) in place of the grid while `true`. This matters because these lists start empty — without a loading flag, the "no data yet" empty state flashes before the real data arrives. `PrintView` already had this pattern (`isLoading` + `Loader2`); the other three follow the same convention. When adding a new data-fetching feature component, follow this pattern rather than leaving the empty state to double as a loading state.
+- **`LoadingScreen`** (`src/components/LoadingScreen.tsx`): the single full-viewport loading UI (logo + `Loader2` spinner) shown while auth is resolving. Used by both `App.tsx` (top-level `isLoading` from `useAuth`) and `ProtectedRoute`. Don't reintroduce a bespoke spinner in either place. Route any new "waiting on auth" case through this component so the loading UI stays visually consistent and on-theme.
+- **Per-feature data fetches**: `WeeklyPlanner`, `GoalTracker`, and `EventCalendar` each track their own `[tasks|goals|events]Loading` boolean around their initial Supabase fetch (and, for `WeeklyPlanner`, each week change) and render a centered `Loader2` block (`h-8 w-8 text-indigo-500 animate-spin` + a muted caption) in place of the grid while `true`. This matters because these lists start empty: without a loading flag, the "no data yet" empty state flashes before the real data arrives. `PrintView` already had this pattern (`isLoading` + `Loader2`); the other three follow the same convention. When adding a new data-fetching feature component, follow this pattern rather than leaving the empty state to double as a loading state.
 - **`AuthModal`** shows a `Loader2` spin icon next to "Please wait…" on its submit button while `loading` is true, matching the same icon+text convention. The event modal, `EditTaskModal` and the add buttons follow the same icon convention while saving.
 
 ### Modals (`src/hooks/useModalFocus.ts`)
@@ -115,11 +115,11 @@ Deleting a task, goal or event always goes through `ConfirmDialog`. It is a smal
 
 ### Print / export (`src/components/PrintView.tsx`)
 
-`PrintView` is **portalled to `<body>`** and adds `print-view-open` to `<body>` while mounted. `index.css` has `@media print { body.print-view-open > #root { display: none } }`, so only the report prints, not the sidebar, header and page underneath it. Escape closes it. Props: `view`, `weekKey` (planner — `PlannerPage` tracks it via `WeeklyPlanner`'s `onWeekChange`), and `month` (calendar — `CalendarPage` tracks it via `EventCalendar`'s `onMonthChange`, so Export prints the month you're looking at, not always the current one). `weekKeyToMonday` uses `setISOWeek` + `startOfISOWeek`. Don't go back to adding `86400000` ms per day, which lands on Sunday 23:00 across a daylight-saving change.
+`PrintView` is **portalled to `<body>`** and adds `print-view-open` to `<body>` while mounted. `index.css` has `@media print { body.print-view-open > #root { display: none } }`, so only the report prints, not the sidebar, header and page underneath it. Escape closes it. Props: `view`, `weekKey` (planner: `PlannerPage` tracks it via `WeeklyPlanner`'s `onWeekChange`), and `month` (calendar: `CalendarPage` tracks it via `EventCalendar`'s `onMonthChange`, so Export prints the month you're looking at, not always the current one). `weekKeyToMonday` uses `setISOWeek` + `startOfISOWeek`. Don't go back to adding `86400000` ms per day, which lands on Sunday 23:00 across a daylight-saving change.
 
 ### Favicon set (`public/`)
 
-`favicon.svg` is the source of truth — a 32×32 vector redraw of the in-app logo badge (indigo-500→violet-600 gradient, `rounded-lg`-equivalent corners, white lucide `Compass` glyph at the exact same geometry used in `AppLayout`/`LandingPage`/etc.). `favicon.ico` (16/32/48 multi-res), `apple-touch-icon.png` (180×180), `icon-192.png`, and `icon-512.png` are all rasterized from it — don't hand-edit the PNGs/ICO directly; regenerate them from `favicon.svg` if the mark ever changes. `site.webmanifest` references the two PNG icons plus `theme_color` (`#4f46e5`, indigo-600) and `background_color` (`#f8fafc`, slate-50), matching the design system tokens above — update those two values together if the primary/background tokens ever change. All five files plus the manifest are linked from `index.html`'s `<head>`. Regenerate them with **`npm run icons -- favicons`** (`scripts/generate-icons.mjs`; `sharp` + `png-to-ico` are devDependencies since 2026-10-06). Run against the current `favicon.svg`, it reproduces the committed files visually; only the PNG compression differs, so the originals were kept to avoid binary churn.
+`favicon.svg` is the source of truth: a 32×32 vector redraw of the in-app logo badge (indigo-500→violet-600 gradient, `rounded-lg`-equivalent corners, white lucide `Compass` glyph at the exact same geometry used in `AppLayout`/`LandingPage`/etc.). `favicon.ico` (16/32/48 multi-res), `apple-touch-icon.png` (180×180), `icon-192.png`, and `icon-512.png` are all rasterized from it. Don't hand-edit the PNGs/ICO directly; regenerate them from `favicon.svg` if the mark ever changes. `site.webmanifest` references the two PNG icons plus `theme_color` (`#4f46e5`, indigo-600) and `background_color` (`#f8fafc`, slate-50), matching the design system tokens above. Update those two values together if the primary/background tokens ever change. All five files plus the manifest are linked from `index.html`'s `<head>`. Regenerate them with **`npm run icons -- favicons`** (`scripts/generate-icons.mjs`; `sharp` + `png-to-ico` are devDependencies since 2026-10-06). Run against the current `favicon.svg`, it reproduces the committed files visually; only the PNG compression differs, so the originals were kept to avoid binary churn.
 
 ### Link previews / Open Graph (`index.html`, `public/og-image.png`)
 
@@ -127,15 +127,15 @@ Deleting a task, goal or event always goes through `ConfirmDialog`. It is a smal
 
 ### Legal pages (`src/pages/TermsPage.tsx`, `src/pages/PrivacyPage.tsx`)
 
-Both are thin content components wrapped in `LegalPageLayout` (`src/components/LegalPageLayout.tsx`), which owns the shared nav/footer chrome and the prose styling (descendant-selector classes for `h2`/`p`/`ul`/`a`/`strong`/`code` — write page content as plain semantic HTML inside a `<section>` per clause, don't add per-element classes). `LegalPageLayout` reads `useAuth()` itself to point its back link at `/app/planner` or `/`, same pattern as `NotFoundPage`. Routed at `/terms` and `/privacy` — public, top-level routes outside `/app/*`, so they render for both signed-in and signed-out users. Linked from the `LandingPage` footer, the register form in `AuthModal` (consent line, register mode only), `SettingsPage` (small legal-links row), and cross-linked in `LegalPageLayout`'s own footer. When editing the copy, keep the "Last updated" date in sync with actual content changes.
+Both are thin content components wrapped in `LegalPageLayout` (`src/components/LegalPageLayout.tsx`), which owns the shared nav/footer chrome and the prose styling (descendant-selector classes for `h2`/`p`/`ul`/`a`/`strong`/`code`; write page content as plain semantic HTML inside a `<section>` per clause, don't add per-element classes). `LegalPageLayout` reads `useAuth()` itself to point its back link at `/app/planner` or `/`, same pattern as `NotFoundPage`. Routed at `/terms` and `/privacy`: public, top-level routes outside `/app/*`, so they render for both signed-in and signed-out users. Linked from the `LandingPage` footer, the register form in `AuthModal` (consent line, register mode only), `SettingsPage` (small legal-links row), and cross-linked in `LegalPageLayout`'s own footer. When editing the copy, keep the "Last updated" date in sync with actual content changes.
 
 ### Per-page meta (`src/hooks/usePageMeta.ts`)
 
-This is a client-rendered SPA with no SSR, so there's no head-management library (react-helmet, etc.) — `usePageMeta(title, description)` sets `document.title` and the `<meta name="description">` content directly in a `useEffect`, restoring the previous values on unmount. Every route-level component calls it once near the top of the component body: `LandingPage`, `NotFoundPage`, and each page in `src/pages/` (`PlannerPage`, `GoalsPage`, `CalendarPage`, `SettingsPage`). When adding a new route, add a `usePageMeta` call with a distinct title/description rather than leaving the previous page's meta in place.
+This is a client-rendered SPA with no SSR, so there's no head-management library (react-helmet, etc.); `usePageMeta(title, description)` sets `document.title` and the `<meta name="description">` content directly in a `useEffect`, restoring the previous values on unmount. Every route-level component calls it once near the top of the component body: `LandingPage`, `NotFoundPage`, and each page in `src/pages/` (`PlannerPage`, `GoalsPage`, `CalendarPage`, `SettingsPage`). When adding a new route, add a `usePageMeta` call with a distinct title/description rather than leaving the previous page's meta in place.
 
 ### Storage (`src/utils/storage.ts`)
 
-Typed `localStorage` wrapper. Fixed keys are in the `StorageKey` union type (add new keys there, or `tsc` rejects them — `last_sync` was missing until 2026-09-30). User-scoped cache keys are generated by `storage.getUserKey(feature, userId)` — which returns `StorageKey` via a cast — and look like `journeyset:v1:planner:{userId}`. `storage.clearUserCache(userId)` removes all three; it's called by `logout` (so a shared device doesn't keep the previous user's data) and by Settings → Reset all local data.
+Typed `localStorage` wrapper. Fixed keys are in the `StorageKey` union type (add new keys there, or `tsc` rejects them; `last_sync` was missing until 2026-09-30). User-scoped cache keys are generated by `storage.getUserKey(feature, userId)` (which returns `StorageKey` via a cast) and look like `journeyset:v1:planner:{userId}`. `storage.clearUserCache(userId)` removes all three; it's called by `logout` (so a shared device doesn't keep the previous user's data) and by Settings → Clear offline copy.
 
 ### DB ↔ TypeScript naming
 
@@ -177,18 +177,18 @@ Five **fixed** themes: `light`, `dark`, `sky`, `gold`, `forest` (defined in `src
 
 - Each theme = a base (light or dark) **+** an accent hue. The base is still the `.dark` class (`dark` and `forest` set it); the accent is a set of CSS variables.
 - `ThemeContext` writes `data-theme="<name>"` on `<html>` and persists the theme **name** to `localStorage` (`journeyset:v1:theme`; the old `'light'`/`'dark'` values are still valid). A pre-paint script, **`public/theme-init.js`** (loaded by a `<script src>` in `index.html`'s `<head>`; it's external because the CSP's `script-src 'self'` forbids inline scripts), applies the saved theme before React mounts to avoid a flash.
-- `tailwind.config.js` remaps the `indigo` scale → `--accent-*` and `violet` → `--accent2-*` (space-separated R G B triplets, so `/60` opacity modifiers still work). `src/index.css` holds one `[data-theme=…]` block per non-default theme. **Never hardcode a hex accent** — use `indigo-*` / `violet-*` classes and they follow the theme.
-- Text/icons that sit on an accent-filled surface use **`text-on-accent`** (not `text-white`) — it is white for every theme except Gold, where it is near-black for contrast.
+- `tailwind.config.js` remaps the `indigo` scale → `--accent-*` and `violet` → `--accent2-*` (space-separated R G B triplets, so `/60` opacity modifiers still work). `src/index.css` holds one `[data-theme=…]` block per non-default theme. **Never hardcode a hex accent**. Use `indigo-*` / `violet-*` classes and they follow the theme.
+- Text/icons that sit on an accent-filled surface use **`text-on-accent`** (not `text-white`). It is white for every theme except Gold, where it is near-black for contrast.
 - Adding a theme: add an entry to `THEMES`, add a `[data-theme='…']` block in `index.css`, add its name to the allow-list in `public/theme-init.js`. Keep filled-accent (`--accent-600`) at ≥4.5:1 against `--accent-contrast`.
-- The picker lives in `SettingsPage` (full) and the `AppLayout` sidebar (swatch row / cycle button when compact). The `PrintView` `@media print` CSS is intentionally still hardcoded indigo — printouts are always light.
+- The picker lives in `SettingsPage` (full) and the `AppLayout` sidebar (swatch row / cycle button when compact). The `PrintView` `@media print` CSS is intentionally still hardcoded indigo, because printouts are always light.
 
 **Custom Tailwind additions** (see `tailwind.config.js`):
-- Breakpoint `xs: 475px` — fills the gap between 320 px phones and the standard `sm: 640px`.
+- Breakpoint `xs: 475px`: fills the gap between 320 px phones and the standard `sm: 640px`.
 - `shadow-card` and `shadow-card-hover` tinted with the live accent (`rgb(var(--accent-600) / …)`).
 - `fontFamily.sans` set to Plus Jakarta Sans.
 - `minHeight.dvh` / `height.dvh` = `100dvh`.
 
-**Safe-area utilities** (see `src/index.css`): `.pt-safe`, `.pb-safe`, `.pl-safe`, `.pr-safe` — wraps `env(safe-area-inset-*)` for notch / Dynamic Island / home indicator support. Apply to sidebar, sticky headers, modal backdrops, and footers.
+**Safe-area utilities** (see `src/index.css`): `.pt-safe`, `.pb-safe`, `.pl-safe`, `.pr-safe`: these wrap `env(safe-area-inset-*)` for notch / Dynamic Island / home indicator support. Apply to sidebar, sticky headers, modal backdrops, and footers.
 
 ## Responsive design
 
@@ -204,18 +204,18 @@ Five **fixed** themes: `light`, `dark`, `sky`, `gold`, `forest` (defined in `src
 **Key responsive patterns**:
 - Modals (`AuthModal`, `EventCalendar` event modal, `EditTaskModal`; the Settings reset dialog is a centred card at every size) render as **bottom sheets** on mobile (`items-end`, `rounded-t-2xl`, `sheet-enter` animation) and centred cards on `xs:+`.
 - All interactive elements have `min-h-[44px]` (Apple HIG minimum touch target).
-- `min-h-dvh` replaces `min-h-screen` everywhere — `100vh` on iOS Safari includes the retractable URL bar.
+- `min-h-dvh` replaces `min-h-screen` everywhere, because `100vh` on iOS Safari includes the retractable URL bar.
 - `viewport-fit=cover` in `index.html` enables safe-area CSS on notched devices.
 
 ## Auth initialisation pattern
 
 `AuthContext` uses **only** `onAuthStateChange` to determine the initial auth state. Do **not** re-introduce `supabase.auth.getSession()` inside a `useEffect`.
 
-**Why**: `getSession()` silently attempts to refresh an expired token over the network. If that request hangs (Supabase project paused, flaky network, cold-start), the `await` never resolves, the `finally` block never runs, and `setLoading(false)` is never called — causing a permanent loading spinner.
+**Why**: `getSession()` silently attempts to refresh an expired token over the network. If that request hangs (Supabase project paused, flaky network, cold-start), the `await` never resolves, the `finally` block never runs, and `setLoading(false)` is never called, causing a permanent loading spinner.
 
 `onAuthStateChange` fires `INITIAL_SESSION` synchronously from `localStorage` on mount (no network call), so `setLoading(false)` is called in the same JS tick. Any token refresh happens in the background via subsequent events (`TOKEN_REFRESHED`, `SIGNED_OUT`).
 
-The profile name is fetched with a fire-and-forget `.then()` after setting the user from session data — so a slow or failing profile query never blocks the initial render. It is deferred with `setTimeout(..., 0)` because Supabase warns against calling other `supabase` methods inside the `onAuthStateChange` callback (the auth lock is held).
+The profile name is fetched with a fire-and-forget `.then()` after setting the user from session data, so a slow or failing profile query never blocks the initial render. It is deferred with `setTimeout(..., 0)` because Supabase warns against calling other `supabase` methods inside the `onAuthStateChange` callback (the auth lock is held).
 
 A **5 s safety timer** also ends the loading state if `INITIAL_SESSION` never arrives.
 
@@ -240,17 +240,31 @@ Testing note: the error text only appears on a real page load. Changing just the
 
 ## Key behaviours to preserve
 
-- **Recurring tasks**: when advancing to the next week (`handleNextWeek` in `WeeklyPlanner`), tasks marked `recurring: 'weekly'` are created via `createPlannerTask` in Supabase for the new week before the week state changes. Do not revert to client-only UUID generation. `handleNextWeek` first fetches the target week and skips any recurring task already present (matched on `dayKey|time|title`) so navigating forward → back → forward doesn't create duplicates — keep that guard.
+- **Recurring tasks**: when advancing to the next week (`handleNextWeek` in `WeeklyPlanner`), tasks marked `recurring: 'weekly'` are created via `createPlannerTask` in Supabase for the new week before the week state changes. Do not revert to client-only UUID generation. `handleNextWeek` first fetches the target week and skips any recurring task already present (matched on `dayKey|time|title`) so navigating forward → back → forward doesn't create duplicates. Keep that guard.
 - **Event delete in modal**: the Delete button inside the event edit modal opens `ConfirmDialog`, whose confirm must call `deleteEventHandler` (closes modal + updates state), not the raw `deleteEvent` API import.
 - **No one-click deletes**: tasks, goals and events are deleted only through `ConfirmDialog`; the account only through `DeleteAccountDialog` (type-your-email). Keep new destructive actions behind a confirmation too.
-- **Parsing `YYYY-MM-DD`**: use date-fns `parseISO(dateISO)` (local midnight), never `new Date(dateISO)` (UTC midnight — the previous day for anyone west of UTC). Or compare the strings directly, as `PrintView` does.
-- **localStorage fallback**: API functions catch Supabase errors and return the cached value — don't remove the catch blocks.
+- **Parsing `YYYY-MM-DD`**: use date-fns `parseISO(dateISO)` (local midnight), never `new Date(dateISO)` (UTC midnight, which is the previous day for anyone west of UTC). Or compare the strings directly, as `PrintView` does.
+- **localStorage fallback**: API functions catch Supabase errors and return the cached value. Don't remove the catch blocks.
 - **Dynamic Tailwind classes**: never build class strings by interpolation (e.g. `` `gap-${n}` ``). Tailwind's scanner can't detect them at build time; use full static class names in ternaries instead.
-- **404 handling**: `NotFoundPage` (`src/components/NotFoundPage.tsx`) is used at both catch-alls in `App.tsx` — the top-level `*` route (`fullPage={true}`, renders its own nav/footer since there's no layout wrapping it) and the nested `/app/*` catch-all inside `AppLayout` (`fullPage={false}`, renders just the centered content since the sidebar/header are already provided). It reads `useAuth()` itself to point "back home" at `/app/planner` when signed in or `/` when signed out — don't hardcode the home link.
+- **404 handling**: `NotFoundPage` (`src/components/NotFoundPage.tsx`) is used at both catch-alls in `App.tsx`: the top-level `*` route (`fullPage={true}`, renders its own nav/footer since there's no layout wrapping it) and the nested `/app/*` catch-all inside `AppLayout` (`fullPage={false}`, renders just the centered content since the sidebar/header are already provided). It reads `useAuth()` itself to point "back home" at `/app/planner` when signed in or `/` when signed out. Don't hardcode the home link.
+
+## Writing style
+
+On 2026-10-16 the owner had all user-facing text, the legal pages and both docs rewritten with the Humanizer and Stop Slop skills. Keep new text in the same style.
+
+- User-facing text (pages, buttons, messages, page titles and descriptions, the link-preview card) uses a plain, friendly voice: "you" and "we", everyday words, short sentences. British spelling, as the app already uses ("organised", "colour"). No hype words such as elegant, seamless, powerful, perfectly, effortless, "companion" or "journey" (other than in the name).
+- Headings, buttons, labels, nav items and page titles use sentence case: "Weekly planner", "Add event", "Clear offline copy", "Page not found | JourneySet". "Terms of Use" and "Privacy Policy" keep their capitals because they're document names, and so do the theme names (Light, Dark, Sky, Gold, Forest) and event categories.
+- "Sign in", "Sign up" and "Sign out" are the verbs; "sign-in" is only a noun.
+- Messages say what happened and what to do next, as full sentences with a full stop: "We couldn't save that. Check your connection and try again." (`SAVE_ERROR`), "Your name needs at least 2 characters." Don't add "successfully". Supabase Auth errors go through `friendlyAuthError()` in `AuthContext`; add a case there rather than showing a raw message like "Invalid login credentials".
+- Delete confirmations read `"<title>" will be deleted. You can't undo this.`, with straight quotes (`&quot;` in JSX).
+- No em dashes anywhere: UI text, code comments, CSS, SQL or docs. Use a comma, a colon, parentheses or a new sentence.
+- Don't claim things that aren't true. No user counts or invented stats (the landing page once said "Join thousands" and showed "10K+ / 95% / 5K+"). Feature text has to match what the app does: Export opens a print view you can print or save as a PDF, and weekly tasks are copied when you move to next week.
+- The legal pages are plain English, but their promises are binding. Change the code and the pages together, and bump the "Last updated" date when the wording changes. Button names quoted in them (Settings → Clear offline copy, Settings → Delete account, the Export button) must match the real labels.
+- The link-preview image's headline lives in `scripts/generate-icons.mjs`. Keep it in step with the landing page hero ("Plan your week / and keep your goals in sight"), then run `npm run icons -- og`.
 
 ## Known gaps / possible next steps
 
-Not broken, not asked for yet — flagged here so a future session (or a fresh chat) has the context without re-deriving it:
+Not broken, not asked for yet. Flagged here so a future session (or a fresh chat) has the context without re-deriving it:
 
 - **Both passes browser-verified end to end on 2026-10-06**, with a throwaway account on `localhost:5173`, each step checked against the live DB. Covered:
   - planner: add (timed + weekly), edit day / set time / clear time, complete + duplicate clicked back-to-back
@@ -266,10 +280,10 @@ Not broken, not asked for yet — flagged here so a future session (or a fresh c
 
   How it was run: Claude can't type passwords into the real Supabase sign-in, so the owner signed in, and set the new password, in Chrome; Claude drove the Claude in Chrome extension. That tab was in the background, which blocks real keystrokes and clicks, so most steps used in-page `.click()` and React-compatible value setters. Re-test on a real device before relying on touch details.
 
-- **Email delivery** — the owner set up custom SMTP (Gmail) on 2026-10-06. Confirmation and reset emails both reached a non-team Gmail address that day. Gmail SMTP has its own daily sending limits, so a dedicated provider (Resend, etc.) is worth it if the user base grows. Supabase's built-in sender only reaches the Supabase team and is not an option for real users.
-- **Per-route link previews** — the OG tags are site-wide (see Link previews above). Per-route cards would need prerendering/SSR; not worth it for this app.
-- **Legal pages content review** — `TermsPage`/`PrivacyPage` (see above) were drafted by Claude, grounded in what the app actually does (Supabase, RLS, localStorage caching), but are not a substitute for actual legal review. Worth a human pass before treating them as binding, especially if the app ever gets real paying users or handles data from EU/UK users (GDPR) or California users (CCPA) — neither is addressed explicitly.
+- **Email delivery**: the owner set up custom SMTP (Gmail) on 2026-10-06. Confirmation and reset emails both reached a non-team Gmail address that day. Gmail SMTP has its own daily sending limits, so a dedicated provider (Resend, etc.) is worth it if the user base grows. Supabase's built-in sender only reaches the Supabase team and is not an option for real users.
+- **Per-route link previews**: the OG tags are site-wide (see Link previews above). Per-route cards would need prerendering/SSR; not worth it for this app.
+- **Legal pages content review**: `TermsPage`/`PrivacyPage` (see above) were drafted by Claude, grounded in what the app actually does (Supabase, RLS, localStorage caching), but are not a substitute for actual legal review. Worth a human pass before treating them as binding, especially if the app ever gets real paying users or handles data from EU/UK users (GDPR) or California users (CCPA); neither is addressed explicitly.
 - **Landing-page stats are product facts** (`3-in-1` / `5` themes / `$0`), replacing the fake "10K+ / 95% / 5K+" on 2026-10-06. Keep them true; there's a comment on the array.
-- **Dev-tooling advisories** — `npm audit` reports 9 issues (as of 2026-10-06), all in build/dev tooling (Vite 5's esbuild/dev server, Tailwind 3's chokidar/micromatch/postcss-selector-parser). `npm audit --omit=dev` is clean, so nothing ships to users. Clearing them needs major upgrades (Vite 8, Tailwind 4 — Tailwind 4 changes the config format), which is a separate project.
-- **Supabase advisors (as of 2026-09-30)** — Security: *Leaked password protection disabled* (Auth → Password settings; may need a paid plan). Performance: all 15 RLS policies call `auth.uid()` directly instead of `(select auth.uid())`, so it's re-evaluated per row. Harmless at this data size; fix by recreating the policies with the `select` wrapper if tables grow. The remaining "unused index" infos just mean there's barely any traffic yet.
-- **Auth URL configuration** — the owner set it on 2026-10-06 (Site URL `https://journeyset.vercel.app`; Redirect URLs `https://journeyset.vercel.app/**` and `http://localhost:5173/**`). The localhost redirect is proven, since the reset test landed on `localhost:5173/reset-password`. The production redirect will be proven by the first real reset after deploy. The Supabase MCP can't read these settings, so changes there must be checked by hand.
+- **Dev-tooling advisories**: `npm audit` reports 9 issues (as of 2026-10-06), all in build/dev tooling (Vite 5's esbuild/dev server, Tailwind 3's chokidar/micromatch/postcss-selector-parser). `npm audit --omit=dev` is clean, so nothing ships to users. Clearing them needs major upgrades (Vite 8, Tailwind 4; Tailwind 4 changes the config format), which is a separate project.
+- **Supabase advisors (as of 2026-09-30)**: Security: *Leaked password protection disabled* (Auth → Password settings; may need a paid plan). Performance: all 15 RLS policies call `auth.uid()` directly instead of `(select auth.uid())`, so it's re-evaluated per row. Harmless at this data size; fix by recreating the policies with the `select` wrapper if tables grow. The remaining "unused index" infos just mean there's barely any traffic yet.
+- **Auth URL configuration**: the owner set it on 2026-10-06 (Site URL `https://journeyset.vercel.app`; Redirect URLs `https://journeyset.vercel.app/**` and `http://localhost:5173/**`). The localhost redirect is proven, since the reset test landed on `localhost:5173/reset-password`. The production redirect will be proven by the first real reset after deploy. The Supabase MCP can't read these settings, so changes there must be checked by hand.

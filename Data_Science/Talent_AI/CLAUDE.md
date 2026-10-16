@@ -1,10 +1,9 @@
 # CLAUDE.md
 
-Guidance for Claude Code (and future-you) working in this repository. The
-README explains *what the product is and why*; this file is about *not
-breaking things while changing the code*. Keep both updated together —
-this file whenever a convention/gotcha changes, the README whenever a
-feature/phase changes.
+Guidance for Claude Code (and future you) working in this repository. The
+README explains what the product is and why; this file is about not breaking
+things while you change the code. Keep both up to date: this file whenever a
+convention or gotcha changes, the README whenever a feature or phase changes.
 
 ## Commands
 
@@ -24,44 +23,45 @@ npm run build                                           # tsc + production build
 npx eslint <changed files>                              # lint just what you touched
 ```
 
-There's no CI yet (Phase F, not started) — `pytest`, `tsc --noEmit`, `npm run
-build`, and a targeted `eslint` are the full local check before deploying.
-Two pre-existing eslint issues are known and left alone: a
-`react-hooks/set-state-in-effect` on the jobs/candidates list pages'
-`load*(offset)` calls, and `@next/next/no-html-link-for-pages` on a couple
-of plain `<a>` nav links. Don't "fix" these as a drive-by — they're
-long-standing, not new breakage, and touching them is out of scope for
-unrelated changes.
+There's no CI yet (Phase F hasn't started), so `pytest`, `tsc --noEmit`,
+`npm run build` and a targeted `eslint` are the whole local check before a
+deploy. Two eslint issues are known and left alone: a
+`react-hooks/set-state-in-effect` on the jobs and candidates list pages'
+`load*(offset)` calls, and `@next/next/no-html-link-for-pages` on a few plain
+`<a>` links. Don't fix them as a drive-by. They're old, not new breakage, and
+touching them is out of scope for unrelated changes.
+
+The owner commits and pushes himself. Leave changes in the working tree and
+list the changed files.
 
 ## Environment
 
-Two separate `.env` files — `apps/api/.env` (see `.env.example` for the
-full current list: Supabase, OpenAI, Stripe, service_role, SMTP/report
-secrets) and `apps/web/.env.local` (`.env.local.example`: Supabase publishable
-config + `NEXT_PUBLIC_API_URL`).
+There are two `.env` files: `apps/api/.env` (`.env.example` lists every key:
+Supabase, OpenAI, Stripe, service_role, SMTP and the report secret) and
+`apps/web/.env.local` (`.env.local.example`: the Supabase publishable config
+and `NEXT_PUBLIC_API_URL`).
 
-**`CORS_ORIGINS` and `FRONTEND_URL` are prod-specific overrides that only
-ever get set directly on Cloud Run — never mirror them from local `.env`.**
-Local `.env` correctly has both pointed at `http://localhost:3000`; Cloud
-Run's copies additionally/instead include the live Vercel URL
-(`https://my-projects-zeta-three.vercel.app`). This bit us for real once
-(2026-09-25): a deploy that did a full env-var replace from local `.env`
-silently wiped the prod values back to localhost-only, breaking the live
-site's CORS and Stripe's checkout redirect until caught and fixed. **Never
-deploy with a full env replacement (`--env-vars-file` built from local
-`.env`, `--set-env-vars` with the complete set) for this service — always
-use `gcloud run services update --update-env-vars` (or `deploy
---update-env-vars`) scoped to just the keys that changed.** If a value has
-spaces (e.g. a Gmail app password), don't fight shell quoting — generate a
-small YAML with just the new/changed keys and deploy with
-`--env-vars-file=that-file.yaml`, never one built from the whole `.env`.
+**`CORS_ORIGINS` and `FRONTEND_URL` are production overrides that only ever
+get set directly on Cloud Run. Never copy them from the local `.env`.** The
+local `.env` points both at `http://localhost:3000`; Cloud Run's copies
+include the live Vercel URL (`https://my-projects-zeta-three.vercel.app`).
+This broke production once (2026-09-25): a deploy that replaced every env var
+with the local `.env` set both back to localhost only, which broke the live
+site's CORS and Stripe's checkout redirect until someone noticed. **Never
+deploy this service with a full env replacement (`--env-vars-file` built from
+the local `.env`, or `--set-env-vars` with the complete set). Use
+`gcloud run services update --update-env-vars` (or `deploy
+--update-env-vars`) with only the keys that changed.** If a value contains
+spaces (a Gmail app password, say), skip the shell-quoting fight: write a
+small YAML with only the new or changed keys and deploy with
+`--env-vars-file=that-file.yaml`. Never build that file from the whole
+`.env`.
 
 ## Deployment
 
-Nothing auto-deploys from a push except the Vercel frontend (and even that
-needs a manual **Redeploy** click if only an env var changed, not code —
-see "Vercel env var type" gotcha below). The backend always needs an
-explicit command after any `apps/api` change:
+Only the Vercel frontend deploys on push, and even Vercel needs a manual
+**Redeploy** click when only an env var changed (see the Vercel gotcha at the
+end). The backend needs this command after every `apps/api` change:
 
 ```bash
 cd apps/api
@@ -70,235 +70,304 @@ gcloud run deploy talent-ai-api --source . --region us-central1 \
   --allow-unauthenticated
 ```
 
-(`gcloud` isn't on PATH by default: prepend
+`gcloud` isn't on PATH by default. Prepend
 `C:\Users\felix\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin` each
-session, or in PowerShell call `gcloud.cmd` directly if `gcloud.ps1`'s
-execution policy complains.)
+session, or call `gcloud.cmd` by its full path if PowerShell's execution
+policy blocks `gcloud.ps1`. The owner's VS Code terminal is cmd, not
+PowerShell, so a command for him to paste must not start with PowerShell's
+`&`.
 
-Adding/removing DB objects needs a new numbered file in
-`supabase/migrations/` applied via the Supabase `apply_migration` MCP tool
-against project `ljtjlvyezkyakayetlod` (`TalentAI`) — migrations are
-additive, never rewrite an old one. `apply_migration` can itself be refused
-by Claude Code's auto-mode classifier as a production deploy (happened with
-`0014`); if so, the user applies it — paste the file into the Supabase SQL
-editor, or approve the tool call.
+Adding or removing database objects needs a new numbered file in
+`supabase/migrations/`, applied with the Supabase `apply_migration` MCP tool
+to project `ljtjlvyezkyakayetlod` (`TalentAI`). Migrations only add; never
+rewrite an old one. Claude Code's auto-mode check can refuse
+`apply_migration` as a production deploy (it did for `0014`). If that
+happens, the owner applies it, either by pasting the file into the Supabase
+SQL editor or by approving the tool call.
 
-**Before assuming a DB-touching failure is a code bug, check whether the
-Supabase project auto-paused** (free tier, pauses after ~1 week of
-inactivity) — `list_projects` and look for `status: "INACTIVE"`. Only the
-user can click Restore in the dashboard; the `restore_project` MCP tool is
-blocked by Claude Code's own safety classifier (misfires as "irreversible
-deletion" even though restoring un-pauses, not deletes).
+**Before you blame the code for a database failure, check whether the
+Supabase project paused itself** (free tier, after about a week without use):
+run `list_projects` and look for `status: "INACTIVE"`. Only the owner can
+click Restore in the dashboard. Claude Code's safety check blocks the
+`restore_project` MCP tool, reading it as an "irreversible deletion" when
+restoring only un-pauses the project.
 
 ## Stack
 
 | Concern | Approach |
 |---|---|
-| Backend | FastAPI (`apps/api`), containerized, Cloud Run |
-| DB / Auth / Storage | Supabase — Postgres + `pgvector`, Auth, Storage |
-| Frontend | Next.js App Router (`apps/web`), Vercel |
-| AI | OpenAI (`gpt-4o-mini` default) for candidate insights only |
-| Billing | Stripe Checkout + billing portal + webhook |
-| Email | stdlib `smtplib` (no email SDK dependency) |
+| Backend | FastAPI (`apps/api`), in a container on Cloud Run |
+| DB, auth, storage | Supabase: Postgres with `pgvector`, Auth, Storage |
+| Frontend | Next.js App Router (`apps/web`) on Vercel |
+| AI | OpenAI (`gpt-4o-mini` by default), for candidate reviews only |
+| Billing | Stripe Checkout, the billing portal and a webhook |
+| Email | stdlib `smtplib` (no email SDK) |
 
 ## Architecture
 
-### Tenant isolation is Postgres RLS, not app code
+### Postgres RLS isolates tenants, not app code
 
-Every request carries the caller's own Supabase JWT through to
-PostgREST/Storage (`apps/api/app/deps.py::get_scoped_client`). A bug in a
-service function can't leak another tenant's rows, because the database
-itself refuses them regardless of what the query asks for. **When adding a
-new table, add its RLS policy in the same migration** — nothing reads as
-"tenant-scoped" by default; it's opt-in per table.
+Every request carries the caller's own Supabase JWT through to PostgREST and
+Storage (`apps/api/app/deps.py::get_scoped_client`). A bug in a service
+function can't leak another tenant's rows, because the database refuses them
+whatever the query asks for. **When you add a table, add its RLS policy in
+the same migration.** Nothing is tenant-scoped by default; each table opts
+in.
 
-**Any signed-in user can also call PostgREST directly** (publishable key +
-their own JWT), skipping FastAPI entirely — so an RLS policy is the whole
-rule, not a backstop behind the API's checks. Two policies got this wrong
-until `0013` (2026-09-28): `profiles` was self-updatable with no `WITH
-CHECK`, so a user could rewrite their own `tenant_id` and land inside another
-tenant (every isolation policy resolves the caller's tenant through that
-column); and `usage_events` was `for all`, so a tenant could delete its own
-ledger rows to reset its OpenAI budget. Now `profiles` is read-only to users
-(only the signup trigger writes it) and `usage_events` is SELECT + INSERT
-only. Before writing a `for all` / `for update` policy, ask what a user could
-do by writing that row by hand. Known, accepted gap: the trial
-candidate/job count caps are app-level only, so a direct insert can exceed
-them — cost-free, unlike the token budget.
+**Any signed-in user can also call PostgREST directly** with the publishable
+key and their own JWT, skipping FastAPI entirely. So an RLS policy is the
+whole rule, and the API's checks don't back it up. Two policies got this
+wrong until `0013` (2026-09-28). Users could update their own `profiles` row
+with no `WITH CHECK`, so a user could change their `tenant_id` and land
+inside another tenant, since every isolation policy looks up the caller's
+tenant through that column. And `usage_events` was `for all`, so a tenant
+could delete its own ledger rows to reset its OpenAI budget. Now `profiles`
+is read-only for users (only the signup trigger writes it) and `usage_events`
+allows only SELECT and INSERT. Before you write a `for all` or `for update`
+policy, work out what a user could do by writing that row by hand. Known,
+accepted gap: the trial candidate and job caps are checked in app code only,
+so a direct insert can go past them. That costs nothing, unlike the token
+budget.
 
 ### Single-row reads: `fetch_one`, never `.single()`
 
-supabase-py's `.single()` **raises** on zero rows (PostgREST answers 406)
-rather than returning empty data — so the `if not result.data: 404` that
-naturally follows it never runs, and a missing (or another tenant's, which
-RLS makes identical) id becomes an unhandled 500. Use
+supabase-py's `.single()` **raises** when no row matches (PostgREST answers
+406) instead of returning empty data. The `if not result.data: 404` that
+usually follows it never runs, and a missing ID (or another tenant's, which
+RLS makes look the same) becomes an unhandled 500. Use
 `services/db_utils.fetch_one(query)`, which wraps `.maybe_single()` and
 returns the row dict or `None`. In tests, mock
 `...maybe_single.return_value.execute` and return `None` (not `_resp(None)`)
-for "no row" — that's what the real client does. `main.py` also maps any
-`postgrest.APIError` to a JSON response (Postgres `22P02`, a non-UUID path
-id, → 404; anything else → 500) so it's answered inside `CORSMiddleware`;
-an unhandled exception is answered outside it, and the browser then only
-sees "Failed to fetch".
+for "no row", because that's what the real client does. `main.py` also turns
+any `postgrest.APIError` into a JSON response (Postgres `22P02`, a path ID
+that isn't a UUID, becomes a 404; anything else a 500), so it's answered
+inside `CORSMiddleware`. An unhandled exception is answered outside it, and
+then the browser only sees "Failed to fetch".
 
-### The `service_role` key is deliberately rare
+### Error messages reach the user as written
+
+The frontend shows an error response's `detail` to the user word for word:
+`apiFetch` (`apps/web/lib/api.ts`) throws an `ApiError` carrying the status
+and `detail`, and every page's `catch` calls `errorMessage(err)`. So every
+`HTTPException` detail, and every `ValueError` / `PermissionError` /
+`RuntimeError` message a router passes on as a detail, is a sentence for a
+recruiter, written to the rules under "Writing style". Messages raised from
+more than one place live in `apps/api/app/messages.py`. If a response has no
+string `detail` (a 422 validation list, an HTML error page) or the server
+can't be reached, the page shows a generic sentence instead of raw JSON. Code
+that needs a specific status checks `err.status`, never the message text.
+Supabase Auth errors on the login and signup pages go through
+`friendlyAuthError()` (`apps/web/lib/authErrors.ts`); add a case there
+instead of showing `error.message`.
+
+### The `service_role` key stays rare
 
 `apps/api/app/services/admin_client.py::get_admin_client()` is the **only**
-way to get one, and there are exactly two callers, both server-triggered
-(no user session to scope a normal client with):
-`billing_service.handle_stripe_event` (trust = Stripe's HMAC signature) and
-`report_service.run_weekly_reports` (trust = the `X-Report-Token`
-shared-secret header on `/internal/run-weekly-reports`). If you're reaching
-for `get_admin_client()` anywhere else, you almost certainly want
-`get_scoped_client(user.token)` instead — that's the actual security
-boundary in this codebase, and widening service_role usage widens it back
-to "app code has to get it right," which is the thing RLS exists to avoid.
+way to get one, and it has exactly two callers, both started by a server
+with no user session to scope a normal client with:
+`billing_service.handle_stripe_event` (trusted because of Stripe's HMAC
+signature) and `report_service.run_weekly_reports` (trusted because of the
+`X-Report-Token` shared-secret header on `/internal/run-weekly-reports`). If
+you're reaching for `get_admin_client()` anywhere else, you almost certainly
+want `get_scoped_client(user.token)`. That's the real security boundary in
+this codebase, and every extra service_role caller puts us back to "app code
+has to get it right", which is what RLS exists to avoid.
 
 ### Plan limits (`apps/api/app/services/usage_service.py`)
 
-Everything gated by plan reads `tenants.plan` (`'trial'` / `'pro'` — a
-Phase A hook, `supabase/migrations/0002`) through one shared
-`get_tenant_plan()`. Three independent limits, each a plan→value dict in
-this one file: `PLAN_TOKEN_LIMITS` (OpenAI tokens/month, backed by the
-append-only `usage_events` ledger — deliberately separate from
-`candidate_insights`, which upserts and so can't answer "how much was
-spent"), `PLAN_CANDIDATE_LIMITS`, `PLAN_JOB_LIMITS` (row counts, `None` =
-unlimited). Stripe's webhook only ever updates `tenants.plan` — adding a
-real paid tier later means editing these three dicts, not touching billing
-code. All three raise `PermissionError` on the caller, which every router
-maps to **402**.
+Everything that depends on the plan reads `tenants.plan` (`'trial'` or
+`'pro'`, a Phase A hook from `supabase/migrations/0002`) through one shared
+`get_tenant_plan()`. There are three separate limits, each a plan-to-value
+dict in this file: `PLAN_TOKEN_LIMITS` (OpenAI tokens a month, counted from
+the append-only `usage_events` table, kept apart from `candidate_insights`
+because that table upserts and so can't say how much was spent),
+`PLAN_CANDIDATE_LIMITS` and `PLAN_JOB_LIMITS` (row counts, `None` meaning
+unlimited). Stripe's webhook only ever changes `tenants.plan`, so a real paid
+tier later means editing these three dicts, not the billing code. All three
+raise `PermissionError`, which every router turns into a **402**. The
+messages tell the user what to do next, which depends on the plan (only the
+Trial message suggests upgrading) and on the limit (only candidates can be
+deleted to make room).
 
 ### Ranking pipeline
 
-`apps/api/talent_ai_core/` is the vendored, storage-agnostic pipeline
-(parse → anonymize → extract → embed → rank) from the original single-user
-capstone — reused close to unchanged. Semantic ranking itself runs as a
-single indexed Postgres query (`match_candidates` RPC,
-`supabase/migrations/0009`, `<=>` + the `candidates_embedding_idx` HNSW
-index) rather than loading candidates into the API process. The weekly
-report path needs a tenant-explicit twin, `match_candidates_for_tenant`
-(`0012`) — it runs under `get_admin_client()`, which bypasses RLS, so it
-can't rely on RLS to scope the search the way the normal request path does.
+`apps/api/talent_ai_core/` is the pipeline (parse, anonymize, extract,
+embed, rank) copied from the original single-user capstone and reused almost
+unchanged; it doesn't care where data is stored. Semantic ranking runs as a
+single indexed Postgres query (the `match_candidates` RPC,
+`supabase/migrations/0009`, using `<=>` and the `candidates_embedding_idx`
+HNSW index) instead of loading candidates into the API process. The weekly
+email needs a twin that takes the tenant explicitly,
+`match_candidates_for_tenant` (`0012`), because it runs under
+`get_admin_client()`, which bypasses RLS, so RLS can't limit its search the
+way it does on the normal request path.
 
-The HNSW index spans every tenant, and the tenant filter (RLS or the explicit
-`tenant_id` predicate) is applied to what the index scan returns — without
-pgvector's iterative scan that's at most `hnsw.ef_search` (40) rows globally,
-so at multi-tenant scale a tenant could get fewer than `top_k` results or
-none. `0014` sets `hnsw.iterative_scan = strict_order` on both functions; any
-new vector-search function over a shared index needs the same `SET` clause.
-That `SET` clause fails with `42501: permission denied to set parameter`
-unless pgvector's library is already loaded in the session (the `postgres`
-role isn't a superuser), so start the migration with a throwaway
-`select '[1]'::extensions.vector;` as `0014` does.
+The HNSW index covers every tenant, and the tenant filter (RLS, or the
+explicit `tenant_id` condition) applies to whatever the index scan returns.
+Without pgvector's iterative scan, that's at most `hnsw.ef_search` (40) rows
+across all tenants, so once there are many tenants a tenant could get fewer
+than `top_k` results, or none. `0014` sets `hnsw.iterative_scan =
+strict_order` on both functions, and any new vector-search function over a
+shared index needs the same `SET` clause. That `SET` clause fails with
+`42501: permission denied to set parameter` unless pgvector's library is
+already loaded in the session (the `postgres` role isn't a superuser), so
+start such a migration with a throwaway `select '[1]'::extensions.vector;`,
+as `0014` does.
 
-### Anonymization is best-effort, not a guarantee
+### Anonymization is best effort
 
-`talent_ai_core/extraction/anonymize.py` strips emails/phones reliably via
-regex, and names via a resume-header heuristic + spaCy NER — it is **not**
-a guaranteed PII scrubber, especially for non-Western names or unusual
-resume layouts (its own docstring says so, and a live test once caught a
-real name reaching OpenAI before the header heuristic was added). Only
-`anonymized_text`, never `raw_text`, is ever sent to OpenAI — but don't
-upgrade any comment to claim names are *never* sent; that was true once and
-was wrong.
+`talent_ai_core/extraction/anonymize.py` removes emails and phone numbers
+reliably with regexes, and names with a resume-header heuristic plus spaCy
+NER. It is **not** a guaranteed PII scrubber, especially for non-Western
+names or unusual layouts. Its own docstring says so, and a live test once
+caught a real name reaching OpenAI before the header heuristic existed. Only
+`anonymized_text`, never `raw_text`, goes to OpenAI. Don't change any comment
+or page to claim names are *never* sent; that was once claimed and was
+wrong. The candidate page and the Privacy Policy both say the removal can
+miss things.
 
 ### Resume upload guardrails
 
-10MB size cap + a `%PDF-` magic-byte check (`routers/candidates.py`) —
-`Content-Type` is client-supplied and trivially spoofed, so it's checked
-but not trusted alone. Both single (`/candidates/upload`) and bulk
-(`/candidates/upload/bulk`) paths go through `process_and_store_resume`,
-which itself starts with `ensure_can_add_candidate` (fail fast on the plan
-cap, before the expensive parse/embed work).
+A 10 MB size cap and a `%PDF-` magic-byte check (`routers/candidates.py`).
+`Content-Type` comes from the client and is easy to fake, so it's checked but
+not trusted on its own. The single (`/candidates/upload`) and bulk
+(`/candidates/upload/bulk`) routes both go through `process_and_store_resume`,
+which starts with `ensure_can_add_candidate` so a blocked upload fails before
+the expensive parse and embed work.
 
-### Favicon / app icon set (`apps/web/app/`)
+### Favicon and app icons (`apps/web/app/`)
 
-All code-generated via `next/og`'s `ImageResponse`, sharing one visual
-(`app/_lib/icon-badge.tsx::IconBadge` — indigo `#4f46e5` rounded square,
-white "T") so the mark can't drift between sizes:
+All generated in code with `next/og`'s `ImageResponse`, sharing one visual
+(`app/_lib/icon-badge.tsx::IconBadge`: an indigo `#4f46e5` rounded square
+with a white "T") so the mark can't drift between sizes:
 
 | File | Purpose | Size |
 |---|---|---|
 | `icon.tsx` | Browser tab favicon (Next's special `icon` convention) | 32×32 |
 | `apple-icon.tsx` | iOS "Add to Home Screen" (special `apple-icon` convention) | 180×180 |
-| `icon-192/route.tsx`, `icon-512/route.tsx` | Plain route handlers, **not** the special convention (that only supports one size per file) — exist so `manifest.ts` has fixed-size PNGs to point at | 192×192, 512×512 |
-| `manifest.ts` | PWA manifest — `theme_color`/`background_color` must match `globals.css`'s `--accent`/`--background` if either ever changes | — |
+| `icon-192/route.tsx`, `icon-512/route.tsx` | Plain route handlers, **not** the special convention (it allows one size per file); they give `manifest.ts` fixed-size PNGs to point at | 192×192, 512×512 |
+| `manifest.ts` | PWA manifest. Its `theme_color` and `background_color` must match `globals.css`'s `--accent` and `--background` if either changes | |
 
-No static `favicon.ico` — deliberately skipped. `icon.tsx` already covers
-the tab favicon via Next's generated `<link rel="icon">`, and the special
-`favicon.ico` convention can't be code-generated anyway (Next's own docs:
-"You cannot generate a `favicon` icon"). If the mark itself ever changes,
-edit `IconBadge` once — every size picks it up.
+There's no static `favicon.ico`, on purpose. `icon.tsx` already covers the
+tab favicon through Next's generated `<link rel="icon">`, and the special
+`favicon.ico` convention can't be generated in code anyway (Next's docs: "You
+cannot generate a `favicon` icon"). If the mark changes, edit `IconBadge`
+once and every size picks it up.
 
 ### Custom 404 (`apps/web/app/not-found.tsx`)
 
-A single root-level `not-found.tsx` — since v13.3.0 Next.js also uses the
-root one for any unmatched URL app-wide, not just an explicit `notFound()`
-call, so one file is enough here (this app has a single root layout, no
-need for the experimental `global-not-found.js`). Renders inside
-`app/layout.tsx`, so it picks up `globals.css`'s light/dark theming for
-free. Styled to match `app/page.tsx` (the landing page) — same `Logo`,
-same plain-`<a>`-styled-as-button pattern (this app doesn't use
-`next/link` anywhere; matching that here is deliberate, not a missed
-lint fix). "Go home" always points at `/`, not the dashboard — a 404 can be
-hit by a signed-out visitor, and `/` is the one destination that's correct
-either way.
+One root-level `not-found.tsx`. Since v13.3.0, Next.js also uses the root one
+for any unmatched URL, not only an explicit `notFound()` call, so one file is
+enough (this app has a single root layout and doesn't need the experimental
+`global-not-found.js`). It renders inside `app/layout.tsx`, so it gets
+`globals.css`'s light and dark theming for free. It matches `app/page.tsx`
+(the landing page): same `Logo`, same plain `<a>` styled as a button. This app
+doesn't use `next/link` anywhere, and matching that here is deliberate, not a
+missed lint fix. "Back to home" always points at `/`, not the dashboard: a
+signed-out visitor can hit a 404, and `/` is right either way.
 
 ### Loading states
 
-Two layers, don't conflate them:
+There are two layers; don't mix them up.
 
-- **Route-level `loading.tsx`** (`app/loading.tsx`, `app/dashboard/loading.tsx`)
-  — Next.js's Suspense-boundary convention, shown while a route segment is
-  being rendered on the server (matters most for `candidates/[id]` and
-  `jobs/[id]`, which are dynamic/server-rendered per request, not
-  pre-built) and before the page's own client JS has mounted. Both are
-  intentionally the exact same markup as `dashboard/layout.tsx`'s own
-  `!ready` auth-check spinner (`<main class="flex min-h-screen
-  items-center justify-center"><Spinner .../></main>`) so there's no
-  visual jump between "route loading" and "layout mounted, checking auth" —
-  keep them in sync if that markup ever changes.
-- **Per-page data-loading state** — every page that fetches its own data
-  client-side (`useEffect` + `apiFetch`) tracks its own `loading` boolean
-  and renders a centered `<Spinner className="h-6 w-6 text-muted" />` (list
-  pages: `h-6 w-6` in a `py-8`/`py-12` block; full-page: centered in a
-  `min-h-screen`/`py-16` block). **Always reuse `Spinner` from
-  `components/ui.tsx` for this — don't reach for `animate-pulse` or a
-  bespoke dot.** Two list pages did that until 2026-09-25 and it read as an
-  inconsistent second loading language next to every other page's Spinner;
-  fixed by switching them to the same component.
+- **Route-level `loading.tsx`** (`app/loading.tsx`, `app/dashboard/loading.tsx`):
+  Next.js's Suspense-boundary convention, shown while the server renders a
+  route segment (this matters most for `candidates/[id]` and `jobs/[id]`,
+  which render per request) and before the page's client JS mounts. Both use
+  exactly the same markup as `dashboard/layout.tsx`'s `!ready` auth-check
+  spinner (`<main class="flex min-h-screen items-center
+  justify-center"><Spinner .../></main>`), so nothing jumps between "route
+  loading" and "layout mounted, checking auth". Keep them in step if that
+  markup changes.
+- **Per-page data loading**: every page that fetches its own data in the
+  browser (`useEffect` plus `apiFetch`) tracks its own `loading` boolean and
+  shows a centered `<Spinner className="h-6 w-6 text-muted" />` (list pages:
+  `h-6 w-6` in a `py-8` or `py-12` block; full pages: centered in a
+  `min-h-screen` or `py-16` block). **Always use `Spinner` from
+  `components/ui.tsx`. Don't reach for `animate-pulse` or a custom dot.** Two
+  list pages did until 2026-09-25, and it looked like a second loading style
+  next to every other page's Spinner.
 
-### Terms of Use / Privacy Policy (`apps/web/app/terms/`, `apps/web/app/privacy/`)
+### Terms of Use and Privacy Policy (`apps/web/app/terms/`, `apps/web/app/privacy/`)
 
-Public pages, shared chrome/prose styling via
-`components/LegalPageLayout.tsx` (same idea as the favicon/not-found
-sections above — one place owns the look, the page files are just content).
-Content is real and product-accurate (covers the multi-tenant model, the
-anonymize-then-send-to-OpenAI flow, Stripe billing, the sub-processor list,
-and — importantly — that an uploaded candidate is not a Service user and
-the uploading tenant is the data controller for that candidate's data), but
-**it's Claude-drafted, not lawyer-reviewed**. Both files have a
-`[PLACEHOLDER]` comment at the top for the legal entity name and governing
-jurisdiction — fill those in, and get an actual legal review before relying
-on this for paying customers whose candidate data might trigger GDPR/CCPA
-obligations. If a new sub-processor is ever added (different email
-provider, a second AI vendor, etc.), update Privacy Section 5 in the same
-change — don't let that list drift from what the code actually calls.
-Linked from the landing page footer and, more importantly, a consent line
-on the signup form (`By signing up, you agree to our Terms... and Privacy
-Policy`) — that consent line is the one place linking to these pages
-actually matters for enforceability, so don't remove it in a redesign
-without replacing it with an equivalent.
+Public pages that share their layout and prose styling through
+`components/LegalPageLayout.tsx`, the same idea as the icon and 404 sections
+above: one file owns the look, and the page files are only content. The
+content matches the product: the multi-tenant model, the
+anonymize-then-send-to-OpenAI flow, Stripe billing, the list of
+sub-processors and, importantly, that an uploaded candidate isn't a user of
+the Service and the uploading company is the data controller for that
+candidate's data. **Claude drafted them; a lawyer hasn't reviewed them.**
+Both files have a `[PLACEHOLDER]` comment at the top for the legal entity name
+and governing jurisdiction. Fill those in, and get a real legal review before
+relying on them with paying customers whose candidate data might fall under
+GDPR or CCPA.
 
-## Known platform gotchas (not this project's bugs, still worth knowing)
+They're plain English, but what they promise is binding, so change the code
+and the pages together and bump `lastUpdated` when the wording changes. Keep
+them true to the app. On 2026-10-16 they said you could delete "your data at
+any time" from "the Candidates page", but only candidates can be deleted, from
+each candidate's own page; jobs and accounts need an email. Button names
+quoted in them (Manage billing, Delete) must match the real labels. If you
+add a sub-processor (a different email provider, a second AI vendor), update
+Privacy section 5 in the same change.
 
-- **Vercel env var type**: `NEXT_PUBLIC_*` vars must be **Config** type, not
-  **Secret** — Secret-type vars aren't visible to `next build`, so an edit
-  silently does nothing and the old value stays baked into the bundle
-  forever. Vercel won't convert in place; delete and recreate.
-- **Next.js 16**: `middleware.ts` → `proxy.ts` isn't just a rename — the old
-  convention runs on the Edge runtime (`__dirname is not defined` crash
-  from the Supabase SSR bundle), the new one defaults to Node.js.
-- **Windows temp paths**: a natively-run Python process's `/tmp` doesn't
-  resolve the way you'd expect from this Bash tool — use a real Windows
-  temp path for scratch files (PDF generation, etc.), not `/tmp`.
+They're linked from the landing-page footer and, more importantly, from a
+consent line on the signup form ("By signing up, you agree to our Terms of
+Use and Privacy Policy"). That consent line is the link that matters for
+enforceability, so don't remove it in a redesign without an equivalent.
+
+## Writing style
+
+On 2026-10-16 the owner had all user-facing text, the API's error messages,
+the weekly email, the legal pages and both docs rewritten with the Humanizer
+and Stop Slop skills. Keep new text in the same style.
+
+- User-facing text (pages, buttons, messages, page titles, the weekly email)
+  uses a plain, friendly voice for recruiters: "you" and "we", everyday
+  words, short sentences. American spelling ("organization", "anonymized"),
+  as the app already uses. Explain jargon or leave it out: the job page says
+  what semantic and keyword ranking do instead of saying "TF-IDF". No hype
+  words such as powerful, seamless, effortless, "AI-powered" or
+  "intelligence".
+- Headings, buttons, labels, nav items and page titles use sentence case:
+  "Your jobs", "Show top", "Choose resume PDFs". Page titles read
+  "Page not found | Talent AI". Document names (Terms of Use, Privacy
+  Policy) and plan names (Trial, Pro) keep their capitals.
+- "Log in", "Log out" and "Sign up" are the verbs; "login" is only a noun.
+- Messages say what happened and what to do next, as full sentences ending
+  with a full stop: "That file is over the 10 MB limit.", "We couldn't find
+  that job.", "Your session has expired. Log in again." Don't add
+  "successfully". Plan-limit messages name the limit and the way out.
+- Delete confirmations read "<thing> will be deleted. You can't undo this."
+- No em dashes anywhere: UI text, comments, docstrings, SQL or docs. Use a
+  comma, a colon, parentheses or a new sentence. Code comments that already
+  use `--` as a dash can stay.
+- Don't claim what isn't true. The landing page's example says "led a team"
+  *can count toward* management, not that it will rank first. The candidate
+  page and the AI review panel say anonymization and AI reviews can be wrong.
+  The weekly email checkbox says emails aren't being sent yet; remove that
+  note (`dashboard/jobs/[id]/page.tsx`) once SMTP and Cloud Scheduler are
+  live.
+- The sample job descriptions (`apps/web/lib/sampleJds.ts`) are realistic job
+  ads used as test input, so they keep a job-ad voice. Changing their wording
+  changes which skills `extract_skills` finds.
+
+## Known platform gotchas (not this project's bugs, but worth knowing)
+
+- **Vercel env var type**: `NEXT_PUBLIC_*` vars must be the **Config** type,
+  not **Secret**. `next build` can't see Secret vars, so editing one does
+  nothing and the old value stays baked into the bundle. Vercel won't convert
+  one in place; delete it and create it again.
+- **Next.js 16**: `middleware.ts` to `proxy.ts` is more than a rename. The
+  old convention runs on the Edge runtime (where the Supabase SSR bundle
+  crashes with `__dirname is not defined`), and the new one defaults to
+  Node.js.
+- **Windows temp paths**: a natively run Python process doesn't resolve
+  `/tmp` the way you'd expect from the Bash tool. Use a real Windows temp
+  path for scratch files (PDF generation and so on), not `/tmp`.
+- **PowerShell bulk replace**: in a `foreach` over a list of
+  `@(old, new)` pairs, a list holding a single pair gets flattened, and the
+  loop then replaces characters instead of strings. On 2026-10-16 that turned
+  every "d" into "e" in two files, which had to be restored from Git. Write
+  each pair as `,@(old, new)`, or use the Edit tool.

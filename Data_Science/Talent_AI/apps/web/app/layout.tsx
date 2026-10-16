@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Talent AI",
-  description: "Rank candidates against a job description with semantic search.",
+  description: "Upload resumes, paste a job description, and see which candidates fit best.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

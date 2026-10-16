@@ -32,7 +32,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ onPrint, label = 'Export' }
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-card-hover border border-slate-200 dark:border-slate-700 z-20 overflow-hidden">
+        <div className="absolute right-0 mt-1.5 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-card-hover border border-slate-200 dark:border-slate-700 z-20 overflow-hidden">
           <button
             onClick={() => {
               onPrint('print');
@@ -40,7 +40,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ onPrint, label = 'Export' }
             }}
             className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
-            Print-ready view
+            Print or save as PDF
           </button>
         </div>
       )}

@@ -18,6 +18,7 @@ from talent_ai_core.schemas import CandidateProfile, JobDescription
 from .db_utils import fetch_one
 from .usage_service import ensure_within_budget, record_usage
 from ..deps import CurrentUser
+from ..messages import CANDIDATE_NOT_FOUND, JOB_NOT_FOUND
 
 
 def _row_to_response(row: dict) -> dict:
@@ -63,11 +64,11 @@ def generate_insight(
 
     candidate_row = fetch_one(client.table("candidates").select("*").eq("id", candidate_id))
     if not candidate_row:
-        raise ValueError("Candidate not found")
+        raise ValueError(CANDIDATE_NOT_FOUND)
 
     job_row = fetch_one(client.table("job_descriptions").select("*").eq("id", job_id))
     if not job_row:
-        raise ValueError("Job description not found")
+        raise ValueError(JOB_NOT_FOUND)
 
     candidate = CandidateProfile(
         candidate_id=candidate_row["id"],
@@ -100,9 +101,9 @@ def generate_insight(
     # tokens above were still really spent, so they stay recorded -- but
     # there's nothing to cache.
     if insights is None:
-        raise RuntimeError("The AI model returned no usable insight for this candidate. Try again.")
+        raise RuntimeError("The AI didn't send back a usable review this time. Try again.")
 
-    now =datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     payload = {
         "tenant_id": user.tenant_id,
         "candidate_id": candidate_id,

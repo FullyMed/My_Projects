@@ -22,6 +22,7 @@ from talent_ai_core.schemas import CandidateProfile
 
 from ..config import settings
 from ..deps import CurrentUser
+from ..messages import CANDIDATE_NOT_FOUND
 from .db_utils import fetch_one
 from .usage_service import ensure_can_add_candidate
 
@@ -56,7 +57,7 @@ def process_and_store_resume(
         Path(tmp.name).unlink(missing_ok=True)
 
     if not raw_text.strip():
-        raise ValueError("No text could be extracted from this PDF")
+        raise ValueError("We couldn't read any text in this PDF.")
 
     anonymized_text = anonymize_text(raw_text)
     extracted = extract_all(raw_text)
@@ -114,7 +115,7 @@ def _upload_to_storage(*, token: str, path: str, file_bytes: bytes) -> None:
 def delete_candidate(*, client: Client, user: CurrentUser, candidate_id: str) -> None:
     row = fetch_one(client.table("candidates").select("source_path").eq("id", candidate_id))
     if not row:
-        raise ValueError("Candidate not found")
+        raise ValueError(CANDIDATE_NOT_FOUND)
 
     # Storage first, then the DB row: if the Storage delete fails for any
     # reason other than "already gone," the row is left intact so the user

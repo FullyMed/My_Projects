@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { Badge, Button, Spinner } from "@/components/ui";
 
 export type CandidateInsights = {
@@ -36,7 +36,7 @@ function Section({ title, items }: { title: string; items: string[] }) {
 }
 
 /** AI insights for one candidate evaluated against one job. Shared by the job
- * ranking page and the candidate detail page — both hit the same
+ * ranking page and the candidate detail page. Both hit the same
  * POST/GET /candidates/{id}/insights?job_id= endpoint and the same cache. */
 export function InsightsPanel({
   candidateId,
@@ -64,7 +64,7 @@ export function InsightsPanel({
     setLoading(true);
     apiFetch<InsightRow | null>(`/candidates/${candidateId}/insights?job_id=${jobId}`)
       .then((data) => !cancelled && setRow(data ?? null))
-      .catch((err) => !cancelled && setError(String(err)))
+      .catch((err) => !cancelled && setError(errorMessage(err)))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -83,21 +83,16 @@ export function InsightsPanel({
       );
       setRow(data);
     } catch (err) {
-      const msg = String(err);
-      setError(
-        msg.includes("OPENAI_API_KEY")
-          ? "AI insights aren't configured on the server yet (missing OpenAI key)."
-          : msg.includes("402")
-            ? "Monthly AI usage limit reached for your workspace. It resets at the start of next month."
-            : msg,
-      );
+      // The server's message already covers the cases worth explaining: the
+      // monthly AI allowance (402) and insights not being set up (503).
+      setError(errorMessage(err));
     } finally {
       setGenerating(false);
     }
   }
 
   if (!jobId) {
-    return <p className="text-sm text-muted">Pick a job to evaluate this candidate against.</p>;
+    return <p className="text-sm text-muted">Choose a job above to see how this candidate fits it.</p>;
   }
 
   if (loading) {
@@ -114,7 +109,7 @@ export function InsightsPanel({
 
       {!row && !generating && (
         <div className="flex items-center gap-3">
-          <p className="text-sm text-muted">No insights generated for this job yet.</p>
+          <p className="text-sm text-muted">No AI review for this job yet.</p>
           <Button onClick={() => generate(false)} className="px-3 py-1.5">
             Generate insights
           </Button>
@@ -123,7 +118,7 @@ export function InsightsPanel({
 
       {generating && (
         <div className="flex items-center gap-2 text-sm text-muted">
-          <Spinner className="h-4 w-4" /> Analyzing candidate…
+          <Spinner className="h-4 w-4" /> Reading the resume…
         </div>
       )}
 
@@ -132,7 +127,7 @@ export function InsightsPanel({
           <p className="text-sm">{row.insights.summary}</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Section title="Strengths" items={row.insights.strengths} />
-            <Section title="Weaknesses / gaps" items={row.insights.weaknesses} />
+            <Section title="Gaps" items={row.insights.weaknesses} />
             <Section title="Missing qualifications" items={row.insights.missing_qualifications} />
           </div>
           <div className="flex flex-col gap-1">
@@ -153,6 +148,10 @@ export function InsightsPanel({
               {row.model} · {row.input_tokens + row.output_tokens} tokens
             </Badge>
           </div>
+          <p className="text-xs text-muted">
+            An AI wrote this from the anonymized resume. It can be wrong, so check it before you
+            rely on it.
+          </p>
         </div>
       )}
     </div>

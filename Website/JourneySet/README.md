@@ -1,29 +1,28 @@
 # JourneySet
 
-A personal productivity planner built with React, TypeScript, and Supabase. Plan your week, track goals, and manage events — all in one elegant workspace.
+A free weekly planner built with React, TypeScript and Supabase. You plan your week, count your way towards goals and keep your appointments on a monthly calendar.
 
-**Live demo**: [journeyset.vercel.app](https://journeyset.vercel.app/)
+**Live site**: [journeyset.vercel.app](https://journeyset.vercel.app/)
 
-## Features
+## What it does
 
-- **Weekly Planner** — schedule tasks by day with optional time slots; weekly-recurring tasks carry forward automatically
-- **Goal Tracker** — set numeric targets with any unit, track progress with gradient bars, lock or allow exceeding the target
-- **Event Calendar** — full monthly calendar with category colour-coding and time-conflict detection
-- **Export & Print** — generate print-ready views of the planner (the week you're viewing), goals, or calendar (the month you're viewing); only the report prints, not the app around it
-- **Five themes** — Light, Dark, Sky, Gold, Forest (each a light/dark base + accent); persisted per-device, respects `prefers-color-scheme` on first visit
-- **Compact sidebar** — toggle to an icon-only sidebar for more screen real estate
-- **Offline-resilient** — all reads fall back to a per-user localStorage cache when Supabase is unreachable (the planner cache is per week); failed saves show a dismissible error instead of silently doing nothing
-- **Private on shared devices** — signing out clears that user's cached data from the browser
-- **Password reset** — "Forgot password?" in the sign-in window emails a link to `/reset-password`, where you choose a new password
-- **Delete your account** — Settings → Delete account permanently removes the account and all its data (you confirm by typing your email)
-- **Safe deletes** — deleting a task, goal or event asks for confirmation first
-- **Custom 404 page** — themed not-found page for unmatched routes, both public and inside the app
-- **Per-page meta** — each route sets its own `<title>` and meta description for SEO
-- **Link previews** — Open Graph / Twitter tags and a 1200×630 preview image, so shared links show a card with the logo
-- **Fast first load** — pages and the print view are code-split and load on demand
-- **Loading states** — a themed full-page loader while auth resolves, plus per-feature spinners so the Planner, Goals, and Calendar lists never flash an empty state while their data is still loading
-- **Terms of Use & Privacy Policy** — dedicated pages at `/terms` and `/privacy`, linked from the landing footer, the sign-up form, and Settings
-- **Full favicon set** — SVG favicon, ICO fallback, Apple touch icon, and a web manifest with Android/PWA icons, all redrawn from the in-app logo mark (`npm run icons` regenerates them and the preview image)
+- Weekly planner: add tasks to any day, with an optional time. Tasks marked "weekly" are copied into next week when you move forward.
+- Goal tracker: set a target in any unit and press +1 as you go. A goal can stop at its target or be allowed to go past it.
+- Event calendar: a monthly view with colour-coded categories. It warns you when two events share a time.
+- Printing: print the week you're looking at, your goals or the month you're looking at, or save them as a PDF. Only the report prints, not the app around it.
+- Five themes (Light, Dark, Sky, Gold, Forest). The browser remembers your choice and follows your system's dark mode on the first visit.
+- A compact mode that shrinks the sidebar to icons.
+- Offline copy: if Supabase can't be reached, the app shows your last-loaded data from the browser (the planner keeps each week separately). Failed saves show an error you can dismiss.
+- Signing out removes your offline copy, so the next person on a shared computer can't see it.
+- Password reset by email ("Forgot password?" in the sign-in window leads to `/reset-password`).
+- Self-serve account deletion in Settings. You confirm by typing your email, and every task, goal and event goes with the account.
+- Deleting a task, goal or event asks you to confirm first.
+- A 404 page for unknown addresses, both on the public site and inside the app.
+- Each page sets its own title and meta description, and shared links show a preview card with the logo (Open Graph and Twitter tags plus a 1200×630 image).
+- Pages and the print view load on demand, which keeps the first download small.
+- A full-page loader while sign-in resolves, plus a spinner per list, so an empty list never flashes before your data arrives.
+- Terms of Use and Privacy Policy at `/terms` and `/privacy`, linked from the landing page footer, the sign-up form and Settings.
+- A full favicon set (SVG, ICO, Apple touch icon, web manifest icons) drawn from the in-app logo. `npm run icons` regenerates them and the preview image.
 
 ## Tech stack
 
@@ -31,7 +30,7 @@ A personal productivity planner built with React, TypeScript, and Supabase. Plan
 |---|---|
 | Framework | React 18 + TypeScript |
 | Build | Vite 5 |
-| Styling | Tailwind CSS 3 (Plus Jakarta Sans; CSS-variable accent — 5 themes) |
+| Styling | Tailwind CSS 3 (Plus Jakarta Sans; CSS-variable accent colours for 5 themes) |
 | Backend | Supabase (PostgreSQL + Auth + Row Level Security) |
 | Routing | react-router-dom v7 |
 | Icons | lucide-react |
@@ -77,7 +76,7 @@ supabase/migrations/
 
 > **Free-tier note**: Supabase pauses free projects after about a week without activity. While paused, nobody can sign in. Restore it from the Supabase dashboard.
 
-All tables have Row Level Security enabled — users can only read and write their own data.
+All tables have Row Level Security enabled, so users can only read and write their own data.
 
 ### 5. Run locally
 
@@ -113,7 +112,7 @@ src/
 │   ├── NotFoundPage.tsx      # Custom 404 (standalone or embedded in AppLayout)
 │   ├── LoadingScreen.tsx     # Full-page loading state (auth resolving)
 │   ├── LegalPageLayout.tsx   # Shared nav/footer + prose chrome for Terms/Privacy
-│   └── PrintView.tsx         # Print-ready layout (portalled to <body>)
+│   └── PrintView.tsx         # Print view (portalled to <body>)
 ├── contexts/         # React contexts (Auth, Theme, CompactMode)
 ├── pages/            # Route-level wrappers (thin, delegate to components), incl. ResetPasswordPage
 ├── hooks/            # useModalFocus (trap + Escape handling), usePageMeta (per-route title/description)
@@ -139,7 +138,7 @@ Five fixed themes, chosen in **Settings** or from the sidebar swatch row:
 | Gold | light | yellow-gold |
 | Forest | dark | emerald / green |
 
-Each theme is a light-or-dark base **plus** an accent hue. The accent is a set of
+Each theme is a light or dark base plus an accent colour. The accent is a set of
 CSS variables (`--accent-*` / `--accent2-*`) that `tailwind.config.js` maps onto the
 `indigo` / `violet` class names, so every existing `indigo-*` class follows the theme
 with no per-component work. `ThemeContext` writes `data-theme` on `<html>` and stores
@@ -150,7 +149,7 @@ per-theme variable blocks are in `src/index.css`.
 
 ## Responsive design
 
-The app is designed to work across all device sizes:
+The layout changes at these widths:
 
 | Breakpoint | Target |
 |---|---|
@@ -161,15 +160,15 @@ The app is designed to work across all device sizes:
 | 1024px (`lg`) | iPad Pro / laptop |
 | 1280px+ | Desktop |
 
-On mobile, modals render as **bottom sheets** with a drag handle. All interactive elements meet the 44 × 44 pt minimum touch target. `viewport-fit=cover` and `env(safe-area-inset-*)` utilities handle notch / Dynamic Island / home indicator on iOS and modern Android devices.
+On phones, pop-up windows slide up from the bottom of the screen as sheets. All interactive elements meet the 44 × 44 pt minimum touch target. `viewport-fit=cover` and `env(safe-area-inset-*)` utilities handle notch / Dynamic Island / home indicator on iOS and modern Android devices.
 
 ## Database schema overview
 
 ```
-profiles          — user display name, linked to auth.users
-planner_tasks     — day_key (weekday name: Monday–Sunday), week_key (YYYY-Www), recurring
-goals             — target_value, current_value, unit, allow_exceed_target
-events            — date_iso (YYYY-MM-DD), time (HH:MM), category, title
+profiles          user display name, linked to auth.users
+planner_tasks     day_key (weekday name: Monday–Sunday), week_key (YYYY-Www), recurring
+goals             target_value, current_value, unit, allow_exceed_target
+events            date_iso (YYYY-MM-DD), time (HH:MM), category, title
 ```
 
 Every table enforces `auth.uid() = user_id` through RLS policies, and a shared trigger keeps `updated_at` current.
@@ -180,12 +179,12 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 ## Roadmap / possible next steps
 
-Nothing here is broken — these are known gaps, noted so they aren't lost between sessions:
+Nothing here is broken. These are known gaps, written down so they don't get lost:
 
-- **Email provider** — emails go out through custom SMTP (Gmail) since 2026-10-06. That's fine at this scale; switch to a dedicated provider (e.g. Resend) if sign-ups grow past Gmail's daily sending limits.
-- **Supabase hardening** — leaked-password protection is off (it needs a paid plan). Optionally rewrite RLS policies to `(select auth.uid())` for performance at scale.
-- **Legal page review** — Terms of Use and Privacy Policy exist (`/terms`, `/privacy`) but were drafted, not lawyer-reviewed; revisit before any real/paying user base, and consider explicit GDPR/CCPA language if that becomes relevant.
-- **Tooling upgrades** — `npm audit` flags dev-only tooling (Vite 5, Tailwind 3); the shipped app has no known vulnerabilities. Fixing them means upgrading to Vite 8 / Tailwind 4.
+- Email provider: emails have gone out through custom SMTP (Gmail) since 2026-10-06. That's fine at this scale. Switch to a dedicated provider (e.g. Resend) if sign-ups grow past Gmail's daily sending limit.
+- Supabase hardening: leaked-password protection is off (it needs a paid plan). If the tables grow, rewrite the RLS policies to use `(select auth.uid())`, which is faster at scale.
+- Legal review: the Terms of Use and Privacy Policy (`/terms`, `/privacy`) were drafted, not written by a lawyer. Have someone check them before the app has paying users, and add GDPR or CCPA wording if those laws start to apply.
+- Tooling upgrades: `npm audit` flags the build tools (Vite 5, Tailwind 3). The app that ships to users has no known vulnerabilities. Clearing the warnings means upgrading to Vite 8 and Tailwind 4.
 
 ## License
 

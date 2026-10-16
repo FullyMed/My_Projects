@@ -17,7 +17,7 @@ class CandidateProfile(BaseModel):
 
     raw_text: str
     anonymized_text: str
-    """Text used for embedding — PII stripped by extraction/anonymize.py."""
+    """Text used for embedding, with PII removed (best effort) by extraction/anonymize.py."""
 
     skills: list[str] = Field(default_factory=list)
     education: list[str] = Field(default_factory=list)

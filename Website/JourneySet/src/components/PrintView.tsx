@@ -72,7 +72,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
     (async () => {
       try {
         if (view === 'planner') {
-          // Fetch directly from Supabase — not the stale localStorage cache
+          // Fetch from Supabase rather than the localStorage cache, which may be stale
           const fetched = await getPlannerTasks(user.id, activeWeekKey);
           setTasks(fetched);
         } else if (view === 'goals') {
@@ -101,7 +101,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
     return (
       <div className="print-content">
         <div className="print-header">
-          <h1 className="print-title">Weekly Planner</h1>
+          <h1 className="print-title">Weekly planner</h1>
           <p className="print-subtitle">Week of {format(weekStart, 'MMMM d, yyyy')} · {activeWeekKey}</p>
         </div>
 
@@ -134,7 +134,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
                     </td>
                     <td>
                       {dayTasks.length === 0 ? (
-                        <span className="no-content">—</span>
+                        <span className="no-content">No tasks</span>
                       ) : (
                         <ul className="task-list">
                           {dayTasks.map(task => (
@@ -174,12 +174,12 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
     return (
       <div className="print-content">
         <div className="print-header">
-          <h1 className="print-title">Goal Tracker</h1>
+          <h1 className="print-title">Goal tracker</h1>
           <p className="print-subtitle">{format(currentDate, 'MMMM d, yyyy')}</p>
         </div>
 
         {goals.length === 0 ? (
-          <p className="no-content">No goals tracked yet.</p>
+          <p className="no-content">No goals yet.</p>
         ) : (
           <>
             <p className="print-summary" style={{ marginBottom: '20px' }}>
@@ -194,8 +194,8 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
                 const status = isComplete
                   ? 'Completed'
                   : goal.currentValue === 0
-                  ? 'Not Started'
-                  : 'In Progress';
+                  ? 'Not started'
+                  : 'In progress';
 
                 return (
                   <div key={goal.id} className="goal-item">
@@ -253,7 +253,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
     return (
       <div className="print-content">
         <div className="print-header">
-          <h1 className="print-title">Event Calendar</h1>
+          <h1 className="print-title">Event calendar</h1>
           <p className="print-subtitle">{format(currentDate, 'MMMM yyyy')}</p>
         </div>
 
@@ -287,9 +287,9 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
   };
 
   const titles: Record<typeof view, string> = {
-    planner: 'Weekly Planner',
-    goals: 'Goal Tracker',
-    calendar: 'Event Calendar',
+    planner: 'Weekly planner',
+    goals: 'Goal tracker',
+    calendar: 'Event calendar',
   };
 
   return createPortal(
@@ -303,7 +303,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
       <div className="print:hidden sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 xs:px-6 py-3 flex items-center justify-between gap-4 z-10 pt-safe">
         <div className="flex items-center gap-3 min-w-0">
           <h1 className="text-sm xs:text-base font-bold text-slate-900 dark:text-white truncate">
-            {titles[view]} — Print Preview
+            {titles[view]}: print preview
           </h1>
           {isLoading && <Loader2 className="h-4 w-4 text-indigo-500 animate-spin flex-shrink-0" />}
         </div>

@@ -8,8 +8,8 @@ const PrintView = lazy(() => import('../components/PrintView'));
 
 const CalendarPage: React.FC = () => {
   usePageMeta(
-    'Event Calendar | JourneySet',
-    "Manage appointments and events with conflict detection in JourneySet's monthly Event Calendar."
+    'Event calendar | JourneySet',
+    'Keep your appointments on a monthly calendar. JourneySet warns you when two events share a time.'
   );
   const [printView, setPrintView] = useState(false);
   // Month currently shown in EventCalendar, so Export prints that month.
@@ -18,7 +18,7 @@ const CalendarPage: React.FC = () => {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Event Calendar</h1>
+        <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Event calendar</h1>
         <ExportButton onPrint={() => setPrintView(true)} label="Export" />
       </div>
       <EventCalendar onMonthChange={setVisibleMonth} />

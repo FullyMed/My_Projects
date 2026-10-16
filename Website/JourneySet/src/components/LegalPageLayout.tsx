@@ -32,7 +32,7 @@ const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({ title, lastUpdated, c
               className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden xs:inline">{user ? 'Back to Planner' : 'Back to Home'}</span>
+              <span className="hidden xs:inline">{user ? 'Back to planner' : 'Back to home'}</span>
             </Link>
           </div>
         </div>

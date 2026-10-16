@@ -22,7 +22,7 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
-/** Fallback while an in-app page chunk loads — the sidebar/header stay visible. */
+/** Fallback while an in-app page chunk loads; the sidebar and header stay visible. */
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center py-24" role="status" aria-label="Loading">
     <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />

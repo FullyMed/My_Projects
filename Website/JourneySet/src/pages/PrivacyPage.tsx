@@ -5,119 +5,117 @@ import { usePageMeta } from '../hooks/usePageMeta';
 const PrivacyPage: React.FC = () => {
   usePageMeta(
     'Privacy Policy | JourneySet',
-    'How JourneySet collects, stores, and protects your data.'
+    'What JourneySet stores about you, where it keeps it, and how to delete it.'
   );
 
   return (
-    <LegalPageLayout title="Privacy Policy" lastUpdated="October 6, 2026">
+    <LegalPageLayout title="Privacy Policy" lastUpdated="October 16, 2026">
       <section>
         <h2>1. Overview</h2>
         <p>
-          This Privacy Policy explains what information JourneySet collects, how it is used, and
-          the choices you have. We collect only what's needed to run the app — your planner tasks,
-          goals, and events are yours, and we don't sell your data.
+          This Privacy Policy explains what JourneySet collects, how we use it and the choices you
+          have. We only collect what we need to run the app. Your tasks, goals and events are
+          yours, and we don't sell your data.
         </p>
       </section>
 
       <section>
-        <h2>2. Information We Collect</h2>
-        <p>We collect the following categories of information:</p>
+        <h2>2. What we collect</h2>
         <ul>
-          <li><strong>Account information:</strong> the email address and display name you provide when you register.</li>
-          <li><strong>Content you create:</strong> weekly planner tasks, goals and their progress, and calendar events — including titles, descriptions, dates, times, and categories you enter.</li>
-          <li><strong>Local device preferences:</strong> your selected theme, compact-mode setting, and a local cache of your data, stored in your browser's <code>localStorage</code> so the app still works and loads quickly when the network is unavailable.</li>
+          <li>The email address and name you give when you sign up.</li>
+          <li>The tasks, goals (with their progress) and calendar events you create, including the titles, descriptions, dates, times and categories you enter.</li>
+          <li>On your own device: your theme, your compact mode setting and an offline copy of your data. Your browser keeps these in <code>localStorage</code> so the app still loads when you lose your connection.</li>
         </ul>
       </section>
 
       <section>
-        <h2>3. How We Use Your Information</h2>
-        <p>We use the information above solely to:</p>
+        <h2>3. How we use it</h2>
+        <p>We use this information only to:</p>
         <ul>
-          <li>Authenticate you and keep your account secure.</li>
-          <li>Store and sync your planner, goals, and calendar data across your sessions and devices.</li>
-          <li>Display your data back to you — nothing more.</li>
+          <li>Sign you in and keep your account secure.</li>
+          <li>Store your planner, goals and calendar, and keep them in sync across your sessions and devices.</li>
+          <li>Show your data back to you.</li>
         </ul>
-        <p>We do not use your data for advertising, and we do not sell or rent it to third parties.</p>
+        <p>We don't use your data for advertising, and we don't sell or rent it to anyone.</p>
       </section>
 
       <section>
-        <h2>4. Where Your Data Is Stored</h2>
+        <h2>4. Where your data is stored</h2>
         <p>
-          Your data is stored in a <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>{' '}
-          -hosted PostgreSQL database. Every table enforces Row Level Security, so the database
-          itself only ever returns rows where <code>auth.uid() = user_id</code> — meaning your data
-          is isolated at the database layer, not just in the app's code. A read-only local cache of
-          your own data is also kept in your browser's <code>localStorage</code> to support offline
-          use.
+          Your data lives in a PostgreSQL database hosted by{' '}
+          <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>.
+          Every table uses Row Level Security, so the database only returns rows where{' '}
+          <code>auth.uid() = user_id</code>. The database itself keeps your data apart from other
+          users' data, on top of the checks in the app's code. Your browser also keeps a read-only
+          offline copy of your own data in <code>localStorage</code>.
         </p>
       </section>
 
       <section>
-        <h2>5. Cookies &amp; Local Storage</h2>
+        <h2>5. Cookies and local storage</h2>
         <p>
-          JourneySet does not use advertising or tracking cookies. It uses your browser's{' '}
-          <code>localStorage</code> for functional purposes only: remembering your theme and
-          compact-mode preference, and caching your own planner/goals/events data for offline
-          resilience. Your Supabase session is also maintained via browser storage so you stay
-          signed in between visits.
+          JourneySet doesn't use advertising or tracking cookies. It uses your browser's{' '}
+          <code>localStorage</code> only to remember your theme and compact mode setting and to
+          keep the offline copy of your planner, goals and events. Supabase also keeps your
+          sign-in session in browser storage, so you stay signed in between visits.
         </p>
       </section>
 
       <section>
-        <h2>6. Data Sharing</h2>
+        <h2>6. Who we share data with</h2>
         <p>
-          We don't share your personal data with third parties, except with{' '}
+          We don't share your personal data with anyone except{' '}
           <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">Supabase</a>,
-          our infrastructure provider, which hosts the database and authentication system that
-          make the Service work. We do not share your data for marketing purposes.
+          which hosts the database and the sign-in system that run the Service. We don't share
+          your data for marketing.
         </p>
       </section>
 
       <section>
-        <h2>7. Data Retention &amp; Deletion</h2>
+        <h2>7. How long we keep data, and deleting it</h2>
         <p>
-          We retain your account and content data for as long as your account is active. You can
-          delete individual tasks, goals, and events at any time from within the app. You can also
-          clear your local cache from <strong>Settings → Reset all local data</strong>; signing out
-          clears it automatically. You can permanently delete your account, together with all of
-          your tasks, goals, and events, yourself from <strong>Settings → Delete account</strong>;
-          the deletion is immediate and cannot be undone.
+          We keep your account and content for as long as your account exists. You can delete
+          single tasks, goals and events in the app at any time. You can clear the offline copy
+          from <strong>Settings → Clear offline copy</strong>, and signing out clears it too. You
+          can delete your account, with all your tasks, goals and events, yourself from{' '}
+          <strong>Settings → Delete account</strong>. The deletion happens straight away and
+          can't be undone.
         </p>
       </section>
 
       <section>
-        <h2>8. Your Rights &amp; Choices</h2>
-        <p>You can, at any time:</p>
+        <h2>8. Your choices</h2>
+        <p>At any time, you can:</p>
         <ul>
-          <li>View and edit any data you've entered directly within the app.</li>
-          <li>Export a copy of your planner, goals, or calendar using the <strong>Export &amp; Print</strong> feature.</li>
-          <li>Delete individual items, or clear your local cache from Settings.</li>
-          <li>Sign out, which ends your session on this device and removes the local cache of your data from this browser.</li>
-          <li>Delete your account and all associated data from <strong>Settings → Delete account</strong>.</li>
+          <li>See and edit anything you've entered in the app.</li>
+          <li>Print your planner, goals or calendar, or save them as a PDF, with the <strong>Export</strong> button.</li>
+          <li>Delete single items, or clear the offline copy from Settings.</li>
+          <li>Sign out, which ends your session on this device and removes the offline copy of your data from this browser.</li>
+          <li>Delete your account and all its data from <strong>Settings → Delete account</strong>.</li>
         </ul>
       </section>
 
       <section>
-        <h2>9. Children's Privacy</h2>
+        <h2>9. Children</h2>
         <p>
-          JourneySet is not directed at children under 13, and we do not knowingly collect
-          information from children under that age.
+          JourneySet isn't meant for children under 13, and we don't knowingly collect
+          information from them.
         </p>
       </section>
 
       <section>
-        <h2>10. Changes to This Policy</h2>
+        <h2>10. Changes to this policy</h2>
         <p>
-          We may update this Privacy Policy from time to time. Material changes will be reflected
-          by updating the "Last updated" date above.
+          We may update this Privacy Policy. When we make a material change, we'll update the
+          "Last updated" date above.
         </p>
       </section>
 
       <section>
         <h2>11. Contact</h2>
         <p>
-          Questions about this Privacy Policy, or requests to access or delete your data, can be
-          raised via the project's{' '}
+          You can send questions about this policy, or requests to see or delete your data,
+          through the project's{' '}
           <a href="https://github.com/FullyMed/My_Projects" target="_blank" rel="noopener noreferrer">
             GitHub repository
           </a>.

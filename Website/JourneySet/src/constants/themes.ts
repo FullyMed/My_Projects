@@ -16,7 +16,7 @@ export interface ThemeMeta {
  * (see src/index.css); `dark` here drives the `.dark` class for the base.
  *
  * Swatches are drawn as a split circle (base half + accent half) so Light
- * and Dark — which share the indigo accent — stay visually distinct.
+ * and Dark (which share the indigo accent) stay visually distinct.
  */
 export const THEMES: ThemeMeta[] = [
   { id: 'light', label: 'Light', dark: false, base: '#ffffff', swatch: '#4f46e5' },

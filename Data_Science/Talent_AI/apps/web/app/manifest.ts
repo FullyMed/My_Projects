@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Talent AI",
     short_name: "Talent AI",
-    description: "AI-powered candidate ranking and resume intelligence.",
+    description: "Rank resumes against a job description.",
     start_url: "/dashboard/candidates",
     display: "standalone",
     background_color: "#fafafa", // matches --background in globals.css

@@ -46,10 +46,10 @@ def get_client() -> OpenAI:
     if _CLIENT is None:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise RuntimeError(
-                "OPENAI_API_KEY is not set -- AI insights are unavailable until it is "
-                "configured on the API service."
-            )
+            # The router passes this message to the user as a 503, so it's
+            # written for them. The fix on our side: set OPENAI_API_KEY on
+            # the API service.
+            raise RuntimeError("AI insights aren't set up yet. Try again later.")
         _CLIENT = OpenAI(api_key=api_key)
     return _CLIENT
 

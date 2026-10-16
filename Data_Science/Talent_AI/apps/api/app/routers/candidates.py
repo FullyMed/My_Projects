@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from ..deps import CurrentUser, get_current_user, get_scoped_client
+from ..messages import CANDIDATE_NOT_FOUND
 from ..services.candidate_service import (
     delete_candidate,
     get_resume_signed_url,
@@ -23,17 +24,17 @@ async def upload_candidate(
     user: CurrentUser = Depends(get_current_user),
 ) -> dict:
     if file.content_type not in ("application/pdf", "application/octet-stream"):
-        raise HTTPException(status_code=400, detail="Only PDF uploads are supported")
+        raise HTTPException(status_code=400, detail="Only PDF files can be uploaded.")
 
     file_bytes = await file.read()
 
     if len(file_bytes) > MAX_RESUME_BYTES:
-        raise HTTPException(status_code=413, detail="Resume file is too large (10MB limit)")
+        raise HTTPException(status_code=413, detail="That file is over the 10 MB limit.")
     # Content-Type is client-supplied and trivially spoofed -- the magic
     # bytes are what actually gets handed to the PDF parser, so check those
     # too rather than trusting the header alone.
     if not file_bytes.startswith(b"%PDF-"):
-        raise HTTPException(status_code=422, detail="File is not a valid PDF")
+        raise HTTPException(status_code=422, detail="That file isn't a valid PDF.")
 
     client = get_scoped_client(user.token)
 
@@ -72,9 +73,9 @@ async def upload_candidates_bulk(
         try:
             file_bytes = await file.read()
             if len(file_bytes) > MAX_RESUME_BYTES:
-                raise ValueError("File is too large (10MB limit)")
+                raise ValueError("That file is over the 10 MB limit.")
             if not file_bytes.startswith(b"%PDF-"):
-                raise ValueError("File is not a valid PDF")
+                raise ValueError("That file isn't a valid PDF.")
             candidate = process_and_store_resume(
                 client=client,
                 user=user,
@@ -122,7 +123,7 @@ async def get_candidate(
         .eq("id", candidate_id)
     )
     if not candidate:
-        raise HTTPException(status_code=404, detail="Candidate not found")
+        raise HTTPException(status_code=404, detail=CANDIDATE_NOT_FOUND)
     return candidate
 
 
@@ -133,7 +134,7 @@ async def get_candidate_resume_url(
     client = get_scoped_client(user.token)
     row = fetch_one(client.table("candidates").select("source_path").eq("id", candidate_id))
     if not row:
-        raise HTTPException(status_code=404, detail="Candidate not found")
+        raise HTTPException(status_code=404, detail=CANDIDATE_NOT_FOUND)
     url = get_resume_signed_url(token=user.token, path=row["source_path"])
     return {"url": url, "expires_in": 3600}
 

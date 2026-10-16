@@ -23,9 +23,12 @@ async def postgrest_error_handler(request: Request, exc: APIError) -> JSONRespon
     # "invalid text representation": a path id that isn't a UUID, which from
     # the caller's side is just a resource that doesn't exist.
     if exc.code == "22P02":
-        return JSONResponse(status_code=404, content={"detail": "Not found"})
+        return JSONResponse(status_code=404, content={"detail": "We couldn't find that."})
     logger.error("PostgREST error on %s %s: %s", request.method, request.url.path, exc)
-    return JSONResponse(status_code=500, content={"detail": "Database error"})
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Something went wrong on our side. Try again in a moment."},
+    )
 
 app.add_middleware(
     CORSMiddleware,

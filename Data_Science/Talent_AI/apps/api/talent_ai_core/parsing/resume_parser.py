@@ -44,5 +44,5 @@ def _extract_via_ocr(pdf_path: Path) -> str:
         images = convert_from_path(str(pdf_path))
         return "\n".join(pytesseract.image_to_string(image) for image in images)
     except Exception as exc:  # Tesseract binary or poppler missing, corrupt PDF, etc.
-        logger.warning("OCR failed for %s (%s) — is Tesseract/poppler installed?", pdf_path, exc)
+        logger.warning("OCR failed for %s (%s). Is Tesseract/poppler installed?", pdf_path, exc)
         return ""

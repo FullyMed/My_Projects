@@ -48,26 +48,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
       if (mode === 'login' && forgot) {
         const result = await requestPasswordReset(email.trim());
         if (!result.success) {
-          setError(result.error || "Couldn't send the reset email");
+          setError(result.error || "We couldn't send the reset email. Try again in a moment.");
         } else {
           setResetSentTo(email.trim());
         }
       } else if (mode === 'login') {
         const result = await login(email.trim(), password);
         if (!result.success) {
-          setError(result.error || 'Invalid email or password');
+          setError(result.error || "That email and password don't match. Check them and try again.");
         } else {
           onClose();
         }
       } else {
         if (name.trim().length < 2) {
-          setError('Name must be at least 2 characters long');
+          setError('Your name needs at least 2 characters.');
           setLoading(false);
           return;
         }
         const result = await register(email.trim(), password, name.trim());
         if (!result.success) {
-          setError(result.error || 'Failed to create account');
+          setError(result.error || "We couldn't create your account. Try again in a moment.");
         } else if (result.needsConfirmation) {
           setConfirmationSentTo(email.trim());
         } else {
@@ -75,7 +75,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
         }
       }
     } catch {
-      setError('An unexpected error occurred');
+      setError('Something went wrong. Try again in a moment.');
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
           <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
         </div>
 
-        {/* Gradient accent strip — hidden on mobile (handle replaces it visually) */}
+        {/* Gradient accent strip, hidden on mobile (handle replaces it visually) */}
         <div className="hidden xs:block h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-t-2xl" />
 
         <div className="px-6 xs:px-8 pt-4 xs:pt-8 pb-6 xs:pb-8">
@@ -137,14 +137,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
             className="text-xl xs:text-2xl font-bold text-center text-slate-900 dark:text-white mb-1"
             id="auth-modal-title"
           >
-            {forgot ? 'Reset your password' : mode === 'login' ? 'Welcome back' : 'Create account'}
+            {forgot ? 'Reset your password' : mode === 'login' ? 'Welcome back' : 'Create your account'}
           </h2>
           <p className="text-center text-xs xs:text-sm text-slate-500 dark:text-slate-400 mb-5 xs:mb-7">
             {forgot
-              ? "Enter your email and we'll send you a link to set a new one"
+              ? "Enter your email and we'll send you a link to set a new one."
               : mode === 'login'
-              ? 'Sign in to continue your journey'
-              : 'Start your productivity journey today'}
+              ? 'Sign in to see your week.'
+              : "It's free, and you can delete your account at any time."}
           </p>
 
           {resetSentTo ? (
@@ -174,7 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
             {mode === 'register' && (
               <div>
                 <label htmlFor="name-input" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Full name
+                  Your name
                 </label>
                 <input
                   id="name-input"
@@ -182,7 +182,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={inputClass}
-                  placeholder="Enter your full name"
+                  placeholder="e.g. Alex"
                   required
                   autoComplete="name"
                 />
@@ -199,7 +199,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClass}
-                placeholder="Enter your email"
+                placeholder="you@example.com"
                 required
                 autoComplete="email"
                 inputMode="email"
@@ -218,7 +218,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`${inputClass} pr-12`}
-                  placeholder="Enter your password"
+                  placeholder={mode === 'register' ? 'At least 8 characters' : 'Your password'}
                   required
                   minLength={mode === 'register' ? 8 : undefined}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}

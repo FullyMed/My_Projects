@@ -11,12 +11,12 @@ interface NotFoundPageProps {
 
 const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
   usePageMeta(
-    'Page Not Found | JourneySet',
-    "The page you're looking for doesn't exist or may have been moved."
+    'Page not found | JourneySet',
+    "We can't find that page. The link may be old, or the address may have a typo."
   );
   const { user } = useAuth();
   const homePath = user ? '/app/planner' : '/';
-  const homeLabel = user ? 'Back to Planner' : 'Back to Home';
+  const homeLabel = user ? 'Back to planner' : 'Back to home';
 
   const content = (
     <div className="flex flex-col items-center justify-center text-center px-4 xs:px-6 py-16 xs:py-24">
@@ -31,10 +31,10 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
         404
       </p>
       <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 xs:mb-3 tracking-tight">
-        Looks like this page wandered off route
+        We can't find that page
       </h1>
       <p className="text-sm xs:text-base text-slate-600 dark:text-slate-400 max-w-md mb-8 xs:mb-10">
-        The page you're looking for doesn't exist or may have been moved. Let's get you back on track.
+        The link may be old, or the address may have a typo.
       </p>
 
       <div className="flex flex-col xs:flex-row gap-3 w-full xs:w-auto px-4 xs:px-0">
@@ -82,7 +82,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
       <footer className="border-t border-slate-200 dark:border-slate-800 pb-safe">
         <div className="max-w-7xl mx-auto px-4 xs:px-6 py-6 flex justify-center">
           <p className="text-xs xs:text-sm text-slate-400 dark:text-slate-600">
-            Your personal productivity companion.
+            A free planner for your week.
           </p>
         </div>
       </footer>

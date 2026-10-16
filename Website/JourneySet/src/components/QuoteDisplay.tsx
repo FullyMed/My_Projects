@@ -45,7 +45,7 @@ const QuoteDisplay: React.FC<QuoteDisplayProps> = ({ compact = false }) => {
     <div className="flex items-center gap-3 max-w-sm">
       <div className="text-right hidden sm:block min-w-0">
         <p className="text-xs text-slate-500 dark:text-slate-400 italic line-clamp-1">"{quote.text}"</p>
-        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">— {quote.author}</p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{quote.author}</p>
       </div>
       <button
         onClick={refreshQuote}

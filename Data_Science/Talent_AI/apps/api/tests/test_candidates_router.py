@@ -68,7 +68,7 @@ def test_bulk_upload_returns_per_file_results_and_keeps_going_after_a_bad_file()
         results = response.json()
         assert [r["status"] for r in results] == ["ok", "error", "ok"]
         assert results[0]["candidate_id"] == "cand-for-a.pdf"
-        assert "not a valid PDF" in results[1]["detail"]
+        assert "isn't a valid PDF" in results[1]["detail"]
     finally:
         app.dependency_overrides.clear()
 

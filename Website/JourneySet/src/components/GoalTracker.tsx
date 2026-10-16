@@ -21,7 +21,7 @@ const GoalTracker: React.FC = () => {
   const [resetConfirmId, setResetConfirmId] = useState<string | null>(null);
   const [goalsLoading, setGoalsLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  // Goals with an update in flight — their controls are disabled so rapid
+  // Goals with an update in flight. Their controls are disabled so rapid
   // clicks can't send two writes computed from the same stale value.
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -151,8 +151,8 @@ const GoalTracker: React.FC = () => {
 
   const statusConfig: Record<GoalStatus, { label: string; classes: string }> = {
     'Completed': { label: 'Completed', classes: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50' },
-    'In Progress': { label: 'In Progress', classes: 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/50' },
-    'Not Started': { label: 'Not Started', classes: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700' },
+    'In Progress': { label: 'In progress', classes: 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/50' },
+    'Not Started': { label: 'Not started', classes: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700' },
   };
 
   const inputClass =
@@ -160,7 +160,7 @@ const GoalTracker: React.FC = () => {
 
   return (
     <div className={isCompact ? 'space-y-4' : 'space-y-6'}>
-      {/* Analytics — 3 equal columns that shrink gracefully */}
+      {/* Stats: 3 equal columns that shrink on small screens */}
       {goals.length > 0 && (
         <div className={`grid grid-cols-3 ${isCompact ? 'gap-2 xs:gap-3' : 'gap-3 xs:gap-4'}`}>
           {[
@@ -180,13 +180,13 @@ const GoalTracker: React.FC = () => {
 
       {/* Add Goal Form */}
       <div className={`bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 ${isCompact ? 'p-4' : 'p-5'}`}>
-        <h3 className={`font-semibold text-slate-900 dark:text-white ${isCompact ? 'text-sm mb-3' : 'text-sm mb-4'}`}>Create new goal</h3>
+        <h3 className={`font-semibold text-slate-900 dark:text-white ${isCompact ? 'text-sm mb-3' : 'text-sm mb-4'}`}>New goal</h3>
         <div className={`grid gap-3 ${isCompact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
           <input
             type="text"
             value={newGoal.title}
             onChange={e => setNewGoal({ ...newGoal, title: e.target.value })}
-            placeholder="Goal title (e.g. Exercise, Read books)"
+            placeholder="Goal (e.g. Run, Read books)"
             className={inputClass}
           />
           <input
@@ -225,7 +225,7 @@ const GoalTracker: React.FC = () => {
                 onChange={e => setNewGoal({ ...newGoal, allowExceedTarget: e.target.checked })}
                 className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
               />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Allow exceeding target</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Can go past the target</span>
             </label>
             <button
               onClick={addGoal}
@@ -347,7 +347,7 @@ const GoalTracker: React.FC = () => {
                   {isComplete && (
                     <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                       <Check className="h-3.5 w-3.5" />
-                      <span className="text-xs font-semibold">Done!</span>
+                      <span className="text-xs font-semibold">Done</span>
                     </div>
                   )}
                 </div>
@@ -363,7 +363,7 @@ const GoalTracker: React.FC = () => {
                   }`}
                 >
                   {goal.allowExceedTarget ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                  {goal.allowExceedTarget ? 'Exceeding allowed' : 'Locked at target'}
+                  {goal.allowExceedTarget ? 'Can go past target' : 'Stops at target'}
                 </button>
 
                 {/* Reset confirmation */}
@@ -398,7 +398,7 @@ const GoalTracker: React.FC = () => {
           </div>
           <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2">No goals yet</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Create your first goal to start tracking your progress.
+            Add a goal above, then press +1 each time you make progress.
           </p>
         </div>
       )}
@@ -406,7 +406,7 @@ const GoalTracker: React.FC = () => {
       {deletingGoal && (
         <ConfirmDialog
           title="Delete goal?"
-          message={<>“{deletingGoal.title}” and its progress will be permanently deleted.</>}
+          message={<>&quot;{deletingGoal.title}&quot; and its progress will be deleted. You can't undo this.</>}
           onConfirm={async () => {
             await deleteGoalHandler(deletingGoal.id);
             setDeletingGoal(null);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { Button, Card, EmptyState, ErrorText, Input, Spinner, Textarea } from "@/components/ui";
 import { SAMPLE_JDS } from "@/lib/sampleJds";
 
@@ -28,7 +28,7 @@ export default function JobsPage() {
       const data = await apiFetch<Job[]>(`/jobs?limit=${PAGE_SIZE}&offset=${atOffset}`);
       setJobs(data);
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
     } finally {
       setLoadingJobs(false);
     }
@@ -57,12 +57,7 @@ export default function JobsPage() {
       await apiFetch(`/jobs/${job.id}/rank`, { method: "POST" });
       router.push(`/dashboard/jobs/${job.id}`);
     } catch (err) {
-      const msg = String(err);
-      setError(
-        msg.includes("402")
-          ? "Trial plan is limited to 3 job descriptions. Upgrade to add more."
-          : msg,
-      );
+      setError(errorMessage(err));
       setSubmitting(false);
     }
   }
@@ -72,14 +67,14 @@ export default function JobsPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Rank candidates</h1>
         <p className="text-sm text-muted">
-          Paste a job description to find the best-matching candidates by semantic similarity.
+          Paste a job description and we&apos;ll rank your candidates by how well they fit it.
         </p>
       </div>
 
       <Card className="p-5">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-            <span>Load a sample:</span>
+            <span>Try a sample:</span>
             {SAMPLE_JDS.map((jd) => (
               <button
                 key={jd.label}
@@ -108,10 +103,14 @@ export default function JobsPage() {
             required
           />
           <Input
-            placeholder="Required skills, comma-separated (optional) — e.g. python, aws, docker"
+            placeholder="Extra required skills, separated by commas (optional)"
             value={requiredSkills}
             onChange={(event) => setRequiredSkills(event.target.value)}
           />
+          <p className="text-xs text-muted">
+            We pick most skills out of the description for you. Add any we might miss, like
+            python or aws.
+          </p>
           <Button type="submit" loading={submitting} className="w-fit">
             {submitting ? "Ranking..." : "Rank candidates"}
           </Button>
@@ -121,7 +120,7 @@ export default function JobsPage() {
       {error && <ErrorText>{error}</ErrorText>}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted">Past jobs</h2>
+        <h2 className="text-sm font-medium text-muted">Your jobs</h2>
         {loadingJobs ? (
           <div className="flex justify-center py-8">
             <Spinner className="h-6 w-6 text-muted" />
@@ -129,7 +128,7 @@ export default function JobsPage() {
         ) : jobs.length === 0 && offset === 0 ? (
           <EmptyState
             title="No jobs yet"
-            description="Create one above to see it show up here."
+            description="Jobs you create will show up here."
           />
         ) : (
           <>

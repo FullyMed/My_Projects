@@ -191,7 +191,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
               )
           );
           if (results.some(r => r === null)) {
-            setError("Some weekly tasks couldn't be carried over — check your connection.");
+            setError("We couldn't copy some weekly tasks into next week. Check your connection, then go back a week and forward again.");
           }
         }
       }
@@ -284,14 +284,14 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           className="inline-flex items-center gap-2 px-3 xs:px-4 min-h-[44px] text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors cursor-pointer flex-shrink-0"
         >
           <Download className="h-4 w-4" />
-          <span className="hidden xs:inline">Export week</span>
-          <span className="xs:hidden">Export</span>
+          <span className="hidden xs:inline">Download as text</span>
+          <span className="xs:hidden">Download</span>
         </button>
       </div>
 
       <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
-      {/* Filter Buttons — horizontal scroll on small screens */}
+      {/* Filter buttons: horizontal scroll on small screens */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {(['all', 'completed', 'incomplete'] as const).map(filterOption => (
           <button
@@ -311,7 +311,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
 
       {/* Add Task Form */}
       <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card ${isCompact ? 'p-4' : 'p-5'}`}>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Add new task</h3>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Add a task</h3>
         {/* Mobile: stacked single column; md+: 5-column grid */}
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-5 gap-3">
           <input
@@ -327,7 +327,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             onChange={e => setSelectedDay(e.target.value)}
             className={inputClass}
           >
-            <option value="">Select day</option>
+            <option value="">Pick a day</option>
             {days.map(day => (
               <option key={day} value={day}>{day}</option>
             ))}
@@ -487,7 +487,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       {deletingTask && (
         <ConfirmDialog
           title="Delete task?"
-          message={<>“{deletingTask.title}” will be permanently deleted.</>}
+          message={<>&quot;{deletingTask.title}&quot; will be deleted. You can't undo this.</>}
           onConfirm={async () => {
             await deleteTask(deletingTask.id);
             setDeletingTask(null);

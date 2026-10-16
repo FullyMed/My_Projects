@@ -6,11 +6,12 @@ export default function Home() {
       <Logo className="text-lg" />
       <div className="flex flex-col items-center gap-3 text-center">
         <h1 className="max-w-md text-3xl font-semibold tracking-tight">
-          Rank candidates against a job description
+          See which candidates fit the job
         </h1>
         <p className="max-w-sm text-muted">
-          Upload resumes, paste a job description, and get a ranked shortlist by semantic
-          similarity — not keyword matching.
+          Upload resumes and paste a job description. Talent AI compares meaning rather than
+          exact words, so &quot;led a team of five&quot; can count toward a role that asks for
+          management.
         </p>
       </div>
       <div className="flex gap-3">

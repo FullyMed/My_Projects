@@ -86,10 +86,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {usage && (
               <div
                 className="hidden flex-col gap-0.5 sm:flex"
-                title={`${usage.tokens_used.toLocaleString()} / ${usage.token_limit.toLocaleString()} AI tokens used this month (${usage.plan} plan)`}
+                title={`You've used ${usage.tokens_used.toLocaleString()} of your ${usage.token_limit.toLocaleString()} AI tokens this month. The count resets on the 1st.`}
               >
                 <span className="text-xs text-muted">
-                  {usage.tokens_used.toLocaleString()} / {usage.token_limit.toLocaleString()} AI tokens
+                  AI use: {usage.tokens_used.toLocaleString()} of {usage.token_limit.toLocaleString()} tokens
                 </span>
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-surface-hover">
                   <div
@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onClick={handleSignOut}
               className="font-medium text-muted transition-colors hover:text-foreground"
             >
-              Sign out
+              Log out
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, errorMessage } from "@/lib/api";
 import { Button, Card, ErrorText, Spinner } from "@/components/ui";
 
 type UsageSummary = {
@@ -25,7 +25,7 @@ export default function BillingPage() {
   useEffect(() => {
     apiFetch<UsageSummary>("/usage")
       .then(setUsage)
-      .catch((err) => setError(String(err)))
+      .catch((err) => setError(errorMessage(err)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -36,7 +36,7 @@ export default function BillingPage() {
       const { url } = await apiFetch<{ url: string }>("/billing/checkout", { method: "POST" });
       window.location.href = url;
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
       setRedirecting(null);
     }
   }
@@ -48,7 +48,7 @@ export default function BillingPage() {
       const { url } = await apiFetch<{ url: string }>("/billing/portal", { method: "POST" });
       window.location.href = url;
     } catch (err) {
-      setError(String(err));
+      setError(errorMessage(err));
       setRedirecting(null);
     }
   }
@@ -67,19 +67,20 @@ export default function BillingPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Billing</h1>
-        <p className="text-sm text-muted">Manage your plan and AI usage.</p>
+        <p className="text-sm text-muted">Your plan and this month&apos;s AI use.</p>
       </div>
 
       {checkoutResult === "success" && (
         <Card className="border-accent/30 bg-accent/5 p-4">
           <p className="text-sm text-foreground">
-            Subscription started — it may take a few seconds to reflect below.
+            Thanks for subscribing. Your plan can take a few seconds to update here, so refresh
+            the page if it still says Trial.
           </p>
         </Card>
       )}
       {checkoutResult === "cancel" && (
         <Card className="p-4">
-          <p className="text-sm text-muted">Checkout was cancelled — no charge was made.</p>
+          <p className="text-sm text-muted">You cancelled checkout, so we didn&apos;t charge you.</p>
         </Card>
       )}
       {error && <ErrorText>{error}</ErrorText>}
@@ -104,7 +105,7 @@ export default function BillingPage() {
         {usage && (
           <div className="mt-5 flex flex-col gap-1.5 border-t border-border pt-4">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted">AI insights usage this month</span>
+              <span className="text-muted">AI use this month (resets on the 1st)</span>
               <span className="text-muted">
                 {usage.tokens_used.toLocaleString()} / {usage.token_limit.toLocaleString()} tokens
               </span>
@@ -125,11 +126,11 @@ export default function BillingPage() {
 
       {!isPro && (
         <Card className="p-5">
-          <h2 className="mb-2 text-sm font-medium text-muted">Trial plan limits</h2>
+          <h2 className="mb-2 text-sm font-medium text-muted">What the Trial plan includes</h2>
           <ul className="list-disc pl-5 text-sm text-muted marker:text-muted">
             <li>10 candidates</li>
-            <li>3 job descriptions</li>
-            <li>{usage?.token_limit.toLocaleString() ?? "200,000"} AI insight tokens / month</li>
+            <li>3 jobs</li>
+            <li>{usage?.token_limit.toLocaleString() ?? "200,000"} AI tokens a month</li>
           </ul>
         </Card>
       )}

@@ -17,7 +17,7 @@ const linkError = (() => {
 })();
 
 const ResetPasswordPage: React.FC = () => {
-  usePageMeta('Reset Password | JourneySet', 'Choose a new password for your JourneySet account.');
+  usePageMeta('Reset password | JourneySet', 'Choose a new password for your JourneySet account.');
   const { user, updatePassword } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
@@ -30,7 +30,7 @@ const ResetPasswordPage: React.FC = () => {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError('Your password needs at least 8 characters.');
       return;
     }
     if (password !== confirm) {
@@ -41,7 +41,7 @@ const ResetPasswordPage: React.FC = () => {
     const result = await updatePassword(password);
     setSaving(false);
     if (!result.success) {
-      setError(result.error || "Couldn't update your password. Please try again.");
+      setError(result.error || "We couldn't update your password. Try again in a moment.");
       return;
     }
     navigate('/app/planner', { replace: true });
@@ -153,7 +153,7 @@ const ResetPasswordPage: React.FC = () => {
                 className="inline-flex items-center justify-center gap-2 px-6 min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25"
               >
                 <Home className="h-4 w-4" />
-                Back to Home
+                Back to home
               </Link>
             </div>
           )}

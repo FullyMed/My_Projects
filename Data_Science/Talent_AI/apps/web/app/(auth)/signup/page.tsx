@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/authErrors";
 import { Button, Card, ErrorText, Input, Logo } from "@/components/ui";
 
 export default function SignupPage() {
@@ -30,7 +31,7 @@ export default function SignupPage() {
 
     setLoading(false);
     if (signUpError) {
-      setError(signUpError.message);
+      setError(friendlyAuthError(signUpError, "sign up"));
       return;
     }
     // With email confirmation on (as in production), signUp returns no
@@ -52,7 +53,7 @@ export default function SignupPage() {
             <h1 className="text-lg font-semibold">Check your email</h1>
             <p className="text-sm text-muted">
               We sent a confirmation link to <span className="text-foreground">{email}</span>.
-              Click it to activate your account, then log in.
+              Click it to finish setting up your account, then log in.
             </p>
           </div>
         </Card>
@@ -72,7 +73,9 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm p-6">
         <div className="mb-6 flex flex-col gap-1">
           <h1 className="text-lg font-semibold">Create your company account</h1>
-          <p className="text-sm text-muted">Start ranking candidates in minutes.</p>
+          <p className="text-sm text-muted">
+            You start on the free Trial plan: up to 10 candidates and 3 jobs.
+          </p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Input

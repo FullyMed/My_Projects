@@ -25,6 +25,23 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
+/**
+ * Supabase Auth returns short technical messages ("Invalid login credentials").
+ * Turn the common ones into plain sentences; pass anything else through.
+ */
+const friendlyAuthError = (message: string): string => {
+  const m = message.toLowerCase();
+  if (m.includes('invalid login credentials')) return "That email and password don't match. Check them and try again.";
+  if (m.includes('email not confirmed')) return 'Confirm your email first. Open the link we sent you, then sign in.';
+  if (m.includes('already registered')) return 'There is already an account with that email. Try signing in instead.';
+  if (m.includes('rate limit') || m.includes('for security purposes')) return "You've asked for that too many times. Wait a few minutes and try again.";
+  if (m.includes('should be different from the old password')) return 'Pick a password you haven\'t used for this account before.';
+  if (m.includes('weak') || m.includes('easy to guess')) return 'That password is too easy to guess. Try a longer one.';
+  if (m.includes('invalid format')) return "That email address doesn't look right.";
+  if (m.includes('failed to fetch') || m.includes('network')) return "We couldn't reach the server. Check your connection and try again.";
+  return message;
+};
+
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
@@ -73,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       (event, session) => {
         if (session?.user) {
           // Token refreshes and tab re-focus fire this callback with the same
-          // user — keep the existing object so data-loading effects keyed on
+          // user, so keep the existing object so data-loading effects keyed on
           // the user don't refetch (and flash their spinners) every time.
           if (session.user.id !== currentUserId) {
             currentUserId = session.user.id;
@@ -122,10 +139,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: friendlyAuthError(error.message) };
       return { success: true };
     } catch {
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Something went wrong. Try again in a moment.' };
     }
   };
 
@@ -140,11 +157,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password,
         options: { data: { name }, emailRedirectTo: window.location.origin },
       });
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: friendlyAuthError(error.message) };
       // With email confirmation enabled, signUp succeeds without a session.
       return { success: true, needsConfirmation: !data.session };
     } catch {
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Something went wrong. Try again in a moment.' };
     }
   };
 
@@ -153,21 +170,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: friendlyAuthError(error.message) };
       return { success: true };
     } catch {
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Something went wrong. Try again in a moment.' };
     }
   };
 
   const updatePassword = async (password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: friendlyAuthError(error.message) };
       setPasswordRecovery(false);
       return { success: true };
     } catch {
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Something went wrong. Try again in a moment.' };
     }
   };
 
@@ -193,9 +210,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // SECURITY DEFINER function (migration 20261006...): deletes auth.users
       // row for auth.uid(); every table cascades from it.
       const { error } = await supabase.rpc('delete_my_account');
-      if (error) return { success: false, error: error.message };
+      if (error) return { success: false, error: friendlyAuthError(error.message) };
     } catch {
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Something went wrong. Try again in a moment.' };
     }
     // The account (and so its server-side sessions) is gone; end it locally.
     await supabase.auth.signOut({ scope: 'local' });
