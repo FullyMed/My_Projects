@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   function showError(message) {
-    bookingResult.innerHTML = `<p style="color:red;"><strong>${escapeHtml(message)}</strong></p>`;
+    bookingResult.innerHTML = `<p class="form-error"><strong>${escapeHtml(message)}</strong></p>`;
   }
 
   function todayLocal() {
@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!currentUser && bookingForm) {
     popup.classList.remove("hidden");
+    document.getElementById("authPopupLoginBtn")?.focus();
     return;
   }
 

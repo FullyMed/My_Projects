@@ -38,7 +38,7 @@
 
         <header>
             <nav class="navbar">
-                <div class="logo">🐸 Three Frogs</div>
+                <a href="index.html" class="logo"><img src="Assets/Images/logo-mark.png" alt="" width="36" height="36" />Three Frogs</a>
                 <button class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false"><span></span><span></span><span></span></button>
                 <ul class="nav-links" id="navLinks"></ul>
             </nav>
@@ -70,9 +70,9 @@
             <div class="staff-hours" id="staffHours" aria-label="Tables in use per hour"></div>
             <div id="staffBookings"></div>
 
-            <div id="staffCancelPopup" class="cancel-popup hidden">
+            <div id="staffCancelPopup" class="cancel-popup hidden" role="dialog" aria-modal="true" aria-labelledby="staffCancelTitle">
                 <div class="popup-content">
-                    <h3>Cancel this booking?</h3>
+                    <h3 id="staffCancelTitle">Cancel this booking?</h3>
                     <p id="staffCancelText"></p>
                     <label for="staffCancelReason" class="visually-hidden">Reason (optional, included in the email)</label>
                     <textarea id="staffCancelReason" rows="3" maxlength="300" placeholder="Reason for the customer (optional), e.g. we're closed for a private event"></textarea>
@@ -87,7 +87,7 @@
             <p class="footer-links"><a href="Terms-of-Use.html">Terms of Use</a> · <a href="Privacy-Policy.html">Privacy Policy</a></p>
         </footer>
 
-        <button id="scrollTopBtn" title="Back to Top">⬆️</button>
+        <button id="scrollTopBtn" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
         
         <script src="Assets/JS/Notify.js"></script>
         <script src="Assets/JS/Loading.js"></script>

@@ -39,24 +39,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const email = document.getElementById("signupEmail").value;
       if (!validateEmail(email)) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>That email address doesn't look right.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>That email address doesn't look right.</strong></p>`;
         return;
       }
 
       const name = document.getElementById("signupName").value.trim().replace(/\s+/g, " ");
       if (!name) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Please enter your name.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>Please enter your name.</strong></p>`;
         return;
       }
       // Same rule as signup.php: letters (any language), spaces, ' ’ - .
       if (!/^\p{L}[\p{L}\p{M} '’.\-]*$/u.test(name)) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Names can use letters, spaces, apostrophes ('), hyphens (-) and periods (.), and have to start with a letter.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>Names can use letters, spaces, apostrophes ('), hyphens (-) and periods (.), and have to start with a letter.</strong></p>`;
         return;
       }
 
       const password = document.getElementById("signupPassword").value;
       if (password.length < 8) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>Your password needs at least 8 characters.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>Your password needs at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -91,25 +91,16 @@ document.addEventListener("DOMContentLoaded", async () => {
           signupForm.reset();
         } else {
           clearButtonLoading(submitBtn);
-          resultBox.innerHTML = `<p style="color:red;"><strong>${escapeHtml(result.error || "We couldn't create your account. Please try again.")}</strong></p>`;
+          resultBox.innerHTML = `<p class="form-error"><strong>${escapeHtml(result.error || "We couldn't create your account. Please try again.")}</strong></p>`;
         }
       } catch (err) {
         clearButtonLoading(submitBtn);
-        resultBox.innerHTML = `<p style="color:red;"><strong>We couldn't reach the server. Please try again in a moment.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>We couldn't reach the server. Please try again in a moment.</strong></p>`;
         console.error("Signup error:", err);
       }
     });
   }
 
-  // Toggle Show/Hide Password
-  const toggleBtn = document.getElementById("toggleSignupPassword");
-  const passwordInput = document.getElementById("signupPassword");
-
-  if (toggleBtn && passwordInput) {
-    toggleBtn.addEventListener("click", () => {
-      const isVisible = passwordInput.type === "text";
-      passwordInput.type = isVisible ? "password" : "text";
-      toggleBtn.textContent = isVisible ? "👁️" : "🙈";
-    });
-  }
+  // Show/hide password button (Notify.js)
+  wirePasswordToggle("toggleSignupPassword", "signupPassword");
 });

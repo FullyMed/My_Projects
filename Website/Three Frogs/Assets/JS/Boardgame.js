@@ -1982,9 +1982,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    filteredGames.forEach(game => {
+    filteredGames.forEach((game, i) => {
       const card = document.createElement("div");
       card.className = "boardgame-card fadeUp";
+      card.style.setProperty("--i", Math.min(i, 11)); // stagger order for the entrance
       card.innerHTML = `
         <img src="${game.image}" alt="${game.name}" loading="lazy" decoding="async">
         <div class="info">
@@ -2040,7 +2041,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // ================= Boardgame Page =================
   if (window.location.pathname === "/" || window.location.pathname.includes("index.html")) {
-      const maxToShow = 10;
+      // 12 fills every row at 1, 2, 3 and 4 columns (10 left an orphan card)
+      const maxToShow = 12;
       const shuffled = [...boardgames].sort(() => 0.5 - Math.random());
       const toDisplay = shuffled.slice(0, maxToShow);
       renderBoardgames(toDisplay);
@@ -2057,12 +2059,12 @@ document.addEventListener("DOMContentLoaded", () => {
               seeMoreBox.classList.remove("hidden");
             seeMoreBox.innerHTML = data.loggedIn
             ? `<a href="Collection.html" class="see-more-button">See all ${boardgames.length} games</a>`
-            : `<p style="margin-top: 20px;"><a href="Login.html" style="color: #2563eb; font-weight: bold;">Log in</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">sign up</a> to see all ${boardgames.length} games.</p>`;
+            : `<p><a href="Login.html">Log in</a> or <a href="Signup.html">sign up</a> to see all ${boardgames.length} games.</p>`;
           })
           .catch(err => {
             console.error("Error checking session in Boardgame.js:", err);
             seeMoreBox.classList.remove("hidden");
-            seeMoreBox.innerHTML = `<p style="margin-top: 20px;"><a href="Login.html" style="color: #2563eb; font-weight: bold;">Log in</a> or <a href="Signup.html" style="color: #2563eb; font-weight: bold;">sign up</a> to see all ${boardgames.length} games.</p>`;
+            seeMoreBox.innerHTML = `<p><a href="Login.html">Log in</a> or <a href="Signup.html">sign up</a> to see all ${boardgames.length} games.</p>`;
           });
         }
       }

@@ -8,7 +8,7 @@ Live site: [threefrogsboardgame.com](https://threefrogsboardgame.com)
 
 ## Before you deploy (as of 2026-10-15)
 
-None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix and improvement passes from 2026-09-29, 2026-10-15 and the writing pass after it. All of it passes the local test suite (`bash tests/run-tests.sh`, 171 checks) and a run-through in the browser.
+None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix, improvement, writing and design passes from 2026-09-29 to 2026-10-19. All of it passes the local test suite (`bash tests/run-tests.sh`, 214 checks) and a run-through in the browser at desktop and phone widths.
 
 Do these production steps in order:
 
@@ -25,6 +25,35 @@ Known gap: resetting a password doesn't log that account out on other devices.
 ---
 
 ## What changed recently
+
+### Design pass (2026-10-19, not deployed)
+
+We reviewed every page with four design guides (UI/UX Pro Max, taste-skill, Frontend Design and Emil Kowalski's design-engineering rules) and fixed what was wrong without redesigning. The colours, fonts and layout stay the same.
+
+Layout bugs fixed:
+
+- The Login, Dashboard and Staff panels were too narrow (the Dashboard was about 215px wide on desktop). They now fill their intended width.
+- On short pages the footer floated up the screen with empty space below it. It now sits at the bottom.
+- On the Collection page, the letter headings (#, A, B…) were hidden under the A to Z rail on desktop and touched the screen edge on phones. They now line up with the cards.
+- Card details (players, time, description) were bigger than the game name on the Collection page, and on desktop they stayed hidden until you hovered, leaving a blank gap. They're now always visible at the right size.
+- The category dropdown had no arrow, and on phones the search box cut off its own placeholder.
+- Jumping to a letter, or to the games section, landed under the sticky navbar.
+
+Accessibility fixes:
+
+- Gold links (like "Forgot your password?") were too faint to read: 2.4:1, where 4.5:1 is the minimum. Grey text on beige, red error text and form field edges were too faint as well. All now meet WCAG AA.
+- Keyboard users get a visible focus outline everywhere, a "Skip to content" link on the first Tab press, and a marker for the current page in the navbar.
+- The closed phone menu no longer traps keyboard focus in invisible links.
+- The password eye is now a real button that screen readers announce. Dialogs move focus to the safe choice and close with Escape.
+
+Look and feel:
+
+- The navbar shows the café's own frog logo (cut from the favicon) instead of a 🐸 emoji, and it links home. Your account link shows your avatar. Emoji icons became proper icons.
+- The home page hero has "Book a table" and "See the games" buttons, and the home page shows 12 games, so every row is full.
+- Cover photos sit on white instead of in a beige box.
+- Error messages appear in a red box. They used to show red text inside a green success box.
+- Motion is quicker and calmer: buttons press in slightly, dialogs scale in from 96%, and only the home page cards animate in. The Collection page no longer flickers while you type in the search box.
+- The test suite gained checks for these fixes (214 checks in total).
 
 ### Writing pass (after 2026-10-15, not deployed)
 
@@ -43,7 +72,7 @@ We ran the visitor-facing text and these docs through two editing guides (Humani
 - Booking limits. You can book up to 30 days ahead and hold 3 upcoming bookings at a time. All the booking numbers now live in `Assets/PHP/booking_rules.php`.
 - Names. Signup accepts apostrophes, hyphens, periods and accents (Nur'aini, Jean-Luc, José). Text that isn't valid UTF-8 now gets a clear error, where it used to get a misleading "required" message and a PHP warning.
 - No more `alert()` pop-ups. The site shows on-page toasts instead (`Assets/JS/Notify.js`), logging in sends you back to the page you came from, and the footer year updates itself.
-- A test suite in the repo. `bash tests/run-tests.sh` runs 171 end-to-end checks on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
+- A test suite in the repo. `bash tests/run-tests.sh` runs end-to-end checks (214 since the design pass) on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
 - The legal pages describe verification, the booking limits, café cancellations and staff access.
 - On this PC, XAMPP MariaDB's `mysql.db` system table was corrupt, so database permissions vanished every time MariaDB restarted. Repairing it also brought back Prambanan Batik's dev access.
 
@@ -101,7 +130,7 @@ Run the tests after any change. It's one command, and it never touches your dev 
 bash tests/run-tests.sh
 ```
 
-It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 171 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
+It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 214 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
 
 This PC's setup (2026-09-29, updated 2026-10-15):
 
@@ -120,7 +149,7 @@ This PC's setup (2026-09-29, updated 2026-10-15):
 ├── .htaccess                       HTTPS redirect, security headers and CSP, ErrorDocument 404, file lockdown
 ├── .gitignore                      Ignores db_config.php and tests/.tmp/
 ├── robots.txt                      Disallows /Assets/PHP/, /Data/, /tests/, Staff.html, Verify-email.html
-├── index.html                      Home: 10 random games, and a login prompt for the full list
+├── index.html                      Home: 12 random games, and a login prompt for the full list
 ├── Collection.html                 All games, A to Z (login required)
 ├── Booking.html                    Booking form (login required)
 ├── Dashboard.html                  Your account and bookings (login required)
@@ -182,7 +211,7 @@ This PC's setup (2026-09-29, updated 2026-10-15):
 tests/                              Blocked by tests/.htaccess; don't upload it to Hostinger
 ├── run-tests.sh                    The whole end-to-end test run in one command (throwaway database)
 ├── dev-server.sh                   Local server on :8080 that catches emails
-├── api_test.sh                     The 171 checks
+├── api_test.sh                     The 214 checks
 ├── smtp_sink.py                    Saves outgoing emails as .eml files
 ├── lib.sh / httpd.conf.template    Shared helpers and the Apache config template
 └── .tmp/                           Generated and git-ignored: configs, logs, caught emails
@@ -206,7 +235,7 @@ Every page sends a POST to `Assets/PHP/check_session.php` when it loads. The ans
 
 | Page | What a logged-out visitor sees |
 |---|---|
-| `index.html` | 10 random games and a prompt to log in for the rest |
+| `index.html` | 12 random games and a prompt to log in for the rest |
 | `Collection.html` | A redirect to `Login.html` |
 | `Booking.html` | A "please log in" popup instead of the form |
 | `Dashboard.html` | A redirect to `Login.html` |
@@ -260,7 +289,7 @@ Resetting takes two steps, and nobody can change a password without the emailed 
 
 ### Game list
 
-The 218 games are a hard-coded JavaScript array in `Boardgame.js`, not database rows. `Boardgame.js` looks at `window.location.pathname` to decide whether to run the home page logic (10 random games, shuffled from a copy of the array) or the Collection logic (every game, grouped A to Z).
+The 218 games are a hard-coded JavaScript array in `Boardgame.js`, not database rows. `Boardgame.js` looks at `window.location.pathname` to decide whether to run the home page logic (12 random games, shuffled from a copy of the array) or the Collection logic (every game, grouped A to Z).
 
 To add a game, add an object to the `boardgames` array and put its cover image in `Assets/Images/`:
 
@@ -430,11 +459,15 @@ The root `.htaccess` serves `404.html` with `ErrorDocument 404 /404.html`. Two t
 | Variable | Value | Used for |
 |---|---|---|
 | `--color-primary` | `#1a3c2e` | Navbar, headings, buttons, footer |
-| `--color-accent` | `#c9a227` | Highlights, tags, borders, hover states |
+| `--color-accent` | `#c9a227` | Highlights, tags, borders, gold on dark green |
+| `--color-accent-text` | `#8a6a10` | Gold for links and text on light backgrounds |
 | `--color-bg` | `#faf8f2` | Page background (warm cream) |
 | `--color-surface` | `#ffffff` | Cards and form panels |
 | `--color-surface-alt` | `#f3ede1` | Read-only inputs, card image backgrounds |
-| `--color-text-muted` | `#6b7280` | Secondary text |
+| `--color-text-muted` | `#66605a` | Secondary text (warm grey) |
+| `--color-input-border` | `#968a73` | Form field edges |
+| `--color-destructive-text` | `#b91c1c` | Error text |
+| `--ease-out` | `cubic-bezier(0.23, 1, 0.32, 1)` | Easing for all UI motion |
 | `--navbar-height` | `68px` (`60px` on mobile) | Offsets for sticky elements |
 | `--alphabet-nav-w` | `48px` | Width of the A to Z rail on the Collection page |
 | `--page-padding-x` | `clamp(1rem, 4vw, 3rem)` | Side margins |
@@ -466,6 +499,7 @@ Headings use Righteous and body text uses Poppins, both from Google Fonts.
 - The A to Z rail only shows on screens 769px and wider.
 - Don't use `alert()`. Use `showToast()` from `Notify.js`, or `redirectWithMessage()` when you navigate, and `escapeHtml()` for any text you put into `innerHTML`.
 - Write visitor-facing text in the café's voice: friendly, plain, "we", sentence-case headings, and no em dashes.
+- Keep contrast at WCAG AA (use `--color-accent-text` for gold text on light backgrounds), keep focus outlines visible, use SVG icons rather than emoji, and animate only `opacity` and `transform`. CLAUDE.md lists the full design rules.
 - A new page loads `Notify.js` first and `Navbar.js` last, copies the footer (legal links and `.copyright-years`), and gets added to the page list in `tests/api_test.sh`.
 
 ---

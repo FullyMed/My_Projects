@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           return `
             <div class="booking-card${cancelled ? " is-cancelled" : ""}">
               <p><strong>${escapeHtml(b.start_time)} - ${escapeHtml(b.end_time)}</strong> · ${escapeHtml(b.people)} ${Number(b.people) === 1 ? "person" : "people"}</p>
-              <p><strong>Name:</strong> ${escapeHtml(b.name)}${differentName ? ` <span style="color:var(--color-text-muted);">(account: ${escapeHtml(b.account_name)})</span>` : ""}</p>
+              <p><strong>Name:</strong> ${escapeHtml(b.name)}${differentName ? ` <span class="text-muted">(account: ${escapeHtml(b.account_name)})</span>` : ""}</p>
               <p><strong>Email:</strong> <a href="mailto:${escapeHtml(b.email)}">${escapeHtml(b.email)}</a></p>
               ${cancelled ? `<span class="status-badge">Cancelled by the café</span>` : ""}
               ${!cancelled && b.not_ended ? `<button class="cancelBtn" data-id="${escapeHtml(b.id)}">Cancel booking</button>` : ""}
@@ -126,6 +126,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     popupText.textContent = `${selected.name}, ${selected.start_time} - ${selected.end_time} (${selected.people} people). We'll email the customer, and it won't count toward their monthly cancellations.`;
     reasonInput.value = "";
     popup.classList.remove("hidden");
+    document.getElementById("staffClosePopup").focus();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !popup.classList.contains("hidden")) {
+      popup.classList.add("hidden");
+      selected = null;
+    }
   });
 
   document.getElementById("staffClosePopup").addEventListener("click", () => {

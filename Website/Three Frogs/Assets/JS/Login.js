@@ -25,14 +25,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value.trim();
 
+      // Only ever show the message for this attempt
+      resultBox.innerHTML = "";
+      errorMessage.classList.add("hidden");
+
       const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!isValidEmail) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>That email address doesn't look right.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>That email address doesn't look right.</strong></p>`;
         return;
       }
 
       if (password.length < 8) {
-        resultBox.innerHTML = `<p style="color:red;"><strong>That password is too short. Passwords have at least 8 characters.</strong></p>`;
+        resultBox.innerHTML = `<p class="form-error"><strong>That password is too short. Passwords have at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -76,15 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Toggle Show/Hide Password
-  const toggleBtn = document.getElementById("toggleLoginPassword");
-  const passwordInput = document.getElementById("loginPassword");
-
-  if (toggleBtn && passwordInput) {
-    toggleBtn.addEventListener("click", () => {
-      const isVisible = passwordInput.type === "text";
-      passwordInput.type = isVisible ? "password" : "text";
-      toggleBtn.textContent = isVisible ? "👁️" : "🙈";
-    });
-  }
+  // Show/hide password button (Notify.js)
+  wirePasswordToggle("toggleLoginPassword", "loginPassword");
 });

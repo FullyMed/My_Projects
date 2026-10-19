@@ -10,7 +10,7 @@ Live domain: `threefrogsboardgame.com`, hosted on Hostinger.
 
 ## Pending before deploy (as of 2026-10-15)
 
-Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits) and the writing pass after it. All of it passes `bash tests/run-tests.sh` (171 checks) and a browser run-through on the local database.
+Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits), the writing pass after it, and the 2026-10-19 design pass. All of it passes `bash tests/run-tests.sh` (214 checks) and a browser run-through on the local database at desktop and phone widths.
 
 Do the production steps in this order. Tick them off or delete them once they're done.
 
@@ -30,7 +30,7 @@ Known gap, not fixed: a password reset doesn't end the account's other sessions.
 - Update this file and `README.md` in the same turn as any code change, including the pending checklist above. If booking rules, emails, stored data or third-party scripts change, update section 4 of `Terms-of-Use.html` and `Privacy-Policy.html` too, so they stay true (see [Legal pages](#legal-pages)).
 - Verify for real before calling anything done. Run `bash tests/run-tests.sh` and click through the change on `bash tests/dev-server.sh` (see [Local development](#local-development)). A syntax check isn't enough. Real runs caught a blank Booking page and a login crash on 2026-09-29, and a non-UTF-8 signup bug on 2026-10-15, after code review had missed all three.
 - Never use `alert()`. Use `showToast()` from `Notify.js`, or `redirectWithMessage()` when navigating (see [Shared frontend helpers](#shared-frontend-helpers)).
-- Follow [Writing style](#writing-style) for anything a visitor or a reader of these docs will see.
+- Follow [Writing style](#writing-style) for anything a visitor or a reader of these docs will see, and [Design rules](#design-rules) for anything that changes how the site looks or behaves.
 
 ## Writing style
 
@@ -55,7 +55,7 @@ On 2026-10-15 the owner had all visitor-facing text and both docs rewritten with
 
 Set up on this PC on 2026-09-29, with test tooling added on 2026-10-15. Everything runs from Git Bash, and XAMPP's MariaDB has to be running (XAMPP Control Panel → MySQL).
 
-`bash tests/run-tests.sh` runs the whole test suite (171 checks):
+`bash tests/run-tests.sh` runs the whole test suite (214 checks):
 
 - It rebuilds a throwaway `threefrogs_test` database from `Data/schema.sql`, so it never touches dev data.
 - It starts its own Apache on port 8081 (XAMPP binaries, this folder as the document root, so `.htaccess`, the CSP and the 404 page behave as in production) and a mail catcher on port 2526.
@@ -101,7 +101,7 @@ XAMPP's PHP can't deliver email, so outside those two scripts `mail()` fails. Re
 | `Assets/PHP/db_connect.php` | Shared connection. Loads `db_config.php`, sets PHP and MySQL to Surabaya time (`Asia/Jakarta` / `+07:00`), opens MySQLi and installs a JSON exception handler (see [PHP endpoint conventions](#php-endpoint-conventions)). |
 | `Assets/PHP/booking_rules.php` | Booking constants: tables, people, hours, 30-day window, 3 upcoming, 2 cancellations a month. Every booking endpoint uses it. |
 | `Assets/PHP/*.php` | JSON endpoints; they all answer with `Content-Type: application/json` |
-| `Assets/Images/` | Game cover images in jpg, png, webp and avif |
+| `Assets/Images/` | Game cover images in jpg, png, webp and avif, plus `logo-mark.png` (the navbar logo) |
 | `Data/schema.sql` | Full schema for all 6 tables. Safe to re-run, and the single source of truth for table definitions. It only creates missing tables. |
 | `Data/migrations/*.sql` | One-time column changes for older databases such as production, named by date. Run each once, in order. |
 | `tests/` | `run-tests.sh` (full run), `dev-server.sh` (local server), `api_test.sh` (the checks), `smtp_sink.py` (mail catcher), `lib.sh`, `httpd.conf.template`. Blocked by `tests/.htaccess`. Generated files go to the git-ignored `tests/.tmp/`. |
@@ -119,7 +119,7 @@ Every page sends a POST to `Assets/PHP/check_session.php` before showing anythin
 
 ### Pages that need a login
 
-- `index.html` shows 10 random games and asks you to log in for the rest.
+- `index.html` shows 12 random games and asks you to log in for the rest.
 - `Collection.html` redirects logged-out visitors to `Login.html`.
 - `Booking.html` hides the form and shows `#authPopup` to logged-out visitors.
 - `Dashboard.html` redirects logged-out visitors to `Login.html`, and shows the verification banner to unverified users.
@@ -269,11 +269,16 @@ Both `<img>` templates in `Boardgame.js` (`renderBoardgames()` and the Collectio
 | Token | Value | Usage |
 |---|---|---|
 | `--color-primary` | `#1a3c2e` | Navbar, headings, buttons, footer |
-| `--color-accent` | `#c9a227` | Highlights, tags, borders, hover states |
+| `--color-accent` | `#c9a227` | Highlights, tags, borders, gold on the dark green areas. Never for text on light backgrounds (2.4:1). |
+| `--color-accent-text` | `#8a6a10` | Gold for links and text on light backgrounds (4.8:1 on cream) |
 | `--color-bg` | `#faf8f2` | Page background (warm cream) |
-| `--color-surface` | `#ffffff` | Cards, form panels |
-| `--color-surface-alt` | `#f3ede1` | Read-only inputs, card image background |
-| `--color-text-muted` | `#6b7280` | Secondary text |
+| `--color-surface` | `#ffffff` | Cards, form panels, the card image well (cover photos have white backgrounds) |
+| `--color-surface-alt` | `#f3ede1` | Read-only inputs, booking cards, neutral message boxes |
+| `--color-text-muted` | `#66605a` | Secondary text; warm grey, 5.3:1 or better on every light surface |
+| `--color-border` | `#e2d9c8` | Decorative card and panel edges |
+| `--color-input-border` | `#968a73` | Form field edges (3.4:1 on white, so fields are visible) |
+| `--color-destructive-text` | `#b91c1c` | Red text on pale red boxes (5.9:1); `--color-destructive` (`#dc2626`) is for borders and filled buttons |
+| `--ease-out` | `cubic-bezier(0.23, 1, 0.32, 1)` | The easing for UI motion; `--transition-fast` (150ms) and `--transition-base` (220ms) use it |
 | `--navbar-height` | `68px` desktop, `60px` mobile | `top` offset for the alphabet nav |
 | `--alphabet-nav-w` | `48px` | Width of the fixed side nav on the Collection page |
 | `--page-padding-x` | `clamp(1rem, 4vw, 3rem)` | Side margins for every section |
@@ -293,17 +298,36 @@ Headings use Righteous and body text uses Poppins. Both come from Google Fonts t
 | 1025 to 1400px | 4 |
 | 1401px or more | 5 |
 
+## Design rules
+
+On 2026-10-19 the owner had the site reviewed with the UI/UX Pro Max, taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski design-engineering skills. The brief was to improve it without a redesign: the identity (forest green, gold and cream, Righteous and Poppins, the café's frog logo) stays. Keep new work inside these rules.
+
+- Contrast is measured, not eyeballed. Text needs 4.5:1, and form field edges and focus indicators 3:1. Use the tokens above; gold text on a light background is always `--color-accent-text`.
+- Everything interactive has a visible keyboard focus. The global `:focus-visible` style draws a green outline on light backgrounds and a gold one in the navbar, footer and hero. Form fields use their green border plus gold ring instead. Don't remove outlines.
+- The first Tab on any page reaches "Skip to content" (added by `Navbar.js`). The current page's navbar link gets `aria-current="page"`.
+- No emoji as icons. Icons are inline SVG with `currentColor` (the back-to-top chevron, the password eye). Icon-only buttons need an `aria-label`. The logo is `Assets/Images/logo-mark.png`, the frog mark cut from the café's favicon with a transparent background, and the logo links home. The account link shows the user's own avatar.
+- Panels that sit straight in `<body>` (`.booking-form`, `.login-container`, `.dashboard-container`, `.about-section`, `.error-page`, `.notice-box`) need `width: calc(100% - 2rem)` as well as `max-width`. The body is a flex column, and auto margins make a flex item shrink to its content, which is why the Dashboard and Login panels used to be narrow. The footer has `margin-top: auto` so it stays at the bottom of short pages.
+- Nothing important is hover-only. Game card details are always visible; hover only adds a small lift for mouse users (`@media (hover: hover) and (pointer: fine)`).
+- Hidden UI must also leave the tab order. The phone menu closes with `visibility: hidden` and animates only `opacity` and `transform`, never `max-height`.
+- Motion follows Emil Kowalski's rules. It has a purpose; it uses `--ease-out` (never ease-in), stays under 300ms for UI and exits faster than it enters; it animates only `opacity` and `transform`; and nothing enters from `scale(0)`. Buttons press to `scale(0.97)`. Dialogs fade the backdrop and scale the panel from 0.96. Only the 12 home page cards stagger in (40ms apart); Collection cards don't animate, because they re-render on every keystroke. `prefers-reduced-motion` turns motion off.
+- Form messages use classes, not inline colours. Put errors in `<p class="form-error">` and successes in an `h3` or `.form-success`. The result boxes (`#bookingResult`, `#loginResult` and the others) tint themselves red or green with `:has()`.
+- Dialogs (`#authPopup`, `#cancelPopup`, `#staffCancelPopup`) have `role="dialog"`, `aria-modal` and a label. Opening one moves focus to the safe choice ("Keep it" or "Log in"), and Escape closes the cancel dialogs.
+- `appearance: none` removes native select arrows, so `select` draws its own chevron as a background image. Don't set the `background` shorthand on a select, or the arrow disappears; use `background-color`.
+- `scroll-padding-top` keeps anchor jumps (the A to Z rail, `#games`) clear of the sticky navbar.
+- On the Collection page, each `section[id^="letter-"]` carries the horizontal padding and the A to Z rail offset, so letter headings line up with their cards.
+
 ## Behaviour to preserve
 
 - `Navbar.js` builds every navbar `<li>` after the session check, including a "Staff" link when `user.isStaff`. Never put static `<li>` items in the HTML. Every page needs `<button class="nav-toggle" id="navToggle" ...>` and `<ul class="nav-links" id="navLinks"></ul>` inside `.navbar`.
 - `Navbar.js` opens and closes the hamburger menu by toggling `.nav-open` on `#navLinks` and `aria-expanded` on `#navToggle`. Clicking outside the menu or pressing Escape closes it.
-- `Boardgame.js` runs either the home page logic (10 random games) or the Collection logic (grouped A to Z), depending on `window.location.pathname`. Don't move or nest those branches.
+- `Boardgame.js` runs either the home page logic (12 random games, a number that fills every row at 1 to 4 columns) or the Collection logic (grouped A to Z), depending on `window.location.pathname`. Don't move or nest those branches.
 - `Collection.html` needs `<body class="page-collection">` so the CSS can add `padding-left` to the grid and search bar to clear the fixed alphabet nav. No other page has this class.
 - The alphabet nav only shows on screens 769px and wider (`display: none` below that). It's `position: fixed; left: 0; width: var(--alphabet-nav-w)`.
 - Inputs and selects stay at `font-size: 1rem` (16px) so iOS doesn't zoom in on focus. The global reset in `Boardgame.css` sets this; don't override it with anything smaller.
 - Anything interactive has `min-height: 44px` and `touch-action: manipulation`. Keep that for new controls.
 - Card `.details` and hover lifts sit in `@media (hover: hover)`, so only mouse and trackpad users get them. Touch devices show the details without hovering through `@media (hover: none)`. Do the same for new hover effects.
 - The navbar, footer, popups, toasts and the scroll-to-top button use `env(safe-area-inset-*)` to clear phone notches and home bars. Keep that on new fixed or sticky elements.
+- The edit-avatar pencil is 32px but has an invisible `::before` ring that makes its tap target 44px.
 - Avatars are stored as relative paths such as `Assets/Images/Avatars/Clam.jpg`. `signup.php` and `update_avatar.php` both check them against the allowed list.
 - The home page shuffles `[...boardgames].sort(...)`, a copy, so the source array isn't changed. The Collection page sorts with `localeCompare`. Both read the same module-level array.
 - The Booking page fills the email field from the session and makes it `readOnly`. After a successful booking, `bookingForm.reset()` runs and the script fills the email and name in again, so back-to-back bookings work.

@@ -45,13 +45,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         const response = await fetch("Assets/PHP/request_reset.php", { method: "POST", body: formData });
         const result   = await response.json();
         if (result.success) {
-          requestResult.innerHTML = `<p style="color:green;"><strong>If we have an account with that email, we've sent it a reset link. Check your inbox and spam folder.</strong></p>`;
+          requestResult.innerHTML = `<p class="form-success"><strong>If we have an account with that email, we've sent it a reset link. Check your inbox and spam folder.</strong></p>`;
           requestForm.reset();
         } else {
-          requestResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "Something went wrong. Please try again in a moment.")}</p>`;
+          requestResult.innerHTML = `<p class="form-error">${escapeHtml(result.error || "Something went wrong. Please try again in a moment.")}</p>`;
         }
       } catch (err) {
-        requestResult.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
+        requestResult.innerHTML = `<p class="form-error">We couldn't reach the server. Please try again in a moment.</p>`;
         console.error("Request reset error:", err);
       } finally {
         clearButtonLoading(submitBtn);
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const submitBtn = forgotForm.querySelector("button[type='submit']");
 
       if (password.length < 8) {
-        forgotResult.innerHTML = `<p style="color:red;"><strong>Your password needs at least 8 characters.</strong></p>`;
+        forgotResult.innerHTML = `<p class="form-error"><strong>Your password needs at least 8 characters.</strong></p>`;
         return;
       }
 
@@ -91,26 +91,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           `;
           setTimeout(() => redirectWithMessage("Login.html", "password_reset"), 1500);
         } else {
-          forgotResult.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "We couldn't reset your password. Please try again.")}</p>`;
+          forgotResult.innerHTML = `<p class="form-error">${escapeHtml(result.error || "We couldn't reset your password. Please try again.")}</p>`;
           clearButtonLoading(submitBtn);
         }
       } catch (err) {
-        forgotResult.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
+        forgotResult.innerHTML = `<p class="form-error">We couldn't reach the server. Please try again in a moment.</p>`;
         console.error("Reset password error:", err);
         clearButtonLoading(submitBtn);
       }
     });
   }
 
-  // ── Toggle password visibility ──
-  const toggleBtn   = document.getElementById("toggleForgotPassword");
-  const passwordInput = document.getElementById("newPassword");
-
-  if (toggleBtn && passwordInput) {
-    toggleBtn.addEventListener("click", () => {
-      const isPassword = passwordInput.getAttribute("type") === "password";
-      passwordInput.setAttribute("type", isPassword ? "text" : "password");
-      toggleBtn.textContent = isPassword ? "🙈" : "👁️";
-    });
-  }
+  // Show/hide password button (Notify.js)
+  wirePasswordToggle("toggleForgotPassword", "newPassword");
 });

@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (!token) {
-    show(`<p style="color:red;">This verification link is incomplete. Please open the link from your email again.</p>`);
+    show(`<p class="form-error">This verification link is incomplete. Please open the link from your email again.</p>`);
     return;
   }
 
@@ -29,12 +29,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       `);
     } else {
       show(`
-        <p style="color:red;">${escapeHtml(result.error || "This verification link didn't work.")}</p>
+        <p class="form-error">${escapeHtml(result.error || "This verification link didn't work.")}</p>
         <p><a href="Dashboard.html">Go to your Dashboard</a></p>
       `);
     }
   } catch (err) {
     console.error("Verify email error:", err);
-    show(`<p style="color:red;">We couldn't reach the server. Try the link again in a moment.</p>`);
+    show(`<p class="form-error">We couldn't reach the server. Try the link again in a moment.</p>`);
   }
 });

@@ -22,14 +22,14 @@ function wireResendVerification(button, resultEl, getCsrfToken, onVerified) {
       if (result.success && result.alreadyVerified) {
         if (onVerified) onVerified();
       } else if (result.success) {
-        resultEl.innerHTML = `<span style="color:var(--color-success);">Sent! Check your inbox (and spam folder) for the new link.</span>`;
+        resultEl.innerHTML = `<span class="form-success">Sent. Check your inbox (and spam folder) for the new link.</span>`;
       } else {
-        resultEl.innerHTML = `<span style="color:var(--color-destructive);">${escapeHtml(result.error || "We couldn't send the email.")}</span>`;
+        resultEl.innerHTML = `<span class="form-error">${escapeHtml(result.error || "We couldn't send the email.")}</span>`;
       }
     } catch (err) {
       console.error("Resend verification error:", err);
       clearButtonLoading(button);
-      resultEl.innerHTML = `<span style="color:var(--color-destructive);">We couldn't reach the server. Please try again in a moment.</span>`;
+      resultEl.innerHTML = `<span class="form-error">We couldn't reach the server. Please try again in a moment.</span>`;
     }
   });
 }

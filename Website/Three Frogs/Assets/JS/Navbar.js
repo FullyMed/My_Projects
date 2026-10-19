@@ -11,6 +11,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // "Skip to content": the first Tab stop on every page. It jumps to the
+  // first visible block after the header (pages reveal different content
+  // depending on login state, so the target is found when it's used).
+  const skipLink = document.createElement("a");
+  skipLink.href = "#";
+  skipLink.className = "skip-link";
+  skipLink.textContent = "Skip to content";
+  skipLink.addEventListener("click", e => {
+    e.preventDefault();
+    let target = document.querySelector("header")?.nextElementSibling;
+    while (target && (target.classList.contains("hidden") || target.offsetParent === null)) {
+      target = target.nextElementSibling;
+    }
+    if (!target) return;
+    if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+    target.focus();
+  });
+  document.body.prepend(skipLink);
+
   // Footer: "© 2025–<current year>" (the HTML ships a static fallback)
   const thisYear = new Date().getFullYear();
   document.querySelectorAll(".copyright-years").forEach(el => {
@@ -34,12 +53,21 @@ document.addEventListener("DOMContentLoaded", () => {
         ${data.loggedIn && data.user?.isStaff ? `<li><a href="Staff.html">Staff</a></li>` : ""}
         ${
           data.loggedIn
-            ? `<li><a href="Dashboard.html">👤 ${userName}</a></li>
+            ? `<li><a href="Dashboard.html" class="nav-account"><img class="nav-avatar" src="${escapeHtml(data.user.avatar || "Assets/Images/Avatars/Clam.jpg")}" alt="" width="26" height="26" />${userName}</a></li>
                <li><a href="#" class="logout-link">Log out</a></li>`
             : `<li><a href="Login.html">Log in</a></li>
                <li><a href="Signup.html">Sign up</a></li>`
         }
       `;
+
+      // Mark the link for the page you're on
+      const here = currentPageName() || "index.html";
+      navLinks.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href");
+        if (href === here || (href === "Dashboard.html" && here === "Dashboard.html")) {
+          a.setAttribute("aria-current", "page");
+        }
+      });
 
       // Logout handler
       const logoutLink = document.querySelector(".logout-link");

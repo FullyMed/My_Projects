@@ -75,7 +75,18 @@ for page in index Booking Collection Dashboard Login Signup About Forgot-passwor
   check   "$page.html loads Notify.js"        "Assets/JS/Notify.js"          "$HTML"
   check   "$page.html footer legal links"     "footer-links"                 "$HTML"
   check_not "$page.html has no jQuery"        "jquery"                       "$HTML"
+  check   "$page.html logo links home"        'href="index.html" class="logo"' "$HTML"
+  check   "$page.html back-to-top labelled"   'aria-label="Back to top"'     "$HTML"
+  check_not "$page.html no emoji buttons"     "⬆️"                           "$HTML"
 done
+for page in Login Signup Forgot-password; do
+  check   "$page.html password toggle is a button" 'class="toggle-password" aria-label="Show password"' "$(curl -s "$BASE/$page.html")"
+done
+CSS=$(curl -s "$BASE/Assets/CSS/Boardgame.css")
+check     "CSS: readable gold for links"     "--color-accent-text"          "$CSS"
+check     "CSS: visible input borders"       "--color-input-border"         "$CSS"
+check     "CSS: keyboard focus style"        ":focus-visible"               "$CSS"
+check_not "CSS: no max-height menu anim"     "max-height 0.35s"             "$CSS"
 
 echo "=== Signup + name rules"
 R=$(signup a 'Alice Tester' 'Alice@Example.com')

@@ -17,13 +17,16 @@
   --color-accent:        #c9a227;
   --color-accent-hover:  #b08d1f;
   --color-accent-light:  #f0e0a0;
+  --color-accent-text:   #8a6a10;  /* gold for text/links on light backgrounds: 4.8:1 on cream */
   --color-bg:            #faf8f2;
   --color-surface:       #ffffff;
   --color-surface-alt:   #f3ede1;
   --color-text:          #1c1917;
-  --color-text-muted:    #6b7280;
-  --color-border:        #e2d9c8;
+  --color-text-muted:    #66605a;  /* warm grey, 5.3:1+ on every light surface */
+  --color-border:        #e2d9c8;  /* decorative card/panel edges */
+  --color-input-border:  #968a73;  /* form field edges: 3.4:1 on white */
   --color-destructive:   #dc2626;
+  --color-destructive-text: #b91c1c;  /* red text on pale red boxes: 5.9:1 */
   --color-success:       #166534;
 
   /* Shadows */
@@ -38,9 +41,10 @@
   --radius-lg:   20px;
   --radius-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
+  /* Motion: strong ease-out for UI feedback (enter/press), never ease-in */
+  --ease-out:        cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition-base: 220ms var(--ease-out);
   --transition-slow: 400ms ease;
 
   /* Typography */
@@ -63,6 +67,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Anchor jumps (A-Z rail, #games) land below the sticky navbar */
+  scroll-padding-top: calc(var(--navbar-height) + 1rem);
   font-size: 16px;
   height: 100%;
   /* Prevent horizontal overflow without breaking position:fixed */
@@ -87,10 +93,44 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   line-height: 1.25;
   margin-top: 0;
+  text-wrap: balance;
 }
 
-a { color: var(--color-accent); text-decoration: none; }
-a:hover { color: var(--color-accent-hover); }
+p { text-wrap: pretty; }
+
+/* Links on light backgrounds use the darker gold; dark areas (navbar,
+   footer, hero) set their own brighter gold below. */
+a { color: var(--color-accent-text); text-decoration: none; }
+a:hover { color: var(--color-primary); }
+
+/* One visible focus style for keyboard users everywhere. Green on light
+   backgrounds, gold on the dark green areas. */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.navbar :focus-visible,
+footer :focus-visible,
+.hero :focus-visible {
+  outline-color: var(--color-accent);
+}
+
+/* Injected by Navbar.js: the first Tab press on any page lands here */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  z-index: 300;
+  padding: 0.7rem 1.1rem;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transform: translateY(-120%);
+  transition: transform var(--transition-fast);
+}
+.skip-link:focus { transform: translateY(0.75rem); color: var(--color-primary); }
 
 img { max-width: 100%; display: block; }
 
@@ -115,6 +155,20 @@ img { max-width: 100%; display: block; }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Small, quick entrance: cards on the home page, toasts, dialog panels */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -207,6 +261,10 @@ header {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
   font-family: var(--font-heading);
   font-size: 1.35rem;
   color: var(--color-accent);
@@ -214,6 +272,8 @@ header {
   white-space: nowrap;
   flex-shrink: 0;
 }
+.logo:hover { color: var(--color-accent); }
+.logo img { width: 36px; height: 36px; }
 
 /* ── Hamburger button (mobile only) ── */
 .nav-toggle {
@@ -286,7 +346,23 @@ header {
   background: rgba(201, 162, 39, 0.12);
 }
 
-.nav-links a.active { color: var(--color-accent); }
+/* "Your account" link: the user's own avatar instead of an icon */
+.nav-account { gap: 0.5rem; }
+.nav-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+/* Current page, set by Navbar.js */
+.nav-links a[aria-current="page"] {
+  color: var(--color-accent);
+  background: rgba(201, 162, 39, 0.12);
+}
 
 /* ----------------------------------------------------------------
    Hero
@@ -333,6 +409,29 @@ header {
   margin: 0;
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+/* Gold primary button for the dark hero (5:1 green on gold) */
+.hero .btn-gold {
+  background: var(--color-accent);
+  color: var(--color-primary);
+}
+.hero .btn-ghost {
+  background: transparent;
+  color: white;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero .btn-gold:hover { background: #d8b23a; color: var(--color-primary); }
+  .hero .btn-ghost:hover { background: rgba(255, 255, 255, 0.12); color: white; box-shadow: inset 0 0 0 1.5px white; }
+}
+
 /* ----------------------------------------------------------------
    Section Titles & Letter Headings
    ---------------------------------------------------------------- */
@@ -361,7 +460,23 @@ header {
   border-bottom: 2px solid var(--color-border);
 }
 
-section[id^="letter-"] { margin-bottom: 1.5rem; }
+/* Collection A-Z groups: the heading and its grid share one padded column,
+   so headings line up with the cards and clear the fixed A-Z rail */
+section[id^="letter-"] {
+  max-width: 1600px;
+  margin: 0 auto 1.5rem;
+  padding: 0 var(--page-padding-x);
+}
+#boardgame-list > section[id^="letter-"] .boardgame-container {
+  padding: 0.5rem 0 1rem;
+  max-width: none;
+}
+@media (min-width: 769px) {
+  .page-collection section[id^="letter-"] {
+    padding-left: calc(var(--alphabet-nav-w) + 1.5rem + var(--page-padding-x));
+    max-width: calc(1600px + var(--alphabet-nav-w));
+  }
+}
 
 /* ----------------------------------------------------------------
    Search & Filter Bar
@@ -380,11 +495,12 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
 .search-filter-bar select {
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-input-border);
   /* 16px min to prevent iOS zoom */
   font-size: 1rem;
   font-family: var(--font-body);
-  background: var(--color-surface);
+  /* background-color, not the shorthand: keeps the select's arrow image */
+  background-color: var(--color-surface);
   color: var(--color-text);
   min-width: 0;
   flex: 1;
@@ -399,8 +515,8 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
 
 .search-filter-bar input:focus,
 .search-filter-bar select:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.4);
 }
 
 /* ----------------------------------------------------------------
@@ -431,28 +547,30 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border);
   overflow: hidden;
-  animation: fadeUp 0.4s ease both;
   transition:
     transform var(--transition-base),
     box-shadow var(--transition-base),
     border-color var(--transition-base);
 }
 
-/* Hover lift for pointer devices only */
-@media (hover: hover) {
+/* Home page only: the 12 sample cards rise in once, 40ms apart (--i is set
+   by Boardgame.js). Collection cards don't animate, because they re-render
+   on every search keystroke. */
+.boardgame-card.fadeUp {
+  animation: riseIn 320ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* Small hover lift for mouse users; the details are always visible */
+@media (hover: hover) and (pointer: fine) {
   .boardgame-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(201, 162, 39, 0.4);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(201, 162, 39, 0.45);
   }
 
   .boardgame-card:hover img {
-    transform: scale(1.04);
-  }
-
-  .boardgame-card:hover .details {
-    opacity: 1;
-    transform: translateY(0);
+    transform: scale(1.03);
   }
 }
 
@@ -461,7 +579,8 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
   height: 200px;
   object-fit: contain;
   padding: 0.85rem;
-  background: var(--color-surface-alt);
+  /* White well: most cover photos have white backgrounds */
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   transition: transform var(--transition-base);
 }
@@ -485,28 +604,22 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
   line-height: 1.5;
 }
 
-/* .details hidden by default on pointer devices, visible on touch */
+/* Collection cards: players, duration and description, always shown
+   (hiding them until hover left a blank gap and hid them from keyboard
+   and touch users) */
 .boardgame-card .details {
-  padding: 0 1rem 0.85rem;
-  transition: opacity var(--transition-base), transform var(--transition-base);
+  padding: 0.25rem 1rem 0.95rem;
 }
 
-/* Hidden by default only for devices that support hover */
-@media (hover: hover) {
-  .boardgame-card .details {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+.boardgame-card .details p {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: 0.1rem 0;
+  line-height: 1.5;
 }
 
-/* Always visible on touch / no-hover devices */
-@media (hover: none) {
-  .boardgame-card .details {
-    opacity: 1;
-    transform: none;
-    padding-top: 0.25rem;
-  }
-}
+.boardgame-card .info strong,
+.boardgame-card .details strong { color: var(--color-text); font-weight: 600; }
 
 /* ----------------------------------------------------------------
    Tags
@@ -524,7 +637,7 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
   border: 1px solid rgba(201, 162, 39, 0.3);
   border-radius: var(--radius-full);
   padding: 2px 9px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
   letter-spacing: 0.01em;
@@ -538,6 +651,8 @@ section[id^="letter-"] { margin-bottom: 1.5rem; }
   margin: 0.5rem auto 3rem;
   padding: 0 1rem;
 }
+
+.see-more-box a:not(.see-more-button) { font-weight: 600; }
 
 .view-more-box {
   text-align: center;
@@ -583,28 +698,30 @@ button,
   appearance: none;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   button:hover,
   .see-more-button:hover,
   .view-more-button:hover {
     background: var(--color-primary-hover);
+    color: white;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(26, 60, 46, 0.3);
   }
 }
 
+/* Press feedback: the button visibly gives under your finger */
 button:active,
 .see-more-button:active,
 .view-more-button:active {
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.97);
   box-shadow: none;
 }
 
 button:focus-visible,
 .see-more-button:focus-visible,
 .view-more-button:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--radius-full);
 }
 
 /* ----------------------------------------------------------------
@@ -619,7 +736,7 @@ textarea {
   font-size: 1rem;
   color: var(--color-text);
   background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-input-border);
   border-radius: var(--radius-md);
   outline: none;
   box-sizing: border-box;
@@ -631,14 +748,30 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.4);
+}
+
+/* Fields show focus with the border + ring above, not the outline */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible { outline: none; }
+
+/* appearance: none removes the native arrow, so draw one */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231a3c2e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px 8px;
+  padding-right: 2.75rem !important;
+  cursor: pointer;
 }
 
 /* ----------------------------------------------------------------
    Booking Form  (Booking.html · Signup.html)
    ---------------------------------------------------------------- */
 .booking-form {
+  width: calc(100% - 2rem);
   max-width: 480px;
   margin: 2.5rem auto;
   padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
@@ -665,11 +798,9 @@ textarea:focus {
 .booking-form label {
   display: block;
   margin-top: 1rem;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-text);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .booking-form input,
@@ -696,18 +827,40 @@ textarea:focus {
   border-radius: var(--radius-md);
 }
 
-#bookingResult {
+/* Result boxes under the forms. Neutral by default; red-tinted when they
+   hold an error (.form-error) and green when they hold a success message. */
+#bookingResult,
+#signupResult,
+#loginResult,
+#forgotResult,
+#requestResult,
+#verifyResult:not(:has(.loading-state)) {
   margin-top: 1.25rem;
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: var(--color-success);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
   font-size: 0.9rem;
   line-height: 1.65;
 }
 
-#bookingResult h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+:is(#bookingResult, #signupResult, #loginResult, #forgotResult, #requestResult, #verifyResult):has(.form-error) {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+:is(#bookingResult, #signupResult, #loginResult, #forgotResult, #requestResult, #verifyResult):has(h3, .form-success) {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: var(--color-success);
+}
+
+:is(#bookingResult, #signupResult, #loginResult, #forgotResult, #requestResult, #verifyResult) p { margin: 0.25rem 0; }
+:is(#bookingResult, #signupResult, #loginResult, #forgotResult, #requestResult, #verifyResult) h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+
+.form-error { color: var(--color-destructive-text); }
+.form-success { color: var(--color-success); }
 
 /* ----------------------------------------------------------------
    Booking Cards  (Dashboard)
@@ -728,13 +881,13 @@ textarea:focus {
 
 .booking-card .cancelBtn {
   display: inline-flex;
+  color: var(--color-destructive-text);
   align-items: center;
   margin-top: 0.75rem;
   min-height: 44px;
   padding: 0.4rem 1rem;
   font-size: 0.82rem;
   background: transparent;
-  color: var(--color-destructive);
   border: 1.5px solid var(--color-destructive);
   border-radius: var(--radius-full);
 }
@@ -762,7 +915,7 @@ textarea:focus {
   font-size: 0.75rem;
   font-weight: 600;
   background: #fef2f2;
-  color: var(--color-destructive);
+  color: var(--color-destructive-text);
   border: 1px solid #fecaca;
 }
 
@@ -770,6 +923,7 @@ textarea:focus {
    Notice box  (email-verification banner on Dashboard / Booking)
    ---------------------------------------------------------------- */
 .notice-box {
+  width: calc(100% - 2rem);
   max-width: 480px;
   margin: 1.25rem auto;
   padding: 1rem 1.25rem;
@@ -822,14 +976,15 @@ textarea:focus {
   line-height: 1.5;
   box-shadow: var(--shadow-lg);
   border-left: 4px solid var(--color-accent);
-  animation: fadeUp 0.25s ease;
-  transition: opacity var(--transition-base);
+  animation: riseIn 240ms var(--ease-out);
+  /* exit is quicker than entry */
+  transition: opacity 150ms ease, transform 150ms ease;
   pointer-events: auto;
 }
 
 .toast-success { border-left-color: #4ade80; }
 .toast-error   { background: #7f1d1d; border-left-color: #fca5a5; }
-.toast-leaving { opacity: 0; }
+.toast-leaving { opacity: 0; transform: translateY(4px); }
 
 /* ----------------------------------------------------------------
    Staff page  (Staff.html)
@@ -878,7 +1033,7 @@ textarea:focus {
 
 .staff-hour strong { display: block; font-size: 0.95rem; color: var(--color-primary); }
 .staff-hour.is-full { background: #fef2f2; border-color: #fecaca; }
-.staff-hour.is-full strong { color: var(--color-destructive); }
+.staff-hour.is-full strong { color: var(--color-destructive-text); }
 
 .booking-card a { color: var(--color-primary); word-break: break-all; }
 
@@ -887,7 +1042,7 @@ textarea:focus {
   width: 100%;
   margin: 0 0 1rem;
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-input-border);
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
   resize: vertical;
@@ -897,6 +1052,7 @@ textarea:focus {
    Login Container  (Login.html)
    ---------------------------------------------------------------- */
 .login-container {
+  width: calc(100% - 2rem);
   max-width: 420px;
   /* Use smaller top margin on short viewports / keyboard-open state */
   margin: clamp(1.5rem, 6vh, 5rem) auto;
@@ -917,10 +1073,8 @@ textarea:focus {
 .login-container label {
   display: block;
   margin-top: 1rem;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .login-container input {
@@ -946,20 +1100,7 @@ textarea:focus {
   color: var(--color-text-muted);
 }
 
-.register a { color: var(--color-accent); font-weight: 600; }
-
-#signupResult,
-#loginResult,
-#forgotResult {
-  margin-top: 1.25rem;
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius-md);
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-  font-size: 0.88rem;
-  line-height: 1.65;
-}
+.register a { color: var(--color-accent-text); font-weight: 600; }
 
 /* ----------------------------------------------------------------
    Password Toggle
@@ -973,31 +1114,43 @@ textarea:focus {
   width: 100%;
 }
 
-.toggle-password {
+/* .password-wrapper prefix outranks the global button / .login-container button rules */
+.password-wrapper .toggle-password {
   position: absolute;
   top: 50%;
-  right: 0.75rem;
+  right: 0.25rem;
   transform: translateY(-50%);
-  cursor: pointer;
-  user-select: none;
-  font-size: 1rem;
-  color: var(--color-text-muted);
-  transition: color var(--transition-fast);
-  /* minimum touch target */
+  width: 44px;
   min-width: 44px;
   min-height: 44px;
+  margin: 0;
+  padding: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  cursor: pointer;
   touch-action: manipulation;
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
-
-.toggle-password:hover { color: var(--color-primary); }
+.password-wrapper .toggle-password svg { width: 20px; height: 20px; }
+.password-wrapper .toggle-password:hover {
+  background: transparent;
+  color: var(--color-primary);
+  transform: translateY(-50%);
+  box-shadow: none;
+}
+.password-wrapper .toggle-password:active { transform: translateY(-50%) scale(0.92); }
+.password-wrapper .toggle-password:focus-visible { border-radius: var(--radius-sm); outline-offset: -2px; }
 
 /* ----------------------------------------------------------------
    Dashboard
    ---------------------------------------------------------------- */
 .dashboard-container {
+  width: calc(100% - 2rem);
   max-width: 620px;
   margin: clamp(1.5rem, 4vh, 3rem) auto;
   padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
@@ -1028,7 +1181,7 @@ textarea:focus {
   min-height: 44px;
   padding: 0.6rem 1.5rem;
   background: transparent;
-  color: var(--color-destructive);
+  color: var(--color-destructive-text);
   border: 1.5px solid var(--color-destructive);
   border-radius: var(--radius-full);
   font-size: 0.88rem;
@@ -1078,6 +1231,14 @@ textarea:focus {
   box-shadow: var(--shadow-sm);
   touch-action: manipulation;
   transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+/* The pencil is 32px; this invisible ring makes the tap target 44px */
+.edit-avatar::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
 }
 
 .edit-avatar:hover {
@@ -1142,6 +1303,12 @@ input[type="radio"]:checked + .avatar-option {
   box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.45);
 }
 
+/* The radios are invisible, so show keyboard focus on the picture */
+input[type="radio"]:focus-visible + .avatar-option {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
 /* ----------------------------------------------------------------
    Popups / Modals
    ---------------------------------------------------------------- */
@@ -1156,7 +1323,7 @@ input[type="radio"]:checked + .avatar-option {
   z-index: 1000;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  animation: fadeUp 0.2s ease;
+  animation: fadeIn 180ms var(--ease-out);
   padding: 1rem;
   /* respect safe area */
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
@@ -1174,6 +1341,7 @@ input[type="radio"]:checked + .avatar-option {
   max-width: 340px;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--color-border);
+  animation: popIn 200ms var(--ease-out);
 }
 
 .popup-content h3 {
@@ -1242,6 +1410,7 @@ input[type="radio"]:checked + .avatar-option {
    About Page
    ---------------------------------------------------------------- */
 .about-section {
+  width: calc(100% - 2rem);
   padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2.5rem);
   max-width: 860px;
   margin: clamp(1.5rem, 3vw, 3rem) auto;
@@ -1271,7 +1440,9 @@ input[type="radio"]:checked + .avatar-option {
   color: var(--color-text);
   font-size: 0.93rem;
   line-height: 1.8;
+  max-width: 70ch;  /* comfortable reading line on the legal pages */
 }
+.about-section li { max-width: 70ch; }
 
 .about-section ul {
   list-style: none;
@@ -1330,6 +1501,7 @@ input[type="radio"]:checked + .avatar-option {
    404 / Error Page
    ---------------------------------------------------------------- */
 .error-page {
+  width: calc(100% - 2rem);
   padding: clamp(2rem, 6vw, 3.5rem) clamp(1.25rem, 4vw, 2.5rem);
   max-width: 640px;
   margin: clamp(2rem, 8vw, 5rem) auto;
@@ -1451,6 +1623,9 @@ input[type="radio"]:checked + .avatar-option {
   font-size: 1rem;
   cursor: pointer;
   display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   box-shadow: var(--shadow-md);
   touch-action: manipulation;
   transition: background var(--transition-fast), transform var(--transition-fast);
@@ -1465,6 +1640,7 @@ input[type="radio"]:checked + .avatar-option {
 }
 
 #scrollTopBtn:active { transform: scale(0.94); }
+#scrollTopBtn svg { width: 20px; height: 20px; }
 
 /* ----------------------------------------------------------------
    Feedback / Result Boxes
@@ -1482,7 +1658,7 @@ input[type="radio"]:checked + .avatar-option {
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: var(--radius-md);
-  color: var(--color-destructive);
+  color: var(--color-destructive-text);
   font-size: 0.88rem;
   line-height: 1.5;
 }
@@ -1491,6 +1667,8 @@ input[type="radio"]:checked + .avatar-option {
    Footer
    ---------------------------------------------------------------- */
 footer {
+  /* Pins the footer to the bottom on short pages (body is a flex column) */
+  margin-top: auto;
   background: var(--color-primary);
   padding: 1.5rem var(--page-padding-x);
   /* safe area bottom for notched phones */
@@ -1505,6 +1683,9 @@ footer {
 .footer-links {
   margin-top: 0.5rem;
 }
+
+footer a { color: var(--color-accent); }
+footer a:hover { color: #e3c25a; }
 
 .footer-links a {
   /* at least 44px touch target, without visually enlarging the small text link */
@@ -1543,8 +1724,9 @@ footer {
   .about-section { margin: 1rem; border-radius: var(--radius-md); }
 
   .search-filter-bar { gap: 0.5rem; }
+  /* Stack search and category on phones so the placeholder isn't cut off */
   .search-filter-bar input,
-  .search-filter-bar select { min-width: 0; }
+  .search-filter-bar select { min-width: 0; flex-basis: 100%; }
 }
 
 /* ── Small phone (≤ 360 px — tight screens) ── */
@@ -1568,23 +1750,36 @@ footer {
     top: var(--navbar-height);
     left: 0;
     right: 0;
-    background: rgba(26, 60, 46, 0.98);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    /* Solid: a translucent panel let the hero text ghost through the links */
+    background: var(--color-primary);
     border-bottom: 2px solid rgba(201, 162, 39, 0.25);
+    box-shadow: var(--shadow-lg);
     flex-direction: column;
     align-items: stretch;
     gap: 0;
     padding: 0.5rem 0 max(0.75rem, env(safe-area-inset-bottom, 0px));
-    /* hidden by default */
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease, padding 0.3s ease;
     z-index: 199;
+    /* Closed: invisible AND out of the tab order (visibility), animated with
+       opacity/transform only. visibility flips after the fade on close. */
+    opacity: 0;
+    transform: translateY(-6px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease,
+      visibility 0s linear 160ms;
   }
 
   .nav-links.nav-open {
-    max-height: 400px;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 220ms var(--ease-out),
+      transform 220ms var(--ease-out),
+      visibility 0s;
   }
 
   .nav-links a {
@@ -1657,3 +1852,4 @@ footer {
     margin-bottom: 1rem;
   }
 }
+.text-muted { color: var(--color-text-muted); }

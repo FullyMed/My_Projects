@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Bookings that have already started stay in "Upcoming" until they end,
     // but can no longer be cancelled (cancel_booking.php enforces the same rule).
     upcomingContainer.innerHTML = upcomingBookings.length === 0
-      ? "<p>No upcoming bookings.</p>"
+      ? `<p>No upcoming bookings. <a href="Booking.html">Book a table</a></p>`
       : upcomingBookings.map(b => bookingCard(b, new Date(`${b.date}T${b.start_time}`) > now)).join("");
 
     // Most recent first
@@ -158,6 +158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         `Cancel your booking on ${selectedBooking.date}, ${selectedBooking.start_time} - ${selectedBooking.end_time}? ` +
         `You have ${remainingCancels} of ${cancelLimit} cancellations left this month.`;
       popup.classList.remove("hidden");
+      // Start on the safe choice, so Enter or Space can't cancel by accident
+      closePopup?.focus();
     } else {
       showToast(`You've already used your ${cancelLimit} cancellations this month, so you can't cancel this one online.`, "error");
     }
@@ -189,15 +191,15 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (result.success) {
             loggedInUser.avatar = newAvatar;
             updateUserInfo();
-            avatarMsg.innerHTML = `<p style="color:green;">Avatar saved.</p>`;
+            avatarMsg.innerHTML = `<p class="form-success">Avatar saved.</p>`;
             setTimeout(() => avatarMsg.innerHTML = "", 3000);
           } else {
-            avatarMsg.innerHTML = `<p style="color:red;">${escapeHtml(result.error || "We couldn't save your avatar.")}</p>`;
+            avatarMsg.innerHTML = `<p class="form-error">${escapeHtml(result.error || "We couldn't save your avatar.")}</p>`;
           }
         } catch (err) {
           console.error("Avatar update error:", err);
           clearButtonLoading(submitBtn);
-          avatarMsg.innerHTML = `<p style="color:red;">We couldn't reach the server. Please try again in a moment.</p>`;
+          avatarMsg.innerHTML = `<p class="form-error">We couldn't reach the server. Please try again in a moment.</p>`;
         }
       }
     });
@@ -241,6 +243,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  // Escape closes the confirm dialog
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !popup.classList.contains("hidden")) {
+      popup.classList.add("hidden");
+      selectedBooking = null;
+    }
+  });
 
   if (closePopup) {
     closePopup.addEventListener("click", () => {
