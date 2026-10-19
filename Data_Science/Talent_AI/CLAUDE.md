@@ -353,6 +353,75 @@ and Stop Slop skills. Keep new text in the same style.
   ads used as test input, so they keep a job-ad voice. Changing their wording
   changes which skills `extract_skills` finds.
 
+## Design rules
+
+On 2026-10-19 the owner had the UI reviewed and fixed with the UI/UX Pro Max,
+taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski
+skills. It was a fix pass, not a redesign: same Geist type, indigo accent and
+zinc neutrals. Keep new UI to these rules.
+
+- **Theme tokens live in `app/globals.css`.** Use the Tailwind names
+  (`bg-surface`, `text-muted`, `border-border`, `border-border-strong`,
+  `text-danger`, `text-success`), never raw hex. `color-scheme: light dark`
+  is set so native controls (checkboxes, selects, number inputs, scrollbars)
+  follow dark mode. Dark mode has its own `--danger` and `--success`,
+  because the light ones fall under 4.5:1 on dark surfaces. Light `--muted` is
+  `#66666e`, not zinc-500, so muted text keeps 4.5:1 on `--surface-hover`
+  too. Every page passed a WCAG AA text-contrast audit in light and dark at
+  375px and 1280px on 2026-10-19; re-run one if you change a token.
+- **Focus**: `globals.css` gives every interactive element one visible
+  `:focus-visible` ring (2px accent outline). Don't add `outline-none` to
+  inputs or buttons; the shared `Input` / `Textarea` / `Select` don't. The
+  dashboard layout has a "Skip to main content" link to `#main`.
+- **Forms**: use `Field` (`components/ui.tsx`) for a visible label with
+  optional hint text. A placeholder is only an example value, never the
+  label. Inputs are 16px on phones (`text-base sm:text-sm`) so iOS doesn't zoom
+  the page on focus. Login and signup set `autoComplete` (email,
+  current-password, new-password, organization) so password managers work.
+- **File upload**: the input is `sr-only`, never `display:none` or `hidden`,
+  so keyboard users can reach it; the label around it shows the focus ring and
+  accepts drag-and-drop. Dropped files skip the `accept` filter, so
+  `pickFiles` checks for PDFs itself. Clear `fileInputRef` after an upload, or
+  picking the same file again fires no change event.
+- **Header** (`dashboard/layout.tsx`): two rows, brand and account on top,
+  tabs and the AI-use meter below. One row overflowed a 375px phone and
+  wrapped "Talent AI" and "Log out" even on desktop. Tabs are active by prefix
+  (`/dashboard/jobs/<id>` still highlights Jobs) and set `aria-current`.
+- **Phones**: nothing may scroll sideways at 375px. Page headers stack
+  (`flex-col sm:flex-row`), the candidates table scrolls inside its card and
+  drops the date column, and long titles and categories wrap instead of
+  pushing controls off screen. Buttons are at least 40px tall (`min-h-10`).
+- **Motion**: buttons and button-styled links scale to 0.97 on press over
+  150ms with `ease-snappy` (`cubic-bezier(0.23, 1, 0.32, 1)`, registered in
+  `@theme`), behind `motion-safe:` so reduced motion skips it. Content that
+  appears because the user asked for it (an AI review, upload results, the
+  "check your email" card) gets the `.reveal` class: a 200ms fade and 4px rise,
+  fade only under reduced motion. Nothing animates on page load or on hover
+  beyond color. Name the properties in a transition; never `transition: all`.
+- **Screen readers**: a standalone `Spinner` announces "Loading"; pass
+  `decorative` when the text beside it already says what's happening.
+  `ErrorText` and the insights error are `role="alert"`. Matching skill badges
+  add "(matches the job)" as `sr-only` text, so color isn't the only signal.
+  Upload results use SVG icons with `sr-only` "Uploaded" / "Not uploaded".
+- **Numbers**: scores, dates and usage figures use `tabular-nums`. Match
+  scores go through `percent()` on the job page, which floors at 0 (a
+  slightly negative cosine score used to read "-1.2% match").
+- **"Show top" input** keeps the typed text and clamps (5 to 25) only when
+  used. Clamping on every keystroke turned the "2" of "20" into 5.
+- **Landing page**: a small example ranking, captioned "An example ranking".
+  Its numbers are made up, so keep them plausible.
+- **Plain `<a>` links** are this app's convention (no `next/link` anywhere);
+  the new logo links follow it. They add more instances of the known
+  `no-html-link-for-pages` lint error, which is expected.
+
+To review the dashboard locally without a real login, run a throwaway mock
+API on port 8010 (where `.env.local` points `NEXT_PUBLIC_API_URL`) that
+returns sample JSON with CORS headers, and set a fake
+`sb-ljtjlvyezkyakayetlod-auth-token` cookie (`base64-` plus a base64url
+session whose `expires_at` is in the future) from a page on
+`localhost:3000`. The dashboard only reads that cookie locally. Delete the
+cookie and stop the mock afterwards. Don't use a real account for this.
+
 ## Known platform gotchas (not this project's bugs, but worth knowing)
 
 - **Vercel env var type**: `NEXT_PUBLIC_*` vars must be the **Config** type,

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/authErrors";
-import { Button, Card, ErrorText, Input, Logo } from "@/components/ui";
+import { Button, Card, ErrorText, Field, Input, Logo } from "@/components/ui";
 
 export default function SignupPage() {
   const [companyName, setCompanyName] = useState("");
@@ -46,10 +46,12 @@ export default function SignupPage() {
 
   if (awaitingConfirmation) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
-        <Logo />
-        <Card className="w-full max-w-sm p-6">
-          <div className="flex flex-col gap-1">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10 sm:px-6">
+        <a href="/" className="rounded-md" aria-label="Talent AI home">
+          <Logo />
+        </a>
+        <Card className="reveal w-full max-w-sm p-6">
+          <div role="status" className="flex flex-col gap-1">
             <h1 className="text-lg font-semibold">Check your email</h1>
             <p className="text-sm text-muted">
               We sent a confirmation link to <span className="text-foreground">{email}</span>.
@@ -68,8 +70,10 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
-      <Logo />
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10 sm:px-6">
+      <a href="/" className="rounded-md" aria-label="Talent AI home">
+        <Logo />
+      </a>
       <Card className="w-full max-w-sm p-6">
         <div className="mb-6 flex flex-col gap-1">
           <h1 className="text-lg font-semibold">Create your company account</h1>
@@ -77,28 +81,37 @@ export default function SignupPage() {
             You start on the free Trial plan: up to 10 candidates and 3 jobs.
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <Input
-            placeholder="Company name"
-            value={companyName}
-            onChange={(event) => setCompanyName(event.target.value)}
-            required
-          />
-          <Input
-            type="email"
-            placeholder="Work email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password (at least 8 characters)"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            minLength={8}
-          />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field label="Company name" htmlFor="signup-company">
+            <Input
+              id="signup-company"
+              autoComplete="organization"
+              value={companyName}
+              onChange={(event) => setCompanyName(event.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Work email" htmlFor="signup-email">
+            <Input
+              id="signup-email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Password" htmlFor="signup-password" hint="At least 8 characters.">
+            <Input
+              id="signup-password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              minLength={8}
+            />
+          </Field>
           {error && <ErrorText>{error}</ErrorText>}
           <Button type="submit" loading={loading} className="mt-1 w-full">
             {loading ? "Creating account..." : "Sign up"}

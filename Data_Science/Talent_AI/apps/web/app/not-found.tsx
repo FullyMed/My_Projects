@@ -24,7 +24,7 @@ export default function NotFound() {
       </div>
       <a
         href="/"
-        className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-hover"
+        className="inline-flex min-h-10 items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-[background-color,transform] duration-150 ease-snappy hover:bg-accent-hover motion-safe:active:scale-[0.97]"
       >
         Back to home
       </a>

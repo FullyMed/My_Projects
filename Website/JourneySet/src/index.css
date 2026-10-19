@@ -167,6 +167,12 @@
     cursor: not-allowed;
   }
 
+  /* Native controls (checkboxes, time pickers, select lists, scrollbars)
+     follow the dark themes instead of staying bright white. */
+  .dark {
+    color-scheme: dark;
+  }
+
   /* Press feedback: buttons give slightly while held down. */
   button:not(:disabled):active {
     transform: scale(0.97);

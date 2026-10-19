@@ -239,6 +239,21 @@ Brought back later:
       explain Supabase errors in plain words, and the legal pages no longer
       claim things the app doesn't do. `CLAUDE.md` has the style rules
       under "Writing style".
+- [x] **Design pass (2026-10-19).** A fix pass with the UI/UX Pro Max,
+      taste-skill, Frontend Design and Emil Kowalski skills, keeping the
+      existing look. Fixed: the dashboard header overflowed a phone screen
+      (every dashboard page scrolled sideways at 375px) and wrapped its text
+      on desktop, so it's now two rows; the resume upload couldn't be reached
+      by keyboard, and now also takes drag-and-drop; native controls stayed
+      light in dark mode; red error text failed contrast in dark mode; inputs
+      hid their focus ring and had no visible labels; the "Show top" box made
+      "20" impossible to type; scores could read "-1.2%"; the Jobs tab wasn't
+      highlighted on a job's page. Added a skip link, screen-reader
+      announcements, press feedback and a short reveal for AI reviews (both
+      respect reduced motion), and a captioned example ranking on the landing
+      page. Every page passes a WCAG AA contrast check in light and dark mode
+      at phone and desktop widths. `CLAUDE.md` has the rules under "Design
+      rules".
 - [x] **Phase F (partial): production deployment.** Vercel, Cloud Run and
       Supabase went live early, before Phases B to E, so colleagues could
       try it. Monitoring and CI/CD are still open.

@@ -113,7 +113,10 @@ Every modal (`AuthModal`, `EditTaskModal`, the `EventCalendar` event modal, the 
 
 Deleting a task, goal or event always goes through `ConfirmDialog`. It is a small destructive-action `alertdialog`, **portalled to `<body>`** at `z-[60]`, so it can open on top of the event modal without either modal's native Escape/Tab listeners seeing the other's keys. Initial focus is on **Cancel** (`data-autofocus`). `onConfirm` may be async; the dialog shows a spinner until it settles and the caller then closes it. Each feature holds a `deleting{Task,Goal,Event}` state, and the trash buttons set it instead of deleting directly. Inside the event modal, Delete also goes through `ConfirmDialog` → `deleteEventHandler` (see Key behaviours).
 
-### Print / export (`src/components/PrintView.tsx`)
+### Print / export (`src/components/PrintView.tsx`, `ExportButton.tsx`)
+
+Each page has one **Export** menu (`ExportButton`): "Print or save as PDF" opens `PrintView`, and on the planner only, "Download as text (.txt)" calls `downloadWeekAsText()` (`src/utils/exportWeekText.ts`) with that week's tasks from `getPlannerTasks`. Before 2026-10-19 the text download was a separate white button inside `WeeklyPlanner`. The menu is a real menu button: `aria-expanded`, `role="menu"`/`menuitem`, arrow keys, Escape returns focus to the button. Week-key helpers (`dateToWeekKey`, `weekKeyToMonday`) live in `src/utils/weekKey.ts` and are shared by `PrintView` and the text export.
+
 
 `PrintView` is **portalled to `<body>`** and adds `print-view-open` to `<body>` while mounted. `index.css` has `@media print { body.print-view-open > #root { display: none } }`, so only the report prints, not the sidebar, header and page underneath it. Escape closes it. Props: `view`, `weekKey` (planner: `PlannerPage` tracks it via `WeeklyPlanner`'s `onWeekChange`), and `month` (calendar: `CalendarPage` tracks it via `EventCalendar`'s `onMonthChange`, so Export prints the month you're looking at, not always the current one). `weekKeyToMonday` uses `setISOWeek` + `startOfISOWeek`. Don't go back to adding `86400000` ms per day, which lands on Sunday 23:00 across a daylight-saving change.
 
@@ -202,8 +205,9 @@ Five **fixed** themes: `light`, `dark`, `sky`, `gold`, `forest` (defined in `src
 | `xl:`+ | Desktop |
 
 **Key responsive patterns**:
-- Modals (`AuthModal`, `EventCalendar` event modal, `EditTaskModal`; the Settings reset dialog is a centred card at every size) render as **bottom sheets** on mobile (`items-end`, `rounded-t-2xl`, `sheet-enter` animation) and centred cards on `xs:+`.
-- All interactive elements have `min-h-[44px]` (Apple HIG minimum touch target).
+- Modals (`AuthModal`, `EventCalendar` event modal, `EditTaskModal`; the Settings reset dialog, `ConfirmDialog` and `DeleteAccountDialog` are centred cards at every size) render as **bottom sheets** on mobile (`items-end`, `rounded-t-2xl`, `sheet-enter`) and centred cards on `xs:+`. See Design rules for the motion.
+- Below `lg` the sidebar is a drawer: the header shows the menu button (`aria-expanded`, Escape closes the drawer and refocuses the button) and the JourneySet name. The daily quote and its refresh button only show from `sm` up, and not in compact mode.
+- Buttons have `min-h-[44px]` (Apple HIG minimum touch target); icon buttons follow the touch-target rule under Design rules.
 - `min-h-dvh` replaces `min-h-screen` everywhere, because `100vh` on iOS Safari includes the retractable URL bar.
 - `viewport-fit=cover` in `index.html` enables safe-area CSS on notched devices.
 
@@ -247,6 +251,21 @@ Testing note: the error text only appears on a real page load. Changing just the
 - **localStorage fallback**: API functions catch Supabase errors and return the cached value. Don't remove the catch blocks.
 - **Dynamic Tailwind classes**: never build class strings by interpolation (e.g. `` `gap-${n}` ``). Tailwind's scanner can't detect them at build time; use full static class names in ternaries instead.
 - **404 handling**: `NotFoundPage` (`src/components/NotFoundPage.tsx`) is used at both catch-alls in `App.tsx`: the top-level `*` route (`fullPage={true}`, renders its own nav/footer since there's no layout wrapping it) and the nested `/app/*` catch-all inside `AppLayout` (`fullPage={false}`, renders just the centered content since the sidebar/header are already provided). It reads `useAuth()` itself to point "back home" at `/app/planner` when signed in or `/` when signed out. Don't hardcode the home link.
+
+## Design rules
+
+On 2026-10-19 the owner had the UI reviewed and polished with the UI/UX Pro Max, taste (redesign-existing-projects), Frontend Design and Emil Kowalski design-engineering skills. It was a fix-up pass, not a redesign: the indigo/violet palette, themes, layout and fonts stayed. Keep new UI to these rules.
+
+- **Contrast (WCAG AA)**: body-size text needs 4.5:1. On light surfaces use `text-slate-500` or darker for secondary text, never `text-slate-400` (2.6:1); in dark mode the matching muted colour is `dark:text-slate-400`. Calendar dates outside the current month are `text-slate-500 dark:text-slate-400`, still dimmer than this month's `slate-700` / `slate-300`. The 2026-10-19 audit measured every visible text node on all four app screens in Light and Dark; only the visually hidden skip link is below 4.5:1.
+- **Touch targets**: icon buttons (edit, duplicate, delete, reset) use `h-9 w-9` (36px) with a negative margin so cards don't grow, and shrink to 28px with `[@media(pointer:fine)]:h-7 w-7` for mouse users, which keeps task titles from wrapping on desktop. The planner's complete toggle is a 36px button around a 20px circle. Other buttons keep `min-h-[44px]` (±1 goal buttons are 40×44).
+- **Focus**: `index.css` gives every element a 2px accent `:focus-visible` outline (keyboard only, never on mouse clicks); text fields keep their own ring. Don't add `outline-none` without a replacement. Both layouts have a "Skip to content" link to `#main`.
+- **Text fields** are `text-base sm:text-sm`: 16px on phones, because iOS zooms the page when you focus anything smaller.
+- **Hover** only applies on devices that can hover (`future.hoverOnlyWhenSupported` in `tailwind.config.js`), so taps don't leave buttons stuck in their hover style.
+- **Motion** (Emil Kowalski's rules): only `transform` and `opacity` animate, never `transition-all` (use `transition`, or `transition-[width]` for the goal bar). Tokens: `--ease-out: cubic-bezier(0.23,1,0.32,1)` and `--ease-drawer: cubic-bezier(0.32,0.72,0,1)`. Buttons scale to 0.97 while pressed (`button:active` in `index.css`). Dialogs slide up as sheets on phones (`.sheet-enter`, 280ms drawer curve) and fade/scale in from 0.96 on larger screens (180ms); centred dialogs use `.modal-pop`, backdrops `.backdrop-enter`, menus `.menu-enter` (grows from the top-right, where its button is). Keep UI animation under 300ms. `prefers-reduced-motion` turns off every movement but keeps colour and opacity fades.
+- **Dark themes** set `color-scheme: dark` (`.dark` in `index.css`), so checkboxes, time pickers, select lists and scrollbars aren't bright white.
+- **Icons**: lucide only, decorative ones get `aria-hidden="true"`, icon-only buttons need an `aria-label`. Edit is `Pencil` (it was a mis-imported `CreditCard` until 2026-10-19).
+- **Semantics**: no interactive element inside another (calendar day cells are clickable `div`s whose date number is the real `<button>`; event labels are `<button>`s). Toggles use `aria-pressed` (planner filters, goal "Stops at target", compact mode), the current nav item `aria-current="page"`, today's date `aria-current="date"`, goal bars `role="progressbar"` with values.
+- **Calendar layout**: the side panel sits under the grid until `xl` (it squeezed day cells to about 43px at 1024px). From `sm` up, cells show event titles; the time shows only at `2xl`, on hover and in the side panel. Phones show one coloured dot per event.
 
 ## Writing style
 

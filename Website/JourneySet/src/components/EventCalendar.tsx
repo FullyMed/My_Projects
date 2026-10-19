@@ -291,7 +291,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                         isCurrentDay
                           ? 'bg-indigo-600 text-on-accent'
                           : !isCurrentMonth
-                          ? 'text-slate-300 dark:text-slate-600'
+                          ? 'text-slate-500 dark:text-slate-400'
                           : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >

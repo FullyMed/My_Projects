@@ -105,25 +105,29 @@ export function InsightsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-danger">
+          {error}
+        </p>
+      )}
 
       {!row && !generating && (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm text-muted">No AI review for this job yet.</p>
-          <Button onClick={() => generate(false)} className="px-3 py-1.5">
+          <Button onClick={() => generate(false)} className="px-3">
             Generate insights
           </Button>
         </div>
       )}
 
       {generating && (
-        <div className="flex items-center gap-2 text-sm text-muted">
-          <Spinner className="h-4 w-4" /> Reading the resume…
+        <div role="status" className="flex items-center gap-2 text-sm text-muted">
+          <Spinner className="h-4 w-4" decorative /> Reading the resume…
         </div>
       )}
 
       {row && (
-        <div className="flex flex-col gap-4">
+        <div className="reveal flex flex-col gap-4">
           <p className="text-sm">{row.insights.summary}</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Section title="Strengths" items={row.insights.strengths} />

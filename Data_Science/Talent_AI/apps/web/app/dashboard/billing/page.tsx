@@ -104,9 +104,9 @@ export default function BillingPage() {
 
         {usage && (
           <div className="mt-5 flex flex-col gap-1.5 border-t border-border pt-4">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
               <span className="text-muted">AI use this month (resets on the 1st)</span>
-              <span className="text-muted">
+              <span className="text-muted tabular-nums">
                 {usage.tokens_used.toLocaleString()} / {usage.token_limit.toLocaleString()} tokens
               </span>
             </div>

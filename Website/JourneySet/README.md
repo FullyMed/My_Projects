@@ -9,7 +9,8 @@ A free weekly planner built with React, TypeScript and Supabase. You plan your w
 - Weekly planner: add tasks to any day, with an optional time. Tasks marked "weekly" are copied into next week when you move forward.
 - Goal tracker: set a target in any unit and press +1 as you go. A goal can stop at its target or be allowed to go past it.
 - Event calendar: a monthly view with colour-coded categories. It warns you when two events share a time.
-- Printing: print the week you're looking at, your goals or the month you're looking at, or save them as a PDF. Only the report prints, not the app around it.
+- Export menu: print the week you're looking at, your goals or the month you're looking at, or save them as a PDF. Only the report prints, not the app around it. On the planner the same menu also downloads the week as a text file.
+- Accessible on phones and keyboards: readable contrast in every theme, 16px text fields (so iPhones don't zoom), touch-sized buttons, visible keyboard focus, a skip link, and short animations that switch off when your system asks for reduced motion.
 - Five themes (Light, Dark, Sky, Gold, Forest). The browser remembers your choice and follows your system's dark mode on the first visit.
 - A compact mode that shrinks the sidebar to icons.
 - Offline copy: if Supabase can't be reached, the app shows your last-loaded data from the browser (the planner keeps each week separately). Failed saves show an error you can dismiss.
@@ -119,7 +120,7 @@ src/
 ├── constants/        # EVENT_CATEGORIES, THEMES (the 5 theme definitions), shared messages
 ├── data/             # Static quotes array
 ├── types/            # Shared TypeScript interfaces
-└── utils/            # storage.ts (localStorage), supabaseClient.ts
+└── utils/            # storage.ts (localStorage), supabaseClient.ts, weekKey.ts, exportWeekText.ts
 scripts/
 └── generate-icons.mjs  # favicons + Open Graph image (sharp + png-to-ico)
 supabase/

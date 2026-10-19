@@ -353,7 +353,7 @@ const GoalTracker: React.FC = () => {
                     </button>
                   </div>
                   {isComplete && (
-                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
                       <Check className="h-3.5 w-3.5" />
                       <span className="text-xs font-semibold">Done</span>
                     </div>

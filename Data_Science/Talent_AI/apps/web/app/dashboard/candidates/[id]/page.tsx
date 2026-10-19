@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch, errorMessage } from "@/lib/api";
-import { Badge, Button, Card, ErrorText, Spinner } from "@/components/ui";
+import { Badge, Button, Card, ErrorText, Select, Spinner } from "@/components/ui";
 import { InsightsPanel } from "@/components/insights";
 
 type CandidateDetail = {
@@ -76,16 +76,16 @@ export default function CandidateDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <a href="/dashboard/candidates" className="text-sm text-muted hover:text-foreground">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <a href="/dashboard/candidates" className="inline-block rounded-md py-1 text-sm text-muted hover:text-foreground">
             ← Back to candidates
           </a>
           <h1 className="mt-1 text-xl font-semibold tracking-tight">
             {candidate.category ?? "Uncategorized candidate"}
           </h1>
-          <p className="text-sm text-muted">
-            Uploaded {new Date(candidate.created_at).toLocaleString()}
+          <p className="text-sm text-muted tabular-nums">
+            Uploaded {new Date(candidate.created_at).toLocaleDateString()}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -121,10 +121,11 @@ export default function CandidateDetailPage() {
       <Card className="p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-medium text-muted">AI insights</h2>
-          <select
+          <Select
+            aria-label="Job to review this candidate against"
             value={selectedJobId}
             onChange={(event) => setSelectedJobId(event.target.value)}
-            className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-foreground outline-none focus:border-accent"
+            className="py-2 sm:w-auto sm:max-w-xs"
           >
             <option value="">Choose a job…</option>
             {jobs.map((job) => (
@@ -132,7 +133,7 @@ export default function CandidateDetailPage() {
                 {job.title}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <InsightsPanel candidateId={id} jobId={selectedJobId || null} />
       </Card>

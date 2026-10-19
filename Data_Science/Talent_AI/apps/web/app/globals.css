@@ -1,17 +1,31 @@
 @import "tailwindcss";
 
 :root {
+  /* Tells the browser which theme native controls (checkboxes, selects,
+     number inputs, scrollbars) should follow. Without it they stay light in
+     dark mode. */
+  color-scheme: light dark;
+
   --background: #fafafa;
   --surface: #ffffff;
   --surface-hover: #f4f4f5;
   --foreground: #18181b;
-  --muted: #71717a;
+  /* #66666e rather than zinc-500 (#71717a): it keeps 4.5:1 contrast on
+     --surface-hover too, not only on white. */
+  --muted: #66666e;
   --border: #e4e4e7;
+  --border-strong: #c4c4cc;
   --accent: #4f46e5;
   --accent-hover: #4338ca;
   --accent-foreground: #ffffff;
   --danger: #dc2626;
-  --success: #16a34a;
+  --success: #15803d;
+}
+
+/* Strong ease-out for anything that enters or responds to a press
+   (Tailwind class: ease-snappy). Tailwind's built-in ease-out is too soft. */
+@theme {
+  --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @theme inline {
@@ -21,6 +35,7 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
@@ -38,9 +53,13 @@
     --foreground: #f4f4f5;
     --muted: #a1a1aa;
     --border: #27272a;
+    --border-strong: #46464f;
     --accent: #818cf8;
     --accent-hover: #a5b4fc;
     --accent-foreground: #09090b;
+    /* The light-mode red and green fall under 4.5:1 on these dark surfaces. */
+    --danger: #f87171;
+    --success: #4ade80;
   }
 }
 
@@ -49,8 +68,45 @@ body {
   color: var(--foreground);
 }
 
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* One visible focus style for every interactive element, shown only for
+   keyboard focus. Components shouldn't override it with outline-none. */
+:where(a, button, input, select, textarea, summary, label, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Content that appears because the user asked for it (an AI review opening,
+   upload results). Short and quiet; reduced motion keeps only the fade. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.reveal {
+  animation: reveal 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation-name: reveal-fade;
   }
 }

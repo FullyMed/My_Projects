@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyAuthError } from "@/lib/authErrors";
-import { Button, Card, ErrorText, Input, Logo } from "@/components/ui";
+import { Button, Card, ErrorText, Field, Input, Logo } from "@/components/ui";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,28 +30,36 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6">
-      <Logo />
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-10 sm:px-6">
+      <a href="/" className="rounded-md" aria-label="Talent AI home">
+        <Logo />
+      </a>
       <Card className="w-full max-w-sm p-6">
         <div className="mb-6 flex flex-col gap-1">
           <h1 className="text-lg font-semibold">Log in</h1>
           <p className="text-sm text-muted">Good to see you again.</p>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <Input
-            type="email"
-            placeholder="Work email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field label="Work email" htmlFor="login-email">
+            <Input
+              id="login-email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Password" htmlFor="login-password">
+            <Input
+              id="login-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+          </Field>
           {error && <ErrorText>{error}</ErrorText>}
           <Button type="submit" loading={loading} className="mt-1 w-full">
             {loading ? "Logging in..." : "Log in"}

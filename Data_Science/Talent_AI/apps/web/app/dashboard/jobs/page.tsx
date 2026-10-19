@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, errorMessage } from "@/lib/api";
-import { Button, Card, EmptyState, ErrorText, Input, Spinner, Textarea } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorText, Field, Input, Spinner, Textarea } from "@/components/ui";
 import { SAMPLE_JDS } from "@/lib/sampleJds";
 
 const PAGE_SIZE = 20;
@@ -72,7 +72,7 @@ export default function JobsPage() {
       </div>
 
       <Card className="p-5">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
             <span>Try a sample:</span>
             {SAMPLE_JDS.map((jd) => (
@@ -83,34 +83,43 @@ export default function JobsPage() {
                   setTitle(jd.title);
                   setRawText(jd.text);
                 }}
-                className="rounded-md border border-border px-2 py-1 font-medium text-foreground transition-colors hover:bg-surface-hover"
+                className="min-h-8 rounded-md border border-border px-2.5 py-1 font-medium text-foreground transition-[background-color,transform] duration-150 ease-snappy hover:bg-surface-hover motion-safe:active:scale-[0.97]"
               >
                 {jd.label}
               </button>
             ))}
           </div>
-          <Input
-            placeholder="Job title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            required
-          />
-          <Textarea
-            className="min-h-40"
-            placeholder="Paste the job description here"
-            value={rawText}
-            onChange={(event) => setRawText(event.target.value)}
-            required
-          />
-          <Input
-            placeholder="Extra required skills, separated by commas (optional)"
-            value={requiredSkills}
-            onChange={(event) => setRequiredSkills(event.target.value)}
-          />
-          <p className="text-xs text-muted">
-            We pick most skills out of the description for you. Add any we might miss, like
-            python or aws.
-          </p>
+          <Field label="Job title" htmlFor="job-title">
+            <Input
+              id="job-title"
+              placeholder="Backend Engineer"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+            />
+          </Field>
+          <Field label="Job description" htmlFor="job-description">
+            <Textarea
+              id="job-description"
+              className="min-h-40"
+              placeholder="Paste the job description here"
+              value={rawText}
+              onChange={(event) => setRawText(event.target.value)}
+              required
+            />
+          </Field>
+          <Field
+            label="Extra required skills (optional)"
+            htmlFor="job-skills"
+            hint="We pick most skills out of the description for you. Add any we might miss, separated by commas."
+          >
+            <Input
+              id="job-skills"
+              placeholder="python, aws"
+              value={requiredSkills}
+              onChange={(event) => setRequiredSkills(event.target.value)}
+            />
+          </Field>
           <Button type="submit" loading={submitting} className="w-fit">
             {submitting ? "Ranking..." : "Rank candidates"}
           </Button>
@@ -134,11 +143,11 @@ export default function JobsPage() {
           <>
             <div className="flex flex-col gap-2">
               {jobs.map((job) => (
-                <a key={job.id} href={`/dashboard/jobs/${job.id}`}>
+                <a key={job.id} href={`/dashboard/jobs/${job.id}`} className="rounded-xl">
                   <Card className="p-4 transition-colors hover:bg-surface-hover">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="font-medium">{job.title}</span>
-                      <span className="shrink-0 text-xs text-muted">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="min-w-0 font-medium">{job.title}</span>
+                      <span className="shrink-0 pt-0.5 text-xs text-muted tabular-nums">
                         {new Date(job.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -147,6 +156,7 @@ export default function JobsPage() {
                 </a>
               ))}
             </div>
+            {(offset > 0 || jobs.length === PAGE_SIZE) && (
             <div className="flex items-center justify-between">
               <Button
                 variant="secondary"
@@ -163,6 +173,7 @@ export default function JobsPage() {
                 Next
               </Button>
             </div>
+            )}
           </>
         )}
       </div>

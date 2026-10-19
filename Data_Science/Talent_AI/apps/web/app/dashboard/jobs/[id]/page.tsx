@@ -25,6 +25,8 @@ type MatchResult = {
 type SkillGap = { skill: string; missing_fraction: number };
 type Method = "semantic" | "tfidf" | "compare";
 
+/** Skills that match the job's required skills are highlighted. The color
+ * isn't the only signal: screen readers hear "matches the job" too. */
 function SkillBadges({ skills, required }: { skills: string[]; required: string[] }) {
   const req = new Set(required);
   return (
@@ -32,11 +34,19 @@ function SkillBadges({ skills, required }: { skills: string[]; required: string[
       {skills.slice(0, 8).map((skill) => (
         <Badge key={skill} tone={req.has(skill) ? "accent" : "default"}>
           {skill}
+          {req.has(skill) && <span className="sr-only"> (matches the job)</span>}
         </Badge>
       ))}
     </div>
   );
 }
+
+// A slightly negative cosine score would otherwise read "-1.2% match".
+function percent(score: number) {
+  return Math.max(0, score * 100).toFixed(1);
+}
+
+const clampTopK = (value: string) => Math.max(5, Math.min(25, Number(value) || 10));
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +55,10 @@ export default function JobDetailPage() {
   const [tfidfResults, setTfidfResults] = useState<MatchResult[] | null>(null);
   const [skillGap, setSkillGap] = useState<SkillGap[] | null>(null);
   const [method, setMethod] = useState<Method>("semantic");
-  const [topK, setTopK] = useState(10);
+  // Kept as typed text and clamped only when used: clamping on every keystroke
+  // turned the "2" of "20" into 5 before the "0" arrived.
+  const [topKText, setTopKText] = useState("10");
+  const topK = clampTopK(topKText);
   const [loading, setLoading] = useState(true);
   const [ranking, setRanking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,29 +173,29 @@ export default function JobDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <a href="/dashboard/jobs" className="text-sm text-muted hover:text-foreground">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <a href="/dashboard/jobs" className="inline-block rounded-md py-1 text-sm text-muted hover:text-foreground">
             ← Back to jobs
           </a>
           <h1 className="mt-1 text-xl font-semibold tracking-tight">{job.title}</h1>
-          <p className="text-sm text-muted">
-            Created {new Date(job.created_at).toLocaleString()}
+          <p className="text-sm text-muted tabular-nums">
+            Created {new Date(job.created_at).toLocaleDateString()}
           </p>
         </div>
         {method === "semantic" && (
           <div className="flex shrink-0 items-center gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-muted">
+            <label className="flex items-center gap-2 text-sm text-muted">
               Show top
               <input
                 type="number"
+                inputMode="numeric"
                 min={5}
                 max={25}
-                value={topK}
-                onChange={(e) =>
-                  setTopK(Math.max(5, Math.min(25, Number(e.target.value) || 10)))
-                }
-                className="w-14 rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground outline-none focus:border-accent"
+                value={topKText}
+                onChange={(e) => setTopKText(e.target.value)}
+                onBlur={() => setTopKText(String(topK))}
+                className="h-10 w-16 rounded-lg border border-border bg-surface px-2.5 text-base text-foreground tabular-nums transition-colors focus:border-accent sm:text-sm"
               />
             </label>
             <Button loading={ranking} onClick={handleRerank}>
@@ -222,13 +235,14 @@ export default function JobDetailPage() {
       {error && <ErrorText>{error}</ErrorText>}
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-lg border border-border p-0.5">
+        <div role="group" aria-label="Ranking method" className="inline-flex rounded-lg border border-border p-0.5">
           {(["semantic", "tfidf", "compare"] as Method[]).map((m) => (
             <Button
               key={m}
               variant={method === m ? "secondary" : "ghost"}
+              aria-pressed={method === m}
               onClick={() => selectMethod(m)}
-              className="px-3 py-1.5"
+              className="min-h-9 px-3 py-1.5"
             >
               {m === "semantic" ? "Semantic" : m === "tfidf" ? "Keyword" : "Compare"}
             </Button>
@@ -267,9 +281,7 @@ export default function JobDetailPage() {
                     >
                       {result.category ?? "Uncategorized"}
                     </a>
-                    <span className="ml-2 text-xs text-muted">
-                      {(result.score * 100).toFixed(1)}%
-                    </span>
+                    <span className="ml-2 text-xs text-muted tabular-nums">{percent(result.score)}%</span>
                     <SkillBadges skills={result.skills} required={job.required_skills} />
                   </div>
                 </Card>
@@ -290,20 +302,21 @@ export default function JobDetailPage() {
         <div className="flex flex-col gap-2">
           {displayed.map((result) => (
             <Card key={result.candidate_id} className="flex flex-col gap-3 p-4">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
                   {result.rank}
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <div className="flex items-center gap-2">
+                {/* basis-48 lets the AI button drop to its own line on a phone */}
+                <div className="flex min-w-0 flex-1 basis-48 flex-col gap-1.5">
+                  <div className="flex items-baseline justify-between gap-3">
                     <a
                       href={`/dashboard/candidates/${result.candidate_id}`}
-                      className="font-medium hover:text-accent"
+                      className="min-w-0 font-medium hover:text-accent"
                     >
                       {result.category ?? "Uncategorized"}
                     </a>
-                    <span className="text-xs text-muted">
-                      {(result.score * 100).toFixed(1)}% match
+                    <span className="shrink-0 text-xs text-muted tabular-nums">
+                      {percent(result.score)}% match
                     </span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
@@ -318,14 +331,15 @@ export default function JobDetailPage() {
                   <Button
                     variant="ghost"
                     onClick={() => toggleInsights(result.candidate_id)}
-                    className="shrink-0 px-2.5 py-1.5 text-xs"
+                    aria-expanded={openInsights.has(result.candidate_id)}
+                    className="ml-12 shrink-0 px-3 text-xs sm:ml-0"
                   >
                     {openInsights.has(result.candidate_id) ? "Hide insights" : "AI insights"}
                   </Button>
                 )}
               </div>
               {method === "semantic" && openInsights.has(result.candidate_id) && (
-                <div className="border-t border-border pt-3">
+                <div className="reveal border-t border-border pt-3">
                   <InsightsPanel candidateId={result.candidate_id} jobId={id} />
                 </div>
               )}
@@ -345,9 +359,7 @@ export default function JobDetailPage() {
               <div key={skill} className="flex flex-col gap-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium">{skill}</span>
-                  <span className="text-muted">
-                    {(missing_fraction * 100).toFixed(0)}% missing
-                  </span>
+                  <span className="text-muted tabular-nums">{(missing_fraction * 100).toFixed(0)}% missing</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-hover">
                   <div

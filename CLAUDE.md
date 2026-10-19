@@ -76,14 +76,26 @@ Then run `claude` to start Claude Code in that project.
   legal pages and both docs through the Humanizer and Stop Slop skills
   (plain, friendly voice for recruiters; pages now show the server's error
   sentence instead of raw JSON; rules under "Writing style" in its
-  `CLAUDE.md`). Tests, tsc and a local browser check pass. It's uncommitted,
-  for the owner to review, and the backend part needs a Cloud Run redeploy.
+  `CLAUDE.md`). Tests, tsc and a local browser check pass. It's committed
+  (`ac936b9`), but as of 2026-10-19 the live API still returned the old
+  messages, so the backend part still needs a Cloud Run redeploy.
+  A 2026-10-19 design pass (UI/UX Pro Max, taste-skill
+  redesign-existing-projects, Frontend Design and Emil Kowalski skills; fixes,
+  not a redesign) fixed a header that made every dashboard page scroll
+  sideways on phones, a keyboard-unreachable resume upload (now also
+  drag-and-drop), light native controls and failing red text in dark mode,
+  hidden focus rings, placeholder-only labels, an un-typeable "Show top" box
+  and "-1.2%" scores; added a skip link, screen-reader announcements, press
+  and reveal motion with reduced-motion support, and an example ranking on
+  the landing page (rules under "Design rules" in its `CLAUDE.md`). Every page
+  passes a WCAG AA contrast audit in light and dark; tsc and `next build`
+  pass. Frontend only, uncommitted, for the owner to review.
 - **Run:** `apps/api`: `uvicorn app.main:app --reload --port 8010` · `apps/web`: `npm run dev`
 
 ### Website / JourneySet
 - **Type:** React 18 + TypeScript + Supabase SPA
 - **Purpose:** Personal productivity planner (weekly tasks, goal tracker, event calendar)
-- **Key traits:** Supabase auth + RLS, localStorage offline fallback, 5 themes, Tailwind CSS. Live at https://journeyset.vercel.app/. Vercel auto-deploys on push to `main` (verified 2026-09-30). The Supabase project is free tier and **pauses after ~1 week idle**, which breaks sign-in; if login fails everywhere, restore it first. A 2026-09-30 fix pass is committed, pushed and deployed. A 2026-10-06 improvement pass (password reset, self-serve account deletion, delete confirmations, OG preview image, code-splitting) is committed and deployed, with its DB migration applied. Both passes were browser-verified end to end on 2026-10-06 (owner signs in; Claude drives Chrome via the Claude in Chrome extension). Custom SMTP and Auth URLs are set. A 2026-10-16 writing pass ran all user-facing text, the legal pages, the preview card and both docs through the Humanizer and Stop Slop skills (plain, friendly voice; no false claims; rules under "Writing style" in its `CLAUDE.md`). Build and lint pass; it's uncommitted, for the owner to review. See "Known gaps" in its `CLAUDE.md`.
+- **Key traits:** Supabase auth + RLS, localStorage offline fallback, 5 themes, Tailwind CSS. Live at https://journeyset.vercel.app/. Vercel auto-deploys on push to `main` (verified 2026-09-30). The Supabase project is free tier and **pauses after ~1 week idle**, which breaks sign-in; if login fails everywhere, restore it first. A 2026-09-30 fix pass is committed, pushed and deployed. A 2026-10-06 improvement pass (password reset, self-serve account deletion, delete confirmations, OG preview image, code-splitting) is committed and deployed, with its DB migration applied. Both passes were browser-verified end to end on 2026-10-06 (owner signs in; Claude drives Chrome via the Claude in Chrome extension). Custom SMTP and Auth URLs are set. A 2026-10-16 writing pass ran all user-facing text, the legal pages, the preview card and both docs through the Humanizer and Stop Slop skills (plain, friendly voice; no false claims; rules under "Writing style" in its `CLAUDE.md`). The writing pass is committed. A 2026-10-19 design pass (UI/UX Pro Max, taste redesign-existing-projects, Frontend Design and Emil Kowalski skills; fixes, not a redesign) fixed a mis-imported credit-card Edit icon, a cut-off Repeat dropdown, unreadable calendar event labels, nested buttons, small touch targets, 2.6:1 grey text, iOS input zoom and a stray header button; merged the two export buttons into one Export menu; and added keyboard focus, skip links, short press/dialog motion with reduced-motion support (rules under "Design rules" in its `CLAUDE.md`). Every app screen passes a WCAG AA contrast audit in Light and Dark; build and lint pass. Most of it is committed by the owner; the last contrast and dark-control fixes and the docs are uncommitted. See "Known gaps" in its `CLAUDE.md`.
 - **Run:** `npm run dev` (`npm run build` type-checks first) · `npm run icons` regenerates favicons + OG image
 
 ### Website / Prambanan Batik
