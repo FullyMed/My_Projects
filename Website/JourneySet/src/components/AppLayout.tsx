@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Calendar,
@@ -29,6 +29,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { theme, setTheme, themes } = useTheme();
   const { isCompact, toggleCompact } = useCompactMode();
   const location = useLocation();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Phone sidebar: Escape closes it and puts focus back on the menu button.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSidebarOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [sidebarOpen]);
 
   const currentTheme = themes.find((t) => t.id === theme);
   const cycleTheme = () => {
@@ -50,17 +64,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:px-4 focus:py-2.5 focus:rounded-lg focus:bg-white focus:text-slate-900 focus:shadow-card-hover"
+      >
+        Skip to content
+      </a>
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden z-40"
+          className="backdrop-enter fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden z-40"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* ── Sidebar ──────────────────────────────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl lg:shadow-none transform transition-transform duration-300 ease-in-out lg:translate-x-0 z-50 flex flex-col ${sidebarWidth} ${
+        id="app-sidebar"
+        aria-label="Main"
+        className={`fixed inset-y-0 left-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl lg:shadow-none transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:translate-x-0 z-50 flex flex-col ${sidebarWidth} ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -80,7 +104,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {!isCompact && (
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 cursor-pointer"
+              aria-label="Close menu"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -116,7 +141,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center rounded-lg transition-all duration-150 cursor-pointer min-h-[44px] ${
+                    aria-current={active ? 'page' : undefined}
+                    aria-label={isCompact ? item.name : undefined}
+                    className={`flex items-center rounded-lg transition duration-150 cursor-pointer min-h-[44px] ${
                       isCompact ? 'px-2 justify-center' : 'px-3 space-x-3'
                     } ${
                       active
@@ -155,7 +182,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </button>
           ) : (
             <div className="px-3 py-1.5">
-              <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1.5">
+              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">
                 Theme
               </p>
               <div className="flex items-center gap-1">
@@ -187,6 +214,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <button
             onClick={toggleCompact}
             title={`Toggle ${isCompact ? 'normal' : 'compact'} mode`}
+            aria-label={isCompact ? 'Turn off compact mode' : undefined}
+            aria-pressed={isCompact}
             className={`w-full flex items-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer min-h-[44px] ${
               isCompact ? 'px-2 justify-center' : 'px-3 space-x-3'
             }`}
@@ -201,7 +230,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
           <button
             onClick={logout}
-            className={`w-full flex items-center rounded-lg text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer min-h-[44px] ${
+            aria-label={isCompact ? 'Sign out' : undefined}
+            className={`w-full flex items-center rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer min-h-[44px] ${
               isCompact ? 'px-2 justify-center' : 'px-3 space-x-3'
             }`}
           >
@@ -218,19 +248,29 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <div className={`flex items-center gap-3 ${isCompact ? 'px-4 py-3' : 'px-4 xs:px-6 py-3.5'}`}>
             {/* Mobile hamburger */}
             <button
+              ref={menuButtonRef}
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 cursor-pointer"
-              aria-label="Open sidebar"
+              className="lg:hidden -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-300 cursor-pointer"
+              aria-label="Open menu"
+              aria-expanded={sidebarOpen}
+              aria-controls="app-sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
+            {/* Phones and tablets: the sidebar is hidden, so name the app here */}
+            <Link to="/app/planner" className="lg:hidden flex items-center gap-2 min-w-0">
+              <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                <Compass className="h-3.5 w-3.5 text-on-accent" aria-hidden="true" />
+              </span>
+              <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">JourneySet</span>
+            </Link>
             <div className="flex-1" />
             <QuoteDisplay compact={isCompact} />
           </div>
         </header>
 
         {/* Page content */}
-        <main className={`flex-1 pb-safe ${isCompact ? 'p-3 xs:p-4' : 'p-4 xs:p-5 sm:p-6 lg:p-8'}`}>
+        <main id="main" tabIndex={-1} className={`flex-1 pb-safe focus:outline-none ${isCompact ? 'p-3 xs:p-4' : 'p-4 xs:p-5 sm:p-6 lg:p-8'}`}>
           {children}
         </main>
       </div>

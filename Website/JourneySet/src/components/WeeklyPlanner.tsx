@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Clock, Check, Trash2, CreditCard as Edit3, Download, Copy, ChevronLeft, ChevronRight, Filter, Loader2 } from 'lucide-react';
+import { Plus, Clock, Check, Trash2, Pencil, Copy, ChevronLeft, ChevronRight, Filter, Loader2 } from 'lucide-react';
 import { PlannerTask } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -203,50 +203,11 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
     }
   };
 
-  const exportTasks = () => {
-    const currentWeekTasks = tasks.filter(task => task.weekKey === currentWeekKey);
-    const weekData = days.map(day => ({
-      day,
-      tasks: currentWeekTasks
-        .filter(task => task.dayKey === day)
-        .sort((a, b) => {
-          if (a.time && b.time) return a.time.localeCompare(b.time);
-          if (a.time) return -1;
-          if (b.time) return 1;
-          return 0;
-        }),
-    }));
-
-    const content = weekData
-      .map(({ day, tasks }) => {
-        const taskList = tasks
-          .map(
-            task =>
-              `  ${task.completed ? '✓' : '○'} ${task.title}${task.time ? ` (${task.time})` : ''}${task.recurring === 'weekly' ? ' [weekly]' : ''}`
-          )
-          .join('\n');
-        return `${day}:\n${taskList || '  No tasks'}`;
-      })
-      .join('\n\n');
-
-    const blob = new Blob(
-      [`Weekly Plan - ${format(currentWeek, 'MMMM dd, yyyy')} (Week ${currentWeekKey.split('-')[1]})\n\n${content}`],
-      { type: 'text/plain' }
-    );
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `weekly-plan-${currentWeekKey}.txt`;
-    a.click();
-    // Revoking synchronously can cancel the download in some browsers.
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
   const getDayDate = (dayIndex: number) => addDays(currentWeek, dayIndex);
   const weekTaskCount = tasks.filter(task => task.weekKey === currentWeekKey).length;
 
   const inputClass =
-    'w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors';
+    'w-full px-3.5 py-2.5 text-base sm:text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors';
 
   return (
     <div className="space-y-5">
@@ -279,14 +240,6 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
-        <button
-          onClick={exportTasks}
-          className="inline-flex items-center gap-2 px-3 xs:px-4 min-h-[44px] text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-100 transition-colors cursor-pointer flex-shrink-0"
-        >
-          <Download className="h-4 w-4" />
-          <span className="hidden xs:inline">Download as text</span>
-          <span className="xs:hidden">Download</span>
-        </button>
       </div>
 
       <ErrorBanner message={error} onDismiss={() => setError(null)} />
@@ -297,6 +250,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           <button
             key={filterOption}
             onClick={() => setFilter(filterOption)}
+            aria-pressed={filter === filterOption}
             className={`inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg text-xs font-medium transition-colors capitalize cursor-pointer whitespace-nowrap flex-shrink-0 ${
               filter === filterOption
                 ? 'bg-indigo-600 text-on-accent'
@@ -313,7 +267,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
       <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card ${isCompact ? 'p-4' : 'p-5'}`}>
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Add a task</h3>
         {/* Mobile: stacked single column; md+: 5-column grid */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-6 gap-3">
           <input
             type="text"
             value={newTask}
@@ -338,7 +292,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
             onChange={e => setSelectedTime(e.target.value)}
             className={inputClass}
           />
-          <div className="flex gap-2 xs:col-span-2 md:col-span-1">
+          <div className="flex gap-2 xs:col-span-2 md:col-span-2">
             <select
               value={selectedRecurring}
               onChange={e => setSelectedRecurring(e.target.value as 'none' | 'weekly')}
@@ -351,7 +305,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
               onClick={addTask}
               disabled={!newTask.trim() || !selectedDay || adding}
               aria-label="Add task"
-              className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+              className="inline-flex items-center justify-center w-[48px] flex-shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
               {adding ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
             </button>
@@ -375,7 +329,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
           return (
             <div
               key={day}
-              className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-200 ${
+              className={`bg-white dark:bg-slate-900 rounded-2xl border transition duration-200 ${
                 isCurrentDay
                   ? 'border-indigo-300 dark:border-indigo-700 shadow-card'
                   : 'border-slate-200 dark:border-slate-800'
@@ -386,7 +340,7 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                   <h3 className={`font-semibold text-sm ${isCurrentDay ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-white'}`}>
                     {day}
                   </h3>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {format(dayDate, 'MMM d')}
                   </p>
                 </div>
@@ -403,29 +357,34 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                 {dayTasks.map(task => (
                   <div
                     key={task.id}
-                    className={`p-3 rounded-xl border transition-all duration-150 ${
+                    className={`p-3 rounded-xl border transition duration-150 ${
                       task.completed
                         ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50'
                         : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:border-indigo-200 dark:hover:border-indigo-800/50'
                     }`}
                   >
-                    <div className="flex items-start gap-2.5">
+                    <div className="flex items-start gap-3">
+                      {/* 36px hit area around a 20px circle; -m-2 keeps the card layout unchanged */}
                       <button
                         onClick={() => toggleTask(task)}
                         aria-label={task.completed ? 'Mark as not completed' : 'Mark as completed'}
-                        className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 cursor-pointer ${
-                          task.completed
-                            ? 'bg-emerald-500 border-emerald-500'
-                            : 'border-slate-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500'
-                        }`}
+                        className="group -m-2 h-9 w-9 flex-shrink-0 flex items-center justify-center rounded-full cursor-pointer"
                       >
-                        {task.completed && <Check className="h-3 w-3 text-white" />}
+                        <span
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-150 ${
+                            task.completed
+                              ? 'bg-emerald-500 border-emerald-500'
+                              : 'border-slate-400 dark:border-slate-500 group-hover:border-indigo-500 dark:group-hover:border-indigo-400'
+                          }`}
+                        >
+                          {task.completed && <Check className="h-3 w-3 text-white" aria-hidden="true" />}
+                        </span>
                       </button>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <p className={`text-sm leading-snug break-words min-w-0 ${
                             task.completed
-                              ? 'text-slate-400 dark:text-slate-500 line-through'
+                              ? 'text-slate-500 dark:text-slate-400 line-through'
                               : 'text-slate-800 dark:text-slate-200'
                           }`}>
                             {task.title}
@@ -439,41 +398,41 @@ const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({ onWeekChange }) => {
                         {task.time && (
                           <div className="flex items-center gap-1 mt-1">
                             <Clock className="h-3 w-3 text-slate-400" />
-                            <span className="text-[11px] text-slate-400 dark:text-slate-500">{task.time}</span>
+                            <span className="text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{task.time}</span>
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-0.5 flex-shrink-0">
+                      <div className="flex flex-shrink-0 -mr-1.5">
                         <button
                           onClick={() => setEditingTaskData(task)}
-                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                          className="inline-flex h-9 w-9 -my-2 [@media(pointer:fine)]:h-7 [@media(pointer:fine)]:w-7 [@media(pointer:fine)]:-my-1 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition-colors cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
                           title="Edit"
                           aria-label="Edit task"
                         >
-                          <Edit3 className="h-3.5 w-3.5" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => duplicateTask(task)}
-                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-sky-500 dark:hover:text-sky-400 transition-colors cursor-pointer"
+                          className="inline-flex h-9 w-9 -my-2 [@media(pointer:fine)]:h-7 [@media(pointer:fine)]:w-7 [@media(pointer:fine)]:-my-1 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition-colors cursor-pointer hover:text-sky-600 dark:hover:text-sky-400"
                           title="Duplicate"
                           aria-label="Duplicate task"
                         >
-                          <Copy className="h-3.5 w-3.5" />
+                          <Copy className="h-4 w-4" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => setDeletingTask(task)}
-                          className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                          className="inline-flex h-9 w-9 -my-2 [@media(pointer:fine)]:h-7 [@media(pointer:fine)]:w-7 [@media(pointer:fine)]:-my-1 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 transition-colors cursor-pointer hover:text-rose-600 dark:hover:text-rose-400"
                           title="Delete"
                           aria-label="Delete task"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
                   </div>
                 ))}
                 {dayTasks.length === 0 && (
-                  <p className="text-center text-slate-400 dark:text-slate-600 text-xs py-6">
+                  <p className="text-center text-slate-500 dark:text-slate-400 text-xs py-6">
                     No tasks
                   </p>
                 )}

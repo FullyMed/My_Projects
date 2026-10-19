@@ -48,7 +48,7 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   const inputClass =
-    'w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors text-sm min-h-[48px]';
+    'w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors text-base sm:text-sm min-h-[48px]';
 
   return (
     <div className="min-h-dvh bg-slate-50 dark:bg-slate-950 transition-colors duration-300 flex flex-col">
@@ -102,7 +102,7 @@ const ResetPasswordPage: React.FC = () => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-0 top-0 bottom-0 min-w-[48px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
+                      className="absolute right-0 top-0 bottom-0 min-w-[48px] flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -132,7 +132,7 @@ const ResetPasswordPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
+                  className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                   {saving ? 'Saving…' : 'Update password'}
@@ -150,7 +150,7 @@ const ResetPasswordPage: React.FC = () => {
               </p>
               <Link
                 to="/"
-                className="inline-flex items-center justify-center gap-2 px-6 min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25"
+                className="inline-flex items-center justify-center gap-2 px-6 min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-sm transition duration-200 shadow-sm shadow-indigo-500/25"
               >
                 <Home className="h-4 w-4" />
                 Back to home

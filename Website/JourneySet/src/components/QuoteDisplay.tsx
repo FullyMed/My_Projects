@@ -29,28 +29,21 @@ const QuoteDisplay: React.FC<QuoteDisplayProps> = ({ compact = false }) => {
     }
   }, []);
 
-  if (compact) {
-    return (
-      <button
-        onClick={refreshQuote}
-        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 cursor-pointer"
-        title="New quote"
-      >
-        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-      </button>
-    );
-  }
+  // Compact mode has no room for the quote, and on phones it's hidden too, so
+  // don't leave a refresh button for a quote nobody can see.
+  if (compact) return null;
 
   return (
-    <div className="flex items-center gap-3 max-w-sm">
-      <div className="text-right hidden sm:block min-w-0">
+    <div className="hidden sm:flex items-center gap-3 max-w-sm">
+      <div className="text-right min-w-0">
         <p className="text-xs text-slate-500 dark:text-slate-400 italic line-clamp-1">"{quote.text}"</p>
-        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{quote.author}</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{quote.author}</p>
       </div>
       <button
         onClick={refreshQuote}
-        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex-shrink-0 cursor-pointer"
+        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex-shrink-0 cursor-pointer"
         title="New quote"
+        aria-label="Show another quote"
       >
         <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
       </button>

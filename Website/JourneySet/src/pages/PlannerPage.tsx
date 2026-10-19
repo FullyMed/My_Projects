@@ -3,6 +3,9 @@ import { getISOWeek, getISOWeekYear } from 'date-fns';
 import WeeklyPlanner from '../components/WeeklyPlanner';
 import ExportButton from '../components/ExportButton';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useAuth } from '../hooks/useAuth';
+import { getPlannerTasks } from '../api/plannerApi';
+import { downloadWeekAsText } from '../utils/exportWeekText';
 
 // Only needed on Export, so it's split into its own chunk.
 const PrintView = lazy(() => import('../components/PrintView'));
@@ -18,6 +21,7 @@ const PlannerPage: React.FC = () => {
     'Weekly planner | JourneySet',
     'Plan each day of your week with tasks, times and weekly repeats.'
   );
+  const { user } = useAuth();
   const [printView, setPrintView] = useState(false);
   // Initialise to the current ISO week so PrintView is correct even before
   // the user navigates to a different week.
@@ -27,7 +31,15 @@ const PlannerPage: React.FC = () => {
     <>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl xs:text-3xl font-bold text-slate-900 dark:text-white">Weekly planner</h1>
-        <ExportButton onPrint={() => setPrintView(true)} label="Export" />
+        <ExportButton
+          onPrint={() => setPrintView(true)}
+          onDownloadText={async () => {
+            if (!user) return;
+            // Same source as the print view: Supabase, or the offline copy.
+            downloadWeekAsText(await getPlannerTasks(user.id, currentWeekKey), currentWeekKey);
+          }}
+          label="Export"
+        />
       </div>
       <WeeklyPlanner onWeekChange={setCurrentWeekKey} />
       {printView && (

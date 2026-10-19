@@ -3,7 +3,7 @@ import { useModalFocus } from '../hooks/useModalFocus';
 import ErrorBanner from './ErrorBanner';
 import ConfirmDialog from './ConfirmDialog';
 import { SAVE_ERROR } from '../constants/messages';
-import { ChevronLeft, ChevronRight, Plus, CreditCard as Edit3, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Calendar as CalendarIcon, Search, AlertCircle, X, Loader2 } from 'lucide-react';
 import { Event } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { useCompactMode } from '../hooks/useCompactMode';
@@ -189,7 +189,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
   const timeConflicts = newEvent.time ? checkConflicts(dateISO, newEvent.time, editingEvent?.id) : [];
 
   const inputClass =
-    'w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors';
+    'w-full px-3.5 py-2.5 text-base sm:text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors';
 
   return (
     <div className="space-y-5">
@@ -216,22 +216,23 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
         </div>
 
         {/* Search */}
-        <div className="relative max-w-xs w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 dark:text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search events…"
             aria-label="Search events"
-            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-base sm:text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors"
           />
         </div>
       </div>
 
       <ErrorBanner message={error} onDismiss={() => setError(null)} />
 
-      <div className={`flex flex-col lg:flex-row ${isCompact ? 'gap-4' : 'gap-5'}`}>
+      {/* The side panel sits below the grid until xl, so day cells stay wide enough to read */}
+      <div className={`flex flex-col xl:flex-row ${isCompact ? 'gap-4' : 'gap-5'}`}>
         {/* Calendar grid */}
         <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 overflow-hidden">
           {eventsLoading ? (
@@ -245,7 +246,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
           <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
             {weekDays.map(day => (
               <div key={day} className={`text-center ${isCompact ? 'py-2' : 'py-3'}`}>
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                   {isCompact ? day[0] : day}
                 </span>
               </div>
@@ -261,25 +262,32 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
               const isSelected = selectedDate && isSameDay(day, selectedDate);
 
               return (
+                // The whole cell is clickable for mouse and touch; the date number
+                // is the real button for keyboard and screen-reader users, so
+                // the event buttons inside aren't nested in another button.
                 <div
                   key={day.toISOString()}
                   onClick={() => handleDateClick(day)}
                   className={`border-r border-b border-slate-100 dark:border-slate-800 cursor-pointer transition-colors ${
                     isSelected
-                      ? 'bg-indigo-50 dark:bg-indigo-950/40'
+                      ? 'bg-indigo-50 dark:bg-indigo-950/40 ring-1 ring-inset ring-indigo-300 dark:ring-indigo-700'
                       : isCurrentDay
                       ? 'bg-indigo-50/60 dark:bg-indigo-950/20'
                       : !isCurrentMonth
                       ? 'bg-slate-50/50 dark:bg-slate-900/50'
                       : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                  } ${isCompact ? 'min-h-[56px] p-1' : 'min-h-[90px] p-2'}`}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleDateClick(day)}
+                  } ${isCompact ? 'min-h-[56px] p-1' : 'min-h-[72px] sm:min-h-[90px] p-1.5 sm:p-2'}`}
                 >
                   <div className="flex items-start justify-between mb-1">
-                    <span
-                      className={`text-xs font-semibold inline-flex items-center justify-center ${isCompact ? 'w-5 h-5' : 'w-6 h-6'} rounded-full ${
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleDateClick(day);
+                      }}
+                      aria-label={`${format(day, 'EEEE, MMMM d')}${dayEvents.length ? `, ${dayEvents.length} event${dayEvents.length !== 1 ? 's' : ''}` : ''}. Add an event`}
+                      aria-current={isCurrentDay ? 'date' : undefined}
+                      className={`text-xs font-semibold tabular-nums inline-flex items-center justify-center ${isCompact ? 'w-5 h-5' : 'w-6 h-6'} rounded-full cursor-pointer ${
                         isCurrentDay
                           ? 'bg-indigo-600 text-on-accent'
                           : !isCurrentMonth
@@ -288,27 +296,32 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                       }`}
                     >
                       {format(day, 'd')}
-                    </span>
+                    </button>
                   </div>
-                  <div className="space-y-0.5">
+                  {/* Phones: one coloured dot per event (labels wouldn't fit) */}
+                  {dayEvents.length > 0 && (
+                    <div className="flex flex-wrap gap-1 px-0.5 sm:hidden" aria-hidden="true">
+                      {dayEvents.slice(0, 4).map(event => (
+                        <span key={event.id} className={`h-1.5 w-1.5 rounded-full ${getCategoryColor(event.category)}`} />
+                      ))}
+                    </div>
+                  )}
+                  <div className="hidden sm:block space-y-0.5">
                     {dayEvents.slice(0, isCompact ? 1 : 2).map(event => (
-                      <div
+                      <button
+                        type="button"
                         key={event.id}
                         onClick={e => handleEventClick(event, e)}
-                        className={`rounded-md text-white cursor-pointer hover:opacity-80 transition-opacity truncate ${getCategoryColor(event.category)} ${isCompact ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-[11px]'}`}
-                        title={event.title}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' || e.key === ' ') handleEventClick(event, e);
-                        }}
+                        className={`block w-full text-left rounded-md text-white cursor-pointer hover:opacity-85 transition-opacity truncate ${getCategoryColor(event.category)} ${isCompact ? 'px-1 py-0.5 text-[10px]' : 'px-1.5 py-0.5 text-[11px]'}`}
+                        title={event.time ? `${event.time} ${event.title}` : event.title}
                       >
-                        {event.time && <span className="font-semibold mr-0.5">{event.time}</span>}
+                        {/* Titles matter more than times in a narrow cell; the time shows on hover and in the side panel */}
+                        {event.time && <span className="hidden 2xl:inline font-semibold tabular-nums mr-1">{event.time}</span>}
                         {event.title}
-                      </div>
+                      </button>
                     ))}
                     {dayEvents.length > (isCompact ? 1 : 2) && (
-                      <div className="text-[10px] text-indigo-500 dark:text-indigo-400 font-medium px-1">
+                      <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium px-1">
                         +{dayEvents.length - (isCompact ? 1 : 2)} more
                       </div>
                     )}
@@ -322,7 +335,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
         </div>
 
         {/* Side panel */}
-        <div className={`lg:w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 flex flex-col ${isCompact ? 'p-4' : 'p-5'}`}>
+        <div className={`xl:w-80 xl:flex-shrink-0 bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-200 dark:border-slate-800 flex flex-col ${isCompact ? 'p-4' : 'p-5'}`}>
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             {searchQuery.trim()
               ? `Results (${filteredEvents.length})`
@@ -330,6 +343,12 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
               ? format(selectedDate, 'EEEE, MMM d')
               : 'Select a day'}
           </h3>
+
+          {!selectedDate && !searchQuery.trim() && (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Pick a day to see its events or add one. You can also search above.
+            </p>
+          )}
 
           {(selectedDate || searchQuery.trim()) && (
             <>
@@ -343,29 +362,29 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                       <div className="flex items-start justify-between mb-1.5">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getCategoryColor(event.category)}`} />
-                          <h4 className="text-sm font-medium text-slate-900 dark:text-white truncate">{event.title}</h4>
+                          <h4 className="text-sm font-medium text-slate-900 dark:text-white break-words min-w-0">{event.title}</h4>
                         </div>
-                        <div className="flex gap-0.5 flex-shrink-0 ml-2">
+                        <div className="flex flex-shrink-0 ml-2 -mr-1.5">
                           <button
                             onClick={() => handleEventClick(event)}
                             aria-label="Edit event"
-                            className="p-1 text-slate-300 dark:text-slate-600 hover:text-indigo-500 transition-colors cursor-pointer"
+                            className="inline-flex h-9 w-9 -my-1.5 [@media(pointer:fine)]:h-7 [@media(pointer:fine)]:w-7 [@media(pointer:fine)]:-my-0.5 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
                             title="Edit"
                           >
-                            <Edit3 className="h-3.5 w-3.5" />
+                            <Pencil className="h-4 w-4" aria-hidden="true" />
                           </button>
                           <button
                             onClick={() => setDeletingEvent(event)}
                             aria-label="Delete event"
-                            className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors cursor-pointer"
+                            className="inline-flex h-9 w-9 -my-1.5 [@media(pointer:fine)]:h-7 [@media(pointer:fine)]:w-7 [@media(pointer:fine)]:-my-0.5 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer hover:text-rose-600 dark:hover:text-rose-400"
                             title="Delete"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </button>
                         </div>
                       </div>
                       {(isSearching || event.time) && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 ml-4">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 ml-4">
                           {isSearching && format(parseISO(event.dateISO), 'EEE, MMM d, yyyy')}
                           {isSearching && event.time && ' · '}
                           {event.time}
@@ -384,13 +403,13 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
                     <CalendarIcon className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                    <p className="text-sm text-slate-400 dark:text-slate-500">No events</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">No events</p>
                   </div>
                 </div>
               )}
               <button
                 onClick={() => handleDateClick(selectedDate ?? new Date())}
-                className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+                className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 min-h-[44px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-medium transition duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
               >
                 <Plus className="h-4 w-4" />
                 Add event
@@ -403,7 +422,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
       {/* Event modal: bottom sheet on mobile, centred on sm+ */}
       {showEventModal && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
+          className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
           role="presentation"
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
@@ -412,7 +431,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="event-modal-title"
-            className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-md max-h-[92dvh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter xs:animate-none">
+            className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-md max-h-[92dvh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter">
             {/* Mobile drag handle */}
             <div className="flex justify-center pt-3 pb-1 xs:hidden">
               <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
@@ -426,7 +445,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                 <button
                   onClick={closeModal}
                   aria-label="Close"
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 cursor-pointer"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -459,7 +478,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
 
                 <div>
                   <label htmlFor="event-time" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
-                    Time <span className="font-normal text-slate-400 normal-case">(optional)</span>
+                    Time <span className="font-normal text-slate-500 dark:text-slate-400 normal-case">(optional)</span>
                   </label>
                   <input
                     id="event-time"
@@ -499,7 +518,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
 
                 <div>
                   <label htmlFor="event-description" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
-                    Description <span className="font-normal text-slate-400 normal-case">(optional)</span>
+                    Description <span className="font-normal text-slate-500 dark:text-slate-400 normal-case">(optional)</span>
                   </label>
                   <textarea
                     id="event-description"
@@ -538,7 +557,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ onMonthChange }) => {
                   <button
                     onClick={saveEvent}
                     disabled={!newEvent.title.trim() || saving}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition duration-200 cursor-pointer shadow-sm shadow-indigo-500/20"
                   >
                     {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                     {editingEvent ? 'Save changes' : 'Add event'}

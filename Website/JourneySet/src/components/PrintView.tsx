@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { format, startOfMonth, endOfMonth, addDays, parseISO, setISOWeek, startOfISOWeek } from 'date-fns';
-import { getISOWeek, getISOWeekYear } from 'date-fns';
+import { format, startOfMonth, endOfMonth, addDays, parseISO } from 'date-fns';
+import { dateToWeekKey, weekKeyToMonday } from '../utils/weekKey';
 import { Printer, X, Loader2 } from 'lucide-react';
 import { PlannerTask, Goal, Event } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -18,25 +18,6 @@ interface PrintViewProps {
   /** Any date inside the month currently shown in EventCalendar (defaults to today) */
   month?: Date;
 }
-
-/**
- * Convert an ISO week key (YYYY-Www) to the Monday of that week.
- * Uses date-fns calendar arithmetic rather than adding 86 400 000 ms per day,
- * which lands on Sunday 23:00 across a daylight-saving change.
- */
-const weekKeyToMonday = (weekKey: string): Date => {
-  const [yearStr, weekStr] = weekKey.split('-W');
-  // ISO week 1 always contains Jan 4th, so Jan 4th is in the right ISO year.
-  const jan4 = new Date(parseInt(yearStr, 10), 0, 4);
-  return startOfISOWeek(setISOWeek(jan4, parseInt(weekStr, 10)));
-};
-
-/** Build the ISO week key for a given date */
-const dateToWeekKey = (date: Date): string => {
-  const year = getISOWeekYear(date);
-  const week = getISOWeek(date);
-  return `${year}-W${String(week).padStart(2, '0')}`;
-};
 
 const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) => {
   const { user } = useAuth();
@@ -311,7 +292,7 @@ const PrintView: React.FC<PrintViewProps> = ({ view, onClose, weekKey, month }) 
           <button
             onClick={() => window.print()}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
+            className="inline-flex items-center gap-2 px-4 min-h-[44px] text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-on-accent rounded-lg transition duration-200 cursor-pointer shadow-sm"
           >
             <Printer className="h-4 w-4" />
             <span className="hidden xs:inline">Print</span>

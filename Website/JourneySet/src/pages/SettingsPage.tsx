@@ -53,11 +53,11 @@ const SettingsPage: React.FC = () => {
           </div>
           <div className="px-6 py-5 space-y-4">
             <div>
-              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Email</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Email</p>
               <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.email}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Name</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Name</p>
               <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
             </div>
           </div>
@@ -86,7 +86,7 @@ const SettingsPage: React.FC = () => {
               ) : (
                 <>
                   <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-4 w-4 text-slate-400" />
+                    <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">Nothing saved yet</p>
@@ -197,7 +197,7 @@ const SettingsPage: React.FC = () => {
         </section>
 
         {/* Legal */}
-        <div className="flex items-center gap-4 px-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="flex items-center gap-4 px-1 text-xs text-slate-500 dark:text-slate-400">
           <Link to="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Use</Link>
           <Link to="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</Link>
         </div>
@@ -208,7 +208,7 @@ const SettingsPage: React.FC = () => {
       {/* Reset Confirmation Modal */}
       {showResetModal && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           role="presentation"
           onClick={(e) => { if (e.target === e.currentTarget) setShowResetModal(false); }}
         >
@@ -217,7 +217,7 @@ const SettingsPage: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="reset-modal-title"
-            className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
+            className="modal-pop bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
           >
             <div className="w-12 h-12 bg-rose-100 dark:bg-rose-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />

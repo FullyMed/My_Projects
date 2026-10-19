@@ -40,7 +40,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onClose }) =>
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
       role="presentation"
       onClick={(e) => {
         if (e.target === e.currentTarget && !deleting) onClose();
@@ -52,7 +52,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onClose }) =>
         aria-modal="true"
         aria-labelledby="delete-account-title"
         aria-describedby="delete-account-desc"
-        className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
+        className="modal-pop bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
       >
         <div className="w-12 h-12 bg-rose-100 dark:bg-rose-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
@@ -77,7 +77,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onClose }) =>
           autoComplete="off"
           data-autofocus
           disabled={deleting}
-          className="w-full px-3.5 py-2.5 mb-4 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors min-h-[44px]"
+          className="w-full px-3.5 py-2.5 mb-4 text-base sm:text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors min-h-[44px]"
         />
 
         {error && (

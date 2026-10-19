@@ -40,7 +40,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]"
+      className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]"
       role="presentation"
       onClick={(e) => {
         if (e.target === e.currentTarget && !busy) onCancel();
@@ -52,7 +52,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
-        className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
+        className="modal-pop bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20"
       >
         <div className="w-12 h-12 bg-rose-100 dark:bg-rose-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />

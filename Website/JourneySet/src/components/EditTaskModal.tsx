@@ -52,13 +52,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
   };
 
   const inputClass =
-    'w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors';
+    'w-full px-3.5 py-2.5 text-base sm:text-sm border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 transition-colors';
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe" role="presentation">
+    <div className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe" role="presentation">
       <div
         ref={modalRef}
-        className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter xs:animate-none max-h-[92dvh] overflow-y-auto"
+        className="bg-white dark:bg-slate-900 rounded-t-2xl xs:rounded-2xl w-full xs:max-w-sm border border-slate-200 dark:border-slate-800 shadow-2xl shadow-black/20 sheet-enter max-h-[92dvh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-task-title"
@@ -76,7 +76,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -115,7 +115,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
 
           <div>
             <label htmlFor="task-time" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wide">
-              Time <span className="font-normal text-slate-400 normal-case">(optional)</span>
+              Time <span className="font-normal text-slate-500 dark:text-slate-400 normal-case">(optional)</span>
             </label>
             <input
               id="task-time"
@@ -167,7 +167,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, days, onSave, onClo
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-60 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer shadow-sm shadow-indigo-500/20"
+              className="flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-60 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl text-sm font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer shadow-sm shadow-indigo-500/20"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Save changes

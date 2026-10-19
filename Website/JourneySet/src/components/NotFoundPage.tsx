@@ -30,7 +30,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
       <p className="text-6xl xs:text-7xl md:text-8xl font-extrabold bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent tracking-tight mb-2 xs:mb-3">
         404
       </p>
-      <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 xs:mb-3 tracking-tight">
+      <h1 className="text-balance text-xl xs:text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 xs:mb-3 tracking-tight">
         We can't find that page
       </h1>
       <p className="text-sm xs:text-base text-slate-600 dark:text-slate-400 max-w-md mb-8 xs:mb-10">
@@ -40,14 +40,14 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
       <div className="flex flex-col xs:flex-row gap-3 w-full xs:w-auto px-4 xs:px-0">
         <Link
           to={homePath}
-          className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-on-accent rounded-xl font-semibold text-sm transition duration-200 shadow-sm shadow-indigo-500/25 cursor-pointer"
         >
           <Home className="h-4 w-4" />
           {homeLabel}
         </Link>
         <button
           onClick={() => window.history.back()}
-          className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 min-h-[48px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 min-h-[48px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 rounded-xl font-semibold text-sm transition duration-200 cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
           Go back
@@ -81,7 +81,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({ fullPage = true }) => {
 
       <footer className="border-t border-slate-200 dark:border-slate-800 pb-safe">
         <div className="max-w-7xl mx-auto px-4 xs:px-6 py-6 flex justify-center">
-          <p className="text-xs xs:text-sm text-slate-400 dark:text-slate-600">
+          <p className="text-xs xs:text-sm text-slate-500 dark:text-slate-400">
             A free planner for your week.
           </p>
         </div>

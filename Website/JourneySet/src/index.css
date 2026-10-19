@@ -143,6 +143,35 @@
     touch-action: manipulation;
   }
 
+  /* Motion tokens (Emil Kowalski's curves): ease-out for things entering or
+     responding to a press, the drawer curve for sheets and the sidebar. */
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* Keyboard focus is always visible, in the theme's accent. Mouse clicks
+     don't trigger :focus-visible on buttons, so this never shows on click.
+     Text fields keep their own focus ring instead. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent-500));
+    outline-offset: 2px;
+  }
+  input:not([type='checkbox']):focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid transparent;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Press feedback: buttons give slightly while held down. */
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -168,13 +197,62 @@
   .mt-safe { margin-top: env(safe-area-inset-top, 0px); }
   .mb-safe { margin-bottom: env(safe-area-inset-bottom, 0px); }
 
-  /* Bottom sheet: slide up from bottom on mobile */
+  /* Dialogs: a bottom sheet that slides up on phones, and a quick fade and
+     scale on larger screens (dialogs aren't anchored, so they scale from the
+     centre). */
   .sheet-enter {
-    animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    animation: sheet-up 0.28s var(--ease-drawer) both;
+  }
+  @media (min-width: 475px) {
+    .sheet-enter {
+      animation: modal-pop 0.18s var(--ease-out) both;
+    }
+  }
+  .modal-pop {
+    animation: modal-pop 0.18s var(--ease-out) both;
+  }
+  .backdrop-enter {
+    animation: fade-in 0.15s ease-out both;
+  }
+  /* Dropdown menus grow out of their button (top right). */
+  .menu-enter {
+    transform-origin: top right;
+    animation: menu-pop 0.15s var(--ease-out) both;
   }
   @keyframes sheet-up {
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
+  }
+  @keyframes modal-pop {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes menu-pop {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
+
+/* Reduced motion: nothing slides, scales or grows. Colour and opacity changes
+   stay, because they still show what changed. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, opacity, box-shadow !important;
+    scroll-behavior: auto !important;
+  }
+  .sheet-enter,
+  .modal-pop,
+  .menu-enter {
+    animation: fade-in 0.15s ease-out both !important;
+  }
+  button:not(:disabled):active {
+    transform: none;
   }
 }
 

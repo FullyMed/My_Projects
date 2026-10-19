@@ -17,6 +17,11 @@ const ramp = (name) => {
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
+  // hover: styles only apply on devices that can really hover, so a tap on a
+  // phone doesn't leave a button stuck in its hover state.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     screens: {
       xs: '475px',

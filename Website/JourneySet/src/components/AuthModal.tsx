@@ -82,7 +82,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
   };
 
   const inputClass =
-    'w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors text-sm min-h-[48px]';
+    'w-full px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors text-base sm:text-sm min-h-[48px]';
 
   return (
     /*
@@ -90,7 +90,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
      * On sm+      → items-center = centred card
      */
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
+      className="backdrop-enter fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end xs:items-center justify-center xs:p-4 z-50 pb-safe"
       role="presentation"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -101,7 +101,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
           'shadow-2xl shadow-black/20 border border-slate-200 dark:border-slate-800',
           /* Mobile: full-width rounded top corners + sheet animation */
           'rounded-t-2xl xs:rounded-2xl',
-          'sheet-enter xs:animate-none',
+          'sheet-enter',
           /* Let tall content scroll on small phones */
           'max-h-[92dvh] overflow-y-auto',
         ].join(' ')}
@@ -121,7 +121,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -227,7 +227,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-0 top-0 bottom-0 min-w-[48px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
+                  className="absolute right-0 top-0 bottom-0 min-w-[48px] flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -256,14 +256,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ mode, onClose, onSwitchMode }) =>
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
+              className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 text-on-accent rounded-lg font-semibold text-sm transition duration-200 shadow-sm shadow-indigo-500/25 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 cursor-pointer mt-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Please wait…' : forgot ? 'Send reset link' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
 
             {mode === 'register' && (
-              <p className="text-center text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
+              <p className="text-center text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 By creating an account, you agree to our{' '}
                 <Link to="/terms" className="text-indigo-600 dark:text-indigo-400 hover:underline">Terms of Use</Link>
                 {' '}and{' '}
