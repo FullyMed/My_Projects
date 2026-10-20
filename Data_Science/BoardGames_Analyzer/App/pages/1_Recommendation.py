@@ -21,7 +21,7 @@ theme.set_meta_description(
 )
 
 # Sidebar
-st.sidebar.title("⚙ Settings")
+st.sidebar.title("Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 
@@ -95,7 +95,7 @@ for key in ["title_input", "category_input", "mechanic_input", "family_input", "
         st.session_state[key] = ""
 
 # Header
-st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Find your next game</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Find your next game</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">Start from games you already like, from traits you want, or from both.</div>',
     unsafe_allow_html=True,
@@ -113,9 +113,9 @@ st.markdown(
 )
 
 # Example button
-ex_col, caption_col = st.columns([1, 5])
+ex_col, caption_col = st.columns([1, 3], vertical_alignment="center")
 with ex_col:
-    if st.button("Try an example"):
+    if st.button("Try an example", key="try_example"):
         st.session_state["title_input"] = "Splendor, Azul"
         st.session_state["category_input"] = "Strategy, Family"
         st.session_state["mechanic_input"] = ""
@@ -286,11 +286,6 @@ if run_btn:
                     unsafe_allow_html=True,
                 )
 
-            # Full table
-            st.markdown("---")
-            st.markdown('<div class="section-title">All results</div>', unsafe_allow_html=True)
-            st.dataframe(formatted, width='stretch', height=min(400, max(120, 40 + 35 * len(formatted))))
-
             # Top-5 cards
             st.markdown("---")
             st.markdown('<div class="section-title">Top picks</div>', unsafe_allow_html=True)
@@ -300,7 +295,7 @@ if run_btn:
                 # can't wrap widgets; a keyed container can (theme.py styles .st-key-result_card_*)
                 with st.container(key=f"result_card_{rank}"):
                     st.markdown(
-                        f'<div class="card-title">🎲 {html.escape(str(row.get("name", "—")))}</div>',
+                        f'<div class="card-title">{html.escape(str(row.get("name", "—")))}</div>',
                         unsafe_allow_html=True,
                     )
 
@@ -319,11 +314,38 @@ if run_btn:
                         unsafe_allow_html=True,
                     )
 
+            # Full table, with plain column names (the engine's names are for code)
+            st.markdown("---")
+            st.markdown('<div class="section-title">All results</div>', unsafe_allow_html=True)
+            table = formatted.rename(columns={
+                "name": "Game",
+                "final_score": "Match score",
+                "score_like": "Title score",
+                "score_trait": "Trait score",
+                "avg_rating": "BGG rating",
+                "num_votes": "Ratings",
+                "reason": "Why",
+            })
+            st.dataframe(
+                table,
+                width='stretch',
+                hide_index=True,
+                height=min(400, max(120, 40 + 35 * len(table))),
+                column_config={
+                    "Match score": st.column_config.NumberColumn(format="%.3f"),
+                    "Title score": st.column_config.NumberColumn(format="%.3f"),
+                    "Trait score": st.column_config.NumberColumn(format="%.3f"),
+                    "BGG rating": st.column_config.NumberColumn(format="%.2f"),
+                    "Ratings": st.column_config.NumberColumn(format="localized"),
+                    "Why": st.column_config.TextColumn(width="large"),
+                },
+            )
+
         elif formatted is not None and len(formatted) == 0:
             theme.render_not_found(
                 title="No matches",
                 message="Nothing matched that search. Try fewer traits, a different difficulty, or another game title.",
-                icon="🔍",
+                icon="search",
             )
 
     except Exception as e:

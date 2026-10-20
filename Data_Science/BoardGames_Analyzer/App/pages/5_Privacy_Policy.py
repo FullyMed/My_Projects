@@ -16,13 +16,13 @@ theme.set_meta_description(
     "no accounts, and nothing you type gets saved."
 )
 
-st.sidebar.title("⚙ Settings")
+st.sidebar.title("Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 st.sidebar.markdown("---")
 st.sidebar.caption("Board Game Discovery Engine, a student research project.")
 
-st.markdown('<div class="main-title"><span class="title-icon">🔒</span> Privacy policy</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Privacy policy</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">What BoardGames Analyzer does and doesn\'t collect when you use it.</div>',
     unsafe_allow_html=True,
@@ -87,9 +87,9 @@ for title, body in sections:
 st.markdown("---")
 c1, c2 = st.columns(2)
 with c1:
-    st.page_link("app.py", label="Home", icon="🏠")
+    st.page_link("app.py", label="Home", icon=":material/home:")
 with c2:
-    st.page_link("pages/4_Terms_of_Use.py", label="Terms of use", icon="📜")
+    st.page_link("pages/4_Terms_of_Use.py", label="Terms of use", icon=":material/description:")
 
 st.markdown("---")
 st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

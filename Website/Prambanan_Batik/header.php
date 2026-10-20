@@ -50,8 +50,10 @@ $og_image_url = absolute_url($og_image ?? SITE_PATH . '/assets/images/og-image.p
     <noscript><style>.reveal, .product-card { opacity: 1 !important; transform: none !important; }</style></noscript>
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
     <?php if (is_preview_mode()): ?>
-        <div class="preview-banner">
+        <div class="preview-banner" role="status">
             Preview mode: we can't load our products right now, so these are sample items.
         </div>
     <?php endif; ?>
@@ -60,19 +62,21 @@ $og_image_url = absolute_url($og_image ?? SITE_PATH . '/assets/images/og-image.p
         <div class="header-content">
             <div class="header-left">
                 <div class="logo-section">
-                    <h1 class="logo">
+                    <?php // Each page has its own <h1>, so the site name is a plain paragraph. ?>
+                    <p class="logo">
                         <a href="<?php echo SITE_PATH; ?>/"><?php echo SITE_NAME; ?></a>
-                    </h1>
+                    </p>
                     <p class="tagline"><?php echo SITE_TAGLINE; ?></p>
                 </div>
             </div>
-            <nav class="nav">
+            <nav class="nav" aria-label="Main">
                 <ul>
-                    <li><a href="<?php echo SITE_PATH; ?>/" class="<?php echo $current_page === 'index.php' ? 'active' : ''; ?>">Home</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/products.php" class="<?php echo $current_page === 'products.php' ? 'active' : ''; ?>">Batik collection</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/"<?php echo $current_page === 'index.php' ? ' class="active" aria-current="page"' : ''; ?>>Home</a></li>
+                    <?php // A product page sits inside the collection, so it highlights that link too. ?>
+                    <li><a href="<?php echo SITE_PATH; ?>/products.php"<?php echo $current_page === 'products.php' ? ' class="active" aria-current="page"' : ($current_page === 'product.php' ? ' class="active"' : ''); ?>>Batik collection</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="main-content">
+    <main class="main-content" id="main" tabindex="-1">

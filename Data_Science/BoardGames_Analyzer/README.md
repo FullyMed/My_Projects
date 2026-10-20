@@ -11,8 +11,9 @@ You can start from games you already like, from traits you want (co-op, tile pla
 - Three ways to search: Title-Based, Trait-Based and Combined.
 - A reason on every result, plus the component scores. The page also shows which catalog game each typed title matched, so a typo can't quietly pick the wrong seed.
 - A review-sentiment signal: DistilBERT SST-2 scored up to 10 random review comments per game.
-- An Analytics page with charts of the data: ratings, complexity, top games, common mechanics and categories, and releases per year.
+- An Analytics page with interactive Altair charts of the data (ratings, complexity, top games, common mechanics and categories, releases per year). They stay readable on a phone and show details on hover.
 - Light and dark themes, a layout that works on phones, tablets and desktops, and loading spinners for the slow steps.
+- Keyboard friendly: a skip link on every page and a visible focus ring on every control. Every page passes a WCAG AA contrast check in both themes, whether your computer is in light or dark mode.
 - A themed 404 page, a distinct title and meta description on every page, and Terms of use and Privacy policy pages linked from the home page.
 
 ---
@@ -88,7 +89,7 @@ BoardGames_Analyzer/
 
 - Python 3.10 or newer
 - For development: everything in `Requirements.txt`
-- For the Streamlit Cloud deployment: the short list in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, matplotlib)
+- For the Streamlit Cloud deployment: the short list in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, altair)
 
 ### Install
 
@@ -250,7 +251,7 @@ Plain-language pages about what the app does with your input: no accounts, and w
 | Machine learning | scikit-learn, scipy |
 | NLP & embeddings | sentence-transformers (MiniLM-L6), transformers (DistilBERT SST-2), torch |
 | Similarity storage | scipy sparse CSR matrices, joblib |
-| Visualization | matplotlib, seaborn |
+| Visualization | Altair (app charts), matplotlib and seaborn (notebooks, paper figures) |
 | App framework | Streamlit 1.52 |
 | Notebooks | Jupyter |
 | Paper | LaTeX (IEEE format) |
@@ -284,7 +285,7 @@ The paper describes the three modes and how each one scores games, then tests th
 - The paper and the code matched up again on 2026-10-01: real per-mode formulas, baselines, an ablation, a long-tail analysis, and the system's own explanations.
 - Suggested next steps, not yet approved: pin the versions in `App/requirements.txt`, add bootstrap confidence intervals, shorten the publisher lists in explanations, embed descriptions only, and add a second evaluation that leans less on popular games. See `CLAUDE.md` Section 12.
 - The root single-page app (`app.py` / `recommender.py`) is a reference copy. It doesn't have the 404 page, meta tags or loading spinners that `App/` has.
-- Image compression was considered and skipped: the app has no static images, since matplotlib draws every chart live. See `CLAUDE.md`.
+- Image compression was considered and skipped: the app has no static images, since every chart is drawn live. See `CLAUDE.md`.
 
 ---
 

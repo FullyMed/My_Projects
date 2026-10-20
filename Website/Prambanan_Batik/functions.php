@@ -85,21 +85,15 @@ function format_currency($amount) {
 }
 
 /**
- * Get star rating HTML
+ * Star rating as an image of five stars, filled to the exact rating (4.3 fills 86%).
+ * The stars are drawn in CSS (.star-rating in styles.css); screen readers get the
+ * aria-label instead. Pass $class to size it ("star-rating star-rating-lg").
  */
-function get_star_rating($rating) {
-    $rating = (float)$rating;
-    $full_stars = floor($rating);
-    $half_star = ($rating - $full_stars) >= 0.5;
-    $empty_stars = 5 - $full_stars - ($half_star ? 1 : 0);
-
-    $stars = str_repeat('★', $full_stars);
-    if ($half_star) {
-        $stars .= '◐';
-    }
-    $stars .= str_repeat('☆', $empty_stars);
-
-    return $stars;
+function get_star_rating($rating, $class = 'star-rating') {
+    $rating = max(0, min(5, (float)$rating));
+    $label = 'Rated ' . rtrim(rtrim(number_format($rating, 1, '.', ''), '0'), '.') . ' out of 5';
+    return '<span class="' . escape($class) . '" role="img" aria-label="' . escape($label) . '"'
+        . ' style="--rating: ' . number_format($rating, 2, '.', '') . '"></span>';
 }
 
 /**

@@ -136,16 +136,17 @@ $categories = $stmt->fetchAll();
     <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
                     <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active" aria-current="page">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
@@ -153,7 +154,7 @@ $categories = $stmt->fetchAll();
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1><?php echo $product ? 'Edit product' : 'Create product'; ?></h1>
                 <div class="topbar-user">
@@ -244,7 +245,7 @@ $categories = $stmt->fetchAll();
                     </form>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>

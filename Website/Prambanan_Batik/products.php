@@ -132,7 +132,7 @@ $canonical_url = BASE_URL . '/products.php' . ($canonical_query ? '?' . http_bui
 
     <section class="products-section">
         <div class="container">
-            <h2 class="section-title reveal">Batik collection</h2>
+            <h1 class="section-title reveal">Batik collection</h1>
             <p class="section-subtitle reveal">Everything we sell, highest rated first. Pick a category to narrow it down.</p>
 
             <div class="products-filters">
@@ -154,29 +154,34 @@ $canonical_url = BASE_URL . '/products.php' . ($canonical_query ? '?' . http_bui
 
             <?php if (empty($all_products)): ?>
                 <div class="empty-state reveal">
-                    <h3>No batik here yet</h3>
+                    <h2>No batik here yet</h2>
                     <p><?php echo $active_category_name !== '' ? 'We don\'t have anything in ' . escape($active_category_name) . ' at the moment.' : 'We don\'t have a category by that name.'; ?></p>
                     <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary">See all batik</a>
                 </div>
             <?php endif; ?>
 
+            <?php if (!empty($all_products)): ?>
+                <h2 class="visually-hidden">Products</h2>
+            <?php endif; ?>
             <div class="products-grid">
                 <?php foreach ($all_products as $product): ?>
                     <article class="product-card">
                         <div class="product-image">
-                            <img src="<?php echo escape(product_image_url($product['image_url'] ?? '')); ?>" data-fallback="<?php echo SITE_PATH; ?>/assets/images/product-placeholder.svg" alt="<?php echo escape($product['name']); ?>" loading="lazy">
+                            <img src="<?php echo escape(product_image_url($product['image_url'] ?? '')); ?>" data-fallback="<?php echo SITE_PATH; ?>/assets/images/product-placeholder.svg" alt="<?php echo escape($product['name']); ?>" loading="lazy" decoding="async">
                         </div>
                         <div class="product-info">
-                            <span class="category"><?php echo escape($product['category']); ?></span>
+                            <?php if (!empty($product['category'])): ?>
+                                <span class="category"><?php echo escape($product['category']); ?></span>
+                            <?php endif; ?>
                             <h3><a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>"><?php echo escape($product['name']); ?></a></h3>
                             <div class="rating">
-                                <span class="stars"><?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?></span>
-                                <span class="rating-value"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?></span>
+                                <?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?>
+                                <span class="rating-value" aria-hidden="true"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?></span>
                                 <span class="review-count"><?php echo review_count_label($product['rating_count'] ?? $product['review_count'] ?? 0); ?></span>
                             </div>
                             <div class="product-footer">
                                 <span class="price"><?php echo format_currency($product['price_display'] ?? $product['price'] ?? 0); ?></span>
-                                <a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-small">View</a>
+                                <a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-small btn-quiet">View<span class="visually-hidden"> <?php echo escape($product['name']); ?></span></a>
                             </div>
                         </div>
                     </article>

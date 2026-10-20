@@ -7,7 +7,8 @@
   --admin-sidebar-bg:   #1e0f05;
   --admin-sidebar-w:    230px;
   --admin-accent:       #c4872c;
-  --admin-accent-hover: #ae7520;
+  --admin-accent-hover: #b37a24;
+  --admin-muted:        #6b5742;   /* muted text: 4.5:1+ on white and on the page background */
   --admin-text-dim:     rgba(255,255,255,0.55);
   --admin-text-mid:     rgba(255,255,255,0.75);
   --admin-surface:      #ffffff;
@@ -26,7 +27,8 @@
   --shadow-sm: 0 2px 8px rgba(42,26,14,0.08);
   --shadow-md: 0 6px 20px rgba(42,26,14,0.10), 0 2px 6px rgba(42,26,14,0.06);
 
-  --transition: 200ms cubic-bezier(0.25,0.46,0.45,0.94);
+  --ease-out:   cubic-bezier(0.23, 1, 0.32, 1);
+  --transition: 160ms var(--ease-out);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,6 +40,46 @@ body {
   color: var(--admin-primary);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Links inside content (tables, review cards) instead of the browser's default blue. */
+a { color: var(--admin-secondary); }
+a:hover { color: var(--admin-primary); }
+
+/* One visible focus ring for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--admin-secondary);
+  outline-offset: 2px;
+}
+.sidebar :focus-visible { outline-color: var(--admin-accent); outline-offset: -2px; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1000;
+  padding: 0.75rem 1.25rem;
+  background: var(--admin-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 200ms var(--ease-out);
+}
+.skip-link:focus { transform: translateY(0); color: #fff; }
+#main:focus { outline: none; }
 
 /* ── Navigation progress bar ──────────────────────────────── */
 .nav-progress-bar {
@@ -71,8 +113,8 @@ body {
   width: 1em;
   height: 1em;
   margin: -0.5em 0 0 -0.5em;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
+  border: 2px solid rgba(42, 26, 14, 0.25);
+  border-top-color: var(--admin-primary);
   border-radius: 50%;
   animation: btn-spinner 0.6s linear infinite;
 }
@@ -115,7 +157,7 @@ body {
 }
 
 .sidebar-header p {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--admin-accent);
@@ -192,14 +234,17 @@ body {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.8125rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
   padding: 0.35rem 0.875rem;
   border: 1px solid var(--admin-border);
   border-radius: var(--radius-pill);
-  transition: background var(--transition), color var(--transition);
+  transition: background-color var(--transition), color var(--transition), border-color var(--transition);
 }
 .topbar-user a:hover {
   background: var(--admin-accent);
-  color: #fff;
+  color: var(--admin-primary);
   border-color: var(--admin-accent);
 }
 
@@ -271,35 +316,36 @@ body {
   letter-spacing: 0.03em;
   text-decoration: none;
   border: 1.5px solid transparent;
+  min-height: 2.5rem;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition),
-              border-color var(--transition), box-shadow var(--transition);
+  transition: background-color var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition),
+              transform var(--transition);
   white-space: nowrap;
 }
 .btn:active { transform: scale(0.97); }
 
-/* default brown */
+/* Default gold button, espresso text (white on this gold was 2.8:1). */
 .btn {
   background: var(--admin-accent);
-  color: #fff;
+  color: var(--admin-primary);
   border-color: var(--admin-accent);
 }
 .btn:hover {
   background: var(--admin-accent-hover);
   border-color: var(--admin-accent-hover);
-  color: #fff;
-  box-shadow: 0 3px 12px rgba(196,135,44,0.3);
+  color: var(--admin-primary);
 }
 
 .btn-primary {
   background: var(--admin-accent);
-  color: #fff;
+  color: var(--admin-primary);
   border-color: var(--admin-accent);
 }
 .btn-primary:hover {
   background: var(--admin-accent-hover);
   border-color: var(--admin-accent-hover);
-  color: #fff;
+  color: var(--admin-primary);
 }
 
 .btn-secondary {
@@ -317,16 +363,19 @@ body {
 .btn-danger {
   background: #b03626;
   border-color: #b03626;
+  color: #fff;
 }
 .btn-danger:hover {
   background: #922d1e;
   border-color: #922d1e;
-  box-shadow: 0 3px 10px rgba(176,54,38,0.3);
+  color: #fff;
 }
+.btn-danger.is-loading::after { border-color: rgba(255,255,255,0.4); border-top-color: #fff; }
 
 .btn-small {
   padding: 0.375rem 0.875rem;
   font-size: 0.75rem;
+  min-height: 2.25rem;
 }
 
 /* ── Forms ────────────────────────────────────────────────── */
@@ -361,14 +410,17 @@ body {
   background: #fffcf8;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
+/* Focus: darker border plus a ring strong enough to see (the old 14% ring was nearly invisible). */
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--admin-accent);
-  box-shadow: 0 0 0 3px rgba(196,135,44,0.14);
+  border-color: var(--admin-secondary);
+  box-shadow: 0 0 0 3px rgba(196,135,44,0.4);
   background: #fff;
 }
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: #8c7a68; }
 
 .form-group textarea {
   resize: vertical;
@@ -379,7 +431,7 @@ body {
 .form-group.full { grid-column: 1 / -1; }
 
 .required { color: #b03626; }
-.optional  { color: #8c7560; font-size: 0.75rem; font-weight: 400; }
+.optional  { color: var(--admin-muted); font-size: 0.75rem; font-weight: 400; }
 
 .button-group {
   display: flex;
@@ -408,7 +460,9 @@ body {
 }
 
 /* ── Tables ───────────────────────────────────────────────── */
-.table-section { overflow: hidden; }
+/* Wide tables scroll inside their card instead of pushing the whole page sideways. */
+.table-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-section table { min-width: 36rem; }
 
 table {
   width: 100%;
@@ -438,6 +492,7 @@ td {
 
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: #fffbf5; }
+td a:not(.btn):not(.btn-primary) { font-weight: 500; text-underline-offset: 0.2em; }
 
 .action-buttons {
   display: flex;
@@ -446,11 +501,19 @@ tbody tr:hover { background: #fffbf5; }
 }
 .action-buttons a,
 .action-buttons button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
   padding: 0.35rem 0.875rem;
   font-size: 0.75rem;
+  font-weight: 600;
   text-decoration: none;
   border-radius: var(--radius-pill);
 }
+.action-buttons a.btn-primary {
+  border: 1.5px solid var(--admin-accent);
+}
+.action-buttons form { display: inline; }
 
 /* ── Dashboard ────────────────────────────────────────────── */
 .dashboard-title {
@@ -477,7 +540,7 @@ tbody tr:hover { background: #fffbf5; }
   box-shadow: var(--shadow-sm);
 }
 .stat-card h3 {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--admin-secondary);
   text-transform: uppercase;
   letter-spacing: 0.09em;
@@ -503,20 +566,20 @@ tbody tr:hover { background: #fffbf5; }
   justify-content: center;
   padding: 1.125rem 1rem;
   background: var(--admin-accent);
-  color: white;
+  color: var(--admin-primary);
   text-decoration: none;
   border-radius: var(--radius-lg);
   text-align: center;
   font-weight: 600;
   font-size: 0.875rem;
   letter-spacing: 0.03em;
-  transition: background var(--transition), box-shadow var(--transition);
+  transition: background-color var(--transition), transform var(--transition);
 }
 .action-btn:hover {
   background: var(--admin-accent-hover);
-  box-shadow: 0 4px 16px rgba(196,135,44,0.3);
-  color: white;
+  color: var(--admin-primary);
 }
+.action-btn:active { transform: scale(0.98); }
 
 /* ── Checkbox ─────────────────────────────────────────────── */
 .checkbox-group {
@@ -525,8 +588,8 @@ tbody tr:hover { background: #fffbf5; }
   gap: 0.5rem;
 }
 .checkbox-group input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
   accent-color: var(--admin-accent);
 }
 .checkbox-group label { margin-bottom: 0; font-weight: 500; }
@@ -536,8 +599,40 @@ tbody tr:hover { background: #fffbf5; }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .sidebar { width: 0; overflow: hidden; }
+  /* The sidebar used to collapse to width 0, leaving phones with no navigation at all.
+     It's now a bar of links across the top that scrolls sideways if needed. */
+  .admin-container { flex-direction: column; }
+  .sidebar {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .sidebar-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 0;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .sidebar nav { display: flex; }
+  .sidebar-nav { display: flex; padding: 0; }
+  .sidebar-nav li a {
+    height: 100%;
+    min-height: 3rem;
+    padding: 0 0.875rem;
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+  .sidebar-nav li a:hover,
+  .sidebar-nav li a.active { border-bottom-color: var(--admin-accent); }
   .main-content { margin-left: 0; }
+  .topbar { position: static; }
   .topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
   .content { padding: 1.25rem; }
   .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
@@ -545,3 +640,214 @@ tbody tr:hover { background: #fffbf5; }
   table { font-size: 0.8125rem; }
   th, td { padding: 0.65rem 0.875rem; }
 }
+
+/* ── Shared page parts that had no styles ─────────────────────── */
+.empty-state {
+  background: var(--admin-surface);
+  border: 1px dashed var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--admin-muted);
+}
+.empty-state p { margin-bottom: 1rem; }
+.muted { color: var(--admin-muted); font-size: 0.875rem; }
+.page-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Reviews list (reviews.php) ───────────────────────────────── */
+.reviews-list { display: grid; gap: 0.875rem; }
+.review-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 1.5rem;
+}
+.review-card .review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.625rem;
+}
+.review-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.875rem; }
+.meta-item { display: inline-flex; align-items: center; gap: 0.375rem; color: var(--admin-muted); font-size: 0.875rem; }
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  border-radius: var(--radius-md);
+  background: #f6e3b8;
+  color: var(--admin-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.reviewer-name { color: var(--admin-primary); font-weight: 600; font-size: 0.9375rem; }
+.verified-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: #eaf4ed;
+  color: #2d5a3d;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.review-date { color: var(--admin-muted); font-size: 0.8125rem; white-space: nowrap; }
+.review-content { color: #3d2a18; line-height: 1.6; margin-bottom: 0.75rem; max-width: 70ch; }
+.review-product { font-size: 0.875rem; color: var(--admin-muted); margin-bottom: 0.875rem; }
+.review-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.review-actions form { display: inline; }
+
+/* ── Product images (product_images.php) ──────────────────────── */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.image-card {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #fffcf8;
+  display: flex;
+  flex-direction: column;
+}
+.image-preview { aspect-ratio: 1; background: #f5ecdf; }
+.image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-info { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.375rem; flex: 1; }
+.image-alt { font-size: 0.875rem; color: #3d2a18; }
+.image-sort { font-size: 0.8125rem; color: var(--admin-muted); }
+.image-actions { margin-top: auto; padding-top: 0.375rem; }
+
+/* ── CSV import (import_products.php) ─────────────────────────── */
+.report-section {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+.report-card {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  text-align: center;
+  background: #fffcf8;
+}
+.report-number {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--admin-primary);
+  font-variant-numeric: tabular-nums;
+}
+.report-label { font-size: 0.8125rem; color: var(--admin-muted); font-weight: 600; }
+.report-card.inserted { border-top: 3px solid #3a6b49; }
+.report-card.updated  { border-top: 3px solid var(--admin-accent); }
+.report-card.failed   { border-top: 3px solid #b03626; }
+.errors-list {
+  list-style: none;
+  border: 1px solid #f1d5cf;
+  border-radius: var(--radius-md);
+  background: #fdf6f4;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+.errors-list li {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  color: #7a2016;
+  border-bottom: 1px solid #f6e2dd;
+}
+.errors-list li:last-child { border-bottom: 0; }
+
+.template-section {
+  background: #faf3e8;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+.template-section h4 { font-size: 0.875rem; font-weight: 700; color: var(--admin-primary); margin-bottom: 0.75rem; }
+.template-table { width: 100%; min-width: 32rem; background: var(--admin-surface); border-radius: var(--radius-md); }
+.template-table th,
+.template-table td { padding: 0.625rem 0.875rem; font-size: 0.875rem; }
+.template-table small { color: var(--admin-muted); line-height: 1.5; }
+.csv-example {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+/* File picker: the real input stays focusable (for keyboards and form validation),
+   it just sits invisibly under the styled drop zone. */
+.file-input-wrapper { position: relative; }
+.file-input-wrapper input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.file-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 1.75rem 1rem;
+  border: 1.5px dashed #d9c5b0;
+  border-radius: var(--radius-lg);
+  background: #fffcf8;
+  text-align: center;
+  color: var(--admin-muted);
+  font-size: 0.9375rem;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+.file-input-label strong { color: var(--admin-secondary); }
+.file-input-icon { display: flex; color: var(--admin-secondary); }
+.file-input-wrapper:hover .file-input-label,
+.file-input-label.active {
+  border-color: var(--admin-accent);
+  background: #fdf5e8;
+}
+.file-input-wrapper input[type="file"]:focus-visible + .file-input-label {
+  outline: 2px solid var(--admin-secondary);
+  outline-offset: 2px;
+}
+.file-name { display: none; font-weight: 600; color: var(--admin-primary); font-size: 0.875rem; }
+.file-name.visible { display: block; }
+
+/* ── Phones: report cards stack, page header actions wrap ─────── */
+@media (max-width: 560px) {
+  .report-section { grid-template-columns: 1fr; }
+  .review-card .review-header { flex-direction: column; gap: 0.375rem; }
+}
+
+/* ── Touch screens: comfortable targets ────────────────────────── */
+@media (pointer: coarse) {
+  .btn,
+  .btn-small,
+  .action-buttons a,
+  .action-buttons button,
+  .topbar-user a { min-height: 2.75rem; }
+  .sidebar-nav li a { min-height: 2.75rem; }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .action-btn:active { transform: none; }
+  .skip-link { transition: none; }
+}
+/* Table cells that must not break (SKUs, prices). */
+.nowrap { white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }

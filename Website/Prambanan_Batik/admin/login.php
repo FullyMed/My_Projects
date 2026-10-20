@@ -92,7 +92,7 @@ if (isLoginRateLimited($pdo, $ip)) {
             font-size: 0.75rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #c4872c;
+            color: #9a6418;
             font-weight: 600;
             margin: 0;
         }
@@ -111,7 +111,7 @@ if (isLoginRateLimited($pdo, $ip)) {
             padding: 0.65rem 0.875rem;
             border: 1.5px solid #ecddd0;
             border-radius: 0.5rem;
-            font-size: 0.9375rem;
+            font-size: 1rem;
             font-family: inherit;
             background: #fff;
             color: #2a1a0e;
@@ -119,14 +119,15 @@ if (isLoginRateLimited($pdo, $ip)) {
         }
         .form-group input:focus {
             outline: none;
-            border-color: #c4872c;
-            box-shadow: 0 0 0 3px rgba(196,135,44,0.14);
+            border-color: #7a5230;
+            box-shadow: 0 0 0 3px rgba(196,135,44,0.4);
         }
         .btn-login {
             width: 100%;
             padding: 0.75rem;
+            min-height: 2.75rem;
             background: #c4872c;
-            color: white;
+            color: #2a1a0e;
             border: none;
             border-radius: 9999px;
             font-family: inherit;
@@ -135,12 +136,16 @@ if (isLoginRateLimited($pdo, $ip)) {
             letter-spacing: 0.05em;
             text-transform: uppercase;
             cursor: pointer;
-            transition: background 200ms, box-shadow 200ms;
+            transition: background-color 160ms cubic-bezier(0.23, 1, 0.32, 1), transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
             margin-top: 0.5rem;
         }
         .btn-login:hover {
-            background: #ae7520;
-            box-shadow: 0 4px 16px rgba(196,135,44,0.35);
+            background: #b37a24;
+        }
+        .btn-login:active { transform: scale(0.98); }
+        .btn-login:focus-visible { outline: 2px solid #7a5230; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            .btn-login:active { transform: none; }
         }
         .error-message {
             background: #fdf0ee;
@@ -176,8 +181,8 @@ if (isLoginRateLimited($pdo, $ip)) {
             width: 1em;
             height: 1em;
             margin: -0.5em 0 0 -0.5em;
-            border: 2px solid rgba(255,255,255,0.4);
-            border-top-color: #fff;
+            border: 2px solid rgba(42,26,14,0.25);
+            border-top-color: #2a1a0e;
             border-radius: 50%;
             animation: btn-spinner 0.6s linear infinite;
         }
@@ -187,6 +192,7 @@ if (isLoginRateLimited($pdo, $ip)) {
     </style>
 </head>
 <body>
+    <main id="main">
     <div class="login-container">
         <div class="login-box">
             <div class="login-brand">
@@ -235,6 +241,7 @@ if (isLoginRateLimited($pdo, $ip)) {
             </form>
         </div>
     </div>
+    </main>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
 </html>

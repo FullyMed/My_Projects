@@ -126,17 +126,17 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
     <section class="product-detail">
         <div class="container">
-            <div class="breadcrumb">
+            <nav class="breadcrumb" aria-label="Breadcrumb">
                 <a href="<?php echo SITE_PATH; ?>/">Home</a>
-                <span>/</span>
+                <span aria-hidden="true">/</span>
                 <a href="<?php echo SITE_PATH; ?>/products.php">Batik collection</a>
-                <span>/</span>
+                <span aria-hidden="true">/</span>
                 <?php if (!empty($product['category'])): ?>
                     <a href="<?php echo SITE_PATH; ?>/products.php?category=<?php echo urlencode($product['category_slug'] ?? ''); ?>"><?php echo escape($product['category']); ?></a>
-                    <span>/</span>
+                    <span aria-hidden="true">/</span>
                 <?php endif; ?>
-                <span><?php echo escape($product['name']); ?></span>
-            </div>
+                <span aria-current="page"><?php echo escape($product['name']); ?></span>
+            </nav>
 
             <div class="product-layout">
                 <div class="product-image-section">
@@ -150,7 +150,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                     <h1><?php echo escape($product['name']); ?></h1>
 
                     <div class="rating-section">
-                        <div class="stars"><?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?></div>
+                        <?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0, 'star-rating star-rating-lg'); ?>
                         <span class="rating-text"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?> out of 5</span>
                         <span class="review-text"><?php echo review_count_label($product['rating_count'] ?? $product['review_count'] ?? 0, 'customer review'); ?></span>
                     </div>
@@ -161,23 +161,23 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
 
                     <?php if (!empty($product['description'])): ?>
                         <div class="product-description">
-                            <h3>Description</h3>
+                            <h2>Description</h2>
                             <p><?php echo nl2br(escape($product['description'])); ?></p>
                         </div>
                     <?php endif; ?>
 
                     <div class="action-buttons">
                         <?php if (!empty($product['buy_link_shopee'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Shopee</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=shopee" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Shopee<span class="visually-hidden"> (opens in a new tab)</span></a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_tokopedia'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Tokopedia</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=tokopedia" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy on Tokopedia<span class="visually-hidden"> (opens in a new tab)</span></a>
                         <?php endif; ?>
                         <?php if (!empty($product['buy_link_other'])): ?>
-                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy now</a>
+                            <a href="<?php echo SITE_PATH; ?>/go.php?id=<?php echo (int)$product['id']; ?>&platform=other" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Buy now<span class="visually-hidden"> (opens in a new tab)</span></a>
                         <?php endif; ?>
                         <?php if (empty($product['buy_link_shopee']) && empty($product['buy_link_tokopedia']) && empty($product['buy_link_other'])): ?>
-                            <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Search on Shopee</a>
+                            <a href="https://shopee.co.id/search?keyword=<?php echo urlencode($product['name']); ?>" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">Search on Shopee<span class="visually-hidden"> (opens in a new tab)</span></a>
                         <?php endif; ?>
                         <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-secondary btn-large">Back to the collection</a>
                     </div>

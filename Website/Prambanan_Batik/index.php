@@ -47,7 +47,7 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
     <section class="hero">
         <div class="hero-content">
             <span class="hero-eyebrow">Prambanan Batik</span>
-            <h2>Indonesian batik, made by hand</h2>
+            <h1>Indonesian batik, made by hand</h1>
             <p>Traditional patterns, clothing and cloth, with reviews from the people who bought them.</p>
             <a href="<?php echo SITE_PATH; ?>/products.php" class="btn btn-primary btn-large">Browse the collection</a>
         </div>
@@ -61,19 +61,21 @@ $_ENV['PREVIEW_MODE'] = $preview_mode;
                 <?php foreach ($featured_products as $product): ?>
                     <article class="product-card">
                         <div class="product-image">
-                            <img src="<?php echo escape(product_image_url($product['image_url'] ?? '')); ?>" data-fallback="<?php echo SITE_PATH; ?>/assets/images/product-placeholder.svg" alt="<?php echo escape($product['name']); ?>" loading="lazy">
+                            <img src="<?php echo escape(product_image_url($product['image_url'] ?? '')); ?>" data-fallback="<?php echo SITE_PATH; ?>/assets/images/product-placeholder.svg" alt="<?php echo escape($product['name']); ?>" loading="lazy" decoding="async">
                         </div>
                         <div class="product-info">
-                            <span class="category"><?php echo escape($product['category']); ?></span>
+                            <?php if (!empty($product['category'])): ?>
+                                <span class="category"><?php echo escape($product['category']); ?></span>
+                            <?php endif; ?>
                             <h3><a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>"><?php echo escape($product['name']); ?></a></h3>
                             <div class="rating">
-                                <span class="stars"><?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?></span>
-                                <span class="rating-value"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?></span>
+                                <?php echo get_star_rating($product['rating_avg'] ?? $product['rating'] ?? 0); ?>
+                                <span class="rating-value" aria-hidden="true"><?php echo number_format($product['rating_avg'] ?? $product['rating'] ?? 0, 1); ?></span>
                                 <span class="review-count"><?php echo review_count_label($product['rating_count'] ?? $product['review_count'] ?? 0); ?></span>
                             </div>
                             <div class="product-footer">
                                 <span class="price"><?php echo format_currency($product['price_display'] ?? $product['price'] ?? 0); ?></span>
-                                <a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-small">View</a>
+                                <a href="<?php echo SITE_PATH; ?>/product.php?id=<?php echo (int)$product['id']; ?>" class="btn btn-small btn-quiet">View<span class="visually-hidden"> <?php echo escape($product['name']); ?></span></a>
                             </div>
                         </div>
                     </article>

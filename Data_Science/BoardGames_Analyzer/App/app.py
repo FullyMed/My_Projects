@@ -19,12 +19,15 @@ theme.set_meta_description(
 st.sidebar.title("Navigation")
 st.sidebar.info("Pick a page above. Recommendation finds games for you; Analytics shows the data behind it.")
 st.sidebar.markdown("---")
-st.sidebar.title("⚙ Settings")
+st.sidebar.title("Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 
 # Header
-st.markdown('<div class="main-title"><span class="title-icon">🎲</span> Board Game Discovery Engine</div>', unsafe_allow_html=True)
+st.markdown(
+    f'<div class="main-title">{theme.icon_svg("dice", "brand-mark")}Board Game Discovery Engine</div>',
+    unsafe_allow_html=True,
+)
 st.markdown(
     '<div class="subtitle">Find board games like the ones you love, and see why each one was picked.</div>',
     unsafe_allow_html=True,
@@ -35,29 +38,31 @@ st.markdown("---")
 # Navigation cards
 col1, col2 = st.columns(2)
 
+# Keyed containers (styled like .home-card in theme.py) so each card holds a real link;
+# the cards used to look clickable but did nothing
 with col1:
-    st.markdown("""
-    <div class="home-card">
-        <div class="home-card-icon">🧠</div>
+    with st.container(key="home_card_recommend"):
+        st.markdown(f"""
+        <div class="home-card-icon">{theme.icon_svg("search")}</div>
         <div class="home-card-title">Get recommendations</div>
         <div class="home-card-desc">
             Type a few games you like, pick the traits you want, or do both.
             Each suggestion lists the mechanics and categories it shares with your picks.
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+        st.page_link("pages/1_Recommendation.py", label="Find games", icon=":material/casino:")
 
 with col2:
-    st.markdown("""
-    <div class="home-card">
-        <div class="home-card-icon">📊</div>
+    with st.container(key="home_card_data"):
+        st.markdown(f"""
+        <div class="home-card-icon">{theme.icon_svg("chart")}</div>
         <div class="home-card-title">Explore the data</div>
         <div class="home-card-desc">
             Charts of the BoardGameGeek games behind the recommender: ratings, complexity,
             the most common mechanics, and how many games came out each year.
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+        st.page_link("pages/2_Analytics.py", label="See the charts", icon=":material/bar_chart:")
 
 st.markdown("---")
 
@@ -135,9 +140,9 @@ with h3:
 st.markdown("---")
 f1, f2 = st.columns(2)
 with f1:
-    st.page_link("pages/4_Terms_of_Use.py", label="Terms of use", icon="📜")
+    st.page_link("pages/4_Terms_of_Use.py", label="Terms of use", icon=":material/description:")
 with f2:
-    st.page_link("pages/5_Privacy_Policy.py", label="Privacy policy", icon="🔒")
+    st.page_link("pages/5_Privacy_Policy.py", label="Privacy policy", icon=":material/lock:")
 
 st.markdown("---")
 st.caption("BoardGames Analyzer · board game recommendations with reasons · built with Streamlit")

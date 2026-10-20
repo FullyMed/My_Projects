@@ -11,3 +11,12 @@ gatherUsageStats = false
 
 [client]
 showErrorDetails = false
+
+# Accent colour for Streamlit's own widgets (radio dots, slider, focus rings, checkboxes).
+# Without it they use Streamlit's default red, which clashes with the indigo theme in App/theme.py.
+# Set per base theme so Streamlit still follows the visitor's OS light/dark setting.
+[theme.light]
+primaryColor = "#4f46e5"
+
+[theme.dark]
+primaryColor = "#818cf8"

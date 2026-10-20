@@ -258,16 +258,17 @@ $categories = $stmt->fetchAll();
     <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
                     <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active" aria-current="page">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
@@ -275,7 +276,7 @@ $categories = $stmt->fetchAll();
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1>Import products</h1>
                 <div class="topbar-user">
@@ -315,7 +316,7 @@ $categories = $stmt->fetchAll();
                             </div>
                         </div>
 
-                        <p style="color: #666; margin-bottom: 1rem; font-size: 0.875rem;">
+                        <p class="muted" style="margin-bottom: 1rem;">
                             Processed <?php echo $report['rows_processed']; ?> rows total
                         </p>
 
@@ -380,11 +381,11 @@ $categories = $stmt->fetchAll();
                         </table>
 
                         <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">Example CSV</h4>
-                        <pre style="background: white; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.75rem;">sku,name,price,description,category_id,image_url
+                        <pre class="csv-example">sku,name,price,description,category_id,image_url
 PRMB-101,Sogan Parang Batik Tulis,650000,"Hand-drawn parang motif, natural sogan dye",1,https://example.com/parang.jpg
 PRMB-102,Kawung Batik Shirt,275000,Cotton shirt with kawung motif,2,https://example.com/kawung.jpg
 PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
-                        <p style="color: #666; font-size: 0.8125rem; margin-top: 0.75rem;">If a row's SKU already exists, we update that product's name and price, plus its description and category when those cells aren't empty. Put double quotes around any value that contains a comma. Excel's "CSV UTF-8" format works as it is.</p>
+                        <p class="muted" style="margin-top: 0.75rem;">If a row's SKU already exists, we update that product's name and price, plus its description and category when those cells aren't empty. Put double quotes around any value that contains a comma. Excel's "CSV UTF-8" format works as it is.</p>
                     </div>
 
                     <form method="POST" enctype="multipart/form-data">
@@ -396,7 +397,7 @@ PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
                             <div class="file-input-wrapper">
                                 <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
                                 <label for="csv_file" class="file-input-label">
-                                    <div class="file-input-icon">📁</div>
+                                    <div class="file-input-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 8 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></div>
                                     <div class="file-input-text">
                                         Drop CSV file here or <strong>click to browse</strong>
                                     </div>
@@ -412,7 +413,7 @@ PRMB-103,Indigo Batik Table Runner,150000,,8,</pre>
                     </form>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>

@@ -78,13 +78,14 @@ if ($pdo !== null) {
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
-            color: #c4872c;
+            color: #2a1a0e;
+            font-variant-numeric: tabular-nums;
             line-height: 1;
             margin-bottom: 0.25rem;
         }
         .stat-label {
             font-size: 0.8125rem;
-            color: #8c7560;
+            color: #6b5742;
             text-transform: uppercase;
             letter-spacing: 0.06em;
         }
@@ -93,21 +94,22 @@ if ($pdo !== null) {
             font-size: 0.875rem;
         }
         .star-badge {
-            color: #c4872c;
+            color: #7a5230;
             font-weight: 700;
         }
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
                 <p>Prambanan Batik</p>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php" class="active">Dashboard</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/index.php" class="active" aria-current="page">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
@@ -117,7 +119,7 @@ if ($pdo !== null) {
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1>Dashboard</h1>
                 <div class="topbar-user">
@@ -185,7 +187,7 @@ if ($pdo !== null) {
                 <?php endif; ?>
 
             </div>
-        </div>
+        </main>
     </div>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>

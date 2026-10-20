@@ -7,7 +7,19 @@ document.addEventListener('DOMContentLoaded', function () {
   initImageLoading();
   initFormLoadingStates();
   initNavProgressBar();
+  initAdminNav();
 });
+
+/* ── Admin nav on phones: show the current page's link ─────────
+   Below 768px the admin sidebar is a row of links that scrolls sideways.
+   Scroll the active one into view so "Reviews" isn't hidden off-screen. */
+function initAdminNav() {
+  const nav = document.querySelector('.sidebar');
+  const active = document.querySelector('.sidebar-nav a.active');
+  if (!nav || !active || nav.scrollWidth <= nav.clientWidth) return;
+  const left = active.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft;
+  nav.scrollLeft = Math.max(0, left - (nav.clientWidth - active.offsetWidth) / 2);
+}
 
 /* ── Sticky header shadow on scroll ────────────────────────── */
 function initHeader() {

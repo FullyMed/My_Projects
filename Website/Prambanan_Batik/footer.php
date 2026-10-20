@@ -3,11 +3,11 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>About Prambanan Batik</h3>
+                <h2>About Prambanan Batik</h2>
                 <p>We list our batik here with photos, prices and customer reviews. When you're ready to buy, you check out on Shopee or Tokopedia.</p>
             </div>
             <div class="footer-section">
-                <h3>Links</h3>
+                <h2>Links</h2>
                 <ul>
                     <li><a href="<?php echo SITE_PATH; ?>/">Home</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/products.php">Batik collection</a></li>
@@ -16,8 +16,8 @@
                 </ul>
             </div>
             <div class="footer-section">
-                <h3>Buy online</h3>
-                <p><a href="https://shopee.co.id/search?keyword=prambanan%20batik" target="_blank" rel="noopener noreferrer">Find us on Shopee</a></p>
+                <h2>Buy online</h2>
+                <p><a href="https://shopee.co.id/search?keyword=prambanan%20batik" target="_blank" rel="noopener noreferrer">Find us on Shopee<span class="visually-hidden"> (opens in a new tab)</span></a></p>
             </div>
         </div>
         <div class="footer-bottom">

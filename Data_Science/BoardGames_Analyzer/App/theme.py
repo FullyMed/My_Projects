@@ -20,10 +20,11 @@ html, body, [data-testid="stAppViewContainer"] {
     max-width: 100vw !important;
 }
 
-/* ── Tighten main-area padding so mobile gets more usable space ── */
+/* ── Main column: capped width so lines stay readable on wide monitors ── */
 .block-container {
     padding: 2rem 1.5rem 4rem !important;
-    max-width: 100% !important;
+    max-width: 1180px !important;
+    margin: 0 auto !important;
 }
 
 /* ── Ensure all images / pyplot figures scale responsively ── */
@@ -38,6 +39,15 @@ img, [data-testid="stImage"] img,
     max-width: 100% !important;
     overflow-x: auto !important;
 }
+
+/* ── Numbers line up in columns (metrics, stat boxes, the results table) ── */
+[data-testid="stMetricValue"], .stat-number, [data-testid="stDataFrame"] {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Headings break into balanced lines; paragraphs avoid one-word last lines ── */
+.main-title, .section-title, .card-title, .home-card-title { text-wrap: balance; }
+.subtitle, .info-box, .card-reason, .home-card-desc { text-wrap: pretty; }
 
 /* ── Streamlit metric ── */
 [data-testid="stMetricValue"] {
@@ -62,6 +72,94 @@ img, [data-testid="stImage"] img,
    so pin it or the themes' general paragraph colour would bleed into it */
 .stButton > button [data-testid="stMarkdownContainer"] p { color: #ffffff !important; }
 
+/* Press feedback: a quick 0.97 scale confirms the click (ease-out so it reacts at once) */
+.stButton > button {
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms ease, border-color 200ms ease;
+}
+.stButton > button:active { transform: scale(0.97); }
+
+/* "Try an example" sits beside a caption, so it sizes to its label instead of wrapping */
+.st-key-try_example button {
+    width: auto !important;
+    white-space: nowrap;
+    padding: 0 1.1rem !important;
+}
+
+/* ── Keyboard focus ──
+   The themes pin input/select borders with !important, which also hid Streamlit's own
+   focus border, so focus gets an explicit ring. --focus-ring is set per theme. */
+div[data-baseweb="input"]:focus-within > div,
+div[data-baseweb="select"]:focus-within > div,
+div[data-baseweb="textarea"]:focus-within > div {
+    outline: 2px solid var(--focus-ring, #4338ca) !important;
+    outline-offset: 2px;
+}
+.stButton > button:focus-visible,
+[data-testid="stPageLink-NavLink"]:focus-visible,
+[data-testid="stSidebarNav"] a:focus-visible,
+[data-testid="stMarkdownContainer"] a:focus-visible,
+[role="slider"]:focus-visible {
+    outline: 2px solid var(--focus-ring, #4338ca) !important;
+    outline-offset: 2px;
+}
+label[data-baseweb="radio"]:has(input:focus-visible) {
+    outline: 2px solid var(--focus-ring, #4338ca);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+/* ── Skip link: first thing a keyboard user reaches, hidden until focused ── */
+.skip-link {
+    position: fixed;
+    left: 12px;
+    top: -60px;
+    z-index: 1000002;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #4338ca;
+    color: #ffffff !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.skip-link:focus { top: 12px; outline: 2px solid #ffffff; outline-offset: 2px; }
+
+/* ── Touch screens: 44px targets for page links ── */
+@media (pointer: coarse) {
+    [data-testid="stSidebarNav"] a,
+    [data-testid="stPageLink-NavLink"] { min-height: 44px; display: flex; align-items: center; }
+}
+
+/* ── Reduced motion: keep colour and shadow changes, drop movement ── */
+@media (prefers-reduced-motion: reduce) {
+    .stButton > button { transition: box-shadow 200ms ease, border-color 200ms ease; }
+    .stButton > button:active { transform: none; }
+    .skip-link { transition: none; }
+}
+
+/* ── Windows High Contrast: gradient-clipped text would turn invisible ── */
+@media (forced-colors: active) {
+    .main-title, .stat-number {
+        background: none !important;
+        -webkit-text-fill-color: CanvasText !important;
+        color: CanvasText !important;
+    }
+}
+
+/* ── Home cards: equal height, with each card's link pinned to the bottom ── */
+[data-testid="stHorizontalBlock"]:has([class*="st-key-home_card_"]) { align-items: stretch !important; }
+[data-testid="stColumn"]:has([class*="st-key-home_card_"]) > [data-testid="stVerticalBlock"],
+[data-testid="stLayoutWrapper"]:has(> [class*="st-key-home_card_"]),
+[class*="st-key-home_card_"] { height: 100%; box-sizing: border-box; }
+[class*="st-key-home_card_"] > [data-testid="stElementContainer"]:last-child { margin-top: auto; }
+
+/* ── Page links read as links: accent colour, medium weight ── */
+[data-testid="stPageLink-NavLink"] p { font-weight: 600; }
+
+/* ── Brand mark (the die beside the Home title) and card icons ── */
+.brand-mark { display: inline-block; width: 0.9em; height: 0.9em; vertical-align: -0.08em; margin-right: 0.3em; }
+.home-card-icon svg { width: 32px; height: 32px; }
+
 /* ── Inputs: ≥ 16 px prevents iOS auto-zoom on focus ── */
 input, textarea, select,
 div[data-baseweb="input"] input,
@@ -74,6 +172,14 @@ div[data-baseweb="select"] > div {
     min-height: 44px !important;
     border-radius: 12px !important;
 }
+/* Streamlit's outer input wrapper keeps its own (OS-driven) background and border behind the
+   inner box the themes style, which showed as a dark or light rim; let the inner box draw it all */
+div[data-baseweb="input"],
+div[data-baseweb="textarea"] {
+    background: transparent !important;
+    border-color: transparent !important;
+    border-radius: 12px !important;
+}
 
 /* ══════════════════════════════════════════════════════════════════
    TABLET  641 px – 1024 px  (iPad portrait/landscape, small laptop)
@@ -83,7 +189,7 @@ div[data-baseweb="select"] > div {
     .subtitle     { font-size: 1.05rem !important; }
     .section-title { font-size: 1.05rem !important; }
 
-    .home-card  { padding: 18px !important; border-radius: 14px !important; }
+    .home-card, [class*="st-key-home_card_"] { padding: 18px !important; border-radius: 14px !important; }
     .home-card-icon  { font-size: 2rem !important; }
     .home-card-title { font-size: 1.1rem !important; }
     .home-card-desc  { font-size: 0.9rem !important; }
@@ -144,7 +250,7 @@ div[data-baseweb="select"] > div {
     .card-reason { font-size: 0.87rem !important; }
 
     /* Home page cards */
-    .home-card {
+    .home-card, [class*="st-key-home_card_"] {
         padding: 16px !important;
         border-radius: 12px !important;
         margin-bottom: 12px !important;
@@ -184,6 +290,7 @@ div[data-baseweb="select"] > div {
 
 _DARK_CSS = """
 <style>
+:root { --focus-ring: #a5b4fc; }
 .stApp { background: linear-gradient(180deg, #0f172a 0%, #020617 100%); color: #f8fafc; }
 [data-testid="stSidebar"] { background: rgba(15,23,42,0.96); border-right: 1px solid rgba(148,163,184,0.15); }
 
@@ -252,12 +359,19 @@ _DARK_CSS = """
 .card-title  { font-size: 1.35rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.35rem; }
 .card-reason { color: #cbd5e1; font-size: 0.98rem; line-height: 1.5; margin-top: 0.5rem; }
 
-.home-card {
+.home-card, [class*="st-key-home_card_"] {
     background: rgba(30,41,59,0.88);
     border: 1px solid rgba(148,163,184,0.22);
-    border-radius: 18px; padding: 24px; margin-bottom: 16px; text-align: center;
+    border-radius: 18px; padding: 24px; margin-bottom: 16px;
 }
-.home-card-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.home-card-icon  { color: #a5b4fc; margin-bottom: 0.5rem; }
+.brand-mark { color: #a5b4fc; }
+/* Spinners: Streamlit paints them over a gradient in its own (OS-driven) base colour,
+   which put dark text on a near-black box in the mismatched combination */
+[data-testid="stSpinner"] { background: transparent !important; }
+[data-testid="stSpinner"] p, [data-testid="stSpinner"] div { color: #e2e8f0 !important; }
+[data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
+[data-testid="stPageLink-NavLink"] p { color: #a5b4fc !important; }
 .home-card-title { font-size: 1.2rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.4rem; }
 .home-card-desc  { color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; }
 
@@ -270,7 +384,10 @@ div[data-baseweb="select"] > div { background-color: rgba(51,65,85,0.92) !import
 input, textarea { color: #f8fafc !important; }
 
 .stButton > button { border: 1px solid rgba(148,163,184,0.18); background: linear-gradient(90deg,#2563eb,#7c3aed); color: white; }
-.stButton > button:hover { color: white; border: 1px solid rgba(148,163,184,0.35); }
+@media (hover: hover) and (pointer: fine) {
+    .stButton > button:hover { color: white; border: 1px solid rgba(148,163,184,0.45); box-shadow: 0 6px 18px rgba(37,99,235,0.28); }
+}
+input::placeholder, textarea::placeholder { color: #aab4c3 !important; opacity: 1 !important; }
 hr { border: none; border-top: 1px solid rgba(148,163,184,0.18); margin: 1.2rem 0; }
 
 /* ── Text Streamlit colours from its own light/dark base ──
@@ -302,6 +419,7 @@ hr { border: none; border-top: 1px solid rgba(148,163,184,0.18); margin: 1.2rem 
 [data-testid="stTooltipHoverTarget"] svg, [data-testid="stTooltipIcon"] svg { color: #94a3b8 !important; }  /* help= "?" icons */
 input, textarea { color: #f8fafc !important; }
 [data-baseweb="select"] span { color: #f8fafc !important; }
+[data-baseweb="select"] svg, [data-testid="stSelectbox"] svg { fill: #cbd5e1 !important; }  /* dropdown chevrons */
 hr { border: none; border-top: 1px solid rgba(148,163,184,0.2); }
 
 /* ── Alerts (dark) ──
@@ -324,6 +442,8 @@ hr { border: none; border-top: 1px solid rgba(148,163,184,0.2); }
 
 _LIGHT_CSS = """
 <style>
+:root { --focus-ring: #4338ca; }
+
 /* ── Page: soft indigo-lavender gradient so white cards stand out ── */
 .stApp {
     background: linear-gradient(160deg, #eef2ff 0%, #f5f0ff 45%, #fdf4ff 100%);
@@ -348,8 +468,8 @@ _LIGHT_CSS = """
     margin-bottom: 0.25rem;
     line-height: 1.15;
 }
-/* Emoji in the title must escape the transparent fill so it renders normally */
-.main-title .title-icon {
+/* The brand mark must escape the transparent gradient fill so it renders normally */
+.main-title .brand-mark {
     -webkit-text-fill-color: initial !important;
     background: none !important;
     -webkit-background-clip: initial !important;
@@ -358,7 +478,7 @@ _LIGHT_CSS = """
 
 .subtitle {
     font-size: 1.15rem;
-    color: #64748b;
+    color: #475569;
     margin-bottom: 1.2rem;
 }
 
@@ -399,18 +519,24 @@ _LIGHT_CSS = """
 .card-reason { color: #475569; font-size: 0.98rem; line-height: 1.5; margin-top: 0.5rem; }
 
 /* ── Home page nav cards ── */
-.home-card {
+.home-card, [class*="st-key-home_card_"] {
     background: #ffffff;
     border: 1px solid #e0e7ff;
     border-radius: 18px;
     padding: 24px;
     margin-bottom: 16px;
-    text-align: center;
     box-shadow: 0 4px 16px rgba(99,102,241,0.09);
 }
-.home-card-icon  { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.home-card-icon  { color: #4338ca; margin-bottom: 0.5rem; }
 .home-card-title { font-size: 1.2rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; }
-.home-card-desc  { color: #64748b; font-size: 0.95rem; line-height: 1.5; }
+.home-card-desc  { color: #475569; font-size: 0.95rem; line-height: 1.5; }
+.brand-mark { color: #4338ca; }
+/* Spinners: Streamlit paints them over a gradient in its own (OS-driven) base colour,
+   which put dark text on a near-black box in the mismatched combination */
+[data-testid="stSpinner"] { background: transparent !important; }
+[data-testid="stSpinner"] p, [data-testid="stSpinner"] div { color: #1e293b !important; }
+[data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"],
+[data-testid="stPageLink-NavLink"] p { color: #4338ca !important; }
 
 /* ── Stat boxes: gradient number text ── */
 .stat-box {
@@ -430,14 +556,14 @@ _LIGHT_CSS = """
     background-clip: text;
     line-height: 1.2;
 }
-.stat-label { font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; font-weight: 500; }
+.stat-label { font-size: 0.85rem; color: #475569; margin-top: 0.3rem; font-weight: 500; }
 
 /* ── Metric widget ── */
 [data-testid="stMetricValue"] > div { color: #4338ca !important; font-weight: 700 !important; }
 [data-testid="stMetricLabel"],
 [data-testid="stMetricLabel"] p,
 [data-testid="stMetricLabel"] span,
-[data-testid="stMetricLabel"] div { color: #64748b !important; }
+[data-testid="stMetricLabel"] div { color: #475569 !important; }
 [data-testid="stMetricDelta"] { color: #475569 !important; }
 
 /* ── Widget labels (main content area) ── */
@@ -455,7 +581,7 @@ _LIGHT_CSS = """
 
 /* ── Caption text (e.g. below Try Example button) ── */
 [data-testid="stCaptionContainer"] p,
-[data-testid="stCaptionContainer"] span { color: #64748b !important; }
+[data-testid="stCaptionContainer"] span { color: #475569 !important; }
 
 /* ── Text Streamlit colours from its own (OS-driven) base theme ──
    With an OS in dark mode these would otherwise come out light-on-light ── */
@@ -463,7 +589,7 @@ _LIGHT_CSS = """
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] p,
 [data-testid="stMainBlockContainer"] [data-testid="stMarkdownContainer"] li { color: #1e293b; }
 [data-testid="stSliderTickBar"],
-[data-testid="stSliderTickBar"] * { color: #64748b !important; }
+[data-testid="stSliderTickBar"] * { color: #475569 !important; }
 [data-testid="stSidebar"] [data-testid="stIconMaterial"],
 [data-testid="stExpandSidebarButton"] [data-testid="stIconMaterial"] { color: #64748b !important; }
 [data-testid="stTooltipHoverTarget"] svg, [data-testid="stTooltipIcon"] svg { color: #64748b !important; }  /* help= "?" icons */
@@ -482,7 +608,7 @@ input::placeholder,
 textarea::placeholder,
 [data-baseweb="input"] input::placeholder,
 [data-baseweb="textarea"] textarea::placeholder {
-    color: #94a3b8 !important;
+    color: #64748b !important;
     opacity: 1 !important;
 }
 
@@ -525,9 +651,11 @@ textarea::placeholder,
     box-shadow: 0 4px 14px rgba(99,102,241,0.35);
     letter-spacing: 0.01em;
 }
-.stButton > button:hover {
-    color: white;
-    box-shadow: 0 6px 20px rgba(99,102,241,0.45);
+@media (hover: hover) and (pointer: fine) {
+    .stButton > button:hover {
+        color: white;
+        box-shadow: 0 6px 20px rgba(99,102,241,0.45);
+    }
 }
 
 hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
@@ -646,6 +774,26 @@ hr { border: none; border-top: 1px solid #e0e7ff; margin: 1.2rem 0; }
 """
 
 
+_SVG_OPEN = (
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"'
+)
+_PIP = '<circle cx="{x}" cy="{y}" r="1.25" fill="currentColor" stroke="none"/>'
+ICONS = {
+    "dice": '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/>'
+    + "".join(_PIP.format(x=x, y=y) for x, y in [(8.5, 8.5), (15.5, 8.5), (12, 12), (8.5, 15.5), (15.5, 15.5)]),
+    "search": '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+    "chart": '<path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V7"/><path d="M17 16v-8"/>',
+    "compass": '<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+}
+
+
+def icon_svg(name: str, css_class: str = "") -> str:
+    """Inline SVG for one of ICONS (decorative, hidden from screen readers)."""
+    cls = f' class="{css_class}"' if css_class else ""
+    return f"{_SVG_OPEN}{cls}>{ICONS[name]}</svg>"
+
+
 def sidebar_theme() -> str:
     """Render theme toggle in sidebar; return the selected mode."""
     if "theme" not in st.session_state:
@@ -667,11 +815,15 @@ def apply_theme(theme_mode: str):
 
 
 def set_meta_description(description: str):
-    """Inject <meta name="description"> into the real document head.
+    """Inject <meta name="description"> into the real document head, plus a skip link.
 
     Streamlit has no public API for this (st.set_page_config only controls
     <title> and the favicon), so this reaches into the parent document from
-    a same-origin components.v1.html iframe — the standard workaround.
+    a same-origin components.v1.html iframe, the standard workaround.
+
+    The same script adds a "Skip to main content" link as the first focusable
+    element. Streamlit puts the sidebar (page links, theme, filters) before the
+    page content, so without it a keyboard user tabs through all of that first.
     """
     payload = json.dumps(description)
     components.html(
@@ -679,6 +831,12 @@ def set_meta_description(description: str):
         <script>
         (function() {{
             var doc = window.parent.document;
+            // This helper's own zero-size iframe was an invisible tab stop on every page
+            if (window.frameElement) {{
+                window.frameElement.setAttribute('tabindex', '-1');
+                window.frameElement.setAttribute('aria-hidden', 'true');
+                window.frameElement.setAttribute('title', 'Page setup');
+            }}
             var meta = doc.querySelector('meta[name="description"]');
             if (!meta) {{
                 meta = doc.createElement('meta');
@@ -686,6 +844,20 @@ def set_meta_description(description: str):
                 doc.head.appendChild(meta);
             }}
             meta.content = {payload};
+
+            var main = doc.querySelector('[data-testid="stMain"]');
+            if (main) {{
+                main.id = 'main-content';
+                main.setAttribute('tabindex', '-1');
+                main.style.outline = 'none';
+            }}
+            if (!doc.querySelector('.skip-link')) {{
+                var skip = doc.createElement('a');
+                skip.className = 'skip-link';
+                skip.href = '#main-content';
+                skip.textContent = 'Skip to main content';
+                doc.body.insertBefore(skip, doc.body.firstChild);
+            }}
         }})();
         </script>
         """,
@@ -695,31 +867,26 @@ def set_meta_description(description: str):
 
 
 def chart_colors(theme_mode: str) -> dict:
-    """Return a matplotlib colour palette for the active theme."""
+    """Colours for the Altair charts on the Analytics page (transparent background, so
+    they sit on the page itself). Bar colours keep at least 3:1 against the page."""
     if theme_mode == "Dark":
         return {
-            "bg": "#1e293b",
-            "fig_bg": "#0f172a",
-            "text": "#f8fafc",
+            "text": "#e2e8f0",
             "grid": "#334155",
-            "primary": "#6366f1",
-            "secondary": "#8b5cf6",
-            "accent": "#06b6d4",
-            "bar_alpha": 0.88,
+            "primary": "#818cf8",
+            "secondary": "#a78bfa",
+            "accent": "#22d3ee",
         }
     return {
-        "bg": "#ffffff",
-        "fig_bg": "#f0f4ff",   # matches the page tint so charts blend in
         "text": "#1e293b",
-        "grid": "#e0e7ff",
-        "primary": "#4338ca",  # deeper indigo — more saturated on white
+        "grid": "#c7d2fe",
+        "primary": "#4338ca",
         "secondary": "#7c3aed",
-        "accent": "#0284c7",
-        "bar_alpha": 0.82,
+        "accent": "#0369a1",
     }
 
 
-def render_not_found(title: str, message: str, icon: str = "🔍", show_links: bool = False):
+def render_not_found(title: str, message: str, icon: str = "search", show_links: bool = False):
     """Themed 'not found' card — reused for empty results and the dedicated 404 page.
 
     title/message are escaped because the 404 page fills message from the ?reason=
@@ -731,7 +898,7 @@ def render_not_found(title: str, message: str, icon: str = "🔍", show_links: b
     st.markdown(
         f'''
         <div class="result-card" style="text-align:center;">
-            <div class="home-card-icon">{html.escape(icon)}</div>
+            <div class="home-card-icon">{icon_svg(icon)}</div>
             <div class="card-title">{html.escape(title)}</div>
             <div class="card-reason">{html.escape(message)}</div>
         </div>
@@ -741,21 +908,8 @@ def render_not_found(title: str, message: str, icon: str = "🔍", show_links: b
     if show_links:
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.page_link("app.py", label="Home", icon="🏠")
+            st.page_link("app.py", label="Home", icon=":material/home:")
         with c2:
-            st.page_link("pages/1_Recommendation.py", label="Recommendation", icon="🧠")
+            st.page_link("pages/1_Recommendation.py", label="Recommendations", icon=":material/casino:")
         with c3:
-            st.page_link("pages/2_Analytics.py", label="Analytics", icon="📊")
-
-
-def style_ax(ax, fig, colors: dict, title: str = ""):
-    """Apply consistent theme styling to a matplotlib Axes object."""
-    fig.patch.set_facecolor(colors["fig_bg"])
-    ax.set_facecolor(colors["bg"])
-    ax.tick_params(colors=colors["text"], labelcolor=colors["text"])
-    for spine in ax.spines.values():
-        spine.set_edgecolor(colors["grid"])
-    ax.xaxis.label.set_color(colors["text"])
-    ax.yaxis.label.set_color(colors["text"])
-    if title:
-        ax.set_title(title, color=colors["text"], fontsize=11, fontweight="bold", pad=10)
+            st.page_link("pages/2_Analytics.py", label="Data charts", icon=":material/bar_chart:")

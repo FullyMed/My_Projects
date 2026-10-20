@@ -75,7 +75,8 @@ Instead, it focuses on:
 - HuggingFace Transformers: DistilBERT SST-2 sentiment model
 
 ### Visualization
-- matplotlib, seaborn
+- App: Altair (vector charts, readable on phones; see "Design rules" in Section 5)
+- Notebooks and paper figures: matplotlib, seaborn
 
 ### App framework
 - Streamlit 1.52.2
@@ -178,7 +179,8 @@ Contains:
 - Result cards are `st.container(key="result_card_N")`, styled via `[class*="st-key-result_card_"]` alongside `.result-card`, because a `st.markdown('<div class="result-card">')` / `st.markdown('</div>')` pair can't wrap widgets (see Bug 11)
 - `sidebar_theme()`: renders the theme toggle and returns selected mode
 - `apply_theme(mode)`: injects both base + theme CSS
-- `chart_colors(mode)`: returns a matplotlib colour palette dict
+- `chart_colors(mode)`: returns the Altair chart palette (text, grid, three bar colours) for the active theme
+- `ICONS` / `icon_svg(name, css_class)`: inline stroke SVG icons (dice, search, chart, compass) used instead of emoji
 - `style_ax(ax, fig, colors, title)`: applies consistent chart styling
 - `render_not_found(title, message, icon, show_links)`: themed "not found" card (see Section 6, "Custom 404 / not found"). Escapes `title`/`message` and collapses whitespace, because the 404 page feeds it the user-controllable `?reason=` query param (see Bug 12)
 - `set_meta_description(description)`: injects `<meta name="description">` into the real document head per page (see Section 6, "Per-page meta title / description")
@@ -214,7 +216,7 @@ Six chart sections:
 6. Games published per year (line chart with area fill)
 7. Community sentiment distribution (if sentiment data exists): mean P(positive) per game from `02b_sentiment_full_coverage.py`, with a caption explaining the sampling
 
-All charts use `width='stretch'` and are responsive to the container width.
+All charts are Altair (since 2026-10-20; they were matplotlib images, whose labels shrank to about 5px on a phone), use `width='stretch'` and `theme=None`, and are drawn by the `show_chart()` / `hbar_chart()` / `histogram_chart()` helpers. Row 1 also shows a `help=` tooltip on the "Minimum ratings" slider.
 
 ### `App/pages/3_Not_Found.py`
 Standalone, themed "404 / Not Found" page. Appears in the sidebar nav like any other page (Streamlit's `pages/` convention auto-lists every file there, and it cannot be hidden without switching the whole app off the `pages/` convention onto `st.navigation`, which this project intentionally does not do; see "Custom 404 / not found" in Section 6). Reads an optional `?reason=` query param to customize its message, and renders `theme.render_not_found(..., show_links=True)` with `st.page_link` buttons back to Home / Recommendation / Analytics.
@@ -317,6 +319,18 @@ All user-facing text went through the Humanizer and Stop Slop skills on 2026-10-
 **Paper** (`Reports/paper.tex`): formal academic register with an active "we" voice, US spelling, no em dashes, no promotional or significance-inflating words. Every number, equation, table, citation key and label must survive a rewrite unchanged; the 2026-10-15 pass checked this with a before/after diff. Don't add claims about cited works beyond what the original sentence said.
 
 **README.md / CLAUDE.md**: plain sentences, sentence-case headings, no em dashes, no bold-label bullet lists in the README. CLAUDE.md keeps its structured "What was wrong / Fix" bug entries, because those are reference fields rather than prose.
+
+## Design rules (added 2026-10-20)
+A design pass on 2026-10-20 used the UI/UX Pro Max, taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski design-engineering skills. It fixed what was wrong and kept the look (indigo palette, gradient titles and buttons, light/dark themes); it was not a redesign. Keep these rules:
+
+- **Contrast**: every page passes WCAG AA (4.5:1 for normal text, 3:1 for large text and non-text marks like icons and chevrons) in all four combinations of app theme × OS light/dark. Light theme grey text on the lavender page is `#475569`; `#64748b` only reached 4.26:1. Check new text with a contrast audit, not by eye.
+- **Accent**: `.streamlit/config.toml` sets `primaryColor` in `[theme.light]` (`#4f46e5`) and `[theme.dark]` (`#818cf8`). Without it Streamlit's own radio dots, slider and focus colours were its default red. Use the per-theme sections, never a top-level `[theme] base`, so Streamlit keeps following the visitor's OS.
+- **Keyboard**: a "Skip to main content" link is the first tab stop on every page (injected by `set_meta_description()`, which also takes its own zero-size iframe out of the tab order). Inputs and selects show a 2px `--focus-ring` outline via `:focus-within`, because the themes' `!important` borders hid Streamlit's focus border; buttons, links and the slider use `:focus-visible`.
+- **Icons**: no emoji in headings, cards or links. Page links use Material icons (`icon=":material/home:"`), and the Home brand mark and card icons are inline stroke SVGs from `theme.ICONS` via `theme.icon_svg()`, coloured by the theme accent. Browser-tab favicons (`page_icon`) still use emoji, which is fine.
+- **Cards**: anything with widgets inside is a keyed `st.container` styled through `[class*="st-key-…"]` (result cards, Home cards). The Home cards contain real `st.page_link`s, stretch to equal height, and pin their link to the bottom.
+- **Motion**: buttons scale to 0.97 on press over 160ms with a strong ease-out, hover effects only apply with a mouse (`@media (hover: hover) and (pointer: fine)`), and `prefers-reduced-motion` drops the movement but keeps colour changes. Don't add entrance animations to page sections.
+- **Charts** (`pages/2_Analytics.py`): Altair, drawn with `st.altair_chart(..., width="stretch", theme=None)`. `theme=None` matters: Streamlit's chart theme follows the OS, so it would override the app's toggle. Text is 12px at every width, histograms are binned in pandas first, long names truncate (full name in the tooltip), big counts use `~s` on the axis. Bars on a non-zero axis need `x2=alt.datum(axis_min)`, and don't use `clip=True` (clip-path ids can collide across charts on one page).
+- **Layout**: the main column is capped at 1180px, headings use `text-wrap: balance`, numbers use `tabular-nums`, touch screens get 44px page-link targets, and Windows High Contrast mode gets a solid-colour fallback for the gradient-clipped titles.
 
 ## Python formatting
 - 4 spaces indentation
@@ -594,6 +608,22 @@ Found by an engine stress test (17 normal and edge-case queries), driving the re
 
 **Fix:** Retargeted to `stColumn` and `stAppDeployButton` (verified at 375 px: card metric columns stack full-width, no horizontal scroll). The `stThumbValue` selector was **removed**, not retargeted: its rule paints an indigo background with dark text, which would make the slider's value label unreadable on `stSliderThumbValue`.
 
+## 2026-10-20 design pass (UI/UX Pro Max, taste-skill, Frontend Design, Emil Kowalski)
+Found by a WCAG AA contrast audit (all pages, both themes, OS in both modes), keyboard tabbing, a 375px phone viewport and the four skills' checklists. Each fix was re-verified in the browser.
+- **No visible keyboard focus** on inputs and selects: the themes' `!important` borders hid Streamlit's focus border. Added `--focus-ring` outlines.
+- **Streamlit's red accent** on the theme radio, sliders and focus: set per-theme `primaryColor` in `.streamlit/config.toml`.
+- **Invisible tab stop**: `set_meta_description()`'s zero-size iframe was focusable on every page. The script now sets `tabindex="-1"` and `aria-hidden` on its own frame, and also injects a skip link.
+- **Light-theme contrast**: subtitles, captions, metric labels and slider ticks were `#64748b` on lavender (4.26:1), and placeholders `#94a3b8` on white (2.6:1). Now `#475569` and `#64748b`.
+- **Cold-start spinner** was dark text on a near-black box (1.29:1) in Light theme with a dark-mode OS, because Streamlit paints the spinner over its own base colour. Pinned per theme.
+- **Dark rim around text inputs** (and a light rim in the opposite case): Streamlit's outer input wrapper kept its base-theme background. Made it transparent.
+- **Dark-theme dropdown chevrons** fell back to Streamlit's grey; now `#cbd5e1`.
+- **Analytics charts unreadable on phones** (matplotlib images at 24% scale, ~5px labels): rebuilt in Altair (Felix chose this over tuning matplotlib). `App/requirements.txt` now lists `altair` explicitly and no longer lists `matplotlib`.
+- **Home cards looked clickable but weren't**: they're now keyed containers with real page links, equal height, links aligned.
+- **Emoji used as icons** in titles, cards, result cards and page links: replaced with SVG / Material icons.
+- **"Try an example" wrapped onto two lines** in its narrow column: the button now sizes to its label.
+- **Results order and table**: "Top picks" cards now come before the full table, which uses plain column names ("Match score", "BGG rating", "Why") with number formats and no index column.
+- Smaller polish: 1180px max content width, `tabular-nums`, `text-wrap: balance`, press feedback with reduced-motion support, mouse-only hover, a forced-colors fallback for gradient text, 44px touch targets for page links.
+
 ## Bug 20: Smaller engine and page fixes
 - **Silent title resolution:** titles resolve by exact name, then by substring (most-voted match), and unmatched titles were silently dropped. The page now shows "typed → matched" for every seed and warns about unmatched ones (`describe_seed_matches()` in `1_Recommendation.py`).
 - **Expanded traits listed case duplicates** ("Strategy … strategy"): `expand_traits()` now de-duplicates case-insensitively (`_dedupe_casefold`). Scoring was already case-insensitive, so rankings are unchanged.
@@ -696,7 +726,7 @@ The page reads an optional `?reason=` query param to customize its message, but 
 The legacy single-page `app.py` / `recommender.py` at the project root do **not** have: the 404 page, `set_meta_description`, or loading-state spinners. Only `recommender.py`'s logic is required to stay synced with `App/recommender.py` (Section 10). If UI parity there is ever wanted, those three features would need to be ported manually; this was a deliberate scope decision each time, not an oversight.
 
 ## Image compression: considered and declined (2026-09-29)
-The app has no static images at all (every chart is generated live via matplotlib/`st.pyplot`). The only PNGs in the repo are `Reports/images/architecture.png` (468K) and `performance_chart.png` (116K), used solely in the LaTeX paper build, together under 600K with zero effect on the deployed app. Don't re-suggest this unless static images are actually added to the app later.
+The app has no static images at all (every chart is drawn live, with Altair since 2026-10-20). The only PNGs in the repo are `Reports/images/architecture.png` (468K) and `performance_chart.png` (116K), used solely in the LaTeX paper build, together under 600K with zero effect on the deployed app. Don't re-suggest this unless static images are actually added to the app later.
 
 ## Suggested next improvements (offered to Felix 2026-10-01, not yet approved)
 1. **Pin `App/requirements.txt`** to the tested versions (venv: pandas 2.3.3, numpy 1.26.4, scikit-learn 1.8.0, scipy 1.16.3, streamlit 1.52.2). Unpinned, Streamlit Cloud installs the newest on every rebuild.

@@ -154,17 +154,17 @@ $admins = $stmt->fetchAll();
         .admin-avatar {
             width: 2.5rem; height: 2.5rem;
             background: #c4872c;
-            color: #fff;
+            color: #2a1a0e;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 1rem;
             flex-shrink: 0;
         }
         .admin-email { font-weight: 600; color: #2a1a0e; font-size: 0.9375rem; }
-        .admin-meta  { font-size: 0.8125rem; color: #8c7560; margin-top: 0.1rem; }
+        .admin-meta  { font-size: 0.8125rem; color: #6b5742; margin-top: 0.1rem; }
         .self-badge {
             font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
-            text-transform: uppercase; background: #c4872c; color: #fff;
+            text-transform: uppercase; background: #c4872c; color: #2a1a0e;
             padding: 0.15rem 0.5rem; border-radius: 9999px; margin-left: 0.4rem;
         }
         .admin-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -185,24 +185,25 @@ $admins = $stmt->fetchAll();
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
                     <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php" class="active">Admins</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php" class="active" aria-current="page">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1>Admins</h1>
                 <div class="topbar-user">
@@ -319,7 +320,7 @@ $admins = $stmt->fetchAll();
                 </div>
 
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>

@@ -28,6 +28,8 @@ Behind the scenes:
 - **SEO.** Each page has its own title, description and canonical URL. There's an XML sitemap and a generated `robots.txt`.
 - **Loading feedback.** A thin progress bar runs across the top when you change pages, product photos shimmer while they load, and submit buttons show a spinner.
 - **Login protection.** Five failed logins from one IP address lock that address out for 15 minutes.
+- **Accessible.** Every page passes a WCAG AA contrast check, works from the keyboard (skip link, visible focus ring), has one clear page heading, and uses touch targets of at least 44px on phones. Star ratings are read out as "Rated 4.5 out of 5". Motion is short and respects the reduced-motion setting.
+- **Admin on a phone.** The admin sidebar turns into a row of links across the top, and wide tables scroll inside their card.
 
 ## Tech stack
 
@@ -261,6 +263,8 @@ BATIK-001,Parang Batik Cloth,350000,Hand-drawn parang pattern on cotton,1,https:
 
 **There's a preview-mode banner.** The site shows sample products when the database is unreachable or has no products, with the banner "Preview mode: we can't load our products right now, so these are sample items." Check the database settings, or add products. An empty category doesn't trigger this; it shows "No batik here yet" instead.
 
+**The admin panel has no menu on my phone.** Reload the page: below 768px the menu is a row of links across the top that you can swipe sideways. If it's still missing, your browser has an old `admin.css` cached; the `?v=` number on the stylesheet link should change after an update.
+
 **A rating looks wrong.** The site recalculates `rating_avg` and `rating_count` every time a review changes. To recalculate them all by hand:
 ```sql
 UPDATE products p SET
@@ -283,6 +287,20 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version history
+
+- **v2.12.0** (2026-10-20): Design pass (UI/UX Pro Max, taste-skill redesign-existing-projects, Frontend Design and Emil Kowalski skills). This was fixes, not a redesign: the colours and fonts stay.
+  - Admin on phones: the sidebar used to collapse to nothing below 768px, leaving no way to move between pages. It's now a row of links across the top that scrolls sideways and shows the current page. The products table used to push the whole page sideways; tables now scroll inside their card.
+  - The admin Reviews list, product image grid and CSV import page had about 40 classes with no styles at all, so they showed as raw HTML (full-size photos, a bare file input). They're styled now, and the file picker is a drop zone with an upload icon instead of an emoji.
+  - Added an "Add review" button. Nothing linked to the add-review form before.
+  - Contrast: buttons and the category select were white on gold (2.8:1) and now use espresso text. Muted text, the review dates, breadcrumbs, footer text, dashboard numbers and the preview banner were all below AA and are fixed. A script checked every public and admin page.
+  - One `<h1>` per page: the site name was the only `<h1>` (twice on product pages), and page titles were `<h2>`. Heading levels no longer skip.
+  - Keyboard: a skip link on every page, one visible focus ring everywhere (the category select used to remove it), `aria-current` on navigation, and keyboard focus inside a product card lifts it like a hover.
+  - Touch: buttons, nav, pagination, footer and breadcrumb links are 44px tall on touch screens. Selects and inputs are 16px on phones so iOS doesn't zoom. Hover effects only apply with a mouse, so phones don't get stuck hover states.
+  - Motion: one strong ease-out curve, 160 to 200ms for feedback and 400ms for the scroll reveal (it was up to 600ms). No more `transition: all`, and the photo zoom on the product page is gone. Reduced-motion users get plain fades.
+  - Star ratings are drawn stars filled to the exact rating, labelled "Rated 4.5 out of 5" for screen readers, instead of ★/◐ text characters.
+  - Screen readers hear the product name after each "View" link and "(opens in a new tab)" on store links.
+  - On phones the public header is no longer pinned (it took about 125px of the screen) and section spacing is tighter.
+  - Category tags are sentence case instead of small uppercase pills. The pale-gold "Legal" label on the Terms and Privacy pages is gone (it was 1.6:1 on cream). SKUs and prices in the admin table no longer break across lines.
 
 - **v2.11.0** (2026-10-15): Writing pass
   - Rewrote every piece of visitor-facing text with the Humanizer and Stop Slop skills, in a plain, friendly shop voice: page copy, meta descriptions, the tagline, buttons, the preview banner, the 404 page, the footer and the social preview image (`og-image.png`, re-rendered).

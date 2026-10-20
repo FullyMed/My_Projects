@@ -54,16 +54,17 @@ $products = $stmt->fetchAll();
     <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
                     <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active">Products</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/products.php" class="active" aria-current="page">Products</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
@@ -71,7 +72,7 @@ $products = $stmt->fetchAll();
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1>Products</h1>
                 <div class="topbar-user">
@@ -113,9 +114,9 @@ $products = $stmt->fetchAll();
                             <?php foreach ($products as $product): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                    <td><?php echo htmlspecialchars($product['sku']); ?></td>
+                                    <td class="nowrap"><?php echo htmlspecialchars($product['sku']); ?></td>
                                     <td><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></td>
-                                    <td>Rp <?php echo number_format($product['price_display'], 0, ',', '.'); ?></td>
+                                    <td class="nowrap num"><?php echo htmlspecialchars(format_currency($product['price_display'])); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($product['created_at'])); ?></td>
                                     <td>
                                         <div class="action-buttons">
@@ -135,7 +136,7 @@ $products = $stmt->fetchAll();
                     </table>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>

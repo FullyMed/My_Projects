@@ -16,13 +16,13 @@ theme.set_meta_description(
     "or go straight to recommendations or the data charts."
 )
 
-st.sidebar.title("⚙ Settings")
+st.sidebar.title("Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 st.sidebar.markdown("---")
 st.sidebar.caption("Board Game Discovery Engine, a student research project.")
 
-st.markdown('<div class="main-title"><span class="title-icon">🧭</span> 404: page not found</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">404: page not found</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">We couldn\'t find what you were looking for.</div>',
     unsafe_allow_html=True,
@@ -36,7 +36,7 @@ message = reason if reason else "The link may be wrong, or the page moved. Try o
 theme.render_not_found(
     title="Nothing here",
     message=message,
-    icon="🧭",
+    icon="compass",
     show_links=True,
 )
 

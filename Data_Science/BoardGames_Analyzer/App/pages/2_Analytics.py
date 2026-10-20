@@ -6,8 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import ast
 from collections import Counter
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
+import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -24,7 +23,7 @@ theme.set_meta_description(
     "top games, common mechanics and categories, and releases per year."
 )
 
-st.sidebar.title("⚙ Settings")
+st.sidebar.title("Settings")
 selected_theme = theme.sidebar_theme()
 theme.apply_theme(selected_theme)
 colors = theme.chart_colors(selected_theme)
@@ -92,53 +91,87 @@ def top_values(parsed_series: pd.Series, n: int = 20) -> pd.Series:
 
 # ─────────────────────────────────────────────────────────────────
 # Chart helpers
+# Altair draws vector charts with fixed-size text, so labels stay readable on a phone.
+# (The old matplotlib images shrank to about a quarter of their size there, leaving
+# ~5px labels.) theme=None keeps Streamlit's OS-driven chart theme from overriding
+# these colours, which follow the app's own Light/Dark toggle.
 # ─────────────────────────────────────────────────────────────────
-def _hbar_chart(labels, values, title, color, n):
-    """Horizontal bar chart sized to look good at all viewport widths."""
-    height = max(3.5, n * 0.35)
-    fig, ax = plt.subplots(figsize=(8, height))
-    theme.style_ax(ax, fig, colors, title)
-    bars = ax.barh(labels, values, color=color, alpha=colors["bar_alpha"])
-    ax.set_xlabel("Number of Games", fontsize=9)
-    ax.tick_params(labelsize=8)
-    # Value labels only when bars are legible
-    if n <= 20:
-        for bar, val in zip(bars, values):
-            ax.text(
-                bar.get_width() * 1.01,
-                bar.get_y() + bar.get_height() / 2,
-                f"{int(val):,}",
-                va="center", color=colors["text"], fontsize=8,
-            )
-    plt.tight_layout()
-    st.pyplot(fig, width='stretch')
-    plt.close()
+CHART_FONT = '"Source Sans", "Source Sans Pro", sans-serif'
 
 
-def _rating_hbar(names, ratings, title, n, min_votes):
-    if len(ratings) == 0:
-        st.info("No games have that many ratings. Lower the **Minimum ratings** slider.")
-        return
-    height = max(3.5, n * 0.35)
-    fig, ax = plt.subplots(figsize=(8, height))
-    theme.style_ax(ax, fig, colors, "")
-    bars = ax.barh(names, ratings, color=colors["primary"], alpha=colors["bar_alpha"])
-    ax.set_xlabel("Bayes Average Rating", fontsize=9)
-    ax.tick_params(labelsize=8)
-    x_pad = (ratings.max() - ratings.min()) * 0.04
-    if x_pad == 0:
-        x_pad = 0.05
-    ax.set_xlim(ratings.min() - x_pad * 4, ratings.max() + x_pad * 6)
-    for bar, val in zip(bars, ratings):
-        ax.text(
-            bar.get_width() + x_pad,
-            bar.get_y() + bar.get_height() / 2,
-            f"{val:.2f}",
-            va="center", color=colors["text"], fontsize=8,
+def show_chart(chart, height):
+    chart = (
+        chart.properties(height=height, background="transparent")
+        .configure_view(stroke=None)
+        .configure_axis(
+            labelColor=colors["text"], titleColor=colors["text"],
+            gridColor=colors["grid"], domainColor=colors["grid"], tickColor=colors["grid"],
+            labelFontSize=12, titleFontSize=12, labelFont=CHART_FONT, titleFont=CHART_FONT,
+            titleFontWeight=600,
         )
-    plt.tight_layout()
-    st.pyplot(fig, width='stretch')
-    plt.close()
+        .configure_title(color=colors["text"], fontSize=14, font=CHART_FONT, anchor="start", fontWeight=600)
+    )
+    st.altair_chart(chart, width="stretch", theme=None)
+
+
+def hbar_chart(data, label_col, value_col, color, value_title, value_format=",.0f", title="", zero=True):
+    """Horizontal bars, longest at the top, each labelled with its value."""
+    domain = None
+    if not zero:
+        # Ratings bunch together (e.g. 8.0 to 8.6), so start the axis just below the lowest bar
+        lo, hi = data[value_col].min(), data[value_col].max()
+        pad = max((hi - lo) * 0.15, 0.05)
+        domain = [lo - pad, hi + pad]
+    base = alt.Chart(data, title=title).encode(
+        y=alt.Y(f"{label_col}:N", sort="-x", title=None, axis=alt.Axis(labelLimit=170)),
+        x=alt.X(
+            f"{value_col}:Q", title=value_title,
+            scale=alt.Scale(zero=zero, domain=domain) if domain else alt.Scale(zero=zero),
+            # Big counts read as 20k / 40k on the axis (full numbers sit on the bars);
+            # at phone width "80,000100,000" ran together
+            axis=alt.Axis(format="~s" if value_format == ",.0f" else value_format, tickCount=4, labelOverlap=True),
+        ),
+        tooltip=[
+            alt.Tooltip(f"{label_col}:N", title="Name"),
+            alt.Tooltip(f"{value_col}:Q", title=value_title, format=value_format),
+        ],
+    )
+    bars = base.mark_bar(color=color, cornerRadiusEnd=3)
+    if domain:
+        # Vega-Lite draws bars from 0 even on a non-zero axis (they came out 0px wide),
+        # so start them at the axis minimum. No clip=True: with several charts on one
+        # page the SVG clip-path ids can collide and hide another chart's bars.
+        bars = bars.encode(x2=alt.datum(domain[0]))
+    values = base.mark_text(align="left", dx=4, color=colors["text"], fontSize=11, font=CHART_FONT).encode(
+        text=alt.Text(f"{value_col}:Q", format=value_format)
+    )
+    show_chart(bars + values, height=max(220, 24 * len(data)))
+
+
+def histogram_chart(values, bins, color, value_title, title="", mean_label=None):
+    """Bins in pandas first, so the browser gets ~40 bars instead of thousands of raw values."""
+    counts, edges = np.histogram(values.dropna(), bins=bins)
+    hist = pd.DataFrame({"start": edges[:-1], "end": edges[1:], "games": counts})
+    chart = alt.Chart(hist, title=title).mark_bar(color=color, opacity=0.9).encode(
+        x=alt.X("start:Q", title=value_title, bin="binned", axis=alt.Axis(tickCount=6)),
+        x2="end:Q",
+        y=alt.Y("games:Q", title="Games", axis=alt.Axis(format=",.0f", tickCount=5)),
+        tooltip=[
+            alt.Tooltip("start:Q", title="From", format=".2f"),
+            alt.Tooltip("end:Q", title="To", format=".2f"),
+            alt.Tooltip("games:Q", title="Games", format=","),
+        ],
+    )
+    if mean_label is not None:
+        mean = float(values.mean())
+        rule = alt.Chart(pd.DataFrame({"mean": [mean]})).mark_rule(
+            color=colors["text"], strokeDash=[5, 4], size=1.5
+        ).encode(x="mean:Q")
+        label = alt.Chart(pd.DataFrame({"mean": [mean], "text": [mean_label]})).mark_text(
+            align="left", dx=6, dy=-6, baseline="top", color=colors["text"], fontSize=12, font=CHART_FONT
+        ).encode(x="mean:Q", y=alt.value(0), text="text:N")
+        chart = chart + rule + label
+    show_chart(chart, height=280)
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -170,7 +203,7 @@ df_rated = df[df["usersrated"].fillna(0) >= min_votes].copy()
 # ─────────────────────────────────────────────────────────────────
 # Header
 # ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="main-title"><span class="title-icon">📊</span> The data behind it</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">The data behind it</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">The 21,631 BoardGameGeek games the recommender searches, in charts.</div>',
     unsafe_allow_html=True,
@@ -201,28 +234,12 @@ st.markdown('<div class="section-title">Ratings and complexity</div>', unsafe_al
 d1, d2 = st.columns(2)
 
 with d1:
-    ratings = df_rated["bayesaverage"].dropna()
-    fig, ax = plt.subplots(figsize=(6, 3.5))
-    theme.style_ax(ax, fig, colors, "BGG rating (Bayes average)")
-    ax.hist(ratings, bins=40, color=colors["primary"], alpha=colors["bar_alpha"], edgecolor="none")
-    ax.set_xlabel("Bayes Average Rating", fontsize=9)
-    ax.set_ylabel("Games", fontsize=9)
-    ax.tick_params(labelsize=8)
-    plt.tight_layout()
-    st.pyplot(fig, width='stretch')
-    plt.close()
+    histogram_chart(df_rated["bayesaverage"], 40, colors["primary"], "BGG rating (Bayes average)",
+                    title="BGG rating")
 
 with d2:
-    complexity = df_rated["averageweight"].dropna()
-    fig, ax = plt.subplots(figsize=(6, 3.5))
-    theme.style_ax(ax, fig, colors, "Complexity (1 = light, 5 = heavy)")
-    ax.hist(complexity, bins=30, color=colors["secondary"], alpha=colors["bar_alpha"], edgecolor="none")
-    ax.set_xlabel("Average Weight", fontsize=9)
-    ax.set_ylabel("Games", fontsize=9)
-    ax.tick_params(labelsize=8)
-    plt.tight_layout()
-    st.pyplot(fig, width='stretch')
-    plt.close()
+    histogram_chart(df_rated["averageweight"], 30, colors["secondary"], "Complexity (1 = light, 5 = heavy)",
+                    title="Complexity")
 
 st.markdown("---")
 
@@ -234,13 +251,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 top_rated = df_rated.nlargest(top_n_bars, "bayesaverage")[["game_name", "bayesaverage"]].copy()
-_rating_hbar(
-    top_rated["game_name"].iloc[::-1].values,
-    top_rated["bayesaverage"].iloc[::-1].values,
-    "",
-    top_n_bars,
-    min_votes,
-)
+if top_rated.empty:
+    st.info("No games have that many ratings. Lower the **Minimum ratings** slider.")
+else:
+    hbar_chart(top_rated, "game_name", "bayesaverage", colors["primary"], "BGG rating (Bayes average)",
+               value_format=".2f", zero=False)
 
 st.markdown("---")
 
@@ -252,27 +267,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 top_reviewed = df.nlargest(top_n_bars, "usersrated")[["game_name", "usersrated"]].copy()
-height = max(3.5, top_n_bars * 0.35)
-fig, ax = plt.subplots(figsize=(8, height))
-theme.style_ax(ax, fig, colors, "")
-bars = ax.barh(
-    top_reviewed["game_name"].iloc[::-1].values,
-    top_reviewed["usersrated"].iloc[::-1].values,
-    color=colors["accent"], alpha=colors["bar_alpha"],
-)
-ax.set_xlabel("Number of User Ratings", fontsize=9)
-ax.tick_params(labelsize=8)
-ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{int(x):,}"))
-for bar, val in zip(bars, top_reviewed["usersrated"].iloc[::-1].values):
-    ax.text(
-        bar.get_width() * 1.01,
-        bar.get_y() + bar.get_height() / 2,
-        f"{int(val):,}",
-        va="center", color=colors["text"], fontsize=8,
-    )
-plt.tight_layout()
-st.pyplot(fig, width='stretch')
-plt.close()
+hbar_chart(top_reviewed, "game_name", "usersrated", colors["accent"], "User ratings")
 
 st.markdown("---")
 
@@ -289,19 +284,15 @@ with mc1:
     if "boardgamemechanic" in df.columns:
         parsed_mechs = parse_list_col(df["boardgamemechanic"])
         top_mechs = top_values(parsed_mechs, n=top_n_bars)
-        _hbar_chart(
-            top_mechs.index[::-1], top_mechs.values[::-1],
-            f"Top {top_n_bars} mechanics", colors["primary"], top_n_bars,
-        )
+        hbar_chart(top_mechs.rename_axis("mechanic").reset_index(name="games"), "mechanic", "games",
+                   colors["primary"], "Games", title="Mechanics")
 
 with mc2:
     if "boardgamecategory" in df.columns:
         parsed_cats = parse_list_col(df["boardgamecategory"])
         top_cats = top_values(parsed_cats, n=top_n_bars)
-        _hbar_chart(
-            top_cats.index[::-1], top_cats.values[::-1],
-            f"Top {top_n_bars} categories", colors["secondary"], top_n_bars,
-        )
+        hbar_chart(top_cats.rename_axis("category").reset_index(name="games"), "category", "games",
+                   colors["secondary"], "Games", title="Categories")
 
 st.markdown("---")
 
@@ -318,16 +309,18 @@ year_df = (
     .size()
     .reset_index(name="count")
 )
-fig, ax = plt.subplots(figsize=(8, 3.5))
-theme.style_ax(ax, fig, colors, "")
-ax.plot(year_df["yearpublished"], year_df["count"], color=colors["primary"], linewidth=2.2, alpha=0.9)
-ax.fill_between(year_df["yearpublished"], year_df["count"], alpha=0.12, color=colors["primary"])
-ax.set_xlabel("Year Published", fontsize=9)
-ax.set_ylabel("Games Released", fontsize=9)
-ax.tick_params(labelsize=8)
-plt.tight_layout()
-st.pyplot(fig, width='stretch')
-plt.close()
+year_df["yearpublished"] = year_df["yearpublished"].astype(int)
+year_base = alt.Chart(year_df).encode(
+    x=alt.X("yearpublished:Q", title="Year released", axis=alt.Axis(format="d", tickCount=8)),
+    y=alt.Y("count:Q", title="Games released", axis=alt.Axis(format=",.0f", tickCount=5)),
+    tooltip=[alt.Tooltip("yearpublished:Q", title="Year", format="d"), alt.Tooltip("count:Q", title="Games", format=",")],
+)
+show_chart(
+    year_base.mark_area(color=colors["primary"], opacity=0.15)
+    + year_base.mark_line(color=colors["primary"], strokeWidth=2.2)
+    + year_base.mark_point(opacity=0, size=60),  # invisible points give the tooltip something to hover
+    height=280,
+)
 
 st.markdown("---")
 
@@ -346,20 +339,8 @@ if not sent_df.empty and "avg_sentiment_score" in sent_df.columns:
     s1, s2 = st.columns([3, 1])
 
     with s1:
-        fig, ax = plt.subplots(figsize=(8, 3.5))
-        theme.style_ax(ax, fig, colors, "Average review positivity per game (0 = negative, 1 = positive)")
-        ax.hist(sent_scores, bins=40, color=colors["accent"], alpha=colors["bar_alpha"], edgecolor="none")
-        ax.set_xlabel("Average review positivity", fontsize=9)
-        ax.set_ylabel("Games", fontsize=9)
-        ax.tick_params(labelsize=8)
-        ax.axvline(
-            sent_scores.mean(), color=colors["secondary"], linewidth=1.8,
-            linestyle="--", label=f"Mean: {sent_scores.mean():.3f}",
-        )
-        ax.legend(facecolor=colors["bg"], edgecolor=colors["grid"], labelcolor=colors["text"], fontsize=8)
-        plt.tight_layout()
-        st.pyplot(fig, width='stretch')
-        plt.close()
+        histogram_chart(sent_scores, 40, colors["accent"], "Average review positivity (0 = negative, 1 = positive)",
+                        mean_label=f"Mean {sent_scores.mean():.3f}")
 
     with s2:
         st.metric("Games scored", f"{len(sent_scores):,}")

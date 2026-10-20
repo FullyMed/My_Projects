@@ -14,7 +14,7 @@ $meta_description = "We couldn't find this page at Prambanan Batik. Go back to t
     <section class="error-page">
         <div class="container">
             <span class="error-code">404</span>
-            <h2>Page not found</h2>
+            <h1>Page not found</h1>
             <p>We couldn't find that page. The link may be old, or the product may no longer be listed.</p>
             <div class="error-actions">
                 <a href="<?php echo SITE_PATH; ?>/" class="btn btn-primary">Go to the home page</a>

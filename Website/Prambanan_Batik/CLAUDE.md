@@ -24,6 +24,22 @@ On 2026-10-15 the owner had all visitor-facing text, the admin messages and both
 - The legal pages are plain English, but their promises are binding. Don't change what they promise without changing the code to match, and the other way round. When their wording changes, bump the hard-coded "Last updated" month.
 - The sample products (`get_sample_batik_products()` in `functions.php` and `seed.sql`) are named and described to match their photos. If you swap a photo, check the name and description still fit.
 
+## Design rules
+
+On 2026-10-20 the owner had the site reviewed with the UI/UX Pro Max, taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski design-engineering skills. It was a fix pass, not a redesign: the espresso, copper-gold and cream palette and Cormorant Garamond with Inter stay. Keep new work within these rules.
+
+- **Contrast (WCAG AA).** Body text needs 4.5:1, and large text (24px+, or 18.66px bold) needs 3:1. Muted text uses `--color-neutral-500` (`#7d6650`), never `--color-neutral-400`, which is for decoration only. Filled gold controls (`.btn-primary`, the category select, admin `.btn`) use **espresso text on gold**; white on that gold is 2.8:1. On the dark footer, text is `rgba(255,255,255,0.7)` or more. The last audit passed on every public and admin page (a script measured each text element against its real background).
+- **One `<h1>` per page.** The site name in `header.php` is a `<p class="logo">`, so each page owns its `<h1>`: the hero line, "Batik collection", the product name, "Page not found", or the legal page title. Don't skip levels: the collection page has a visually hidden "Products" `<h2>` above the cards; legal sections, the product "Description" and footer headings are `<h2>`.
+- **Keyboard.** Every page starts with a skip link to `<main id="main" tabindex="-1">`. `:focus-visible` gives one 2px ring everywhere (pale gold on the dark hero and footer, gold on the admin sidebar). Never write `outline: none` without a replacement; the only exceptions are text inputs with their own focus ring, and `#main` as the skip-link target. Navs mark the current page with `aria-current="page"`.
+- **Touch.** Buttons are at least 44px tall, and under `@media (pointer: coarse)` so are nav links, pagination, footer links, breadcrumb links and admin actions. Selects and inputs are 16px on phones so iOS doesn't zoom.
+- **Hover only with a pointer.** Hover movement (card lift, photo zoom, button shadow) sits in `@media (hover: hover) and (pointer: fine)`, so phones don't get stuck hover states. `.product-card:focus-within` gives keyboard users the same lift.
+- **Motion.** Use `--ease-out` (`cubic-bezier(0.23, 1, 0.32, 1)`). Button and hover feedback runs 160 to 200ms; only the one-time scroll reveal and card entrance use 400ms. Buttons press to `scale(0.97)`. Name the transitioned properties; never `transition: all`. Under `prefers-reduced-motion` the reveal is a plain fade, press scaling and smooth scrolling are off, and the skip link doesn't slide.
+- **Star ratings** come from `get_star_rating($rating, $class)`. It returns a `role="img"` span labelled "Rated 4.5 out of 5", and CSS draws five masked stars filled to `--rating` (`.star-rating`, or `.star-rating-lg` on the product page). Don't go back to ★/◐ text glyphs, which looked uneven and read badly in screen readers.
+- **Screen-reader text.** `.visually-hidden` adds context that the layout makes obvious on screen: the product name after each "View" link, "(opens in a new tab)" on store links, and the "Products" heading. Decorative separators (breadcrumb "/") are `aria-hidden`.
+- **Labels.** Category tags are sentence case on a small square-cornered tint, not uppercase pills. Don't add eyebrow labels above headings on light pages; the "Legal" label was removed because pale gold on cream was 1.6:1.
+- **Admin on phones.** Below 768px the sidebar becomes a row of links across the top that scrolls sideways, and `initAdminNav()` in `main.js` scrolls the current page's link into view. Wide tables scroll inside `.table-section` (`overflow-x: auto`) instead of widening the page. Cells that mustn't break (SKUs, prices) get `.nowrap`. The topbar isn't sticky on phones, and neither is the public header.
+- **Admin component styles live in `admin.css`.** The reviews list, product image grid, CSV import report, template table and file drop zone used to have no styles at all. A new admin page must not rely on classes that exist nowhere: check with a quick grep before shipping. The file input stays focusable and sits invisibly over its drop zone; don't `display: none` it.
+
 ## Still to do
 
 Check here first when you start a session on this project.
@@ -33,7 +49,7 @@ Check here first when you start a session on this project.
 - **Deploying.** Set `BASE_URL` to the real domain (it drives canonical and Open Graph URLs, `robots.txt` and the sitemap), and switch `.htaccess`'s `ErrorDocument 404` to `/404.php` at the domain root.
 - **Logout is a GET link** (`admin/logout.php`, linked twice on every admin page). That's a low-risk logout CSRF, left alone on purpose. Fixing it means a small POST form with a CSRF check on every admin page.
 
-History: the 2026-09-30 bug-fix pass (README v2.10.0) is committed. It was tested against a real local database with a 67-check scripted run of every admin and public flow, a database-down run, an empty-catalog run and browser checks. The 2026-10-15 writing pass (README v2.11.0) followed.
+History: the 2026-09-30 bug-fix pass (README v2.10.0) is committed. It was tested against a real local database with a 67-check scripted run of every admin and public flow, a database-down run, an empty-catalog run and browser checks. The 2026-10-15 writing pass (README v2.11.0) is committed too. The 2026-10-20 design pass (README v2.12.0, see Design rules) is uncommitted, for the owner to review. It was checked with a contrast audit of every page, keyboard and phone-width runs in the browser, and the 74-check script from the writing pass.
 
 ## Local development
 
@@ -157,7 +173,7 @@ Both pages use the `CONTACT_EMAIL` constant (`config.php`, overridable like `BAS
 
 `footer.php` loads `assets/js/main.js` on every public page, and every `admin/*.php` page includes it directly (`<script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>`) just before any page-specific inline `<script>`. Its public-only init functions (`initHeader`, `initScrollReveal`, `initProductCards`, `initSelectMenus`) all check for selectors that admin pages don't have, so they do nothing there.
 
-Three behaviours live in `main.js`:
+Three loading behaviours live in `main.js` (plus `initAdminNav`, see Design rules):
 - `initImageLoading()` adds `is-img-loading` to `.product-image` and `.product-image-section` containers (shimmer CSS) until their `<img>` fires `load` or `error`, then adds `img-loaded` to fade it in. On `error` it first swaps to the img's `data-fallback` URL, once (see Product images). It works off selectors, so a new product image block needs no JS changes as long as it uses one of those container classes and carries `data-fallback`.
 - `initFormLoadingStates()` disables a form's submit button and adds `is-loading` (a spinner via `::after`) on `submit`. It waits a tick (`setTimeout(fn, 0)`) so the browser has already captured the clicked button's value. That's also why admin delete buttons (`onclick="return confirm(...)"`) get a spinner: `confirm()` runs first, and if you cancel, no `submit` event fires. When the page comes back from the back/forward cache (`pageshow` with `persisted`), `initNavProgressBar` re-enables any `.is-loading` buttons.
 - `initNavProgressBar()` appends one fixed `.nav-progress-bar` div to `<body>` and grows it toward 100% (never to it) on same-tab link clicks and form submits. Every navigation is a full page reload, so the bar never has to finish.
@@ -237,11 +253,11 @@ When an edit **moves a review to another product**, recalculate both the new and
 |------|---------|
 | `config.php` | Loads `.env` into `$_ENV`, defines `config_env()`, then every constant (`BASE_URL`, `SITE_PATH`, `DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`, `ITEMS_PER_PAGE`, `SESSION_TIMEOUT`, `SITE_TAGLINE`, `DEFAULT_META_DESCRIPTION`, `CONTACT_EMAIL` and so on). Order: real env var, then `.env`, then the default. `DB_PASSWORD` defaults to `''`. |
 | `db_connect.php` | Creates and returns a PDO connection (the DSN includes `port=DB_PORT`), or `null` on failure. |
-| `functions.php` | Helpers: `escape()` (null-safe), `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (multibyte-safe), `review_count_label()` ("1 review"/"2 reviews"), `asset_url()`, `absolute_url()`, `product_image_url()`, `post_string()`, `get_sample_batik_products()` and more. |
+| `functions.php` | Helpers: `escape()` (null-safe), `slugify()`, `format_currency()`, `get_pagination()`, `is_preview_mode()`, `truncate_text()` (multibyte-safe), `review_count_label()` ("1 review"/"2 reviews"), `get_star_rating()` (labelled star image, see Design rules), `asset_url()`, `absolute_url()`, `product_image_url()`, `post_string()`, `get_sample_batik_products()` and more. |
 | `header.php` / `footer.php` | Shared page chrome. `header.php` prints the title, description, canonical, Open Graph and Twitter tags and the preview banner; `footer.php` loads `main.js`. |
 | `robots.php` | Builds `robots.txt` (served through an `.htaccess` rewrite) from `SITE_PATH` and `BASE_URL`. |
 | `assets/images/` | `og-image.png` and `og-image-source.html` (social preview), `product-placeholder.svg` (missing or dead product photo). |
-| `assets/js/main.js` | Shared JS: scroll reveal, sticky header, avatar initials, the category filter's auto-submit and the loading feedback (`initImageLoading`, `initFormLoadingStates`, `initNavProgressBar`). Public pages load it through `footer.php`, and every `admin/*.php` page loads it directly. |
+| `assets/js/main.js` | Shared JS: scroll reveal, sticky header, avatar initials, the category filter's auto-submit, the loading feedback (`initImageLoading`, `initFormLoadingStates`, `initNavProgressBar`) and `initAdminNav` (scrolls the current admin link into view on phones). Public pages load it through `footer.php`, and every `admin/*.php` page loads it directly. |
 | `go.php` | Checks that the store URL starts with `http(s)://`, logs the click to `outbound_clicks`, then redirects. |
 | `sitemap.php` | Builds the XML sitemap from the database; still works when `$pdo` is null. |
 | `404.php` | Not-found page, styled like the rest of the site, sending a real 404 via `http_response_code(404)`. `.htaccess` uses it as `ErrorDocument 404`. |

@@ -78,24 +78,25 @@ $reviews = $stmt->fetchAll();
     <link rel="stylesheet" href="<?php echo asset_url('admin/admin.css'); ?>">
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="admin-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Admin panel</h2>
             </div>
-            <nav>
+            <nav aria-label="Admin">
                 <ul class="sidebar-nav">
                     <li><a href="<?php echo SITE_PATH; ?>/admin/index.php">Dashboard</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/categories.php">Categories</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/products.php">Products</a></li>
-                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="active">Reviews</a></li>
+                    <li><a href="<?php echo SITE_PATH; ?>/admin/reviews.php" class="active" aria-current="page">Reviews</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/admins.php">Admins</a></li>
                     <li><a href="<?php echo SITE_PATH; ?>/admin/logout.php">Log out</a></li>
                 </ul>
             </nav>
         </aside>
 
-        <div class="main-content">
+        <main class="main-content" id="main" tabindex="-1">
             <div class="topbar">
                 <h1>Reviews</h1>
                 <div class="topbar-user">
@@ -107,6 +108,7 @@ $reviews = $stmt->fetchAll();
             <div class="content">
                 <div class="page-header">
                     <h2 class="page-title">Manage reviews</h2>
+                    <a href="<?php echo SITE_PATH; ?>/admin/review_edit.php" class="btn">Add review</a>
                 </div>
 
                 <?php if ($message): ?>
@@ -136,7 +138,7 @@ $reviews = $stmt->fetchAll();
                                             <?php endif; ?>
                                         </div>
                                     </div>
-                                    <div style="text-align: right; color: #999; font-size: 0.875rem;">
+                                    <div class="review-date">
                                         <?php echo date('M d, Y', strtotime($review['created_at'])); ?>
                                     </div>
                                 </div>
@@ -166,10 +168,11 @@ $reviews = $stmt->fetchAll();
                 <?php else: ?>
                     <div class="empty-state">
                         <p>No reviews yet.</p>
+                        <a href="<?php echo SITE_PATH; ?>/admin/review_edit.php" class="btn">Add the first review</a>
                     </div>
                 <?php endif; ?>
             </div>
-        </div>
+        </main>
     </div>
     <script src="<?php echo asset_url('assets/js/main.js'); ?>"></script>
 </body>
