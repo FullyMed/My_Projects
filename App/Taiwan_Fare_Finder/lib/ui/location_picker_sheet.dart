@@ -5,6 +5,7 @@ import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/models/location.dart';
 import 'package:taiwan_fare_finder/services/location_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
+import 'package:taiwan_fare_finder/ui/tff_focus_ring.dart';
 import 'package:taiwan_fare_finder/ui/tff_empty_state.dart';
 
 /// Bottom-sheet location picker designed for large lists.
@@ -130,7 +131,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
           const SizedBox(height: AppSpacing.md),
           Flexible(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
+              duration: TffMotion.of(context, TffMotion.fast),
               switchInCurve: Curves.easeOut,
               switchOutCurve: Curves.easeIn,
               child: searching
@@ -261,7 +262,7 @@ class _CityGroupTileState extends State<_CityGroupTile> {
     final locale = l10n.locale;
 
     final cityLocalized = LocationService.starterLocations.firstWhere((l) => l.cityEn == widget.cityEn, orElse: () => widget.locations.first).cityForLocale(locale);
-    return Container(
+    return Ink(
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -269,7 +270,12 @@ class _CityGroupTileState extends State<_CityGroupTile> {
       ),
       child: Column(
         children: [
-          InkWell(
+          Semantics(
+            expanded: _expanded,
+            child: TffFocusRing(
+              radius: BorderRadius.circular(AppRadius.xl),
+              builder: (context, onFocusChange) => InkWell(
+              onFocusChange: onFocusChange,
             borderRadius: BorderRadius.circular(AppRadius.xl),
             onTap: () => setState(() => _expanded = !_expanded),
             child: Padding(
@@ -278,16 +284,19 @@ class _CityGroupTileState extends State<_CityGroupTile> {
                 children: [
                   Expanded(child: Text(cityLocalized, style: Theme.of(context).textTheme.titleMedium)),
                   AnimatedRotation(
-                    duration: const Duration(milliseconds: 180),
+                    duration: TffMotion.of(context, TffMotion.medium),
+                    curve: TffMotion.easeOut,
                     turns: _expanded ? 0.5 : 0,
                     child: Icon(Icons.expand_more_rounded, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
+          )),
           ),
           AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
+            duration: TffMotion.of(context, TffMotion.medium),
+            sizeCurve: TffMotion.easeOut,
             crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
@@ -324,10 +333,15 @@ class LocationListItem extends StatelessWidget {
 
     final title = location.nameForLocale(locale);
     final city = location.cityForLocale(locale);
-    return InkWell(
+    return Semantics(
+      selected: selected,
+      child: TffFocusRing(
+        radius: BorderRadius.circular(AppRadius.xl),
+        builder: (context, onFocusChange) => InkWell(
+        onFocusChange: onFocusChange,
       borderRadius: BorderRadius.circular(AppRadius.xl),
       onTap: onTap,
-      child: Container(
+      child: Ink(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: dense ? 10 : 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -349,14 +363,11 @@ class LocationListItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.md),
-            AnimatedScale(
-              duration: const Duration(milliseconds: 180),
-              scale: selected ? 1 : 0.9,
-              child: Icon(selected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: selected ? cs.primary : cs.onSurfaceVariant),
-            ),
+            Icon(selected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: selected ? cs.primary : cs.onSurfaceVariant),
           ],
         ),
       ),
+      )),
     );
   }
 }

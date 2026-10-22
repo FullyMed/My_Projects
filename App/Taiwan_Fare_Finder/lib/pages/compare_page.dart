@@ -200,7 +200,7 @@ class _ComparePageState extends State<ComparePage> {
                 ),
                 Wrap(
                   spacing: 10,
-                  runSpacing: 10,
+                  runSpacing: 2, // chips pad their own 48 dp tap target
                   children: [
                     _multiChip(context, TransportMode.hsr, l10n.modesHSR,
                         enabled: !fare.isLoading),
@@ -309,7 +309,7 @@ class _ComparePageState extends State<ComparePage> {
                       : null,
                 ),
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
+                  duration: TffMotion.of(context, TffMotion.fast),
                   child: (!fare.isLoading && !canCompare)
                       ? Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -401,21 +401,29 @@ class _ComparePageState extends State<ComparePage> {
 
           return Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xxl),
-            child: SizedBox(
-              height: constraints.maxHeight,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Flexible(
-                    flex: 5,
-                    child: SingleChildScrollView(child: form),
+            // Capped at 1200 wide, like Search, so cards don't stretch across
+            // a big monitor.
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        flex: 5,
+                        child: SingleChildScrollView(child: form),
+                      ),
+                      const SizedBox(width: AppSpacing.lg),
+                      Flexible(
+                        flex: 6,
+                        child: SingleChildScrollView(child: results),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.lg),
-                  Flexible(
-                    flex: 6,
-                    child: SingleChildScrollView(child: results),
-                  ),
-                ],
+                ),
               ),
             ),
           );

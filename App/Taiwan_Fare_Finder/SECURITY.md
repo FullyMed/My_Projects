@@ -36,7 +36,7 @@ Taiwan Fare Finder runs on the user's device. The only server is a small TDX rel
 
 ### Dependencies
 
-- The font ships with the app (`assets/fonts/PlusJakartaSans-VariableFont_wght.ttf`, SIL OFL). The `google_fonts` runtime download is gone.
+- The font ships with the app (five static Plus Jakarta Sans weights in `assets/fonts/`, SIL OFL, generated locally from the bundled variable font by `scripts/gen_fonts.py`). The `google_fonts` runtime download is gone.
 - The remaining packages are mainstream and current: `http`, `shared_preferences`, `provider`, `go_router`, `intl`, `package_info_plus`.
 
 ## Checklist

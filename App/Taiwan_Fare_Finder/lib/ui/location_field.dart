@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/models/location.dart';
 import 'package:taiwan_fare_finder/theme.dart';
+import 'package:taiwan_fare_finder/ui/tff_focus_ring.dart';
 import 'package:taiwan_fare_finder/ui/location_picker_sheet.dart';
 
 class LocationField extends StatelessWidget {
@@ -30,12 +31,21 @@ class LocationField extends StatelessWidget {
     final display = value == null ? '' : value!.nameForLocale(l10n.locale);
     final city = value == null ? '' : value!.cityForLocale(l10n.locale);
 
-    return IgnorePointer(
+    // One button for screen readers: "Origin, Taipei" (or "Origin, Choose a place").
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: '$label, ${value == null ? l10n.locationPickerCtaChoose : display}',
+      excludeSemantics: true,
+      child: IgnorePointer(
       ignoring: !enabled,
       child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 160),
+        duration: TffMotion.of(context, TffMotion.fast),
         opacity: enabled ? 1 : 0.65,
-        child: InkWell(
+        child: TffFocusRing(
+          radius: BorderRadius.circular(AppRadius.lg),
+          builder: (context, onFocusChange) => InkWell(
+          onFocusChange: onFocusChange,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: enabled
               ? () async {
@@ -81,7 +91,8 @@ class LocationField extends StatelessWidget {
           ],
             ),
           ),
-        ),
+        )),
+      ),
       ),
     );
   }

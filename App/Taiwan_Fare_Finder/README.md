@@ -13,6 +13,7 @@ A Flutter app that shows what a trip across Taiwan costs before you go. You pick
 - Speak English, Traditional Chinese and Indonesian, including the city names in saved routes.
 - Fit phones, tablets and desktops: a bottom bar on narrow screens, a side rail on wide ones, and two-column pages from 840 dp.
 - Show shimmer placeholders shaped like the real content while results load, and a themed 404 page for unknown routes.
+- Work for everyone: every text passes WCAG AA contrast in light and dark mode, tap targets are at least 48 dp, layouts hold up at 200% system text, keyboard users on web and desktop get a visible focus ring, screen readers hear what each control is and whether it's selected, and the OS "reduce motion" setting turns off movement.
 - Include a Terms of Use and a Privacy Policy, both translated, that say what the app stores and what it sends in API mode.
 
 ---
@@ -103,7 +104,7 @@ test/
 ├── fixtures/        # real TDX responses (THSR and TRA fares, a timetable sample), captured 2026-10-01
 ├── services/        # TDX parsing, FareService (mock, API, cache, offline, LRU), favorites and history
 ├── controllers/     # stale-response guard, Search and Compare staying separate
-└── widgets/         # full-app flows, plus overflow checks at phone size (Indonesian) and desktop size
+└── widgets/         # full-app flows, overflow checks (phone, desktop, 200% text), keyboard focus
 ```
 
 ---
@@ -113,7 +114,7 @@ test/
 | Concern | Library |
 |---|---|
 | UI | Flutter (Material 3) |
-| Font | Plus Jakarta Sans, bundled as a variable font (`assets/fonts/`, SIL OFL) |
+| Font | Plus Jakarta Sans, five static weights bundled in `assets/fonts/` (SIL OFL), cut from the variable font by `scripts/gen_fonts.py` |
 | State | `provider` |
 | Navigation | `go_router` |
 | Local storage | `shared_preferences` |
@@ -131,7 +132,7 @@ test/
 
 Leave the generated `AppLocalizations` class alone. The app doesn't use it.
 
-The app's copy follows a plain, friendly style: short sentences, written to "you", no hype, and honest about which fares are estimates. "Writing style" in [`CLAUDE.md`](CLAUDE.md) lists the rules.
+The app's copy follows a plain, friendly style: short sentences, written to "you", no hype, and honest about which fares are estimates. "Writing style" in [`CLAUDE.md`](CLAUDE.md) lists the rules, and "Design rules" there covers color, touch targets, focus, motion and large text.
 
 ---
 
@@ -141,7 +142,8 @@ The app's copy follows a plain, friendly style: short sentences, written to "you
 flutter pub get       # install dependencies
 flutter run           # run on a connected device or emulator
 flutter analyze       # lint
-flutter test          # unit and widget tests (about 30, no network needed)
+flutter test          # unit and widget tests (32, no network needed)
+python scripts/gen_fonts.py      # regenerate the static font weights (needs fontTools)
 flutter gen-l10n      # regenerate the ARB stubs (rarely needed)
 dart run flutter_launcher_icons  # regenerate Android, iOS and web icons from assets/icons/app_icon.png
 

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 /// A small pill-shaped badge used for metadata like "Mock data" or "Saved".
 ///
 /// Pass [iconColor], [backgroundColor], and [borderColor] to differentiate
-/// badge types without creating separate widgets.
+/// badge types without creating separate widgets. Colors are solid (no
+/// opacity over the card), so the label contrast is the same on any surface.
 class TffBadge extends StatelessWidget {
   const TffBadge({
     super.key,
@@ -26,11 +27,11 @@ class TffBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final effectiveIcon = iconColor ?? cs.onSurfaceVariant;
-    final effectiveBg = backgroundColor ?? cs.surfaceContainerHighest.withValues(alpha: 0.6);
-    final effectiveBorder = borderColor ?? cs.outline.withValues(alpha: 0.18);
+    final effectiveBg = backgroundColor ?? cs.surfaceContainerHighest;
+    final effectiveBorder = borderColor ?? cs.outline.withValues(alpha: 0.2);
     final effectiveLabel = labelColor ?? cs.onSurfaceVariant;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         color: effectiveBg,
@@ -41,7 +42,9 @@ class TffBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: effectiveIcon),
           const SizedBox(width: 5),
-          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: effectiveLabel, fontWeight: FontWeight.w600)),
+          Flexible(
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: effectiveLabel, fontWeight: FontWeight.w600, letterSpacing: 0.2)),
+          ),
         ],
       ),
     );

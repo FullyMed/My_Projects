@@ -18,7 +18,18 @@ class TffSkeletonBox extends StatefulWidget {
 }
 
 class _TffSkeletonBoxState extends State<TffSkeletonBox> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Pulse only when the OS allows motion; otherwise hold a steady tone.
+    if (TffMotion.reduced(context)) {
+      _c.stop();
+    } else if (!_c.isAnimating) {
+      _c.repeat();
+    }
+  }
 
   @override
   void dispose() {
@@ -29,11 +40,20 @@ class _TffSkeletonBoxState extends State<TffSkeletonBox> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    if (TffMotion.reduced(context)) {
+      return Container(
+        height: widget.height,
+        width: widget.width,
+        decoration: BoxDecoration(color: cs.onSurface.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(widget.radius)),
+      );
+    }
     return AnimatedBuilder(
       animation: _c,
       builder: (context, _) {
         final t = _c.value;
-        final a = (0.22 + 0.18 * (0.5 + 0.5 * (1 - (t - 0.5).abs() * 2))).clamp(0.16, 0.52);
+        // Gentle pulse between 8% and 16% of the text color: visible on the
+        // white light-mode card and the charcoal dark-mode one.
+        final a = 0.08 + 0.08 * (1 - (t - 0.5).abs() * 2);
         return Container(
           height: widget.height,
           width: widget.width,
@@ -46,8 +66,8 @@ class _TffSkeletonBoxState extends State<TffSkeletonBox> with SingleTickerProvid
 
 /// Skeleton placeholder sized like a single fare result card.
 ///
-/// Structure mirrors [FareResultCard]: header row → adult label → big price →
-/// three tier tiles → meta line → updated line.
+/// Structure mirrors [FareResultCard]: header row → route line → adult label →
+/// big price → three passenger-fare rows → meta line → updated line.
 class FareResultSkeletonCard extends StatelessWidget {
   const FareResultSkeletonCard({super.key, this.showTitleLine = true});
 
@@ -61,11 +81,14 @@ class FareResultSkeletonCard extends StatelessWidget {
         children: [
           if (showTitleLine) ...[
             Row(children: const [
-              TffSkeletonBox(height: 20, width: 120, radius: 8),
+              TffSkeletonBox(height: 22, width: 72, radius: 8),
               Spacer(),
-              TffSkeletonBox(height: 22, width: 60, radius: 999),
+              TffSkeletonBox(height: 26, width: 92, radius: 999),
             ]),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.sm),
+            // Route line
+            const TffSkeletonBox(height: 14, width: 150, radius: 6),
+            const SizedBox(height: AppSpacing.md),
           ],
           // "Adult" label
           const TffSkeletonBox(height: 12, width: 44, radius: 6),
@@ -73,14 +96,8 @@ class FareResultSkeletonCard extends StatelessWidget {
           // Big NT$ price (mirrors displaySmall ~36px + padding)
           const TffSkeletonBox(height: 44, width: 140, radius: 8),
           const SizedBox(height: AppSpacing.md),
-          // Three tier tiles (student / child / senior)
-          Row(children: const [
-            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
-            SizedBox(width: AppSpacing.sm),
-            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
-            SizedBox(width: AppSpacing.sm),
-            Expanded(child: TffSkeletonBox(height: 50, radius: 16)),
-          ]),
+          // Passenger-fare rows (student / child / senior)
+          const TffSkeletonBox(height: 112, radius: AppRadius.lg),
           const SizedBox(height: AppSpacing.md),
           // Meta line (distance · duration · transfers)
           const TffSkeletonBox(height: 14, radius: 6),
@@ -115,7 +132,7 @@ class CompareResultsSkeletonList extends StatelessWidget {
 /// Skeleton placeholder sized like a single saved-route tile.
 ///
 /// Structure mirrors `_RouteTile` (Saved page): title line → subtitle line,
-/// with a trailing icon + rerun button placeholder.
+/// with the delete and re-run buttons on the right.
 class RouteTileSkeleton extends StatelessWidget {
   const RouteTileSkeleton({super.key});
 
@@ -136,9 +153,9 @@ class RouteTileSkeleton extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          const TffSkeletonBox(height: 20, width: 20, radius: 999),
-          const SizedBox(width: AppSpacing.sm),
-          const TffSkeletonBox(height: 28, width: 70, radius: 999),
+          const TffSkeletonBox(height: 24, width: 24, radius: 999),
+          const SizedBox(width: AppSpacing.md),
+          const TffSkeletonBox(height: 24, width: 24, radius: 999),
         ],
       ),
     );

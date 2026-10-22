@@ -8,6 +8,7 @@ import 'package:taiwan_fare_finder/pages/search_page.dart';
 import 'package:taiwan_fare_finder/pages/settings_page.dart';
 import 'package:taiwan_fare_finder/pages/shell_page.dart';
 import 'package:taiwan_fare_finder/pages/terms_page.dart';
+import 'package:taiwan_fare_finder/theme.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -25,33 +26,15 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.settings,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const SettingsPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-            return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved), child: child));
-          },
-        ),
+        pageBuilder: (context, state) => _pushedPage(context, const SettingsPage()),
       ),
       GoRoute(
         path: AppRoutes.terms,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const TermsPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-            return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved), child: child));
-          },
-        ),
+        pageBuilder: (context, state) => _pushedPage(context, const TermsPage()),
       ),
       GoRoute(
         path: AppRoutes.privacy,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          child: const PrivacyPolicyPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-            return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero).animate(curved), child: child));
-          },
-        ),
+        pageBuilder: (context, state) => _pushedPage(context, const PrivacyPolicyPage()),
       ),
     ],
   );
@@ -76,4 +59,25 @@ void closePushedPage(BuildContext context) {
   } else {
     context.go(AppRoutes.search);
   }
+}
+
+/// Transition for pages pushed over the shell (Settings / Terms / Privacy):
+/// a short fade with a small rise (4% of the height), ease-out in and a
+/// quicker exit. With reduced motion it's a plain fade, no movement.
+CustomTransitionPage<void> _pushedPage(BuildContext context, Widget child) {
+  final reduced = TffMotion.reduced(context);
+  return CustomTransitionPage<void>(
+    child: child,
+    transitionDuration: const Duration(milliseconds: 260),
+    reverseTransitionDuration: const Duration(milliseconds: 180),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(parent: animation, curve: TffMotion.easeOut, reverseCurve: Curves.easeIn);
+      final faded = FadeTransition(opacity: curved, child: child);
+      if (reduced) return faded;
+      return SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(curved),
+        child: faded,
+      );
+    },
+  );
 }

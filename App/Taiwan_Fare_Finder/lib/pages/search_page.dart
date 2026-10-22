@@ -163,16 +163,24 @@ class _SearchPageState extends State<SearchPage> {
             );
           }
 
-          // Each column scrolls on its own so short desktop windows don't overflow.
+          // Each column scrolls on its own so short desktop windows don't
+          // overflow. Capped at 1200 so the columns don't stretch across a
+          // big monitor and push the price far from its label.
           return Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(flex: 5, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: form)),
-                const SizedBox(width: AppSpacing.lg),
-                Flexible(flex: 6, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: results)),
-              ],
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(flex: 5, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: form)),
+                    const SizedBox(width: AppSpacing.lg),
+                    Flexible(flex: 6, child: SingleChildScrollView(padding: const EdgeInsets.only(bottom: AppSpacing.xxl), child: results)),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -248,7 +256,7 @@ class _SearchFormCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: 10,
-            runSpacing: 10,
+            runSpacing: 2, // chips pad their own 48 dp tap target
             children: [
               TffModeChip(
                 mode: TransportMode.hsr,
@@ -290,7 +298,7 @@ class _SearchFormCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           TffPrimaryButton(label: l10n.searchFares, icon: Icons.search_rounded, isLoading: isLoading, onPressed: onSearch),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
+            duration: TffMotion.of(context, TffMotion.fast),
             child: (!isLoading && isDisabled)
                 ? Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -390,7 +398,7 @@ class _ResultsCard extends StatelessWidget {
       trailing: IconButton(
         tooltip: isFavorite ? l10n.unfavorite : l10n.favorite,
         onPressed: onToggleFavorite,
-        icon: Icon(isFavorite ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, color: isFavorite ? cs.tertiary : cs.onSurfaceVariant),
+        icon: Icon(isFavorite ? Icons.bookmark_rounded : Icons.bookmark_border_rounded, color: isFavorite ? cs.primary : cs.onSurfaceVariant),
       ),
     );
   }

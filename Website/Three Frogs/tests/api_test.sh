@@ -78,7 +78,12 @@ for page in index Booking Collection Dashboard Login Signup About Forgot-passwor
   check   "$page.html logo links home"        'href="index.html" class="logo"' "$HTML"
   check   "$page.html back-to-top labelled"   'aria-label="Back to top"'     "$HTML"
   check_not "$page.html no emoji buttons"     "⬆️"                           "$HTML"
+  # Every CSS/JS link carries ?v=<date> so returning visitors fetch new files
+  check_not "$page.html CSS link versioned"   '.css"'                        "$HTML"
+  check_not "$page.html JS links versioned"   '.js"></script>'               "$HTML"
 done
+VERSIONS=$(for page in index Booking Collection Dashboard Login Signup About Forgot-password Terms-of-Use Privacy-Policy Staff Verify-email; do curl -s "$BASE/$page.html"; done | grep -o '?v=[0-9-]*' | sort -u | wc -l)
+check "one asset version across pages"     "1"                            "$(echo $VERSIONS)"
 for page in Login Signup Forgot-password; do
   check   "$page.html password toggle is a button" 'class="toggle-password" aria-label="Show password"' "$(curl -s "$BASE/$page.html")"
 done

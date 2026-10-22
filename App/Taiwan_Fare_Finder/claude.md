@@ -10,11 +10,12 @@ Guidance for Claude Code (claude.ai/code) when working in this repository.
 flutter pub get          # install dependencies
 flutter run              # run on a connected device or emulator
 flutter analyze          # lint (flutter_lints)
-flutter test             # unit + widget tests (test/, ~30 tests, real TDX fixtures)
+flutter test             # unit + widget tests (test/, 32 tests, real TDX fixtures)
 flutter gen-l10n         # regenerate the ARB localization stubs (rarely needed)
 flutter build apk        # build Android
 flutter build ios        # build iOS
 dart format <file>       # format NEW files only (see Key constraints)
+python scripts/gen_fonts.py  # regenerate the static font weights (needs fontTools)
 ```
 
 ---
@@ -108,7 +109,7 @@ Tests (`test/`):
 - `services/fare_service_test.dart` covers mock determinism, not-served, cache fallback, offline mode, LRU (100) and per-user clearing.
 - `services/saved_routes_test.dart` covers de-duplication that ignores mode order, and keeping other users' rows.
 - `controllers/fare_controller_test.dart` covers the stale-response guard and Search/Compare independence.
-- `widgets/` drives the real `TffApp`: the search → compare → favorite → Saved flow, Settings open/close, a zh_Hant history re-run onto Compare, and overflow checks of every page at 375 dp in Indonesian and in a 1280×640 desktop window.
+- `widgets/` drives the real `TffApp`: the search → compare → favorite → Saved flow, Settings open/close, a zh_Hant history re-run onto Compare, overflow checks of every page at 375 dp in Indonesian and in a 1280×640 desktop window, every page with real content at 375 dp with 200% system text in Indonesian (`large_text_layout_test.dart`), and keyboard Tab/Space on the Settings choices with a visible focus ring (`keyboard_focus_test.dart`).
 
 `AppRouter.router` is a static singleton that a second `TffApp` in the same isolate can't reuse, so each widget test file pumps the app exactly once (one `testWidgets` per file).
 
@@ -131,12 +132,13 @@ Tests (`test/`):
 | Widget | Purpose |
 |---|---|
 | `TffPageScaffold` | Standard page wrapper (safe area, padding) |
-| `TffCard` | Card with the shared radius and theme |
-| `TffButton` | Primary and text button variants |
-| `TffBadge` | Small label chip ("Mock data", "Saved") |
-| `TffModeChip` | Selectable transport-mode chip |
+| `TffCard` | Solid surface card (white on the tinted page in light mode, lifted charcoal in dark). Its child sits on a transparent `Material`, so `InkWell` ripples inside it are visible |
+| `TffButton` | `TffPrimaryButton` (presses scale to 0.97) and `TffTextButton` (48 dp minimum, label can shrink) |
+| `TffBadge` | Small solid label chip ("Live", "Mock data", "Saved") |
+| `TffModeChip` | Selectable transport-mode chip with a 48 dp tap target |
+| `TffFocusRing` | Draws a 2 dp primary outline around an `InkWell` control while it has keyboard focus |
 | `TffFareTable` | Fare table (adult / student / child / senior). Unused at the moment; `FareResultCard` has its own tier grid |
-| `FareResultCard` | One fare result: mode title, optional route `subtitle`, source badge (Mock / Live / Saved), adult price, tier grid ("Student (est.)" when estimated) |
+| `FareResultCard` | One fare result: mode title + source badge (they wrap onto two lines when space runs out), the route on its own line, the adult price, then student/child/senior as label-and-price rows with tabular figures ("Student (est.)" when estimated) |
 | `TffErrorCard` | Inline error with an optional retry action |
 | `TffEmptyState` | Empty state with an icon and short copy |
 | `TffSkeleton` | Shimmer placeholders: `FareResultSkeletonCard` / `CompareResultsSkeletonList` (Search, Compare) and `RouteTileSkeleton` / `RouteTileSkeletonList` (Saved) |
@@ -166,10 +168,13 @@ Defined in `lib/nav.dart` with `go_router`:
 ### Theme and design tokens
 
 `lib/theme.dart` defines:
-- `lightTheme` / `darkTheme` (Material 3, with the Plus Jakarta Sans variable font bundled in `assets/fonts/`, no runtime download)
+- `lightTheme` / `darkTheme` (Material 3). `ThemeData.fontFamily` is Plus Jakarta Sans, so every Material component uses it, not only the text theme. Both themes add a 2 dp focus outline to every Material button (`_withFocusRings`).
 - `AppSpacing`: spacing scale (`xs` 4 → `xxl` 48)
 - `AppRadius`: radius scale (`sm` 8 → `xl` 24)
+- `TffMotion`: duration tokens (`press` 100 ms, `fast` 160 ms, `medium` 220 ms), a strong ease-out curve, and `TffMotion.of(context, d)`, which returns zero when the OS asks for reduced motion
 - `TextStyleExtensions`: `.bold`, `.semiBold`, `.medium`, … on `TextStyle`
+
+Fonts: `pubspec.yaml` declares five static weights (`PlusJakartaSans-Regular/Medium/SemiBold/Bold/ExtraBold.ttf`). Flutter doesn't map `FontWeight` onto a variable font's `wght` axis: with only the variable file bundled, every weight rendered as Regular (measured, 2026-10-22). `scripts/gen_fonts.py` cuts the static files from `PlusJakartaSans-VariableFont_wght.ttf`, which stays in `assets/fonts/` as the source but isn't bundled. If you need a new weight, add it to the script and to `pubspec.yaml`.
 
 ### Responsive layout
 
@@ -201,6 +206,23 @@ Narrow-width rules, learned from real overflows:
 - Put button groups that sit next to text in a `Wrap`, so they can drop to the next line.
 - Indonesian labels are the longest, and the phone layout test covers them.
 
+### Design rules
+
+A design pass on 2026-10-22 used the UI/UX Pro Max, taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski design-engineering skills. It fixed problems rather than redesigning. Keep these rules:
+
+- Color: one accent. Teal (`primary`) is the brand and means "trustworthy / live". Amber (`tertiary`, `tertiaryContainer`) is used only to flag estimates (the "Mock data" badge). Sky blue (`secondary`) is defined but not used for anything that matters. Don't add more accents.
+- Surfaces: the page is a flat tinted grey (`#EEF3F4` light, `#111617` dark, `scaffoldBackgroundColor`). Cards are solid `surface` (white / `#1C2325`) with a hairline border, plus a soft teal shadow in light mode only. No page gradient and no `BackdropFilter` blur: there's nothing behind a card to blur, and the blur cost frames.
+- Badges use solid container colors, never a color with opacity over the card, so their contrast doesn't depend on what's underneath. Live = `primaryContainer`, Mock data = `tertiaryContainer`, Saved = `surfaceContainerHighest`.
+- Contrast: every text pair passes WCAG AA (4.5:1) in both themes, and icons and control fills pass 3:1. Checked with a script that composites the real colors. Recheck when you change a color token.
+- Touch: interactive elements are at least 48 dp. Chips use `MaterialTapTargetSize.padded` (so the `Wrap` around them uses `runSpacing: 2`), `TffTextButton` has `minimumSize: 48`, Settings choices have `minHeight: 48`, and the swap button is a 48 dp `IconButton`.
+- Feedback: anything tappable inside a `TffCard` uses `InkWell` (never a bare `GestureDetector`). Use `Ink` instead of `Container` when the tappable thing has its own background, so the ripple paints above it.
+- Keyboard: Material buttons and chips get a 2 dp outline when focused (from the theme). Custom `InkWell` controls are wrapped in `TffFocusRing`. Filled controls (the primary button, a selected chip) use an `onSurface` ring, because a teal ring disappears into a teal fill. The ring shows only in keyboard highlight mode.
+- Screen readers: Settings choices announce `selected` in a mutually exclusive group; the offline switch is merged with its label; location fields read as a button with their value ("Origin, Taipei"); fare tier rows read as one item ("Child, NT$745"); city groups announce `expanded`; picker items announce `selected`.
+- Type: tabular figures (`FontFeature.tabularFigures()`) on every price and count so digits line up. The adult price is `displaySmall` ExtraBold. Section titles use `titleLarge` SemiBold.
+- Motion: use `TffMotion` tokens with `TffMotion.of(context, …)`. Presses take 100 ms; small state changes 160–220 ms with the strong ease-out; pushed pages 260 ms in and 180 ms out. With reduced motion, pushed pages only fade (no slide), the swap icon doesn't turn, the skeleton holds still, and the button press doesn't scale. Mode chips don't scale on selection, because you switch them many times a session.
+- Large text: don't put fixed-ratio grids or fixed-height boxes around text. Rows that pair a label with a button or value need `Expanded`/`Flexible` on the text side; a `TffTextButton` inside a `Row` goes in `Flexible` (plus `Align` to keep it at the end). `large_text_layout_test.dart` renders every page at 200% text in Indonesian.
+- Wide screens: Search and Compare cap their two columns at 1200 px. In the Saved page's two-column layout, both column headers have the same 48 dp minimum height so the lists start level.
+
 ### Utilities
 
 `IdGenerator` (`lib/utils/id_generator.dart`) makes microsecond-timestamp + random-suffix IDs for `RouteQuery` and similar models. Never use `DateTime.now()` alone for an ID.
@@ -222,13 +244,14 @@ To change the design, edit `scripts/gen_icon.py`, then run it and the command ab
 ## Key constraints
 
 - Never break localization. Every new user-facing string needs an entry in all four ARB files and a getter in `TffLocalizations`, written in the voice described in "Writing style".
+- Follow "Design rules": one accent, solid cards, 48 dp targets, `InkWell` + `TffFocusRing` for custom controls, `TffMotion` for every animation.
 - Never hardcode fare values. All fares go through the mock in `FareService._mock` or the TDX path.
 - Keep the fallbacks. `DataMode.api` uses mock for non-HSR/TRA modes, `FareService.search` falls back to cache on any failure, and a missing station makes only that mode "not served", never the whole search. All three must keep working.
 - Search and Compare state stay separate. Never make both pages watch the same fare controller again.
 - HSR and TRA are live through TDX. Don't revert them to `UnimplementedError`. Adding a mode to the API path means adding it to `TdxFareService.fetch` and to a station map.
 - Offline must always work. The cache and the offline toggle have to function whatever the API is doing.
 - Use `Location` for UI inputs. Never pass raw city-name strings from the UI to controllers; resolve them through `LocationService` and pass `location.queryToken` for cache keys and station lookups. To display a stored token, go through `LocationService.routeLabel` / `displayName` so it's localized.
-- Run `flutter analyze` and `flutter test` before calling a change done. Both were clean on 2026-10-15.
+- Run `flutter analyze` and `flutter test` before calling a change done. Both were clean on 2026-10-22 (32 tests).
 - Don't run `dart format .` across the repo in an unrelated change. Most files predate the formatter, and it rewraps about 50 of them, which buries the real diff. Format only new files.
 - `AnalyticsService` is a stub that only calls `debugPrint`. Don't add real tracking without a consent UI.
 - Keep the store copy in sync. `store_listing/app_store.md` and `store_listing/play_store.md` hold the App Store Connect and Play Console copy for en, zh-Hant and id. When features, cities or languages change, update them in the same change and recheck the character limits.
@@ -245,7 +268,8 @@ Carried over between sessions. Read this before assuming the project is finished
 - Category, age rating and price are still only suggestions in both store listing files (Travel, Everyone/4+, Free). Felix needs to confirm them before submission.
 - Android release signing isn't set up. `android/key.properties` still holds `CHANGE_ME` placeholders and points at a keystore that doesn't exist, so release builds fall back to debug signing and can't go to the Play Store. Felix has to create the keystore himself, since it involves passwords.
 - The proxy has no rate limit, and its CORS allows `*`. Anyone with the URL can drain the TDX quota. See the checklist in `SECURITY.md`; that file also tracks rotating the old TDX secret.
-- Not yet run on a real Android/iOS device or emulator. The 2026-10-01 pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy (mock and API mode, not-served, re-run, en / zh_Hant / id). An Android emulator is set up on this machine.
+- Not yet run on a real Android/iOS device or emulator. The 2026-10-01 pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy (mock and API mode, not-served, re-run, en / zh_Hant / id). The 2026-10-22 design pass was checked with the tests (including 200% text and keyboard focus), a contrast script, and the web build in light and dark mode at phone and desktop sizes. An Android emulator is set up on this machine.
+- Reviewing the web build in the desktop app's browser pane: after changing the viewport size, Flutter sometimes keeps laying out at the old size, so screenshots come back cropped or tiled. Reload the page after resizing. To see populated screens, seed `localStorage` keys `flutter.tff_user`, `flutter.tff_settings`, `flutter.tff_favorites`, `flutter.tff_history` (each value is a JSON string of the JSON object).
 - Mock data is coarse. Distance comes from a one-dimensional west-coast km table (`FareService._cityKm`), so MRT or YouBike between distant cities gives believable-looking but meaningless numbers. In Mock mode Keelung + HSR also gets a mock fare; only API mode reports "not served". Fine for a demo mode, but it isn't real data.
 - `.flutter-plugins-dependencies` is committed even though `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies` when convenient.
 - `architecture.md` is an early design note (it still mentions gen-l10n and three languages). `design_system.md` and `ui_components_notes.md` are one-line design prompts, not documentation. This file and `README.md` are the current references.

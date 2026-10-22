@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:taiwan_fare_finder/models/transport_mode.dart';
+import 'package:taiwan_fare_finder/theme.dart';
 
+/// Selectable transport-mode chip. Selection is shown by color alone (no
+/// scale bump: people switch modes many times a session, and growing chips
+/// read as jitter). The tap target is padded to 48 dp.
 class TffModeChip extends StatelessWidget {
   const TffModeChip({super.key, required this.mode, required this.selected, required this.label, required this.onSelected, this.enabled = true});
 
@@ -14,26 +18,29 @@ class TffModeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final effectiveSelected = selected && enabled;
-    return AnimatedScale(
-      duration: const Duration(milliseconds: 170),
-      curve: Curves.easeOutCubic,
-      scale: effectiveSelected ? 1.03 : 1,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 170),
-        opacity: enabled ? 1 : 0.65,
-        child: ChoiceChip(
-          label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-          selected: effectiveSelected,
-          onSelected: enabled ? onSelected : null,
-          labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(color: effectiveSelected ? cs.onPrimary : cs.onSurface),
-          selectedColor: cs.primary,
-          backgroundColor: cs.surfaceContainerHighest.withValues(alpha: 0.55),
-          side: BorderSide(color: effectiveSelected ? Colors.transparent : cs.outline.withValues(alpha: 0.22)),
-          showCheckmark: false,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-        ),
+    return AnimatedOpacity(
+      duration: TffMotion.of(context, TffMotion.fast),
+      opacity: enabled ? 1 : 0.6,
+      child: ChoiceChip(
+        label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        selected: effectiveSelected,
+        onSelected: enabled ? onSelected : null,
+        labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: effectiveSelected ? cs.onPrimary : cs.onSurface,
+              fontWeight: effectiveSelected ? FontWeight.w600 : FontWeight.w500,
+            ),
+        selectedColor: cs.primary,
+        backgroundColor: cs.surfaceContainerHighest,
+        // 2 dp primary outline on keyboard focus; otherwise a hairline when
+        // unselected and none when selected.
+        side: WidgetStateBorderSide.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) return BorderSide(color: effectiveSelected ? cs.onSurface : cs.primary, width: 2);
+          return BorderSide(color: effectiveSelected ? Colors.transparent : cs.outline.withValues(alpha: 0.28));
+        }),
+        showCheckmark: false,
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),
     );
   }

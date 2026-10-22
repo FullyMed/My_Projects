@@ -6,14 +6,18 @@ import 'package:taiwan_fare_finder/theme.dart';
 import 'package:taiwan_fare_finder/ui/tff_badge.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
 
-/// A modern, decision-oriented card for showing a single [FareResult].
+/// Tabular figures so prices line up digit for digit down a column.
+const List<FontFeature> _tabular = [FontFeature.tabularFigures()];
+
+/// One fare result.
 ///
-/// Features:
-/// - Adult fare is emphasized as the primary decision signal.
-/// - Other tiers are shown in a compact responsive grid.
-/// - Duration + transfers shown as a single concise line.
-/// - Localized "Last updated" timestamp.
-/// - Source badge (Mock / Cached).
+/// - Header: mode name, source badge (Live / Mock data / Saved) and an optional
+///   [trailing] action; the route [subtitle] gets its own full-width line so it
+///   never gets cut off by the badge.
+/// - The adult fare is the big number. The other passenger fares sit in rows
+///   below it, label on the left and price on the right, so they stay readable
+///   at any width and any system text size.
+/// - Then distance, duration and transfers, and when the result was fetched.
 class FareResultCard extends StatelessWidget {
   const FareResultCard({
     super.key,
@@ -39,116 +43,88 @@ class FareResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = TffLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     final localeTag = Localizations.localeOf(context).toLanguageTag();
     final moneyFmt = NumberFormat.decimalPattern(localeTag);
     final updatedFmt = DateFormat.yMMMd(localeTag).add_Hm();
+    String money(int v) => 'NT\$${moneyFmt.format(v)}';
 
-    return LayoutBuilder(
-      builder: (context, c) {
-        final isWide = c.maxWidth >= 520;
-        final headerTitle = title ?? l10n.modeLabel(result.mode);
+    final headerTitle = title ?? l10n.modeLabel(result.mode);
+    final metaLine =
+        '${result.distanceKm} ${l10n.kmShort} • ${result.durationMinutes} ${l10n.minutesShort} • ${_transferText(l10n, result.transferSummary)}';
+    final updatedLine = '${l10n.lastUpdated}: ${updatedFmt.format(result.updatedAt)}';
+    final fares = result.fares;
 
-        final adultPrice = 'NT\$${moneyFmt.format(result.fares.adult)}';
-        final metaLine =
-            '${result.distanceKm} ${l10n.kmShort} • ${result.durationMinutes} ${l10n.minutesShort} • ${_transferText(l10n, result.transferSummary)}';
-        final updatedLine =
-            '${l10n.lastUpdated}: ${updatedFmt.format(result.updatedAt)}';
-
-        return TffCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return TffCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          headerTitle,
-                          style: Theme.of(context).textTheme.titleLarge,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: cs.onSurfaceVariant),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _SourceBadge(source: result.source),
-                  if (trailing != null) ...[
-                    const SizedBox(width: AppSpacing.xs),
-                    trailing!,
-                  ],
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              if (!isWide) ...[
-                _PriceBlock(adultPrice: adultPrice, fares: result.fares),
-                const SizedBox(height: AppSpacing.md),
-                Text(metaLine,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis),
-                const SizedBox(height: AppSpacing.sm),
-                Text(updatedLine,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-              ] else ...[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Title and badge share a Wrap: with large system text the
+              // badge drops under the title instead of overflowing the row.
+              Expanded(
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Expanded(
-                        flex: 7,
-                        child: _PriceBlock(
-                            adultPrice: adultPrice, fares: result.fares)),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      flex: 5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(metaLine,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: cs.onSurfaceVariant),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(updatedLine,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(color: cs.onSurfaceVariant),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
-                    ),
+                    Text(headerTitle, style: text.titleLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    _SourceBadge(source: result.source),
                   ],
                 ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                trailing!,
               ],
             ],
           ),
-        );
-      },
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(subtitle!, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          Text(l10n.adult, style: text.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
+          const SizedBox(height: 2),
+          Text(
+            money(fares.adult),
+            style: text.displaySmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFeatures: _tabular),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+              child: Column(
+                children: [
+                  _TierRow(
+                    icon: Icons.school_rounded,
+                    label: fares.studentEstimated ? '${l10n.student} (${l10n.estimatedShort})' : l10n.student,
+                    value: money(fares.student),
+                  ),
+                  _TierRow(icon: Icons.child_care_rounded, label: l10n.child, value: money(fares.child)),
+                  _TierRow(icon: Icons.elderly_rounded, label: l10n.senior, value: money(fares.senior)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            metaLine,
+            style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant, fontFeatures: _tabular),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(updatedLine, style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
+      ),
     );
   }
 
@@ -163,6 +139,8 @@ class FareResultCard extends StatelessWidget {
   }
 }
 
+/// Where a fare came from. Live (teal, the brand color) is the one to trust;
+/// Mock data is an amber caution; Saved is neutral.
 class _SourceBadge extends StatelessWidget {
   const _SourceBadge({required this.source});
 
@@ -173,21 +151,21 @@ class _SourceBadge extends StatelessWidget {
     final l10n = TffLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     return switch (source) {
-      FareSource.mock => TffBadge(
-          label: l10n.sourceMock,
-          icon: Icons.science_rounded,
-          iconColor: cs.primary,
-          labelColor: cs.onPrimaryContainer,
-          backgroundColor: cs.primaryContainer.withValues(alpha: 0.55),
-          borderColor: cs.primary.withValues(alpha: 0.2),
-        ),
       FareSource.live => TffBadge(
           label: l10n.sourceLive,
           icon: Icons.bolt_rounded,
-          iconColor: cs.tertiary,
+          iconColor: cs.onPrimaryContainer,
+          labelColor: cs.onPrimaryContainer,
+          backgroundColor: cs.primaryContainer,
+          borderColor: cs.primary.withValues(alpha: 0.25),
+        ),
+      FareSource.mock => TffBadge(
+          label: l10n.sourceMock,
+          icon: Icons.science_rounded,
+          iconColor: cs.onTertiaryContainer,
           labelColor: cs.onTertiaryContainer,
-          backgroundColor: cs.tertiaryContainer.withValues(alpha: 0.55),
-          borderColor: cs.tertiary.withValues(alpha: 0.2),
+          backgroundColor: cs.tertiaryContainer,
+          borderColor: cs.tertiary.withValues(alpha: 0.25),
         ),
       FareSource.cache => TffBadge(
           label: l10n.sourceCached,
@@ -197,75 +175,8 @@ class _SourceBadge extends StatelessWidget {
   }
 }
 
-class _PriceBlock extends StatelessWidget {
-  const _PriceBlock({required this.adultPrice, required this.fares});
-
-  final String adultPrice;
-  final FareBreakdown fares;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = TffLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
-    final localeTag = Localizations.localeOf(context).toLanguageTag();
-    final moneyFmt = NumberFormat.decimalPattern(localeTag);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.adult,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.copyWith(color: cs.onSurfaceVariant)),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          adultPrice,
-          style: Theme.of(context)
-              .textTheme
-              .displaySmall
-              ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        LayoutBuilder(
-          builder: (context, c) {
-            final cross = c.maxWidth >= 420 ? 3 : 2;
-            return GridView.count(
-              crossAxisCount: cross,
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              mainAxisSpacing: AppSpacing.sm,
-              crossAxisSpacing: AppSpacing.sm,
-              childAspectRatio: cross == 3 ? 2.8 : 2.6,
-              children: [
-                _TierTile(
-                    label: fares.studentEstimated
-                        ? '${l10n.student} (${l10n.estimatedShort})'
-                        : l10n.student,
-                    value: 'NT\$${moneyFmt.format(fares.student)}',
-                    icon: Icons.school_rounded),
-                _TierTile(
-                    label: l10n.child,
-                    value: 'NT\$${moneyFmt.format(fares.child)}',
-                    icon: Icons.child_care_rounded),
-                _TierTile(
-                    label: l10n.senior,
-                    value: 'NT\$${moneyFmt.format(fares.senior)}',
-                    icon: Icons.elderly_rounded),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _TierTile extends StatelessWidget {
-  const _TierTile(
-      {required this.label, required this.value, required this.icon});
+class _TierRow extends StatelessWidget {
+  const _TierRow({required this.label, required this.value, required this.icon});
 
   final String label;
   final String value;
@@ -274,41 +185,20 @@ class _TierTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: cs.onSurfaceVariant),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(label,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: cs.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-                Text(value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-        ],
+    final text = Theme.of(context).textTheme;
+    // Read as one item by screen readers: "Child, NT$745".
+    return MergeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: cs.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(label, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant))),
+            const SizedBox(width: AppSpacing.sm),
+            Text(value, style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontFeatures: _tabular)),
+          ],
+        ),
       ),
     );
   }

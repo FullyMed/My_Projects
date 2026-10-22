@@ -8,9 +8,9 @@ Three Frogs is a static HTML and PHP website for a boardgame café in Surabaya, 
 
 Live domain: `threefrogsboardgame.com`, hosted on Hostinger.
 
-## Pending before deploy (as of 2026-10-15)
+## Pending before deploy (as of 2026-10-22)
 
-Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits), the writing pass after it, and the 2026-10-19 design pass. All of it passes `bash tests/run-tests.sh` (214 checks) and a browser run-through on the local database at desktop and phone widths.
+Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits), the writing pass after it, the 2026-10-19 design pass and the 2026-10-22 asset version tags. All of it passes `bash tests/run-tests.sh` (239 checks) and a browser run-through on the local database at desktop and phone widths.
 
 Do the production steps in this order. Tick them off or delete them once they're done.
 
@@ -55,7 +55,7 @@ On 2026-10-15 the owner had all visitor-facing text and both docs rewritten with
 
 Set up on this PC on 2026-09-29, with test tooling added on 2026-10-15. Everything runs from Git Bash, and XAMPP's MariaDB has to be running (XAMPP Control Panel → MySQL).
 
-`bash tests/run-tests.sh` runs the whole test suite (214 checks):
+`bash tests/run-tests.sh` runs the whole test suite (239 checks):
 
 - It rebuilds a throwaway `threefrogs_test` database from `Data/schema.sql`, so it never touches dev data.
 - It starts its own Apache on port 8081 (XAMPP binaries, this folder as the document root, so `.htaccess`, the CSP and the 404 page behave as in production) and a mail catcher on port 2526.
@@ -336,3 +336,4 @@ On 2026-10-19 the owner had the site reviewed with the UI/UX Pro Max, taste-skil
 - Every page's footer has the `.footer-links` paragraph for `Terms-of-Use.html` and `Privacy-Policy.html` (see [Legal pages](#legal-pages)) and the `.copyright-years` span. Copy the whole footer from an existing page for a new one.
 - A new page copies the head, navbar and footer from an existing page, loads `Notify.js` first and `Navbar.js` last, and goes into the page loop in `tests/api_test.sh`, which checks Notify.js, the footer links and that there's no jQuery. Staff or utility pages also get `<meta name="robots" content="noindex, nofollow" />` and a `robots.txt` entry.
 - `404.html` keeps its `<base href="/" />` and the other pages don't get one (see [404 page](#404-page)).
+- Every `Assets/CSS/*.css` and `Assets/JS/*.js` link on every page ends in the same `?v=YYYY-MM-DD` tag (added 2026-10-22). Browsers cache those files, so without it a returning visitor gets new HTML with old CSS or JS. Whenever you change any CSS or JS file, set the tag on all pages to that day: `sed -i -E 's/\?v=[0-9-]+"/?v=YYYY-MM-DD"/g' *.html`. A new page copies the tag. `tests/api_test.sh` fails if a link has no tag or the pages disagree. Images and the favicon links aren't tagged.

@@ -10,7 +10,9 @@ import 'package:taiwan_fare_finder/localization/tff_localizations.dart';
 import 'package:taiwan_fare_finder/models/app_settings.dart';
 import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/theme.dart';
+import 'package:taiwan_fare_finder/ui/tff_button.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
+import 'package:taiwan_fare_finder/ui/tff_focus_ring.dart';
 import 'package:taiwan_fare_finder/ui/tff_page_scaffold.dart';
 import 'package:taiwan_fare_finder/ui/tff_skeleton.dart';
 
@@ -163,7 +165,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          // Merged so the switch is announced with its name:
+                          // "Offline mode, switch, off".
+                          MergeSemantics(
+                            child: Row(
                             children: [
                               Expanded(
                                 child: Text(
@@ -178,6 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     .setOfflineMode(v),
                               ),
                             ],
+                          ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
@@ -357,19 +363,9 @@ class PrivacyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.privacy,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              TextButton(
-                onPressed: onReadMore,
-                child: Text(l10n.privacyReadMore),
-              ),
-            ],
+          Text(
+            l10n.privacy,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -380,6 +376,14 @@ class PrivacyCard extends StatelessWidget {
                 ?.copyWith(color: cs.onSurfaceVariant, height: 1.5),
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          // Under the paragraph rather than beside the title, so long labels
+          // ("Baca selengkapnya") and large text never crowd the heading.
+          TffTextButton(
+            label: l10n.privacyReadMore,
+            icon: Icons.policy_outlined,
+            onPressed: onReadMore,
           ),
         ],
       ),
@@ -496,8 +500,11 @@ class _NavLinkRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return InkWell(
+    return TffFocusRing(
+      radius: BorderRadius.circular(AppRadius.lg),
+      builder: (context, onFocusChange) => InkWell(
       onTap: onTap,
+      onFocusChange: onFocusChange,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -520,6 +527,7 @@ class _NavLinkRow extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -584,8 +592,11 @@ class _DangerActionState extends State<_DangerAction> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return InkWell(
+    return TffFocusRing(
+      radius: BorderRadius.circular(AppRadius.lg),
+      builder: (context, onFocusChange) => InkWell(
       onTap: _busy ? null : _handleTap,
+      onFocusChange: onFocusChange,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -617,6 +628,7 @@ class _DangerActionState extends State<_DangerAction> {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -649,19 +661,23 @@ class _InfoRow extends StatelessWidget {
                 .textTheme
                 .bodyMedium
                 ?.copyWith(color: cs.onSurfaceVariant),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         value == null
             ? const TffSkeletonBox(height: 14, width: 64, radius: 6)
-            : Text(
-                value!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
+            : Flexible(
+                child: Text(
+                  value!,
+                  textAlign: TextAlign.end,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()]),
+                ),
               ),
       ],
     );
@@ -697,35 +713,51 @@ class _SegmentRow extends StatelessWidget {
       runSpacing: 10,
       children: [
         for (final item in items)
-          InkWell(
-            onTap: enabled ? () => onChanged(item.value) : null,
-            borderRadius: BorderRadius.circular(999),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: item.value == value
-                    ? cs.primary
-                    : cs.surfaceContainerHighest
-                        .withValues(alpha: enabled ? 0.55 : 0.35),
-                border: Border.all(
+          // One radio-like choice: announced as selected / not selected
+          // within its group, 48 dp tall, ripple drawn above the fill (Ink).
+          Semantics(
+            button: true,
+            selected: item.value == value,
+            inMutuallyExclusiveGroup: true,
+            enabled: enabled,
+            child: TffFocusRing(
+              radius: BorderRadius.circular(999),
+              builder: (context, onFocusChange) => InkWell(
+              onTap: enabled ? () => onChanged(item.value) : null,
+              onFocusChange: onFocusChange,
+              borderRadius: BorderRadius.circular(999),
+              child: Ink(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
                   color: item.value == value
-                      ? cs.primary.withValues(alpha: 0.25)
-                      : cs.outline.withValues(alpha: 0.18),
+                      ? cs.primary
+                      : cs.surfaceContainerHighest
+                          .withValues(alpha: enabled ? 1 : 0.6),
+                  border: Border.all(
+                    color: item.value == value
+                        ? cs.primary
+                        : cs.outline.withValues(alpha: 0.28),
+                  ),
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    child: Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: item.value == value ? FontWeight.w600 : FontWeight.w500,
+                            color: item.value == value
+                                ? cs.onPrimary
+                                : cs.onSurface.withValues(alpha: enabled ? 1 : 0.55),
+                          ),
+                    ),
+                  ),
                 ),
               ),
-              child: Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: item.value == value
-                          ? cs.onPrimary
-                          : cs.onSurface.withValues(alpha: enabled ? 1 : 0.55),
-                    ),
-              ),
+            ),
             ),
           ),
       ],

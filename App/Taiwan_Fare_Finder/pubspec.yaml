@@ -33,9 +33,20 @@ flutter:
   fonts:
     - family: Plus Jakarta Sans
       fonts:
-        # Variable font (wght axis 200–800). Flutter maps FontWeight onto it,
-        # so every weight the theme uses comes from this one asset.
-        - asset: assets/fonts/PlusJakartaSans-VariableFont_wght.ttf
+        # Static weights cut from PlusJakartaSans-VariableFont_wght.ttf by
+        # scripts/gen_fonts.py. Flutter does NOT map FontWeight onto a variable
+        # font's wght axis (every weight rendered as Regular), so each weight
+        # the app uses ships as its own file.
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
 
 flutter_launcher_icons:
   android: true

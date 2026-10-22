@@ -6,9 +6,9 @@ Live site: [threefrogsboardgame.com](https://threefrogsboardgame.com)
 
 ---
 
-## Before you deploy (as of 2026-10-15)
+## Before you deploy (as of 2026-10-22)
 
-None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix, improvement, writing and design passes from 2026-09-29 to 2026-10-19. All of it passes the local test suite (`bash tests/run-tests.sh`, 214 checks) and a run-through in the browser at desktop and phone widths.
+None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix, improvement, writing and design passes from 2026-09-29 to 2026-10-19, and the asset version tags from 2026-10-22. All of it passes the local test suite (`bash tests/run-tests.sh`, 239 checks) and a run-through in the browser at desktop and phone widths.
 
 Do these production steps in order:
 
@@ -25,6 +25,10 @@ Known gap: resetting a password doesn't log that account out on other devices.
 ---
 
 ## What changed recently
+
+### Fresh files after a deploy (2026-10-22, not deployed)
+
+Every page now loads its stylesheet and scripts with a version tag, like `Boardgame.css?v=2026-10-22`. Browsers keep CSS and JS files for a while, so without the tag a returning visitor could get the new HTML with last month's CSS or JavaScript, and a page could look broken or a button could stop working until they cleared their cache. A new tag makes the browser fetch the files again. Bump it whenever you change a CSS or JS file (see [Deployment](#deployment)). The test suite checks that every link has a tag and that all pages use the same one (239 checks in total).
 
 ### Design pass (2026-10-19, not deployed)
 
@@ -72,7 +76,7 @@ We ran the visitor-facing text and these docs through two editing guides (Humani
 - Booking limits. You can book up to 30 days ahead and hold 3 upcoming bookings at a time. All the booking numbers now live in `Assets/PHP/booking_rules.php`.
 - Names. Signup accepts apostrophes, hyphens, periods and accents (Nur'aini, Jean-Luc, José). Text that isn't valid UTF-8 now gets a clear error, where it used to get a misleading "required" message and a PHP warning.
 - No more `alert()` pop-ups. The site shows on-page toasts instead (`Assets/JS/Notify.js`), logging in sends you back to the page you came from, and the footer year updates itself.
-- A test suite in the repo. `bash tests/run-tests.sh` runs end-to-end checks (214 since the design pass) on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
+- A test suite in the repo. `bash tests/run-tests.sh` runs end-to-end checks (239 as of 2026-10-22) on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
 - The legal pages describe verification, the booking limits, café cancellations and staff access.
 - On this PC, XAMPP MariaDB's `mysql.db` system table was corrupt, so database permissions vanished every time MariaDB restarted. Repairing it also brought back Prambanan Batik's dev access.
 
@@ -130,7 +134,7 @@ Run the tests after any change. It's one command, and it never touches your dev 
 bash tests/run-tests.sh
 ```
 
-It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 214 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
+It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 239 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
 
 This PC's setup (2026-09-29, updated 2026-10-15):
 
@@ -211,7 +215,7 @@ This PC's setup (2026-09-29, updated 2026-10-15):
 tests/                              Blocked by tests/.htaccess; don't upload it to Hostinger
 ├── run-tests.sh                    The whole end-to-end test run in one command (throwaway database)
 ├── dev-server.sh                   Local server on :8080 that catches emails
-├── api_test.sh                     The 214 checks
+├── api_test.sh                     The 239 checks
 ├── smtp_sink.py                    Saves outgoing emails as .eml files
 ├── lib.sh / httpd.conf.template    Shared helpers and the Apache config template
 └── .tmp/                           Generated and git-ignored: configs, logs, caught emails
@@ -500,6 +504,7 @@ Headings use Righteous and body text uses Poppins, both from Google Fonts.
 - Don't use `alert()`. Use `showToast()` from `Notify.js`, or `redirectWithMessage()` when you navigate, and `escapeHtml()` for any text you put into `innerHTML`.
 - Write visitor-facing text in the café's voice: friendly, plain, "we", sentence-case headings, and no em dashes.
 - Keep contrast at WCAG AA (use `--color-accent-text` for gold text on light backgrounds), keep focus outlines visible, use SVG icons rather than emoji, and animate only `opacity` and `transform`. CLAUDE.md lists the full design rules.
+- Every `Assets/CSS/` and `Assets/JS/` link ends in the same `?v=YYYY-MM-DD` tag on every page. When you change any CSS or JS file, change the tag on all pages to that day's date.
 - A new page loads `Notify.js` first and `Navbar.js` last, copies the footer (legal links and `.copyright-years`), and gets added to the page list in `tests/api_test.sh`.
 
 ---
@@ -511,3 +516,10 @@ Headings use Righteous and body text uses Poppins, both from Google Fonts.
 3. `Assets/PHP/db_config.php` has to exist on the server with the production credentials. Git ignores it and you don't upload it from the repo; create or edit it on the server.
 4. Don't upload `tests/`. Its own `.htaccess` blocks it anyway.
 5. If a change adds database columns, run its `Data/migrations/` script in phpMyAdmin before you upload the PHP that uses them.
+6. If you changed any CSS or JS file, bump the `?v=` tag first so visitors get the new files instead of cached ones. One command does every page (Git Bash, from the project folder; put in today's date):
+
+   ```bash
+   sed -i -E 's/\?v=[0-9-]+"/?v=2026-10-22"/g' *.html
+   ```
+
+   Then upload the HTML pages along with the changed CSS and JS. `bash tests/run-tests.sh` fails if any page has a different tag or none.

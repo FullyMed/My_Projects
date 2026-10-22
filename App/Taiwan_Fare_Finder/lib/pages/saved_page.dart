@@ -16,6 +16,7 @@ import 'package:taiwan_fare_finder/nav.dart';
 import 'package:taiwan_fare_finder/services/analytics_service.dart';
 import 'package:taiwan_fare_finder/services/location_service.dart';
 import 'package:taiwan_fare_finder/theme.dart';
+import 'package:taiwan_fare_finder/ui/tff_focus_ring.dart';
 import 'package:taiwan_fare_finder/ui/tff_adaptive.dart';
 import 'package:taiwan_fare_finder/ui/tff_button.dart';
 import 'package:taiwan_fare_finder/ui/tff_card.dart';
@@ -173,23 +174,28 @@ class _WideLayout extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
-                  child: Row(
-                    children: [
-                      Icon(Icons.bookmark_rounded,
-                          size: 18, color: cs.tertiary),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        l10n.favorites,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      if (favCount > 0) ...[
+                  // Same minimum height on both columns (History's header has
+                  // a 48 dp "Clear all" button), so the two lists start level.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Row(
+                      children: [
+                        Icon(Icons.bookmark_rounded,
+                            size: 18, color: cs.primary),
                         const SizedBox(width: AppSpacing.sm),
-                        _CountChip(count: favCount, cs: cs),
+                        Text(
+                          l10n.favorites,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        if (favCount > 0) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          _CountChip(count: favCount, cs: cs),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(child: favContent),
@@ -210,30 +216,45 @@ class _WideLayout extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
-                  child: Row(
-                    children: [
-                      Icon(Icons.history_rounded,
-                          size: 18, color: cs.secondary),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          l10n.history,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      if (histCount > 0) ...[
-                        _CountChip(count: histCount, cs: cs),
+                  // Same minimum height on both columns (History's header has
+                  // a 48 dp "Clear all" button), so the two lists start level.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Row(
+                      children: [
+                        Icon(Icons.history_rounded,
+                            size: 18, color: cs.primary),
                         const SizedBox(width: AppSpacing.sm),
-                        TffTextButton(
-                          label: l10n.clearAll,
-                          icon: Icons.delete_sweep_rounded,
-                          onPressed: onClearHistory,
+                        // Title and count sit together on the left (like the
+                        // Saved routes column); "Clear all" goes to the right.
+                        Flexible(
+                          child: Text(
+                            l10n.history,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
                         ),
+                        if (histCount > 0) ...[
+                          const SizedBox(width: AppSpacing.sm),
+                          _CountChip(count: histCount, cs: cs),
+                          const Spacer(),
+                          Flexible(
+                            child: Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: TffTextButton(
+                                label: l10n.clearAll,
+                                icon: Icons.delete_sweep_rounded,
+                                onPressed: onClearHistory,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(child: histContent),
@@ -256,13 +277,13 @@ class _CountChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: cs.secondaryContainer,
+        color: cs.primaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         '$count',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: cs.onSecondaryContainer,
+              color: cs.onPrimaryContainer,
               fontWeight: FontWeight.w700,
             ),
       ),
@@ -294,8 +315,9 @@ class _NarrowLayout extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.md),
           child: Container(
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: cs.surface.withValues(alpha: 0.8),
+              color: cs.surface,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
                   color: cs.outline.withValues(alpha: 0.14)),
@@ -303,14 +325,23 @@ class _NarrowLayout extends StatelessWidget {
             child: TabBar(
               controller: tab,
               dividerHeight: 0,
+              // The pill fills the whole tab, so longer labels ("Saved
+              // routes", "Rute tersimpan") never spill outside it.
+              indicatorSize: TabBarIndicatorSize.tab,
+              splashBorderRadius: BorderRadius.circular(999),
               labelPadding:
-                  const EdgeInsets.symmetric(horizontal: 18),
+                  const EdgeInsets.symmetric(horizontal: 12),
               indicator: BoxDecoration(
-                color: cs.primaryContainer.withValues(alpha: 0.85),
+                color: cs.primaryContainer,
                 borderRadius: BorderRadius.circular(999),
               ),
               labelColor: cs.onPrimaryContainer,
               unselectedLabelColor: cs.onSurfaceVariant,
+              labelStyle: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(fontWeight: FontWeight.w600),
+              unselectedLabelStyle: Theme.of(context).textTheme.labelLarge,
               tabs: [
                 Tab(text: l10n.favorites),
                 Tab(text: l10n.history),
@@ -370,19 +401,11 @@ class _FavoritesList extends StatelessWidget {
                 modes: f.modes,
                 offline: offline,
                 dataMode: dataMode),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.bookmark_rounded, color: cs.tertiary),
-                const SizedBox(width: 6),
-                IconButton(
-                  tooltip: l10n.delete,
-                  onPressed: () => favController.remove(f.id),
-                  icon: Icon(Icons.delete_outline_rounded,
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
+            trailing: IconButton(
+              tooltip: l10n.delete,
+              onPressed: () => favController.remove(f.id),
+              icon: Icon(Icons.delete_outline_rounded,
+                  color: cs.onSurfaceVariant),
             ),
           ),
         );
@@ -430,7 +453,10 @@ class _HistoryList extends StatelessWidget {
                         ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
-                TffTextButton(
+                Flexible(
+                  child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TffTextButton(
                   label: l10n.clearAll,
                   icon: Icons.delete_sweep_rounded,
                   onPressed: () async {
@@ -438,6 +464,8 @@ class _HistoryList extends StatelessWidget {
                     if (confirmed != true) return;
                     await histController.clear();
                   },
+                ),
+                ),
                 ),
               ],
             ),
@@ -466,20 +494,11 @@ class _HistoryList extends StatelessWidget {
                       modes: h.modes,
                       offline: offline,
                       dataMode: dataMode),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.history_rounded, color: cs.secondary),
-                      const SizedBox(width: 6),
-                      IconButton(
-                        tooltip: l10n.delete,
-                        onPressed: () => histController.remove(h.id),
-                        icon: Icon(Icons.delete_outline_rounded,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant),
-                      ),
-                    ],
+                  trailing: IconButton(
+                    tooltip: l10n.delete,
+                    onPressed: () => histController.remove(h.id),
+                    icon: Icon(Icons.delete_outline_rounded,
+                        color: cs.onSurfaceVariant),
                   ),
                 ),
               );
@@ -512,10 +531,16 @@ class _RouteTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final l10n = TffLocalizations.of(context);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onRun,
-      child: TffCard(
+    // An InkWell (not a bare GestureDetector) so tapping the tile shows a
+    // ripple; TffCard's transparent Material lets it paint above the card.
+    return TffCard(
+      padding: EdgeInsets.zero,
+      child: TffFocusRing(
+        radius: BorderRadius.circular(AppRadius.xl),
+        builder: (context, onFocusChange) => InkWell(
+        onFocusChange: onFocusChange,
+        onTap: onRun,
+        child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -568,7 +593,8 @@ class _RouteTile extends StatelessWidget {
             );
           },
         ),
-      ),
+        ),
+      )),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Standard page: app bar + safe-area body on the flat, tinted page color
+/// (`scaffoldBackgroundColor`). Cards provide the contrast, not a gradient.
 class TffPageScaffold extends StatelessWidget {
   const TffPageScaffold({super.key, required this.title, required this.child, this.actions});
 
@@ -9,22 +11,12 @@ class TffPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: actions,
       ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [cs.surface, cs.surfaceContainerHighest],
-          ),
-        ),
-        child: SafeArea(child: child),
-      ),
+      body: SafeArea(child: child),
     );
   }
 }
