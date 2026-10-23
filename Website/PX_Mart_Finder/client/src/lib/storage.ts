@@ -30,7 +30,7 @@ export function writeStored(key: string, value: string) {
   try {
     localStorage.setItem(key, value);
   } catch {
-    // Storage full or blocked — preferences just won't persist this session.
+    // Storage is full or blocked, so preferences won't persist this session.
   }
 }
 

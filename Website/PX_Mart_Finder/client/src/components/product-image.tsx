@@ -13,7 +13,7 @@ type LoadState = { src: string; status: "loading" | "loaded" | "error" };
 
 export function ProductImage({ src, alt, className }: ProductImageProps) {
   // Status is tied to the src it was recorded for, so a src change (wouter keeps
-  // ProductDetail mounted across /product/:id) reads as "loading" on the same render —
+  // ProductDetail mounted across /product/:id) reads as "loading" on the same render, with
   // no reset effect that could race a cached image's onLoad and leave it invisible.
   const [state, setState] = useState<LoadState>({ src, status: "loading" });
   const status = state.src === src ? state.status : "loading";

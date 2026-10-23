@@ -36,7 +36,7 @@ async function run() {
     unlinkSync(file);
 
     console.log(
-      `${file.replace(IMAGES_DIR, "Images")} — ${(before / 1024).toFixed(0)}KB -> ${(after / 1024).toFixed(0)}KB`
+      `${file.replace(IMAGES_DIR, "Images")}: ${(before / 1024).toFixed(0)}KB -> ${(after / 1024).toFixed(0)}KB`
     );
   }
 

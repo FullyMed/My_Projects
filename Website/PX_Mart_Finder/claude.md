@@ -2,573 +2,362 @@
 
 # PX Mart Finder
 
-## 1. Project Overview
+## 1. What this project is
 
-### What This Project Is
-PX Mart Finder is a retail product discovery and in-store navigation prototype designed for PX Mart (全聯福利中心) in Taiwan.
+PX Mart Finder is a prototype that helps shoppers find products inside a PX Mart (全聯福利中心) supermarket in Taiwan. You search or browse, and the app shows the aisle and shelf. You can also save products for later.
 
-The project helps users:
-- Search products quickly
-- Browse by categories/subcategories
-- View aisle and shelf locations
-- Find products inside a physical PX Mart branch
+It's a frontend-only portfolio project. The people who'll look at it are portfolio reviewers, recruiters, university evaluators and, possibly, PX Mart itself as a pitch. Shoppers come second.
 
-This is a frontend-focused prototype intended primarily for:
-- Portfolio demonstration
-- UX/UI experimentation
-- Retail product discovery concepts
-- Prototype pitching/demo purposes
+It covers one real branch, **PX Mart Wufeng (Taichung)**. The Taipei and Kaohsiung branches are demo placeholders, not real coverage. All product and aisle data is demo data, and PX Mart has no part in the project.
+
+Live site: https://px-mart-finder.netlify.app/ (see [Deployment](#deployment)).
 
 ---
 
-### Current Product Positioning
-This project is intentionally positioned as a:
+# 2. Tech stack
 
-> Single-Branch Prototype System
+- React 19, TypeScript, Vite, Tailwind CSS v4
+- shadcn/ui, Lucide icons, framer-motion
+- wouter for routing
+- Fuse.js for fuzzy search, use-debounce for the search box
+- Google Fonts: Rubik (Latin) and Noto Sans TC (Traditional Chinese)
+- npm. `sharp` is a devDependency used only by `script/compress-images.ts`, so it never reaches the client bundle.
 
-The primary supported branch is:
-- PX Mart Wufeng (Taichung, Taiwan)
+## Technical decisions to keep
 
-Other stores are demo placeholders only and are NOT intended to represent real production coverage.
+### Product images are WebP
+Local product photos in `client/public/Images` are `.webp`. `script/compress-images.ts` converted them from PNG: it resizes to at most 800px wide, re-encodes at quality 80 and keeps alpha transparency, since these are cut-out product shots on a `bg-muted` background. That took the folder from 9.9 MB to about 0.8 MB with no visible loss at the sizes they render (about 128px in `product-card.tsx`, up to about 430px on `product-detail.tsx`).
 
----
-
-### Goals
-- Demonstrate retail search UX
-- Simulate real supermarket product finding
-- Showcase modern frontend engineering skills
-- Build a clean and realistic portfolio project
-- Potentially pitch as a prototype/demo concept to PX Mart
-
----
-
-### Target Audience
-Primary audience:
-- Portfolio reviewers
-- Recruiters
-- University evaluators
-- PX Mart stakeholders (prototype/demo context)
-
-Secondary audience:
-- Customers trying to locate products inside a store
-
----
-
-# 2. Tech Stack
-
-## Core Stack
-- React
-- TypeScript
-- Vite
-- Tailwind CSS v4
-
-## UI / Styling
-- shadcn/ui
-- Tailwind utilities
-- Lucide React icons
-- framer-motion (animations and micro-interactions)
-- Google Fonts: Rubik + Noto Sans TC
-
-## Routing
-- wouter
-
-## Search / Filtering
-- Fuse.js (fuzzy search)
-
-## State & Utilities
-- React Hooks
-- use-debounce
-
-## Build / Tooling
-- npm
-- Vite build system
-- TypeScript compiler
-- `sharp` (devDependency, build-time only — never shipped to the client bundle) — used by `script/compress-images.ts` to convert product photos to WebP
-
-## Important Technical Decisions
-
-### Product images are WebP, not PNG
-Local product photos in `client/public/Images` are `.webp` (converted from the original PNGs via `script/compress-images.ts`, a one-off `sharp`-based script — resizes to a max 800px width and re-encodes at quality 80, preserving alpha transparency since these are cutout product shots on a `bg-muted` background, not flattened photos). This cut the folder from 9.9MB to ~0.8MB (93% smaller) with no visible quality loss at the sizes these render at (`product-card.tsx` thumbnails ~128px, `product-detail.tsx` hero up to ~430px).
-
-**When adding new local product images**: drop the PNG/JPEG into `client/public/Images/...`, run `npm run compress-images` (it walks the whole folder, skips files under 10KB, and deletes the original after writing the `.webp`), then update the `image_url` in `products.json` to the new `.webp` filename. Do NOT hand-author or commit multi-hundred-KB PNGs for product photos — Unsplash-hosted images (`image_url` starting with `https://`) are unaffected by this script and don't need local compression.
+To add a local product photo: put the PNG or JPEG in `client/public/Images/...`, run `npm run compress-images`, then point `image_url` in `products.json` at the new `.webp`. The script walks the whole folder, skips files under 10 KB and deletes each original after writing the `.webp`. Don't commit large PNGs. Unsplash images (`image_url` starting with `https://`) don't need compressing.
 
 ### No react-window
-The project previously used react-window, but virtualization was removed because:
-- Dataset size is currently small
-- It introduced dependency/API compatibility issues
-- Simpler rendering is more stable and maintainable for the prototype scope
+The project used react-window once. It was removed because the list is small and the library caused dependency and API problems. Product lists render with a plain `.map()`. Don't add virtualization back.
 
-The project now uses standard `.map()` rendering for product lists.
+### No `whileTap` inside another `whileTap`
+framer-motion attaches native `pointerdown` listeners to each element. If a `motion.div` with `whileTap` sits inside another one, a tap on the inner element bubbles up and fires both. For press feedback on anything nested inside a `motion.div`, use CSS `active:scale-*`.
 
-### No wrapping motion.div around nested interactive elements
-Do NOT add a `motion.div` with `whileTap` around a Button/interactive element that is already inside another `motion.div` with `whileTap`. Framer-motion attaches native `pointerdown` listeners directly on DOM elements. When the inner element is tapped, the event bubbles and triggers both the inner and outer `whileTap` simultaneously.
-
-Use CSS `active:scale-*` for press feedback on elements nested inside a `motion.div`.
-
-### FavoritesContext — shared state, not per-component hook
-`useFavorites()` reads from `FavoritesContext`, not a local `useState`. **Never** revert this to a standalone hook. Previously each `ProductCard` called `useFavorites()` internally, creating isolated state per instance — toggling multiple products overwrote each other in localStorage because every instance wrote from its own stale `prev`. The fix: `FavoritesProvider` (in `favorites-provider.tsx`) holds the single `useState`; all components share it via context. Follow the same pattern as `LanguageContext` if adding other app-wide state.
+### Favorites live in one shared context
+`useFavorites()` reads from `FavoritesContext`. Never turn it back into a hook with its own `useState`. That was the original design, and it gave each `ProductCard` its own copy of the list, so toggling two products made the second card overwrite the first card's localStorage write. `FavoritesProvider` (`favorites-provider.tsx`) now holds the only `useState`, and every component shares it. Copy the `LanguageContext` pattern for any other app-wide state.
 
 ### Read query params with wouter's `useSearch()`, never `window.location.search`
-wouter's `useLocation()` only re-renders when the **pathname** changes. A navigation that only changes the query string (e.g. `/search?sort=name` → `/search?sort=aisle`, or back/forward between two searches) does not re-render a component that reads `window.location.search` during render — this is exactly why the brand filter and sort dropdown silently did nothing until 2026-09-30 (URL changed, list didn't). `search-results.tsx` and `store-map.tsx` now read params via `useSearch()`. Reading `window.location.search` inside an event handler (to build the *next* URL, as `updateParam` does) is fine; reading it to decide what to *render* is not.
+wouter's `useLocation()` re-renders only when the **pathname** changes. When only the query string changes (`/search?sort=name` to `/search?sort=aisle`, or back and forward between two searches), a component that reads `window.location.search` while rendering doesn't update. That's why the sort and brand dropdowns did nothing until 2026-09-30: the URL changed and the list didn't. `search-results.tsx` and `store-map.tsx` read params with `useSearch()`. Reading `window.location.search` inside an event handler, to build the next URL as `updateParam` does, is fine.
 
 ### Route-level code-splitting
-`App.tsx` imports `Home` and `NotFound` eagerly and every other page via `React.lazy()` inside one `<Suspense>` (small spinner fallback) wrapped by `Layout`, so the header/nav never flash. This took the main chunk from 629KB to ~506KB (162KB gzip); the rest is react-dom + framer-motion + the Radix store-picker dropdown, all needed on the landing page, so `vite.config.ts` sets `chunkSizeWarningLimit: 600` with a comment saying so. Don't reach for `manualChunks` tuning. `QueryClientProvider`, `TooltipProvider` and `<Toaster />` were removed from the tree — nothing used them (the shadcn `ui/` files and `lib/queryClient.ts` are still on disk, unused).
+`App.tsx` imports `Home` and `NotFound` directly and every other page with `React.lazy()`, inside one `<Suspense>` (a small spinner) wrapped by `Layout`, so the header and nav never flash. That took the main chunk from 629 KB to about 506 KB (162 KB gzipped). What's left is react-dom, framer-motion and the Radix dropdown for the store picker, which the landing page needs, so `vite.config.ts` sets `chunkSizeWarningLimit: 600` with a comment explaining why. Don't tune `manualChunks`. `QueryClientProvider`, `TooltipProvider` and `<Toaster />` came out of the tree because nothing used them; the shadcn `ui/` files and `lib/queryClient.ts` are still on disk, unused.
 
-### localStorage access goes through `storage.ts` helpers
-`readStored` / `readStoredList` / `writeStored` in `lib/storage.ts` wrap every read/write in `try/catch` and validate shape (`readStoredList` drops non-string entries; `App.tsx` only accepts `"en"`/`"zh"`; `theme-provider.tsx` only accepts `light`/`dark`/`system`). Corrupt JSON, a hand-edited value, or storage blocked by the browser falls back to defaults instead of white-screening the app. Use these helpers for any new persisted state.
+### localStorage goes through the `storage.ts` helpers
+`readStored`, `readStoredList` and `writeStored` in `lib/storage.ts` wrap every read and write in `try/catch` and check the shape: `readStoredList` drops non-string entries, `App.tsx` accepts only `"en"` or `"zh"`, and `theme-provider.tsx` accepts only `light`, `dark` or `system`. Corrupt JSON, a hand-edited value or blocked storage falls back to defaults instead of a white screen. Use these helpers for any new saved setting.
 
 ---
 
-# 3. Project Structure
-
-## Root Structure
+# 3. Project structure
 
 ```
-client/
-server/
-shared/
-dist/
+client/     the React app
+script/     build script, sitemap generator, image compressor
+server/     Express scaffold from the original template (not used)
+shared/     shared types (not used)
+dist/       build output, don't edit by hand
 ```
-
-## client/
-Frontend React application.
 
 ### client/src/components/
-Reusable UI components.
-
-Key components:
-- `layout.tsx` — App shell: responsive header, sidebar (desktop), bottom nav (mobile)
-- `product-card.tsx` — Product list card with location pill, framer-motion hover/tap
-- `product-image.tsx` — `<ProductImage>`: shows a `Skeleton` while an image loads, fades it in on load, falls back to an `ImageOff` icon on error. Used by `product-card.tsx` and `product-detail.tsx`'s hero image
-- `language-toggle.tsx` — EN / 繁中 switcher
-- `theme-toggle.tsx` — Light / Dark mode toggle
+- `layout.tsx`: the app shell. Header, desktop sidebar, mobile bottom nav.
+- `product-card.tsx`: a product in a list, with its location pill and framer-motion hover and tap.
+- `product-image.tsx`: `<ProductImage>`. Shows a `Skeleton` while the image loads, fades it in, and shows an `ImageOff` icon if it fails. Used by `product-card.tsx` and the hero image on `product-detail.tsx`.
+- `language-toggle.tsx`: the EN / 繁中 switch.
+- `theme-toggle.tsx`: the light / dark switch.
 
 ### client/src/pages/
-Page-level views.
 
 | File | Route | Notes |
 |------|-------|-------|
-| `home.tsx` | `/` | Hero search + category grid |
-| `search-results.tsx` | `/search` | Fuzzy search + filter + sort |
+| `home.tsx` | `/` | Hero search and category grid |
+| `search-results.tsx` | `/search` | Fuzzy search, filters and sort |
 | `category-detail.tsx` | `/category/:id` | Subcategory list |
-| `product-detail.tsx` | `/product/:id` | Two-column on desktop |
+| `product-detail.tsx` | `/product/:id` | Two columns on desktop |
 | `favorites.tsx` | `/favorites` | Saved products |
 | `store-map.tsx` | `/store-map` | Placeholder aisle map |
-| `terms.tsx` | `/terms` | Terms of Use — back header + prose sections |
-| `privacy.tsx` | `/privacy` | Privacy Policy — back header + prose sections |
-| `not-found.tsx` | `*` | Custom branded 404 — icon, big "404", heading/description, Search Products + Back to Home CTAs, Go Back link. Fully localized, spring entrance animation |
+| `terms.tsx` | `/terms` | Terms of Use |
+| `privacy.tsx` | `/privacy` | Privacy Policy |
+| `not-found.tsx` | `*` | Branded 404 |
 
 ### client/src/lib/
-Core app logic and shared frontend utilities.
 
 | File | Purpose |
 |------|---------|
-| `data.ts` | All product, category, store data + exported types; `isInCategory` / `isInSubCategory` / `countProducts` helpers (single source for category matching — used by search filters and the count badges) |
-| `i18n.ts` | All translation strings (EN + ZH), context hooks |
-| `normalize.ts` | Aisle/shelf value normalization |
-| `storage.ts` | `FavoritesContext` + `useFavorites()` hook + `useRecentSearches()` hook + safe `readStored` / `readStoredList` / `writeStored` localStorage helpers |
-| `favorites-provider.tsx` | `FavoritesProvider` component — holds single shared favorites `useState` |
-| `validateData.ts` | Data integrity checks (DEV mode only) |
-| `seo.ts` | `usePageMeta(title, description)` hook — sets `document.title` and the `<meta name="description">` tag per page |
+| `data.ts` | Products, categories and stores, with their types. `isInCategory`, `isInSubCategory` and `countProducts` are the only place category matching happens; the search filters and the count badges both use them |
+| `i18n.ts` | Every UI string in English and Chinese, plus the language and store contexts |
+| `normalize.ts` | Turns aisle and shelf values into numbers for sorting |
+| `storage.ts` | `FavoritesContext`, `useFavorites()`, `useRecentSearches()` and the safe localStorage helpers |
+| `favorites-provider.tsx` | `FavoritesProvider`, which holds the one shared favorites `useState` |
+| `validateData.ts` | Data checks that run in dev mode only |
+| `seo.ts` | `usePageMeta(title, description)`, which sets `document.title` and the description meta tag |
 
 ### client/src/data/
-Static mock data files (JSON):
-- products
-- categories
-
-Store list (`STORE_LIST`) is defined directly in `data.ts`, not as a separate JSON file.
-
-This project currently relies entirely on local mock/static data.
-
-## server/
-Minimal Express backend scaffold. Currently NOT actively used.
-
-## shared/
-Shared types/utilities between frontend and backend.
-
-## dist/
-Production build output. Do NOT manually edit.
+`products.json` and `categories.json`. The store list (`STORE_LIST`) is in `data.ts`. All data is local and static.
 
 ---
 
-# 4. Layout & Responsive System
+# 4. Layout
 
-## Breakpoints
-| Breakpoint | Width | Layout |
-|-----------|-------|--------|
-| Mobile | < 1024px | Full-width content + fixed bottom nav |
-| Desktop | ≥ 1024px (`lg`) | 224px left sidebar + main content column |
+| Width | Layout |
+|-------|--------|
+| Under 1024px | Full-width content and a fixed bottom nav |
+| 1024px and up (`lg`) | 224px left sidebar and the content column |
 
-## Container
-- Outer wrapper: `max-w-screen-xl mx-auto`
-- Header background spans full viewport width; inner content is constrained
-- On desktop, main content area = screen width − 224px sidebar
+- The outer wrapper is `max-w-screen-xl mx-auto`. The header background spans the full width; its content doesn't.
+- The bottom nav (Home / Search / Saved) and the desktop sidebar both read `NAV_ITEMS` in `layout.tsx`.
+- CSS variables: `--px-header-h: 72px` (sticky offsets), `--px-bottom-nav-h: 64px`, `--radius: 1rem`.
 
-## Navigation
-- **Mobile/Tablet**: Fixed bottom nav with Home / Search / Saved tabs
-- **Desktop**: Left sidebar with same items; bottom nav hidden via `lg:hidden`
-- Both read from the same `NAV_ITEMS` constant in `layout.tsx`
+| Page | Mobile | Tablet (`sm`) | Desktop (`xl`) |
+|------|--------|---------------|----------------|
+| Category grid (home) | 3 columns | 4 columns | 6 columns |
+| Search results | 1 | 2 | 3 |
+| Subcategories | 1 | 2 | 3 |
+| Saved | 1 | 2 | 3 |
 
-## CSS Variables
-```css
---px-header-h: 72px;      /* sticky header height; used for sticky offsets */
---px-bottom-nav-h: 64px;  /* bottom nav height reference */
---radius: 1rem;            /* global border-radius base */
-```
-
-## Responsive Grid Examples
-| Page | Mobile | Tablet (sm) | Desktop (xl) |
-|------|--------|-------------|--------------|
-| Category grid (home) | 3 cols | 4 cols | 6 cols |
-| Product results | 1 col | 2 cols | 3 cols |
-| Subcategories | 1 col | 2 cols | 3 cols |
-| Favorites | 1 col | 2 cols | 3 cols |
-
-## Product Detail (desktop)
-Two-column grid: `lg:grid-cols-[40%_1fr]`
-- Left: product image, sticky (`lg:sticky lg:top-[72px] lg:h-[calc(100vh-72px)]`)
-- Right: details, location, similar products (scrollable)
+Product detail on desktop: the image column sticks (`lg:sticky lg:top-[72px] lg:h-[calc(100vh-72px)]`) and the details, location and similar products scroll beside it.
 
 ---
 
-# 5. Design System
+# 5. Design system
 
-## Typography
-- **Font**: Rubik (Latin) + Noto Sans TC (Traditional Chinese fallback)
-- Loaded via Google Fonts `@import` in `index.css`
-- **Important**: The Google Fonts `@import url(...)` MUST be the very first line in `index.css`, before `@import "tailwindcss"`. PostCSS expands Tailwind's import into CSS rules, making any later `@import` invalid.
+## Type
+Rubik for Latin text, Noto Sans TC for Chinese, loaded with a Google Fonts `@import` in `index.css`. That `@import url(...)` **must be the first line** of `index.css`, before `@import "tailwindcss"`. PostCSS expands Tailwind's import into CSS rules, and any `@import` after rules is invalid.
 
-## Colors
-PX Mart inspired Blue & Red theme:
-- Primary: `215 90% 45%` (blue)
-- Secondary: `350 80% 55%` (red accent)
-- Background: `210 20% 98%` (cool off-white)
+## Color
+A blue and red palette in the spirit of PX Mart:
+- Primary `215 90% 45%` (blue)
+- Secondary `350 80% 55%` (red)
+- Background `210 20% 98%` (cool off-white)
 
-Dark mode uses desaturated variants — defined in `index.css` under `.dark`.
+Dark mode uses softer versions, defined under `.dark` in `index.css`.
 
-## Animation Principles
-- Use `framer-motion` for entrance animations (stagger, fade-in, scale)
-- Use spring physics (`type: "spring", stiffness: 280–400, damping: 22–28`) for interactive elements
-- Entrance delays: `Math.min(index, 8) * 0.04–0.05s` — cap at 8 items to avoid slow lists
-- Use CSS `hover:` / `active:` for simple color/shadow transitions
-- Use `whileHover` / `whileTap` on outermost non-nested wrappers only
+## Motion
+- framer-motion for entrances (stagger, fade, scale).
+- Springs for interactive elements: `type: "spring"`, stiffness 280 to 400, damping 22 to 28.
+- Stagger delay `Math.min(index, 8) * 0.04` to `0.05`s, capped at 8 items so long lists don't crawl in.
+- CSS `hover:` and `active:` for simple color and shadow changes.
+- `whileHover` and `whileTap` only on the outermost wrapper (see the nesting rule above).
 
-## Shadows & Depth
-- Cards: `shadow-sm` default, `shadow-lg` on hover
-- Bottom nav: `shadow-[0_-4px_24px_rgba(0,0,0,0.07)]`
-- Header: `shadow-md`
+## Depth
+Cards use `shadow-sm` and `shadow-lg` on hover. The bottom nav uses `shadow-[0_-4px_24px_rgba(0,0,0,0.07)]` and the header `shadow-md`.
 
 ---
 
-# 6. Localization (i18n)
+# 6. Languages
 
-## Supported Languages
-- English (`en`)
-- Traditional Chinese — 繁體中文 (`zh`)
+The app speaks English (`en`) and Traditional Chinese (`zh`).
 
-## How it Works
-- All strings live in `client/src/lib/i18n.ts` under `translations.en` and `translations.zh`
-- Access via `const { t, language } = useLanguage()`
-- `t("key")` returns the string for the current language
-- `language` is `"en"` or `"zh"` — use for conditional display of locale-specific data fields
+- Every string lives in `client/src/lib/i18n.ts`, under `translations.en` and `translations.zh`.
+- Components call `const { t, language } = useLanguage()` and `t("key")`. Use `language` to pick between `_en` and `_zh` data fields.
+- No hardcoded English or Chinese in JSX. The one exception is a sentence that needs a value inside it (`t()` has no interpolation), which can use an inline `language === "en" ? ... : ...`.
+- Add the `en` and `zh` keys together, never one without the other.
+- Write Taiwan Traditional Chinese: 門市 (not 門店), 分類 (not 类别), 走道, 收藏, 商品.
 
-## Rules
-- ALL user-facing strings must use `t()` — no hardcoded English/Chinese in JSX
-- Exception: parameterized strings (e.g. `"Location data for ${store.nameEn}"`) may use inline ternary since `t()` has no interpolation support
-- Always add both `en` and `zh` keys together — never add one without the other
-- Taiwan uses Traditional Chinese: always write `門市` (not `門店`), `分類` (not `类别`), etc.
+## Writing style
 
----
+On 2026-10-23 the owner had all user-facing text, the legal pages and both docs rewritten with the Humanizer and Stop Slop skills. Keep new text in the same style.
 
-# 7. Coding Style & Conventions
-
-## General Philosophy
-Code should prioritize:
-- readability
-- maintainability
-- stability
-- simplicity over unnecessary complexity
-
-## Naming Conventions
-- Variables: `camelCase` (e.g. `selectedStore`, `expandedTerms`)
-- Components: `PascalCase` (e.g. `ProductCard`, `SearchResults`)
-- Files: `kebab-case` (e.g. `search-results.tsx`, `product-detail.tsx`)
-
-## TypeScript Rules
-- Use `import type { Foo }` for type-only imports
-- Avoid re-defining types locally when they are exported from `@/lib/data`
-- Avoid `any` — use `LucideIcon` for icon map types, proper interfaces for data
-- Icon maps: `Record<string, LucideIcon>` (import `type LucideIcon` from `lucide-react`)
-
-## React Rules
-- Prefer functional components and hooks
-- Keep components focused and modular
-- Use `cn()` from `@/lib/utils` for conditional classNames
-
-## Comment Style
-Only comment when the WHY is non-obvious. No redundant or task-tracking comments.
+- **Voice.** Plain and friendly, in short sentences with everyday words. English uses "you", "we" for the app, and "I" in the legal pages, where the one person who built it speaks. Chinese uses 你, not 您, and natural Taiwanese phrasing rather than translated English (避免「此為」「本應用程式」「您尚未添加」).
+- **Spelling.** American English, as the UI already uses ("Favorites", "color").
+- **Case.** Sentence case for headings, buttons, labels and page titles: "Search products", "View aisle map", "Page not found | PX Mart". "Terms of Use" and "Privacy Policy" keep their capitals because they're document names.
+- **Words.** "Aisle info" for location data, "branch" for a store, "saved" for favorites (the nav says "Saved", the page title "Saved products"). Use one word per idea; don't rotate synonyms.
+- **Messages.** Say what happened and what to do next, with a full stop: "No products match that search. Try another word." Counts agree with their number: "1 result", "56 results".
+- **No em dashes.** Not in UI text, data, code comments or docs. Use a comma, a colon, parentheses or a new sentence. The demo branches are "Taipei (demo store)" and "台北（示意門市）".
+- **Honesty.** Don't claim what isn't true. The store map is a placeholder and says so ("Demo map, not the real store layout"; "We haven't drawn this branch's floor plan yet"). The app is unofficial, and the footer, legal pages and meta descriptions say so. Feature text in the README has to match real data: the synonym example uses "soda", because there are no tissue products.
+- **Legal pages.** Plain words, but the promises are real. If the app starts storing something new, update `privacySection1Body` and `legalLastUpdated` in both languages together.
 
 ---
 
-# 8. Key Features
+# 7. Coding conventions
 
-## Product Search
-- Fuzzy search via Fuse.js across name, brand, category, subcategory, keywords
-- Synonym expansion (`SYNONYMS` map in `data.ts`)
-- Debounced input with URL sync
-
-## Category Browsing
-- Category grid on home page with animated entrance and a product-count pill on each tile (muted `0` for empty ones)
-- Subcategory filtering per category; each subcategory row shows "N items" or "Coming soon" as a caption under its name
-- Only 8 of the 23 categories have products in the demo data. Empty ones stay visible (it's the real store layout) and lead to a dedicated "No products here yet" state in `search-results.tsx` (`isEmptyCategory`: category/subcategory filter with no query and no brand filter) instead of the generic "No products found" — its shortcut tiles only offer non-empty categories
-
-## Product Detail Pages
-- Product image, category badge, brand
-- Location pill (aisle + shelf) with store-map link
-- Two-column layout on desktop
-- Similar products section (checks both `category_en` and `category_zh`)
-- When the selected store has no location for the product, "Show similar items with known locations" only appears if such items exist; otherwise a `noSimilarWithLocation` message is shown (previously the button emptied the list with no feedback)
-- `showOnlyWithLocation` resets on `/product/:id` change, since wouter keeps the component mounted
-- Unknown product/category IDs render the branded `<NotFound />` (the page still sets its own not-found meta title)
-
-## Favorites System
-- Toggle via heart button on `ProductCard` and on `product-detail.tsx`
-- Single shared state via `FavoritesContext` — provided by `FavoritesProvider` in `App.tsx`
-- `useFavorites()` reads from context; all components share one source of truth
-- State is persisted to localStorage inside `useFavoritesState()` (`storage.ts`)
-
-## Search Suggestions
-- If no results: fuzzy "did you mean" suggestions + category shortcuts
-
-## Sorting
-- Relevance (default)
-- Name A–Z
-- Aisle order (numeric sort with shelf as tiebreaker)
-
-## Store Map
-- Demo placeholder aisle map
-- Highlights the target aisle when navigated from product detail
-- The `?store=` param is applied once per link (effect depends on `storeId` only); switching branch in the header afterwards sticks, and the aisle highlight hides because that aisle belongs to the linked store
-
-## Custom 404 Page
-- Branded not-found page (`not-found.tsx`) matching the app's design system — primary/secondary color icon badge, large "404", heading + description, `Search Products` (primary) and `Back to Home` (secondary) CTAs, plus a `Go Back` link using `window.history.back()`
-- Uses `buttonVariants` classes applied directly to `wouter`'s `Link` (not `Button asChild`) to avoid Radix `Slot` ref-forwarding assumptions with wouter v3
-- Spring entrance animation via `framer-motion`, fully bilingual (`pageNotFound`, `pageNotFoundDesc`, `searchProducts`, `backToHome`, `goBack` keys in `i18n.ts`)
-- Rendered inside the normal `Layout` (header/sidebar/bottom nav still present) since it's just another `<Route>` in `App.tsx`'s catch-all
-
-## Per-Page SEO Meta Tags
-- `usePageMeta(title, description)` in `lib/seo.ts` sets `document.title` (as `"<title> | PX Mart"`) and upserts `<meta name="description">` via a `useEffect` — no `react-helmet`/SSR dependency, matching the project's simplicity-first philosophy for a client-only SPA
-- Every page calls it with bilingual, `language`-reactive content, so switching EN/繁中 updates the tab title and description live:
-  - `home.tsx` / `favorites.tsx` / `store-map.tsx` — static `i18n.ts` keys (`metaHomeTitle`/`metaHomeDesc`, `metaFavoritesTitle`/`metaFavoritesDesc`, `metaStoreMapTitle`/`metaStoreMapDesc`); store-map's description also interpolates the selected store name
-  - `category-detail.tsx` — title is the category name, description interpolates the subcategory count
-  - `product-detail.tsx` — title is the product name, description interpolates brand/category and aisle+shelf (when available for the selected store)
-  - `search-results.tsx` — title/description reflect the active query or category filter, falling back to `metaSearchTitle`/`metaSearchDesc`
-  - `not-found.tsx` — reuses the existing `pageNotFound`/`pageNotFoundDesc` keys
-- For pages with an early-return guard (`category-detail.tsx`, `product-detail.tsx`), `usePageMeta` is called *before* the guard with a not-found fallback title/description, to keep hook call order stable across renders
-
-## Loading States
-Since all data (`data.ts`/JSON) is static and rendered synchronously, there is no real "fetching" state to show. The genuine async gaps in this app are: remote product images (several `image_url`s point to Unsplash, not local `/Images/`), the initial JS bundle/font load, and the search input's debounce window — each gets a real loading indicator rather than a decorative one:
-- **Product images** — `components/product-image.tsx` (`<ProductImage>`) shows a `Skeleton` overlay while the image loads, cross-fades in the `<img>` via `onLoad` (`transition-opacity duration-300`), and falls back to a muted `ImageOff` icon on `onError`. The status is stored together with the `src` it belongs to (`{ src, status }`), so a `src` change reads as `"loading"` on the very same render — wouter keeps `ProductDetail` mounted across `/product/:id` changes. This replaced an earlier `useEffect` reset, which could run *after* a cached image's `onLoad` and leave the new image stuck at `opacity-0`
-- **Lazy route chunks** — `App.tsx`'s `<Suspense>` shows a small centered `Loader2` spinner while a page chunk loads (see [Route-level code-splitting](#route-level-code-splitting))
-- **Remote images must stay alive** — 5 Unsplash photos (f4, 100, 101, 103, 110) had been deleted upstream (HTTP 404) and were replaced on 2026-09-30. If an error-fallback icon shows up, `curl` every `images.unsplash.com` URL in `products.json` for a non-200 and swap in a free-license photo (`netlify.toml`'s CSP only allows `images.unsplash.com` as a remote image host)
-- **Initial app boot** — `client/index.html` renders a `#app-boot-loader` (inline-styled spinner, no Tailwind dependency since it must paint before the bundle loads) over `#root`; `main.tsx` fades it out via a `.hide` class after `createRoot().render()` and removes it from the DOM on `transitionend`, with a `setTimeout(400ms)` fallback removal since `transitionend` can fail to fire when the "hide" class is applied before the initial state has painted
-- **Search debounce** — `search-results.tsx` swaps the search icon for a spinning `Loader2` whenever `query !== debouncedQuery`, signaling that displayed results haven't caught up to what's typed yet (300ms `use-debounce` window)
-
-## Legal Pages
-- `terms.tsx` (`/terms`) and `privacy.tsx` (`/privacy`) — same back-header + prose-section layout as `store-map.tsx`, fully localized (`termsSection1-6Title/Body`, `privacySection1-5Title/Body`, `legalLastUpdated` keys in `i18n.ts`), each wired to `usePageMeta`
-- Both explicitly disclaim that the app is an independent, unofficial portfolio project **not affiliated with, endorsed by, or sponsored by PX Mart (全聯福利中心)** — important since the app is themed around a real retail brand's name/colors
-- Privacy Policy content reflects the app's actual behavior (nothing invented): everything is stored in `localStorage` only (`px-lang`, `px-store`, `px-favorites`, `px-recent-searches`, `vite-ui-theme`), there is no backend/accounts/analytics/tracking, and some product images load from Unsplash (a real third-party dependency — see `product-image.tsx` / [Loading States](#loading-states))
-- Discoverability: linked from the bottom of the desktop `Sidebar` (`layout.tsx`, anchored via `mt-auto`) and from a `<footer>` on `home.tsx` (chosen because Home has natural page flow with no inner `overflow-y-auto` region, unlike `search-results.tsx`) — not added to `NAV_ITEMS`/bottom nav, since legal pages aren't primary navigation
+- Write readable, stable, simple code; keep abstraction to what the job needs.
+- Names: `camelCase` variables, `PascalCase` components, `kebab-case` files.
+- TypeScript: `import type { Foo }` for type-only imports; reuse the types exported from `@/lib/data`; no `any` (icon maps are `Record<string, LucideIcon>`).
+- React: function components and hooks, small focused components, `cn()` from `@/lib/utils` for conditional classes.
+- Comments only where the reason isn't obvious from the code.
 
 ---
 
-# 9. Current Progress
+# 8. Features
 
-## Completed
+## Search
+- Fuse.js fuzzy search across name, brand, category, subcategory and keywords.
+- Synonyms from `SYNONYMS` in `data.ts` ("soda" also searches 可樂 and 汽水).
+- Debounced input, synced to the URL.
+- When nothing matches: fuzzy "Did you mean" suggestions and shortcuts to non-empty categories.
+- Sorting by best match (default), name A-Z, or aisle order (numeric aisle, then shelf).
 
-### Core Features
-- Search system with fuzzy matching + synonym expansion
-- Product cards with location, favorites, hover/tap animations
-- Product detail pages (two-column on desktop)
-- Category browsing with subcategory filtering
-- Favorites with localStorage persistence
-- Sorting/filtering
-- Store selection (dropdown, persisted)
-- Full responsive layout (mobile, tablet, desktop)
+## Categories
+- The home grid animates in, and each tile has a product count (a muted `0` when empty).
+- Each subcategory row shows "N items" or "Coming soon" under its name.
+- Only 8 of the 23 categories have products. The empty ones stay visible, since they match the real store's sections, and lead to a "No products here yet" state in `search-results.tsx` (`isEmptyCategory`: a category or subcategory filter with no query and no brand). Its shortcut tiles offer only categories that have products.
 
-### UI/UX
-- Dark mode support (full light/dark theme)
-- Rubik + Noto Sans TC typography
-- Framer-motion animations: stagger entrance, spring hover, tap feedback
-- Bottom navigation (mobile/tablet)
-- Sidebar navigation (desktop)
-- Sticky search/filter header
-- Two-column product detail on desktop
-- Consistent 1rem border radius, soft shadows
+## Product page
+- Image, category badge and brand.
+- Location pill (aisle and shelf) with a link to the store map.
+- Two columns on desktop.
+- Similar products from the same category (matched on `category_en` or `category_zh`).
+- If the chosen branch has no location for the product, the "Show similar items with aisle info" button appears only when such items exist. Otherwise the page shows the `noSimilarWithLocation` message.
+- `showOnlyWithLocation` resets on every `/product/:id` change, because wouter keeps the component mounted.
+- An unknown product or category ID renders the branded `<NotFound />`, and the page still sets its own "not found" title.
 
-### Localization
-- All UI strings in `i18n.ts` with EN and ZH keys
-- Traditional Chinese throughout (門市, not 門店, etc.)
-- `not-found.tsx` (custom 404), error states, store-map labels all fully localized
+## Saved products
+- Heart button on `ProductCard` and on the product page.
+- One shared state in `FavoritesContext` (see the rule in section 2), saved to localStorage in `useFavoritesState()`.
 
-### Bug Fixes Applied
-- Similar products filter checks both `category_en` and `category_zh`
-- `iconMap` typed as `Record<string, LucideIcon>` (removed `any`)
-- Heart button pointer-event bubbling fixed (CSS `active:scale-90` instead of nested `motion.div`)
-- Duplicate local `type Product` removed from `search-results.tsx`
-- `{ { } }` JSX spacing inconsistency in `store-map.tsx` fixed
-- Google Fonts `@import` moved to top of `index.css`
-- 7 missing local images (f2–f8, Fresh Vegetables) replaced with Unsplash placeholder URLs
-- Hardcoded English `"items"` string in `search-results.tsx` fixed with inline ternary
-- Dark mode classes in `not-found.tsx` changed from `gray-*` to theme-aware (`bg-background`, `text-foreground`, `text-muted-foreground`)
-- Unused `location`/`setLocation` variables removed from `store-map.tsx`
-- **Favorites multi-item bug fixed** — `useFavorites` now reads from a single shared `FavoritesContext` instead of creating an isolated `useState` per component. Previously each `ProductCard` had its own state copy; toggling two products caused the second card to write from stale `prev: []`, overwriting the first card's localStorage entry. Removing multiple items had the same problem in reverse.
-- `not-found.tsx` rebuilt from a plain alert-style card into a fully branded 404 (icon badge, "404", CTAs) — see [Custom 404 Page](#custom-404-page)
-- Per-page meta title and meta description added across all 7 routes via `usePageMeta` — see [Per-Page SEO Meta Tags](#per-page-seo-meta-tags)
-- Loading states added for product images (skeleton + fade-in + error fallback), initial app boot (spinner overlay), and search debounce (spinner icon) — see [Loading States](#loading-states). Fixed a bug in the boot-loader removal where `transitionend` alone could leave `#app-boot-loader` stuck in the DOM (invisible but present) if the "hide" class was applied before the initial paint — added a `setTimeout` fallback removal
-- Terms of Use (`/terms`) and Privacy Policy (`/privacy`) pages added, with a non-affiliation disclaimer and honest, behavior-accurate privacy content (localStorage-only, no backend/tracking) — see [Legal Pages](#legal-pages)
-- Local product images compressed from PNG to WebP via new `script/compress-images.ts` (`sharp`, devDependency) — 9.9MB → ~0.8MB (93% smaller) across 35 files, transparency preserved, `products.json` `image_url`s updated to `.webp` — see [Product images are WebP, not PNG](#product-images-are-webp-not-png)
-- **2026-09-30 fix pass:**
-  - **Sort + brand filter did nothing** (URL changed, results didn't) — see [Read query params with `useSearch()`](#read-query-params-with-wouters-usesearch-never-windowlocationsearch)
-  - **Product data copy-paste errors** in `products.json`: `香蕉` (banana) keyword on 6 non-banana tropical fruits, `草莓` (strawberry) on every tomato/grape/orange/avocado/blueberry, `菠菜` (spinach) on cucumbers and bean sprouts; blueberries `c1` had the Chinese name `新鮮草莓`; lemon `b4` was filed under Apples & Pears (→ Citrus Fruits); avocado `d1` under Citrus Fruits (→ Tropical Fruits); `c2`/`c5` shared the English name "Cherry Tomatoes 550g" (→ "Yu Nu …" / "Sheng Nu …", matching their Chinese names)
-  - 5 dead (404) Unsplash image URLs replaced
-  - Empty categories: counts + "No products here yet" state (see [Category Browsing](#category-browsing)); category page header said "N Categories" for subcategories
-  - Hardcoded EN/ZH ternaries moved into `i18n.ts` (hero title, nav labels, brand/sort select, "Including", favorites hint, "Try a different store", subcategory counts, theme toggle label)
-  - Mobile header overflowed at 375px (page scrolled sideways): language toggle drops the flags below `sm`, the "PX Mart" text title is `sr-only` below 420px (logo stays), store picker truncates (`min-w-0`) — verified at 320px with the back button showing
-  - Theme toggle's first click was a no-op in "system" mode on a dark OS (it compared against the stored `"system"`); now toggles from the actual `.dark` class. "System" mode also follows OS changes live
-  - Store map snapped the header's store picker back to the URL's store; `ProductImage` could get stuck invisible; similar-products button could empty the list with no feedback — see the respective feature sections
-  - Scroll resets to top on route change (`layout.tsx`); clear-search (×) only clears the query, keeping category/brand/sort; searches from the search page are saved to recent searches too; the active brand stays selectable when a new query excludes it
-  - `<html lang>` follows the language toggle (`zh-Hant-TW` / `en`); aria-labels on icon-only buttons (heart, back, clear, store picker); `View Aisle Map` is now a styled `Link` instead of a `<button>` nested inside an `<a>`
-  - `index.html`: added a default `<title>`/description/`theme-color`, removed an unused Inter + Noto Sans **SC** (Simplified) stylesheet, fixed `og:image` pointing at a non-existent `Logo.jpg`, removed Replit's `twitter:site`, removed `maximum-scale=1` (it blocked pinch-zoom); `site.webmanifest` icon paths pointed at `/` instead of `/favicon_io/` and had an empty name
-  - Replit agent state binaries (`.local/state/replit/`) deleted and gitignored
-  - `robots.txt` added, plus a build-generated `sitemap.xml` and absolute `og:image`/`twitter:image` URLs (see [SEO Follow-ups](#seo-follow-ups--done-2026-09-30))
+## Store map
+- A placeholder map that says it's a demo.
+- Shows the aisle you came from when you arrive from a product page.
+- The `?store=` param is applied once per link (the effect depends on `storeId` only). If you then switch branch in the header, the switch sticks and the aisle hides, since that aisle belongs to the linked branch.
 
-### Build Status
-TypeScript: `npx tsc --noEmit` → 0 errors
-Build: `npm run build` → no warnings; main chunk ~506KB (162KB gzip), route chunks lazy-loaded
-Runtime: `npm run dev:client` → serves on port 5000; zero console errors/warnings across all routes (only the DEV data-validation log, which passes)
-Production preview: `.claude/launch.json` has `px-mart-prod-preview` (`vite preview` on port 5001, serves `dist/public` — run `npm run build` first)
+## 404 page
+- `not-found.tsx` has an icon, a big "404", a heading and description, "Search products" and "Back to home" buttons, and a "Go back" link (`window.history.back()`).
+- The buttons are wouter `Link`s styled with `buttonVariants`, not `Button asChild`, to avoid Radix `Slot` ref-forwarding problems with wouter v3.
+- It renders inside the normal `Layout`, as the catch-all `<Route>` in `App.tsx`.
 
-## Pending / Future Improvements
+## Page titles and descriptions
+- `usePageMeta(title, description)` in `lib/seo.ts` sets `document.title` to `"<title> | PX Mart"` and updates `<meta name="description">` in a `useEffect`. No react-helmet and no SSR.
+- Every page passes text for the current language, so switching language updates the tab title live:
+  - `home.tsx` and `favorites.tsx` use fixed `i18n.ts` keys; `store-map.tsx` builds its description from the branch name.
+  - `category-detail.tsx` uses the category name and its subcategory count.
+  - `product-detail.tsx` uses the product name, brand, and aisle and shelf when known.
+  - `search-results.tsx` reflects the query or category, falling back to `metaSearchTitle` and `metaSearchDesc`.
+  - `not-found.tsx` reuses `pageNotFound` and `pageNotFoundDesc`.
+- Pages with an early return (`category-detail.tsx`, `product-detail.tsx`) call `usePageMeta` before the return, with not-found text as the fallback, so the hook order stays the same on every render.
 
-### Data Expansion
-- More products — 15 of 23 categories have none yet (they show "Coming soon"); Fresh Fruits alone is 34 of 56 products
-- Richer category coverage
-- Real branch data
-- Some local image folders don't match the product's (corrected) subcategory, e.g. the lemon's photo lives in `Images/Fresh Fruits/Apples & Pears/` — harmless, paths are still valid
+## Loading states
+The data is static and renders at once, so there's no fetching state. Loading indicators cover the real waits:
+- **Product images.** `<ProductImage>` shows a `Skeleton`, fades the `<img>` in on `onLoad` (`transition-opacity duration-300`) and shows a muted `ImageOff` icon on `onError`. It stores the status together with its `src` (`{ src, status }`), so a new `src` reads as "loading" on the same render. An earlier `useEffect` reset could run after a cached image's `onLoad` and leave the new image stuck at `opacity-0`.
+- **Lazy pages.** The `<Suspense>` in `App.tsx` shows a small centered `Loader2` spinner while a page chunk loads.
+- **Remote images.** 21 product photos come from Unsplash. Five of them (f4, 100, 101, 103, 110) had been deleted upstream (HTTP 404) and were replaced on 2026-09-30. If an image falls back to the icon, `curl` every `images.unsplash.com` URL in `products.json` for a non-200 and swap in a free-license photo. `netlify.toml`'s CSP allows `images.unsplash.com` as the only remote image host.
+- **First load.** `client/index.html` shows `#app-boot-loader`, a spinner styled inline because it has to paint before the bundle loads. `main.tsx` fades it out with a `.hide` class after `createRoot().render()` and removes it on `transitionend`, with a 400ms `setTimeout` fallback, since `transitionend` doesn't always fire if the class lands before the first paint.
+- **Search debounce.** `search-results.tsx` swaps the search icon for a spinning `Loader2` while `query !== debouncedQuery` (300ms), so you can see the results haven't caught up with your typing.
 
-### Backend Expansion
-- APIs
-- Real database
-- Authentication
-- Admin dashboard
+## Legal pages
+- `terms.tsx` (`/terms`) and `privacy.tsx` (`/privacy`) share the back-header and prose layout of `store-map.tsx`. Their text is in `i18n.ts` (`termsSection1-6Title/Body`, `privacySection1-5Title/Body`, `legalLastUpdated`), and each page calls `usePageMeta`.
+- Both say plainly that the app is an independent, unofficial portfolio project that PX Mart (全聯福利中心) doesn't own, run, endorse or sponsor. That matters because the app uses a real retailer's name and colors.
+- The Privacy Policy describes what the app really does: it keeps everything in localStorage (`px-lang`, `px-store`, `px-favorites`, `px-recent-searches`, `vite-ui-theme`), has no backend, accounts, analytics or tracking, and loads some images from Unsplash.
+- Links to them sit at the bottom of the desktop sidebar (`mt-auto` in `layout.tsx`) and in the `<footer>` on `home.tsx`. They aren't in `NAV_ITEMS` or the bottom nav, since they're not main navigation. Home got the footer because it's the one page with normal page flow and no inner scroll area.
 
-### Real PX Mart Integration
-Currently NOT integrated with real PX Mart systems. All data is prototype/demo data.
+---
 
-### Bundle Size / Code-Splitting — done 2026-09-30
-See [Route-level code-splitting](#route-level-code-splitting). 629KB → ~506KB main chunk, no build warning.
+# 9. Progress
+
+## Done
+- Search with fuzzy matching and synonyms; brand filter and three sorts.
+- Product cards, product pages (two columns on desktop), category browsing.
+- Saved products, kept in localStorage.
+- Branch picker, remembered between visits.
+- Responsive layout for mobile, tablet and desktop, with a bottom nav on small screens and a sidebar on desktop.
+- Light and dark mode; Rubik and Noto Sans TC; spring animations for entrances, hover and tap.
+- English and Traditional Chinese for every string.
+
+## Fix history
+
+Earlier fixes:
+- Similar products check both `category_en` and `category_zh`.
+- `iconMap` is typed `Record<string, LucideIcon>` instead of `any`.
+- The heart button uses CSS `active:scale-90` instead of a nested `motion.div`, which fixed taps bubbling to the card.
+- Removed a duplicate local `type Product` from `search-results.tsx`, a `{ { } }` JSX spacing slip in `store-map.tsx`, and unused `location` / `setLocation` variables there.
+- Moved the Google Fonts `@import` to the top of `index.css`.
+- Replaced 7 missing local images (f2 to f8, Fresh Vegetables) with Unsplash photos.
+- Swapped `gray-*` classes in `not-found.tsx` for theme-aware ones.
+- **Saved products bug.** Each `ProductCard` used to keep its own favorites state, so saving two products in a row made the second overwrite the first in localStorage, and removing did the same in reverse. Fixed with the shared `FavoritesContext` (section 2).
+- Rebuilt `not-found.tsx` as the branded 404.
+- Added per-page titles and descriptions with `usePageMeta`.
+- Added the loading states, and fixed the boot loader staying in the DOM when `transitionend` didn't fire.
+- Added the Terms of Use and Privacy Policy.
+- Compressed the local product photos to WebP (35 files, 9.9 MB to about 0.8 MB).
+
+**2026-09-30 fix pass** (committed as `9a0f4a3`, deployed 2026-10-23):
+- **Sort and brand filter did nothing.** The URL changed but the list didn't. See the `useSearch()` rule in section 2.
+- **Copy-paste errors in `products.json`.** `香蕉` (banana) was a keyword on 6 other tropical fruits; `草莓` (strawberry) on every tomato, grape, orange, avocado and blueberry; `菠菜` (spinach) on cucumbers and bean sprouts. The blueberries (`c1`) had the Chinese name `新鮮草莓`. Lemon (`b4`) sat under Apples & Pears and moved to Citrus Fruits; avocado (`d1`) moved from Citrus Fruits to Tropical Fruits. `c2` and `c5` were both "Cherry Tomatoes 550g" and became "Yu Nu ..." and "Sheng Nu ...", matching their Chinese names.
+- Replaced 5 dead (404) Unsplash image URLs.
+- Empty categories got counts and the "No products here yet" state. The category header used to say "N Categories" for subcategories.
+- Moved hardcoded English/Chinese ternaries into `i18n.ts`.
+- **The mobile header was too wide** at 375px, so the page scrolled sideways. Below `sm` the language toggle drops its flags; below 420px the "PX Mart" text title is `sr-only` (the logo stays); the store picker truncates (`min-w-0`). Checked at 320px with the back button showing.
+- **The theme toggle's first click did nothing** in "system" mode on a dark OS, because it compared against the stored `"system"`. It now toggles from the actual `.dark` class, and "system" mode follows OS changes live.
+- The store map snapped the header's branch back to the URL's branch; `ProductImage` could get stuck invisible; the similar-products button could empty the list with no message. See section 8.
+- Scroll resets to the top on route change (`layout.tsx`). Clear search (×) clears only the query and keeps category, brand and sort. Searches from the search page go into recent searches too. The active brand stays in the brand list when a new query no longer matches it.
+- `<html lang>` follows the language (`zh-Hant-TW` or `en`). Icon-only buttons (heart, back, clear, store picker) have aria-labels. "View aisle map" is a styled `Link` instead of a `<button>` inside an `<a>`.
+- `index.html` got a default title, description and `theme-color`. It lost an unused Inter and Noto Sans **SC** (Simplified) stylesheet, an `og:image` pointing at a missing `Logo.jpg`, Replit's `twitter:site` and `maximum-scale=1` (which blocked pinch-zoom). `site.webmanifest` icon paths pointed at `/` instead of `/favicon_io/`, and its name was empty.
+- Deleted the Replit agent state files (`.local/state/replit/`) and gitignored `.local/`.
+- Added `robots.txt`, a build-generated `sitemap.xml` and absolute `og:image` / `twitter:image` URLs.
+
+**2026-10-23 writing pass** (uncommitted, for the owner to review): see [Writing style](#writing-style). It also:
+- fixed "1 Results" on the search page, which now reads "1 result" / "56 results" (Chinese "56 筆結果"),
+- renamed the demo branches to "Taipei (demo store)" and "Kaohsiung (demo store)" (the old names had an em dash),
+- made the "Saved" nav item and the page title agree ("Saved products"),
+- dropped five unused keys (`section`, `recentSearches`, `howToFind`, `goToAisle`, `metaStoreMapDesc`),
+- removed every em dash from `client/src`, `script/` and `index.html` (the shadcn `ui/` files are untouched).
+
+## Build status
+- `npx tsc --noEmit`: 0 errors.
+- `npm run build`: no warnings. Main chunk about 506 KB (162 KB gzipped); the other pages load on demand.
+- `npm run dev:client`: serves on port 5000, with zero console errors or warnings across all routes (apart from the dev-only data validation log, which passes).
+- `.claude/launch.json` has `px-mart-prod-preview`, which runs `vite preview` on port 5001 and serves `dist/public`. Run `npm run build` first.
+
+## Still to do
+
+### Data
+- 15 of the 23 categories have no products yet (they show "Coming soon"). Fresh Fruits alone is 34 of the 56 products.
+- Real aisle data for more branches.
+- Some photos sit in a folder that no longer matches the product's subcategory; the lemon's photo is in `Images/Fresh Fruits/Apples & Pears/`. The paths still work.
+
+### Bigger ideas
+- A drawn floor plan for the store map.
+- An API, a database, accounts and an admin page for editing products.
+- A real connection to PX Mart systems. Today it's all demo data.
 
 ### Deployment
-Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` (Node 22), publishes `dist/public`, and sets security headers including a CSP whose only allowed remote image host is `images.unsplash.com`. **Verified 2026-10-15: pushing to git does NOT deploy.** The 2026-09-30 fixes were committed (`9a0f4a3`) and pushed to `origin/main` (GitHub `FullyMed/My_Projects`, a monorepo), yet the live site still serves a build from **before 2026-09-21**:
-- Its `index.html` has no `#app-boot-loader` (added in `082461d`, 2026-09-21), still has `Logo.jpg`, `maximum-scale=1` and the Inter/Noto Sans SC stylesheet, and serves bundle `index-DWdJhDve.js`.
-- `/robots.txt` and `/sitemap.xml` fall through to `index.html`.
-- **None of `netlify.toml`'s headers are present** (no CSP, `X-Frame-Options` or `X-Content-Type-Options`; only Netlify's default HSTS). So `netlify.toml` isn't being applied, which fits a manual drag-and-drop of a `dist` folder, or a git link without base directory `Website/PX_Mart_Finder`.
+Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` on Node 22, publishes `dist/public` and sets security headers, including a CSP that allows `images.unsplash.com` as the only remote image host.
 
-To check a deploy: `curl -s https://px-mart-finder.netlify.app/ | grep -c app-boot-loader` should print `1`, and `curl -sI` should show `Content-Security-Policy`.
+**Deployed and checked live on 2026-10-23.** Before that, on 2026-10-15, the live site was still a build from before 2026-09-21, even though `9a0f4a3` had been pushed to GitHub `FullyMed/My_Projects` (a monorepo). Its `netlify.toml` headers weren't applied, so Netlify wasn't building from the repo at all. The owner linked the repo with **base directory `Website/PX_Mart_Finder`** and redeployed. Nobody has seen yet whether a push deploys on its own; the next push will show it.
 
-### SEO Follow-ups — done 2026-09-30
-- `client/public/robots.txt` — allow all + `Sitemap:` line.
-- `sitemap.xml` is **generated, not committed**: `script/sitemap.ts` (`writeSitemap`) runs inside `script/build.ts` right after the Vite build and writes `dist/public/sitemap.xml` from `products.json` + `categories.json` — 5 static routes + every `/category/<id>` + every `/product/<id>` (84 URLs today). It can't drift when data changes; if the domain ever changes, update `SITE_URL` there, the `Sitemap:` line in `robots.txt`, and the absolute `og:image`/`twitter:image` in `index.html`. `/favorites` is deliberately excluded (per-device localStorage, always empty for a crawler). Note `npx vite build` alone skips the sitemap — use `npm run build`.
-- The static `og:title`/`og:description`/`og:image` don't vary per page — expected for a client-only SPA (unfurlers don't run JS); per-page OG would need SSR/prerendering, out of scope.
+The 2026-10-23 check:
+- The served bundle `index-Dy2SAV7u.js` matched the local build.
+- All five security headers from `netlify.toml` were present (CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
+- `robots.txt`, `sitemap.xml` (`application/xml`, 84 URLs) and the fixed manifest were served, and deep links returned 200.
+- In the browser, under the real CSP: Rubik loaded, all 56 product images loaded (21 from Unsplash), sort by name worked through the UI, 香蕉 found only the banana, empty categories said "Coming soon", and the store map showed the linked aisle.
+- Unknown IDs showed the 404, nothing scrolled sideways at 375px, and the console had **no errors or CSP violations**.
 
----
+To check a deploy: `curl -s https://px-mart-finder.netlify.app/ | grep -c app-boot-loader` should print a number above 0 (the id appears in the CSS and in the div), `curl -sI` should show `Content-Security-Policy`, and the `assets/index-*.js` name in the live HTML should match `dist/public` after `npm run build`. The CSP exists only on Netlify, so check anything that loads a new remote resource (fonts, images, scripts) on the live site.
 
-# 10. Important Rules for Claude Code
-
-## Claude MUST ALWAYS
-
-### Respect Project Scope
-Single-branch retail prototype. Do NOT over-engineer.
-
-### Prioritize Stability
-Prefer stable, readable, maintainable code over unnecessary optimization or abstraction.
-
-### Preserve Existing UX Direction
-The project aims for a clean, modern, minimal, retail-oriented UI with smooth spring animations.
-Do not redesign unnecessarily.
-
-### Keep Traditional Chinese Support
-All strings must have both EN and ZH translations in `i18n.ts`.
-Use Traditional Chinese conventions (Taiwan): 門市, 走道, 分類, 收藏, etc.
-
-### Keep Data Consistent
-- Product IDs must be unique
-- Image paths must be valid
-- Store location data must be consistent
-- Category/subcategory references must match `CATEGORIES` in `data.ts`
-
-### Maintain Build Stability
-Always ensure `npx tsc --noEmit` passes with 0 errors after changes.
-
-### Follow the CSS Import Order
-In `index.css`, always put external `@import url(...)` (Google Fonts etc.) **before** `@import "tailwindcss"`.
-
-## Claude MUST NEVER
-
-### Do NOT Reintroduce react-window
-Virtualization was intentionally removed. Do not add it back.
-
-### Do NOT Add Enterprise Complexity
-Avoid microservice architecture, unnecessary backend layers, premature optimization, or complex state management libraries (Redux, Zustand, etc.).
-
-### Do NOT Make useFavorites a Standalone useState Hook
-`useFavorites()` must always read from `FavoritesContext`. Moving the `useState` back into the hook (so each component gets its own instance) silently reintroduces the multi-item favorites bug — components overwrite each other's localStorage writes. See the FavoritesContext technical decision above.
-
-### Do NOT Pretend This Is Production Scale
-This is intentionally prototype scale and single-branch focused.
-
-### Do NOT Break Existing Data Structure
-Avoid unnecessary schema rewrites unless strictly required.
-
-### Do NOT Nest motion.div whileTap Inside Another motion.div whileTap
-Framer-motion uses native `pointerdown` listeners. Nesting `whileTap` motion elements causes the parent to trigger on child taps due to event bubbling. Use CSS `active:scale-*` for press feedback on nested interactive elements.
-
-### Do NOT Commit or Push
-The owner commits and pushes himself (restated 2026-09-30). Leave every change uncommitted in the working tree, list the changed files at the end, and don't offer to commit. Only run `git commit`/`git push` if he explicitly asks in that moment.
-
-### Do NOT Hardcode Strings in JSX
-All user-facing text must go through `t("key")` from `useLanguage()`. The only exception is parameterized strings that require interpolation (no template support in `t()`).
+### SEO
+- `client/public/robots.txt` allows everything and has a `Sitemap:` line.
+- `sitemap.xml` is **generated, not committed**. `writeSitemap` in `script/sitemap.ts` runs inside `script/build.ts` after the Vite build and writes `dist/public/sitemap.xml` from `products.json` and `categories.json`: 5 static routes, every `/category/<id>` and every `/product/<id>` (84 URLs today). It can't drift from the data. If the domain changes, update `SITE_URL` there, the `Sitemap:` line in `robots.txt`, and the absolute `og:image` / `twitter:image` in `index.html`. `/favorites` is left out on purpose, since it's per-device localStorage and always empty for a crawler. `npx vite build` alone skips the sitemap, so use `npm run build`.
+- The `og:title`, `og:description` and `og:image` in `index.html` are the same on every page. Link-preview bots don't run JavaScript, so per-page cards would need SSR or prerendering, which is out of scope.
 
 ---
 
-# 11. Known Issues / Notes
+# 10. Rules for Claude Code
 
-## Known Console Noise
-Some non-critical console errors may appear related to `/writing`, `/site_integration`, or permission errors. These originate from environment/tooling integrations, not PX Mart Finder itself. Not blocking.
+## Always
+- **Stay in scope.** It's a single-branch prototype. Don't over-engineer.
+- **Prefer stable, readable code** to clever optimization or extra abstraction.
+- **Keep the look.** Clean, minimal, retail-style UI with gentle spring animation. No redesigns nobody asked for.
+- **Keep Traditional Chinese.** Every string needs `en` and `zh` in `i18n.ts`, in Taiwanese usage (門市, 走道, 分類, 收藏).
+- **Keep the data consistent.** Unique product IDs, valid image paths, consistent store locations, and categories and subcategories that match `CATEGORIES`.
+- **Keep the build green.** `npx tsc --noEmit` must pass with 0 errors after every change.
+- **Keep the CSS import order.** External `@import url(...)` lines go before `@import "tailwindcss"` in `index.css`.
+- **Follow the [writing style](#writing-style)** for any new text.
 
-## Dependency Notes
-- esbuild platform mismatch may occur when `node_modules` was installed on Windows but run in WSL2. Fix: `npm ci` inside WSL2.
-
-## Important Architectural Decision
-The project intentionally favors simplicity, prototype realism, and maintainability over artificial complexity or enterprise-scale simulation.
+## Never
+- **Don't bring back react-window.**
+- **Don't add enterprise complexity:** microservices, extra backend layers, premature optimization, or state libraries such as Redux or Zustand.
+- **Don't give `useFavorites` its own `useState`.** It must read `FavoritesContext`, or saved products start overwriting each other again (section 2).
+- **Don't present it as production scale.** It's a prototype for one branch.
+- **Don't rewrite the data schema** unless there's no other way.
+- **Don't nest `whileTap` motion elements.** Use CSS `active:scale-*` for nested press feedback.
+- **Don't commit or push.** The owner does that himself (said again on 2026-09-30). Leave changes in the working tree, list the changed files at the end, and don't offer to commit. Only run `git commit` or `git push` if he asks for it right then.
+- **Don't hardcode strings in JSX.** Everything goes through `t("key")`, except sentences that need a value inside them.
 
 ---
 
-# Final Philosophy
+# 11. Notes
 
-This project is intentionally designed as:
-
-> A clean, realistic, fully responsive, single-branch retail product finder prototype
-
-NOT:
-- a massive enterprise retail platform
-- a production-scale nationwide system
-- a hyper-optimized architecture experiment
-
-The focus is:
-- strong UX with smooth, gentle interactions
-- believable prototype quality
-- stable frontend engineering
-- full responsive design (mobile → tablet → desktop)
-- clear portfolio value
+- **Console noise.** Errors mentioning `/writing`, `/site_integration` or permissions come from tooling around the editor, not from the app. Ignore them.
+- **WSL2.** If `node_modules` was installed on Windows and you run the app in WSL2, esbuild fails with a platform mismatch. Run `npm ci` inside WSL2.
+- **The point of the project** is a clean, believable, fully responsive single-branch prototype with stable frontend code and clear portfolio value. It isn't meant to be a nationwide retail platform or an architecture experiment.

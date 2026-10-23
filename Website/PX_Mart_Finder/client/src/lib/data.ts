@@ -15,13 +15,13 @@ export const STORE_LIST: Store[] = [
   },
   { 
     id: "demo_taipei_01", 
-    nameEn: "Demo Store — Taipei", 
-    nameZh: "示意門市 — 台北"
+    nameEn: "Taipei (demo store)",
+    nameZh: "台北（示意門市）"
   },
   { 
     id: "demo_kaohsiung_01", 
-    nameEn: "Demo Store — Kaohsiung", 
-    nameZh: "示意門市 — 高雄"
+    nameEn: "Kaohsiung (demo store)",
+    nameZh: "高雄（示意門市）"
   },
 ];
 

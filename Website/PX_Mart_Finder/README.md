@@ -1,116 +1,97 @@
 # PX Mart Finder
 
-**Live demo:** https://px-mart-finder.netlify.app/
+Live demo: https://px-mart-finder.netlify.app/
 
-## Project Description
+PX Mart Finder helps you find a product inside a PX Mart (全聯福利中心) supermarket. You search for it, and the app tells you the aisle and shelf. You can also browse by category and save products for your next shop.
 
-PX Mart Finder is a retail product discovery and in-store navigation prototype designed for PX Mart (全聯福利中心) stores in Taiwan. It helps shoppers quickly locate products by aisle and shelf, browse by category, and save favorites — all through a fast, responsive interface.
+It's a portfolio prototype built around one real branch, PX Mart Wufeng in Taichung. The Taipei and Kaohsiung branches are demo placeholders. PX Mart has nothing to do with the project, and the product and aisle data is demo data.
 
-The project is built as a single-branch proof-of-concept focused on **PX Mart Wufeng (Taichung)**. It demonstrates how modern frontend technologies can be applied to retail search UX, and is intended as a portfolio and prototype demo.
-
----
-
-## Getting Started
+## Getting started
 
 ```bash
-# Install dependencies (run inside WSL2 / Linux if on Windows)
+# Install dependencies (on Windows, run this inside WSL2)
 npm ci
 
-# Start the development server
+# Start the dev server on http://localhost:5000
 npm run dev:client
-# → http://localhost:5000
 
-# Type-check and production build (output: dist/public, deployed to Netlify)
+# Type-check, then build for production (output goes to dist/public)
 npx tsc --noEmit
 npm run build
 ```
 
-> **Windows / WSL2 note:** Always run `npm ci` from within WSL2. Installing `node_modules` on Windows and then running in WSL2 will cause native binary errors (esbuild, rollup).
-
----
+On Windows, run `npm ci` inside WSL2. If you install `node_modules` on Windows and then run the app in WSL2, esbuild and Rollup fail with native binary errors.
 
 ## Deployment
 
-Hosted on Netlify (`netlify.toml`): the build command is `npm run build`, the publish directory is `dist/public`, and it runs on Node 22 with strict security headers and a CSP. The build also generates `sitemap.xml`, covering every product and category page, from the JSON data. If the domain changes, update it in `script/sitemap.ts`, `client/public/robots.txt`, and the `og:image`/`twitter:image` tags in `client/index.html`.
+Netlify hosts the site, using the settings in `netlify.toml`. It runs `npm run build` on Node 22, publishes `dist/public`, and adds security headers, including a Content Security Policy. The build also writes `sitemap.xml` from the product and category data, so the sitemap stays in step when you add products.
 
-To check a production build locally:
+If the domain changes, update it in three places: `script/sitemap.ts`, `client/public/robots.txt`, and the `og:image` and `twitter:image` tags in `client/index.html`.
+
+To try a production build on your machine:
 
 ```bash
 npm run build
 npx vite preview --port 5001
 ```
 
----
+## What it does
 
-## Key Features
+- Search by product name, brand or category. Small typos still find a match, and some words search their synonyms too: "soda" also looks for 可樂 and 汽水.
+- See the aisle and shelf for each product, per branch.
+- Browse 23 categories and their subcategories. Each one shows how many products it has, and the empty ones say "Coming soon" instead of leading to a blank page.
+- Filter by brand and sort by best match, name or aisle order. The filters live in the URL, so the back button and shared links keep them.
+- Get "Did you mean" suggestions when a search finds nothing.
+- Save products with the heart button. Saved products stay in your browser.
+- Switch between the Wufeng branch and the two demo branches.
+- Open a demo store map that shows which aisle to head to.
+- Use it in English or Traditional Chinese (繁體中文), in light or dark mode, on a phone as narrow as 320px or on a desktop.
+- Read the Terms of Use and Privacy Policy, which say plainly that PX Mart doesn't run or endorse the app.
 
-- Fast product search with fuzzy matching and typo tolerance
-- Synonym expansion (e.g. searching "tissue" also finds 衛生紙, 面紙)
-- Aisle and shelf location per product, per store
-- Category and subcategory browsing, with product counts on every category/subcategory and a friendly "No products here yet" state for categories the demo data doesn't cover yet
-- Brand filtering and multi-sort (relevance, name, aisle order) — kept in the URL, so back/forward and shared links restore them
-- "Did you mean?" suggestions when no results are found
-- Favorites with localStorage persistence — shared context keeps all toggles in sync
-- Store selection (Wufeng branch + demo placeholders)
-- Store map placeholder with aisle highlighting
-- Custom branded 404 page — bilingual, with Search Products / Back to Home CTAs
-- Per-page meta title and meta description (bilingual, updates live with the page and language), plus `robots.txt` and a `sitemap.xml` generated at build time from the product/category data
-- Loading states: image skeletons with fade-in and error fallback, an initial app-boot spinner, and a search-debounce indicator
-- Terms of Use and Privacy Policy pages, with a non-affiliation disclaimer (independent portfolio project, not affiliated with PX Mart)
-- Product images compressed to WebP (9.9MB → ~0.8MB, 93% smaller) via `script/compress-images.ts`
-- Route-level code-splitting (`React.lazy` + `Suspense`) — only Home ships in the main bundle
-- Full bilingual support — English and Traditional Chinese (繁體中文), including `<html lang>` for screen readers
-- Light and dark mode (follows the OS setting live until you pick one)
-- Fully responsive — mobile (down to 320px), tablet, and desktop layouts
-- Resilient to corrupt or blocked `localStorage` — bad saved values fall back to defaults instead of crashing
+A few things under the hood:
 
----
+- Each page sets its own title and description, and both change when you switch language.
+- Images show a placeholder while they load and an icon if they fail.
+- Every page except Home loads on demand, which keeps the first download small.
+- Product photos are WebP files, which cut the image folder from 9.9 MB to about 0.8 MB (`script/compress-images.ts`).
+- If saved settings in your browser get corrupted, the app falls back to its defaults instead of crashing.
 
-## Project Structure
+## Project structure
 
 ```
 client/
   src/
-    components/    # Layout, ProductCard, ProductImage, LanguageToggle, ThemeToggle
-    pages/         # Home, Search, Category, Product Detail, Favorites, Store Map, Terms, Privacy
-    lib/           # data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts, seo.ts
-    data/          # products.json, categories.json
-  public/Images/   # Product images organized by category
-server/            # Minimal Express scaffold (not actively used)
-shared/            # Shared types
+    components/    Layout, ProductCard, ProductImage, LanguageToggle, ThemeToggle
+    pages/         Home, Search, Category, Product, Saved, Store map, Terms, Privacy, 404
+    lib/           data.ts, i18n.ts, storage.ts, favorites-provider.tsx, normalize.ts, seo.ts
+    data/          products.json, categories.json
+  public/Images/   Product photos, grouped by category
+script/            Build script, sitemap generator, image compressor
+server/            Express scaffold from the original template (not used)
+shared/            Shared types (not used)
 ```
 
----
+## Built with
 
-## Technologies Used
-
-- **React 19** + **TypeScript**
-- **Vite**
-- **Tailwind CSS v4**
-- **shadcn/ui**
-- **Fuse.js** — fuzzy search
-- **framer-motion** — spring animations and entrance transitions
-- **wouter** — client-side routing
-- **use-debounce** — debounced search input
-- **Lucide React** — icons
-- **Google Fonts** — Rubik (Latin) + Noto Sans TC (Traditional Chinese)
-
----
+- React 19 and TypeScript, bundled with Vite
+- Tailwind CSS v4 and shadcn/ui
+- Fuse.js for fuzzy search
+- framer-motion for animation
+- wouter for routing
+- use-debounce for the search box
+- Lucide icons
+- Rubik and Noto Sans TC from Google Fonts
 
 ## Purpose
 
-PX Mart Finder demonstrates how intelligent search and clear location data can reduce the time customers spend finding products inside a physical supermarket. It is designed as a portfolio piece and prototype pitch — not a production system.
+The project shows how good search and clear aisle data can save shoppers time inside a real supermarket. It's a portfolio piece and a prototype pitch, so it isn't built for production traffic or real inventory.
 
----
+## What's next
 
-## Future Enhancements
-
-- More products and richer category coverage
-- Real branch location data for additional stores
-- Multi-branch support
-- Real-time inventory synchronization
-- Indoor navigation integration
-- Backend API and admin dashboard
-- Mobile application version
-- Products for the 15 categories that are currently empty in the demo data
-- Per-page OG/social preview images (would need SSR/prerendering, out of scope for this stack)
+- Products for the 15 categories that are still empty
+- Real aisle data for more branches
+- A drawn floor plan for the store map
+- Live stock levels
+- A backend and an admin page for editing products
+- A mobile app version
+- Per-page link previews, which would need server-side rendering

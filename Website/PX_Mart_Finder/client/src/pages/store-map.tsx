@@ -20,11 +20,11 @@ export default function StoreMap() {
   usePageMeta(
     t("metaStoreMapTitle"),
     language === "en"
-      ? `View a demo aisle map for ${selectedStore.nameEn}.`
-      : `查看全聯${selectedStore.nameZh}的示意走道地圖。`
+      ? `A demo aisle map for ${selectedStore.nameEn}, showing which aisle to head to.`
+      : `${selectedStore.nameZh}的示意走道地圖，告訴你該往哪條走道走。`
   );
 
-  // Sync to the linked store only when the link changes — depending on selectedStore
+  // Sync to the linked store only when the link changes. Depending on selectedStore
   // here would snap the header's store picker back to the URL's store on every change.
   useEffect(() => {
     const foundStore = storeId ? STORE_LIST.find(s => s.id === storeId) : undefined;
@@ -58,9 +58,9 @@ export default function StoreMap() {
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            {language === 'en' 
-              ? `You are navigating inside ${selectedStore.nameEn}.` 
-              : `您正在 ${selectedStore.nameZh} 內導航。`}
+            {language === 'en'
+              ? `You're viewing the map for ${selectedStore.nameEn}.`
+              : `這是${selectedStore.nameZh}的地圖。`}
           </p>
         </div>
 

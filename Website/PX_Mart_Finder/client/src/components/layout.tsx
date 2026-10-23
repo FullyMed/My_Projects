@@ -112,7 +112,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
-      {/* Header — full viewport width, content capped at screen-xl */}
+      {/* Header: full viewport width, content capped at screen-xl */}
       <header className="bg-primary text-primary-foreground sticky top-0 z-50 shadow-md transition-colors duration-300">
         <div className="max-w-screen-xl mx-auto px-4 h-[72px] flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-1 shrink-0">

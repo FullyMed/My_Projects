@@ -34,8 +34,8 @@ export default function ProductDetail() {
       ? (() => {
           const loc = product.locationsByStore[selectedStore.id];
           return language === "en"
-            ? `${product.brand} ${product.product_name_en} (${product.category_en}) at PX Mart${loc ? ` — Aisle ${loc.aisle}, Shelf ${loc.shelf}` : ""}.`
-            : `全聯${product.category_zh}「${product.product_name_zh}」（${product.brand}）${loc ? `，走道 ${loc.aisle}、貨架 ${loc.shelf}` : ""}。`;
+            ? `${product.brand} ${product.product_name_en} at PX Mart${loc ? `: aisle ${loc.aisle}, shelf ${loc.shelf}` : ""}.`
+            : `全聯「${product.product_name_zh}」（${product.brand}）${loc ? `：走道 ${loc.aisle}、貨架 ${loc.shelf}` : ""}。`;
         })()
       : t("productNotFound")
   );
@@ -69,7 +69,7 @@ export default function ProductDetail() {
 
   return (
     <div className="flex flex-col flex-1 bg-background pb-8 lg:flex-row lg:pb-0 lg:items-start">
-      {/* Hero Image — square on mobile, sticky tall column on desktop */}
+      {/* Hero image: square on mobile, sticky tall column on desktop */}
       <div className="w-full aspect-square bg-muted relative lg:w-2/5 lg:shrink-0 lg:aspect-auto lg:h-[calc(100vh-72px)] lg:sticky lg:top-[72px] lg:self-start">
         <ProductImage
           src={product.image_url}
@@ -148,7 +148,7 @@ export default function ProductDetail() {
                   <div className="space-y-1">
                     <p className="text-sm font-bold text-foreground">
                       {language === 'en' 
-                        ? `Location data for ${selectedStore.nameEn} is not available yet.` 
+                        ? `We don't have aisle info for ${selectedStore.nameEn} yet.`
                         : t("locationNotAvailable")}
                     </p>
                     <p className="text-xs text-muted-foreground">

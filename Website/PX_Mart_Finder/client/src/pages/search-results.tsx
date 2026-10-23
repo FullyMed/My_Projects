@@ -258,7 +258,7 @@ export default function SearchResults() {
     [setLocation]
   );
 
-  // Only clears the text query — category/subcategory/brand/sort filters stay applied.
+  // Only clears the text query; category, subcategory, brand and sort filters stay applied.
   const clearSearch = () => {
     setQuery("");
     updateParam("q", null);
@@ -271,7 +271,7 @@ export default function SearchResults() {
   ).slice(0, 4);
   const metaTitle = q
     ? language === "en"
-      ? `"${q}" search results`
+      ? `Results for "${q}"`
       : `「${q}」的搜尋結果`
     : activeCategory
       ? language === "en"
@@ -280,7 +280,7 @@ export default function SearchResults() {
       : t("metaSearchTitle");
   const metaDescription = q
     ? language === "en"
-      ? `${results.length} results for "${q}" at PX Mart.`
+      ? `${results.length} ${results.length === 1 ? "product matches" : "products match"} "${q}" at PX Mart.`
       : `全聯搜尋「${q}」共 ${results.length} 筆結果。`
     : t("metaSearchDesc");
 
@@ -413,7 +413,7 @@ export default function SearchResults() {
           <div className="h-full flex flex-col">
             <div className="flex justify-between items-center px-5 py-3 shrink-0">
               <h2 className="font-semibold text-sm text-muted-foreground">
-                {results.length} {t("results")}
+                {results.length} {results.length === 1 ? t("resultCount") : t("resultsCount")}
               </h2>
             </div>
 
