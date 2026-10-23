@@ -48,6 +48,13 @@ npx vite preview --port 5001
 - Use it in English or Traditional Chinese (繁體中文), in light or dark mode, on a phone as narrow as 320px or on a desktop.
 - Read the Terms of Use and Privacy Policy, which say plainly that PX Mart doesn't run or endorse the app.
 
+Accessibility and polish:
+
+- All text meets WCAG AA contrast in light and dark mode, and every page has a single main heading.
+- A "Skip to content" link and clear focus rings make it usable from the keyboard.
+- Buttons and toggles are big enough to tap comfortably on a phone.
+- If your device asks for reduced motion, the animations stop moving and only fade.
+
 A few things under the hood:
 
 - Each page sets its own title and description, and both change when you switch language.

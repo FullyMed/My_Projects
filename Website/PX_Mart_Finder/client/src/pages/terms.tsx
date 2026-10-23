@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n";
 import { usePageMeta } from "@/lib/seo";
-import { ArrowLeft } from "lucide-react";
 
 export default function Terms() {
   const { t } = useLanguage();
@@ -19,19 +17,16 @@ export default function Terms() {
 
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
-      <div className="p-4 border-b sticky top-[var(--px-header-h)] bg-background z-10 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label={t("back")} className="rounded-full">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+      <div className="px-6 lg:px-8 py-4 border-b sticky top-[var(--px-header-h)] bg-background z-10">
         <h1 className="text-xl font-bold">{t("termsTitle")}</h1>
       </div>
 
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto w-full space-y-6">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      <div className="p-6 lg:p-8 max-w-2xl w-full space-y-6">
+        <p className="text-sm text-muted-foreground">
           {t("legalLastUpdated")}
         </p>
 
-        <p className="text-sm leading-relaxed text-foreground/90">{t("termsIntro")}</p>
+        <p className="text-base leading-relaxed text-foreground">{t("termsIntro")}</p>
 
         {sections.map((section, i) => (
           <div key={i} className="space-y-2">

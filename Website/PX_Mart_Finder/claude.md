@@ -116,7 +116,7 @@ dist/       build output, don't edit by hand
 | Subcategories | 1 | 2 | 3 |
 | Saved | 1 | 2 | 3 |
 
-Product detail on desktop: the image column sticks (`lg:sticky lg:top-[72px] lg:h-[calc(100vh-72px)]`) and the details, location and similar products scroll beside it.
+Product detail on desktop: the image is a square, rounded panel (`lg:w-2/5 lg:aspect-square lg:rounded-3xl`) that sticks below the header (`lg:sticky lg:top-[calc(var(--px-header-h)+2rem)]`) while the details, location and similar products scroll beside it. It used to fill a full-height column with `object-cover`, which cropped square product shots (half the melon was cut off). On mobile the image is a full-bleed square.
 
 ---
 
@@ -142,6 +142,24 @@ Dark mode uses softer versions, defined under `.dark` in `index.css`.
 
 ## Depth
 Cards use `shadow-sm` and `shadow-lg` on hover. The bottom nav uses `shadow-[0_-4px_24px_rgba(0,0,0,0.07)]` and the header `shadow-md`.
+
+## Design rules
+
+On 2026-10-23 the owner had the UI reviewed with the UI/UX Pro Max, taste-skill (redesign-existing-projects), Frontend Design and Emil Kowalski skills. It was a fix pass, not a redesign. Keep new UI to these rules:
+
+- **Contrast.** All text meets WCAG AA (4.5:1, or 3:1 for large text) in light and dark mode. Don't fade text with opacity (`text-muted-foreground/70`, `opacity-60`); use `text-muted-foreground` as the lightest text color. Before the pass, the sidebar and footer links were 2.8:1, product-card brand and section text 2.9:1, and the store-map placeholder text as low as 1.1:1.
+- **Brand surfaces.** The header and the home and category heroes use `bg-brand text-brand-foreground`, not `bg-primary`. `--brand` is the PX blue in light mode and a deep blue (`216 70% 26%`) in dark mode, with white text in both. Dark mode's `--primary` is a bright blue meant for buttons and links; as a header it was a loud slab with dark text.
+- **Don't use `secondary` for buttons.** `--secondary` is red in light mode and slate in dark mode, so a `secondary` button changes meaning between themes. The 404 page's second button is `outline`.
+- **Text size.** 12px (`text-xs`) is the smallest size for words. Numeric count pills and card category badges may use 11px. Labels are sentence case, never `uppercase` with wide tracking.
+- **Headings.** One `<h1>` per page. The header's "PX Mart" is a `<span>`, Home's hero title is the `<h1>`, and Search has an `sr-only` `<h1>` with the page title. Section headings are `<h2>`.
+- **Focus.** `index.css` gives every focusable element a 2px `--ring` outline. Buttons, inputs and select triggers use a 2px ring instead (`focus-visible:ring-2`). The header and home hero set `[--ring:0_0%_100%]` so rings show white on blue. There's a "Skip to content" link (first Tab stop) that jumps to `<main id="main">`.
+- **Touch targets.** Mobile controls are at least 40px, aiming for 44px. Where a pill has to stay small (store picker, language toggle), an `after:absolute after:-inset-y-1.5` pad stretches the tap area. The clear-search × is a 36px button, not a 16px icon.
+- **Buttons.** `components/ui/button.tsx` has real hover states and press feedback (`active:scale-[0.97]`, 150ms ease-out, on transform and color only). It used to reference Replit utilities that don't exist (`hover-elevate`, `active-elevate-2`, `border-primary-border`, `--button-outline`), so buttons had no hover state. Don't pass `transition-colors` or `transition-all` to a `Button`; it overrides the transition list and kills the press animation.
+- **Motion.** Press feedback is CSS on the button itself, so `motion.div` wrappers have no `whileTap` (the product card keeps its own and stops the heart's `pointerdown` from reaching it). Entrances start at `scale(0.96–0.97)`, never from nothing, and use the `[0.23, 1, 0.32, 1]` ease-out curve. Staggers cap at 8 items. `<MotionConfig reducedMotion="user">` in `App.tsx` and a `prefers-reduced-motion` block in `index.css` turn movement off for people who ask, and the "Show similar items" scroll jumps instead of gliding for them.
+- **Status, not alarm.** Missing aisle data uses a neutral muted panel with a `MapPinOff` icon. Red is only for saved products (the heart).
+- **No duplicate navigation.** The header's back arrow shows on every page except Home, so pages don't add their own Back button (the category, store map, Terms and Privacy pages each had a second one).
+- **Empty states point somewhere.** The empty Saved page has a "Search products" button; the empty-category state offers categories that have products, with their item counts.
+- **Accessible names.** Decorative icons get `aria-hidden="true"`. Search inputs are `type="search"` with an `aria-label`. Toggles use `aria-pressed`, current nav links `aria-current="page"`, and the search result count is `aria-live="polite"`.
 
 ---
 
@@ -199,7 +217,7 @@ On 2026-10-23 the owner had all user-facing text, the legal pages and both docs 
 - Location pill (aisle and shelf) with a link to the store map.
 - Two columns on desktop.
 - Similar products from the same category (matched on `category_en` or `category_zh`).
-- If the chosen branch has no location for the product, the "Show similar items with aisle info" button appears only when such items exist. Otherwise the page shows the `noSimilarWithLocation` message.
+- If the chosen branch has no location for the product, a neutral panel says so. The "Show similar items with aisle info" button appears only when such items exist; otherwise the panel shows the `noSimilarWithLocation` message.
 - `showOnlyWithLocation` resets on every `/product/:id` change, because wouter keeps the component mounted.
 - An unknown product or category ID renders the branded `<NotFound />`, and the page still sets its own "not found" title.
 
@@ -236,7 +254,7 @@ The data is static and renders at once, so there's no fetching state. Loading in
 - **Search debounce.** `search-results.tsx` swaps the search icon for a spinning `Loader2` while `query !== debouncedQuery` (300ms), so you can see the results haven't caught up with your typing.
 
 ## Legal pages
-- `terms.tsx` (`/terms`) and `privacy.tsx` (`/privacy`) share the back-header and prose layout of `store-map.tsx`. Their text is in `i18n.ts` (`termsSection1-6Title/Body`, `privacySection1-5Title/Body`, `legalLastUpdated`), and each page calls `usePageMeta`.
+- `terms.tsx` (`/terms`) and `privacy.tsx` (`/privacy`) share a sticky title bar and a prose column (`max-w-2xl`, about 70 characters a line). Their text is in `i18n.ts` (`termsSection1-6Title/Body`, `privacySection1-5Title/Body`, `legalLastUpdated`), and each page calls `usePageMeta`.
 - Both say plainly that the app is an independent, unofficial portfolio project that PX Mart (全聯福利中心) doesn't own, run, endorse or sponsor. That matters because the app uses a real retailer's name and colors.
 - The Privacy Policy describes what the app really does: it keeps everything in localStorage (`px-lang`, `px-store`, `px-favorites`, `px-recent-searches`, `vite-ui-theme`), has no backend, accounts, analytics or tracking, and loads some images from Unsplash.
 - Links to them sit at the bottom of the desktop sidebar (`mt-auto` in `layout.tsx`) and in the `<footer>` on `home.tsx`. They aren't in `NAV_ITEMS` or the bottom nav, since they're not main navigation. Home got the footer because it's the one page with normal page flow and no inner scroll area.
@@ -286,12 +304,27 @@ Earlier fixes:
 - Deleted the Replit agent state files (`.local/state/replit/`) and gitignored `.local/`.
 - Added `robots.txt`, a build-generated `sitemap.xml` and absolute `og:image` / `twitter:image` URLs.
 
-**2026-10-23 writing pass** (uncommitted, for the owner to review): see [Writing style](#writing-style). It also:
+**2026-10-23 writing pass** (committed as `63dc39c`): see [Writing style](#writing-style). It also:
 - fixed "1 Results" on the search page, which now reads "1 result" / "56 results" (Chinese "56 筆結果"),
 - renamed the demo branches to "Taipei (demo store)" and "Kaohsiung (demo store)" (the old names had an em dash),
 - made the "Saved" nav item and the page title agree ("Saved products"),
 - dropped five unused keys (`section`, `recentSearches`, `howToFind`, `goToAisle`, `metaStoreMapDesc`),
 - removed every em dash from `client/src`, `script/` and `index.html` (the shadcn `ui/` files are untouched).
+
+**2026-10-23 design pass** (uncommitted, for the owner to review): see [Design rules](#design-rules). A measured audit of every page in light and dark mode at 375px and desktop width found:
+- 9 text colors below WCAG AA; there are now none.
+- Two `<h1>`s on most pages, and none of their own on Home and Search; there's now exactly one per page.
+- Buttons with no hover state, caused by the undefined Replit classes.
+- A 1px focus ring, and none at all on the store picker.
+- A 16px clear button and 32px heart and header buttons.
+- 10px text on the store pill, card badges and bottom-nav labels.
+- A cropped product photo on desktop, and ALL-CAPS tracked labels ("LOCATION", "PX SELECT", "HEAD TO AISLE").
+- Duplicate Back buttons on four pages.
+- In dark mode, a bright blue header with dark text.
+- A red error box for missing aisle data.
+- An uncapped stagger on the home grid, and no reduced-motion support.
+
+All of these are fixed. Since the change, tsc and the build pass, the console is clean, nothing scrolls sideways at 375px, and keyboard focus is visible on the blue header.
 
 ## Build status
 - `npx tsc --noEmit`: 0 errors.
@@ -342,7 +375,7 @@ To check a deploy: `curl -s https://px-mart-finder.netlify.app/ | grep -c app-bo
 - **Keep the data consistent.** Unique product IDs, valid image paths, consistent store locations, and categories and subcategories that match `CATEGORIES`.
 - **Keep the build green.** `npx tsc --noEmit` must pass with 0 errors after every change.
 - **Keep the CSS import order.** External `@import url(...)` lines go before `@import "tailwindcss"` in `index.css`.
-- **Follow the [writing style](#writing-style)** for any new text.
+- **Follow the [writing style](#writing-style)** for any new text, and the [design rules](#design-rules) for any new UI.
 
 ## Never
 - **Don't bring back react-window.**

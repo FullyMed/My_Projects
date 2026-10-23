@@ -19,10 +19,10 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggle}
-      className="rounded-full w-8 h-8 shrink-0 bg-white/10 hover:bg-white/20 text-primary-foreground border border-transparent"
+      className="relative rounded-full shrink-0 bg-white/10 text-brand-foreground hover:bg-white/20 hover:text-brand-foreground focus-visible:ring-offset-brand"
     >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-transform duration-200 ease-out dark:-rotate-90 dark:scale-0" aria-hidden="true" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-transform duration-200 ease-out dark:rotate-0 dark:scale-100" aria-hidden="true" />
       <span className="sr-only">{t("toggleTheme")}</span>
     </Button>
   );

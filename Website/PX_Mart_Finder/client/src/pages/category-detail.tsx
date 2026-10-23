@@ -5,7 +5,7 @@ import { usePageMeta } from "@/lib/seo";
 import NotFound from "@/pages/not-found";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ArrowLeft, Search } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
 
 export default function CategoryDetail() {
@@ -33,29 +33,19 @@ export default function CategoryDetail() {
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-6 pt-8 pb-10 rounded-b-[2rem] shadow-lg relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-         <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
+      <div className="bg-brand text-brand-foreground px-6 lg:px-8 pt-8 pb-10 rounded-b-[2rem] lg:rounded-b-3xl shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" aria-hidden="true"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none" aria-hidden="true"></div>
 
-         <div className="relative z-10">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => window.history.back()}
-              className="text-primary-foreground hover:bg-white/10 -ml-2 mb-4 pl-2 pr-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t("back")}
-            </Button>
-
-            <h1 className="text-2xl font-bold">
-                {language === "en" ? category.en : category.zh}
-            </h1>
-            <p className="text-primary-foreground/80 text-sm mt-1">
-                {category.subCategories.length} {t("subcategoriesCount")} · {totalCount}{" "}
-                {totalCount === 1 ? t("itemCount") : t("itemsCount")}
-            </p>
-         </div>
+        <div className="relative z-10">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            {language === "en" ? category.en : category.zh}
+          </h1>
+          <p className="text-brand-foreground/90 text-sm mt-1 tabular-nums">
+            {category.subCategories.length} {t("subcategoriesCount")} · {totalCount}{" "}
+            {totalCount === 1 ? t("itemCount") : t("itemsCount")}
+          </p>
+        </div>
       </div>
 
       {/* Subcategories List */}
@@ -64,38 +54,35 @@ export default function CategoryDetail() {
           {category.subCategories.map((sub, index) => {
             const count = countProducts(category, sub);
             return (
-            <motion.div
-              key={sub.en}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{
-                delay: index * 0.04,
-                type: "spring",
-                stiffness: 300,
-                damping: 26,
-              }}
-            >
-              <Button
-                variant="outline"
-                className="group w-full justify-between h-14 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-2xl transition-colors duration-200"
-                onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
+              <motion.div
+                key={sub.en}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(index, 8) * 0.04,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 26,
+                }}
               >
-                <div className="flex flex-col items-start min-w-0 text-left">
-                  <span className={cn("font-medium truncate max-w-full", count === 0 && "text-muted-foreground")}>
-                    {language === "en" ? sub.en : sub.zh}
+                <Button
+                  variant="outline"
+                  className="group w-full justify-between h-auto min-h-16 py-3 px-5 text-base bg-card hover:bg-primary/5 hover:border-primary/30 hover:text-primary shadow-sm border-border/60 rounded-2xl"
+                  onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
+                >
+                  <span className="flex flex-col items-start min-w-0 text-left">
+                    <span className={cn("font-medium truncate max-w-full", count === 0 && "text-muted-foreground")}>
+                      {language === "en" ? sub.en : sub.zh}
+                    </span>
+                    <span className={cn("text-xs font-normal tabular-nums", count > 0 ? "text-primary" : "text-muted-foreground")}>
+                      {count > 0
+                        ? `${count} ${count === 1 ? t("itemCount") : t("itemsCount")}`
+                        : t("comingSoon")}
+                    </span>
                   </span>
-                  <span className={cn("text-[11px] font-normal", count > 0 ? "text-primary/80" : "text-muted-foreground/70")}>
-                    {count > 0
-                      ? `${count} ${count === 1 ? t("itemCount") : t("itemsCount")}`
-                      : t("comingSoon")}
-                  </span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                  <Search className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </Button>
-            </motion.div>
+                  <ChevronRight className="text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                </Button>
+              </motion.div>
             );
           })}
         </div>

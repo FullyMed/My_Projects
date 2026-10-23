@@ -6,6 +6,7 @@ import { readStored, writeStored } from "@/lib/storage";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { STORE_LIST, Store } from "@/lib/data";
 import { Loader2 } from "lucide-react";
+import { MotionConfig } from "framer-motion";
 
 // Home (the landing route) and NotFound stay in the main bundle; every other route
 // is split out so Fuse.js etc. only load when those pages are visited.
@@ -74,15 +75,17 @@ function App() {
   const setStore = (store: Store) => setSelectedStore(store);
 
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <LanguageContext.Provider value={{ language, setLanguage, t }}>
-        <StoreContext.Provider value={{ selectedStore, setStore }}>
-          <FavoritesProvider>
-            <Router />
-          </FavoritesProvider>
-        </StoreContext.Provider>
-      </LanguageContext.Provider>
-    </ThemeProvider>
+    <MotionConfig reducedMotion="user">
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+          <StoreContext.Provider value={{ selectedStore, setStore }}>
+            <FavoritesProvider>
+              <Router />
+            </FavoritesProvider>
+          </StoreContext.Provider>
+        </LanguageContext.Provider>
+      </ThemeProvider>
+    </MotionConfig>
   );
 }
 

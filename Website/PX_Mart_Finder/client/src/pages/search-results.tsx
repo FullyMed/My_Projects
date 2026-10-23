@@ -288,41 +288,44 @@ export default function SearchResults() {
 
   return (
     <div className="flex flex-col flex-1 bg-muted/30 min-h-screen">
-      <div className="bg-white dark:bg-card p-4 lg:px-6 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40 transition-colors">
+      <div className="bg-card p-4 lg:px-6 sticky top-[var(--px-header-h)] z-40 shadow-sm border-b border-border/40">
+        <h1 className="sr-only">{metaTitle}</h1>
         <form onSubmit={handleSearch} className="relative">
           {query !== debouncedQuery ? (
-            <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
+            <Loader2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin pointer-events-none" aria-hidden="true" />
           ) : (
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 pointer-events-none" aria-hidden="true" />
           )}
           <Input
+            type="search"
+            aria-label={t("searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="pl-9 pr-9 h-10 bg-muted/50 border-transparent focus:bg-white dark:focus:bg-secondary transition-all rounded-full"
+            className="pl-10 pr-11 h-11 bg-muted/60 border-transparent focus:bg-card transition-colors rounded-full [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button
               type="button"
               onClick={clearSearch}
               aria-label={t("clearSearch")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-1 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </form>
 
         {expandedTerms.length > 1 && (
           <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground shrink-0">
+            <span className="text-xs font-medium text-muted-foreground shrink-0">
               {t("including")}:
             </span>
             {expandedTerms.slice(1).map((term, i) => (
               <Badge
                 key={i}
                 variant="outline"
-                className="text-[10px] py-0 px-2 h-5 bg-muted/30 whitespace-nowrap"
+                className="text-xs font-normal py-0 px-2.5 h-6 rounded-full bg-muted/40 whitespace-nowrap"
               >
                 {term}
               </Badge>
@@ -338,7 +341,7 @@ export default function SearchResults() {
               <Button
                 variant="secondary"
                 size="sm"
-                className="h-6 text-xs rounded-full px-2 font-normal bg-primary/10 text-primary hover:bg-primary/20"
+                className="h-8 text-xs rounded-full pl-3 pr-2.5 gap-1 font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
                 onClick={() => updateParam("category", null)}
               >
                 {activeCategory
@@ -346,7 +349,7 @@ export default function SearchResults() {
                     ? activeCategory.en
                     : activeCategory.zh
                   : categoryId}
-                <X className="w-3 h-3 ml-1" />
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
               </Button>
             )}
 
@@ -354,7 +357,7 @@ export default function SearchResults() {
               <Button
                 variant="secondary"
                 size="sm"
-                className="h-6 text-xs rounded-full px-2 font-normal bg-primary/10 text-primary hover:bg-primary/20"
+                className="h-8 text-xs rounded-full pl-3 pr-2.5 gap-1 font-medium bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
                 onClick={() => updateParam("subcategory", null)}
               >
                 {(() => {
@@ -367,7 +370,7 @@ export default function SearchResults() {
                       : sub.zh
                     : subcategoryName;
                 })()}
-                <X className="w-3 h-3 ml-1" />
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
               </Button>
             )}
           </div>
@@ -380,8 +383,8 @@ export default function SearchResults() {
               updateParam("brand", val === "all" ? null : val)
             }
           >
-            <SelectTrigger className="h-8 text-xs w-auto min-w-[100px] rounded-full bg-muted/50 border-transparent">
-              <Filter className="w-3 h-3 mr-1" />
+            <SelectTrigger className="h-9 text-sm w-auto min-w-[110px] gap-1.5 rounded-full bg-muted/60 border-transparent">
+              <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <SelectValue placeholder={t("brand")} />
             </SelectTrigger>
             <SelectContent>
@@ -395,8 +398,8 @@ export default function SearchResults() {
           </Select>
 
           <Select value={sortBy} onValueChange={(val) => updateParam("sort", val)}>
-            <SelectTrigger className="h-8 text-xs w-auto min-w-[100px] rounded-full bg-muted/50 border-transparent">
-              <ArrowUpDown className="w-3 h-3 mr-1" />
+            <SelectTrigger className="h-9 text-sm w-auto min-w-[110px] gap-1.5 rounded-full bg-muted/60 border-transparent">
+              <ArrowUpDown className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <SelectValue placeholder={t("sortBy")} />
             </SelectTrigger>
             <SelectContent>
@@ -412,7 +415,7 @@ export default function SearchResults() {
         {results.length > 0 ? (
           <div className="h-full flex flex-col">
             <div className="flex justify-between items-center px-5 py-3 shrink-0">
-              <h2 className="font-semibold text-sm text-muted-foreground">
+              <h2 className="font-semibold text-sm text-muted-foreground tabular-nums" aria-live="polite">
                 {results.length} {results.length === 1 ? t("resultCount") : t("resultsCount")}
               </h2>
             </div>
@@ -444,20 +447,20 @@ export default function SearchResults() {
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             className="py-12 px-4 flex flex-col items-center text-center overflow-y-auto h-full"
           >
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               {isEmptyCategory ? (
-                <PackageOpen className="w-8 h-8 text-muted-foreground/40" />
+                <PackageOpen className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
               ) : (
-                <Search className="w-8 h-8 text-muted-foreground/40" />
+                <Search className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
               )}
             </div>
 
-            <h3 className="text-lg font-bold text-foreground mb-2">
+            <h2 className="text-lg font-bold text-foreground mb-2 max-w-sm">
               {isEmptyCategory ? t("emptyCategoryTitle") : t("noResults")}
-            </h3>
+            </h2>
             {isEmptyCategory && (
               <p className="text-sm text-muted-foreground max-w-sm">
                 {t("emptyCategoryDesc")}
@@ -467,7 +470,7 @@ export default function SearchResults() {
             {suggestions.length > 0 && (
               <div className="mt-8 w-full max-w-sm">
                 <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center justify-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                  <Sparkles className="w-4 h-4 text-primary" aria-hidden="true" />
                   {t("didYouMean")}
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -476,7 +479,7 @@ export default function SearchResults() {
                       key={i}
                       variant="outline"
                       size="sm"
-                      className="rounded-full text-xs hover:bg-primary/5 hover:text-primary hover:border-primary/30"
+                      className="rounded-full h-9 text-sm hover:bg-primary/5 hover:text-primary hover:border-primary/30"
                       onClick={() => {
                         setQuery(s.name);
                         updateParam("q", s.name);
@@ -498,15 +501,15 @@ export default function SearchResults() {
                   <Button
                     key={cat.id}
                     variant="ghost"
-                    className="justify-start h-auto py-3 px-4 bg-muted/50 hover:bg-primary/5 hover:text-primary rounded-2xl border border-transparent hover:border-primary/20 transition-all"
+                    className="justify-start h-auto py-3 px-4 bg-card hover:bg-primary/5 hover:text-primary rounded-2xl border border-border/60 hover:border-primary/30 whitespace-normal"
                     onClick={() => setLocation(`/category/${cat.id}`)}
                   >
                     <div className="flex flex-col items-start text-left">
-                      <span className="text-sm font-bold truncate w-full">
+                      <span className="text-sm font-semibold w-full">
                         {language === "en" ? cat.en : cat.zh}
                       </span>
-                      <span className="text-[10px] opacity-60">
-                        {cat.subCategories.length} {t("subcategoriesCount")}
+                      <span className="text-xs font-normal text-muted-foreground tabular-nums">
+                        {countProducts(cat)} {countProducts(cat) === 1 ? t("itemCount") : t("itemsCount")}
                       </span>
                     </div>
                   </Button>

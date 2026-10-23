@@ -21,7 +21,7 @@ export default function NotFound() {
         <div className="relative mb-6">
           <div className="absolute inset-0 -z-10 blur-2xl bg-primary/20 dark:bg-primary/10 rounded-full" />
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <MapPinOff className="w-8 h-8 text-primary" />
+            <MapPinOff className="w-8 h-8 text-primary" aria-hidden="true" />
           </div>
         </div>
 
@@ -31,20 +31,21 @@ export default function NotFound() {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Link href="/search" className={buttonVariants({ size: "lg" })}>
-            <Search className="w-4 h-4" />
+            <Search className="w-4 h-4" aria-hidden="true" />
             {t("searchProducts")}
           </Link>
-          <Link href="/" className={buttonVariants({ variant: "secondary", size: "lg" })}>
-            <Home className="w-4 h-4" />
+          <Link href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <Home className="w-4 h-4" aria-hidden="true" />
             {t("backToHome")}
           </Link>
         </div>
 
         <button
           onClick={() => window.history.back()}
-          className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
+          type="button"
+          className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-sm text-muted-foreground transition-[color,transform] duration-150 ease-out hover:text-foreground active:scale-[0.97]"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
           {t("goBack")}
         </button>
       </motion.div>

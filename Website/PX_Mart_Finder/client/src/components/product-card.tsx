@@ -33,26 +33,26 @@ export function ProductCard({ product }: ProductCardProps) {
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      <Link href={`/product/${product.id}`}>
-        <Card className="overflow-hidden cursor-pointer border-border/50 bg-card transition-shadow duration-200 hover:shadow-lg hover:border-primary/20">
+      <Link href={`/product/${product.id}`} className="block rounded-xl">
+        <Card className="overflow-hidden border-border/60 bg-card shadow-sm transition-[box-shadow,border-color] duration-200 hover:shadow-lg hover:border-primary/25">
           <CardContent className="p-0 flex">
             {/* Image */}
             <div className="w-28 h-28 sm:w-32 sm:h-32 bg-muted shrink-0 relative overflow-hidden">
               <ProductImage
                 src={product.image_url}
                 alt={name}
-                className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-[1.04] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]"
               />
             </div>
 
             {/* Details */}
-            <div className="flex-1 p-3 pr-12 flex flex-col justify-between min-w-0">
+            <div className="flex-1 p-3 pr-14 flex flex-col justify-between min-w-0">
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <Badge className="text-[10px] h-4 px-1.5 bg-primary/10 text-primary border-0 font-medium shrink-0 rounded-full">
+                  <Badge className="text-[11px] h-5 px-2 bg-primary/10 text-primary border-0 font-medium shrink-0 rounded-full hover:bg-primary/10">
                     {category}
                   </Badge>
-                  <span className="text-[11px] text-muted-foreground/70 font-medium truncate">{product.brand}</span>
+                  <span className="text-xs text-muted-foreground truncate">{product.brand}</span>
                 </div>
                 <h3 className="font-semibold text-[15px] text-foreground leading-snug line-clamp-2">
                   {name}
@@ -62,20 +62,20 @@ export function ProductCard({ product }: ProductCardProps) {
               {location ? (
                 <div className="mt-2 space-y-0.5">
                   <div className="flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 w-fit">
-                    <MapPin className="w-3 h-3 shrink-0" />
-                    <span className="text-[11px] font-bold">
+                    <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span className="text-xs font-semibold tabular-nums">
                       {t("aisle")} {location.aisle} · {t("shelf")} {location.shelf}
                     </span>
                   </div>
                   {section && (
-                    <p className="text-[10px] text-muted-foreground/70 px-1 truncate max-w-[9rem]">
+                    <p className="text-xs text-muted-foreground px-1 truncate">
                       {section}
                     </p>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-muted-foreground/50 mt-2 text-[11px]">
-                  <Info className="w-3 h-3" />
+                <div className="flex items-start gap-1.5 text-muted-foreground mt-2 text-xs">
+                  <Info className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
                   <span>{t("locationNotAvailable")}</span>
                 </div>
               )}
@@ -88,11 +88,13 @@ export function ProductCard({ product }: ProductCardProps) {
         variant="ghost"
         size="icon"
         className={cn(
-          "absolute top-2 right-2 rounded-full w-8 h-8 transition-all duration-200 shadow-sm active:scale-90",
+          "absolute top-1.5 right-1.5 rounded-full shadow-sm active:scale-90",
           favorited
-            ? "bg-red-50 text-red-500 hover:bg-red-100"
-            : "bg-white/80 dark:bg-card/80 text-muted-foreground hover:bg-white dark:hover:bg-card hover:text-red-400 backdrop-blur-sm"
+            ? "bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-600 dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/25 dark:hover:text-red-400"
+            : "bg-card/90 text-muted-foreground hover:bg-card hover:text-red-500 border border-border/60"
         )}
+        // Keep the card's whileTap from firing when the heart is pressed.
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -101,7 +103,7 @@ export function ProductCard({ product }: ProductCardProps) {
         aria-label={favorited ? t("removeFromFavorites") : t("addToFavorites")}
         aria-pressed={favorited}
       >
-        <Heart className={cn("w-4 h-4 transition-transform duration-200", favorited && "fill-current scale-110")} />
+        <Heart className={cn("w-[18px] h-[18px] transition-transform duration-200 ease-out", favorited && "fill-current scale-110")} aria-hidden="true" />
       </Button>
     </motion.div>
   );

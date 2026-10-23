@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useSearch } from "wouter";
 import { useLanguage, useStore } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Map as MapIcon } from "lucide-react";
+import { MapPin, Map as MapIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { STORE_LIST } from "@/lib/data";
 import { usePageMeta } from "@/lib/seo";
@@ -35,24 +34,20 @@ export default function StoreMap() {
 
   return (
     <div className="flex flex-col flex-1 bg-background min-h-screen">
-      {/* Demo Banner */}
-      <div className="bg-amber-100 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800/50 py-1.5 px-4 sticky top-[var(--px-header-h)] z-20 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200/80">
+      <div className="sticky top-[var(--px-header-h)] z-20 bg-background">
+        {/* Demo banner */}
+        <p className="bg-amber-100 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800/50 py-2 px-4 text-center text-xs font-medium text-amber-900 dark:text-amber-100">
           {t("demoAisleMap")}
         </p>
-      </div>
-
-      <div className="p-4 border-b sticky top-[calc(var(--px-header-h)+30px)] bg-background z-10 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label={t("back")} className="rounded-full">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <h1 className="text-xl font-bold">{t("storeMap")}</h1>
+        <div className="px-6 lg:px-8 py-4 border-b">
+          <h1 className="text-xl font-bold">{t("storeMap")}</h1>
+        </div>
       </div>
 
       <div className="p-6 lg:p-8 space-y-6 max-w-4xl">
-        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <MapPin className="w-5 h-5 text-primary" />
+        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/15">
+          <div className="flex items-center gap-3 mb-1.5">
+            <MapPin className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
             <h2 className="font-bold text-lg">
               {language === 'en' ? selectedStore.nameEn : selectedStore.nameZh}
             </h2>
@@ -66,49 +61,39 @@ export default function StoreMap() {
 
         {highlightedAisle && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-primary text-primary-foreground p-6 rounded-3xl shadow-xl flex items-center justify-between"
+            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            className="bg-primary text-primary-foreground p-6 rounded-3xl shadow-md flex items-center justify-between"
           >
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">
+              <p className="text-sm font-medium opacity-90 mb-1">
                 {t("goingToAisle")}
               </p>
-              <p className="text-4xl font-black">{highlightedAisle}</p>
+              <p className="text-5xl font-extrabold tracking-tight tabular-nums">{highlightedAisle}</p>
             </div>
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-              <MapPin className="w-8 h-8" />
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+              <MapPin className="w-8 h-8" aria-hidden="true" />
             </div>
           </motion.div>
         )}
 
-        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-secondary bg-muted min-h-[400px] lg:min-h-[560px] flex flex-col items-center justify-center p-12 text-center">
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="grid grid-cols-6 h-full w-full border-primary/20">
+        <div className="relative rounded-3xl overflow-hidden border border-border/60 bg-muted/50 min-h-[360px] lg:min-h-[480px] flex flex-col items-center justify-center p-10 text-center">
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            <div className="grid grid-cols-6 h-full w-full">
               {Array.from({ length: 24 }).map((_, i) => (
-                <div key={i} className="border border-primary/10" />
+                <div key={i} className="border border-primary/[0.06]" />
               ))}
             </div>
           </div>
-          
-          <MapIcon className="w-20 h-20 text-primary/20 mb-4" />
-          <h3 className="text-lg font-bold text-foreground/40">
+
+          <MapIcon className="relative w-14 h-14 text-primary/40 mb-4" aria-hidden="true" />
+          <h2 className="relative text-lg font-semibold text-foreground">
             {t("storeLayoutVisual")}
-          </h3>
-          <p className="text-sm text-muted-foreground/50 max-w-[200px] mt-2 italic">
+          </h2>
+          <p className="relative text-sm text-muted-foreground max-w-xs mt-1.5">
             {t("storeLayoutVisualization")}
           </p>
-
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6 pointer-events-none">
-            <div className="flex flex-col">
-              <p className="text-white text-sm font-bold">
-                 {t("floorPlanDemo")}
-              </p>
-              <p className="text-white/70 text-[10px] uppercase tracking-wider">
-                 {t("storeLayoutView")}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
