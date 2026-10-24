@@ -69,6 +69,34 @@ function get_submitted_csrf_token(array $jsonBody = []): ?string {
     return null;
 }
 
+// Whether this session's login still counts. A password reset bumps
+// users.session_version (forgot_password.php), so every session that logged in
+// before it no longer matches and is ended here, on whatever device it is.
+// A deleted account ends its sessions too. Sessions from before this check
+// existed carry no version and count as 0, the column's default, so a deploy
+// doesn't log everyone out. Also refreshes the session's verified flag.
+function session_user_is_current(mysqli $conn): bool {
+    if (empty($_SESSION['user']['email'])) {
+        return false;
+    }
+
+    $stmt = $conn->prepare("SELECT session_version, email_verified_at FROM users WHERE email = ?");
+    $stmt->bind_param("s", $_SESSION['user']['email']);
+    $stmt->execute();
+    $stmt->bind_result($version, $verifiedAt);
+    $found = $stmt->fetch();
+    $stmt->close();
+
+    if (!$found || (int) $version !== (int) ($_SESSION['user']['session_version'] ?? 0)) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+        return false;
+    }
+
+    $_SESSION['user']['verified'] = $verifiedAt !== null;
+    return true;
+}
+
 function client_ip(): string {
     return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 }

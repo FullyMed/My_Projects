@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatar            VARCHAR(255) NOT NULL DEFAULT 'Assets/Images/Avatars/Clam.jpg',
   email_verified_at DATETIME     NULL,
   is_staff          TINYINT(1)   NOT NULL DEFAULT 0,
+  session_version   INT          NOT NULL DEFAULT 0,
   created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

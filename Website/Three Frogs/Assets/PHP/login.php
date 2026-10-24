@@ -47,7 +47,7 @@ if (rate_limit_exceeded($conn, 'login_ip', $ip, 10, 15) || rate_limit_exceeded($
     ]);
 }
 
-$stmt = $conn->prepare("SELECT name, email, password, avatar, email_verified_at, is_staff FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT name, email, password, avatar, email_verified_at, is_staff, session_version FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -60,7 +60,9 @@ if ($user = $result->fetch_assoc()) {
             "email" => $user['email'],
             "avatar" => $user['avatar'] ?: 'Assets/Images/Avatars/Clam.jpg',
             "verified" => $user['email_verified_at'] !== null,
-            "is_staff" => (bool) $user['is_staff']
+            "is_staff" => (bool) $user['is_staff'],
+            // Compared on every request by session_user_is_current()
+            "session_version" => (int) $user['session_version']
         ];
         respond(200, [
             "success" => true

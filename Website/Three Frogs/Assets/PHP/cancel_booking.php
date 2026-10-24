@@ -16,7 +16,7 @@ function respond($status, $data) {
 }
 
 // Ensure the user is logged in
-if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
+if (!isset($_SESSION['user']) || empty($_SESSION['user']['email']) || !session_user_is_current($conn)) {
     respond(401, [
         "success" => false,
         "error" => "Please log in to cancel a booking."

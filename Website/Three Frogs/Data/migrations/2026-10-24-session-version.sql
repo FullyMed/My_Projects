@@ -1,0 +1,12 @@
+-- One-time migration for databases created before 2026-10-24 (i.e. production).
+-- Fresh databases don't need this: Data/schema.sql already has the column.
+--
+-- Run it ONCE, in phpMyAdmin → SQL, after 2026-10-15-verification-and-staff.sql
+-- and immediately before uploading the 2026-10-24 PHP files (the new PHP reads
+-- this column on every logged-in request, so it can't go first). Its ADD COLUMN
+-- line fails if you run it twice.
+--
+-- A password reset adds 1 to the account's session_version, and every session
+-- that logged in with the old number is logged out on its next request. Sessions
+-- that already exist count as 0, so running this logs nobody out.
+ALTER TABLE users ADD COLUMN session_version INT NOT NULL DEFAULT 0;

@@ -8,7 +8,7 @@ header("Content-Type: application/json");
 require_once("db_connect.php");
 
 // Ensure user is logged in
-if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
+if (!isset($_SESSION['user']) || empty($_SESSION['user']['email']) || !session_user_is_current($conn)) {
     http_response_code(401);
     echo json_encode([
         "success" => false,

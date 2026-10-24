@@ -27,7 +27,7 @@ function normalize_time($value) {
     return "$m[1]:$m[2]";
 }
 
-if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
+if (!isset($_SESSION['user']) || empty($_SESSION['user']['email']) || !session_user_is_current($conn)) {
     fail(401, "Please log in to book a table.");
 }
 

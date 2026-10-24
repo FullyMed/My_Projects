@@ -6,27 +6,30 @@ Live site: [threefrogsboardgame.com](https://threefrogsboardgame.com)
 
 ---
 
-## Before you deploy (as of 2026-10-22)
+## Before you deploy (as of 2026-10-24)
 
-None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, and the fix, improvement, writing and design passes from 2026-09-29 to 2026-10-19, and the asset version tags from 2026-10-22. All of it passes the local test suite (`bash tests/run-tests.sh`, 239 checks) and a run-through in the browser at desktop and phone widths.
+None of the recent work is live yet. That includes the security hardening, the 404 page, loading states, legal pages, image compression, the fix, improvement, writing and design passes from 2026-09-29 to 2026-10-19, the asset version tags from 2026-10-22 and the "reset logs out every device" fix from 2026-10-24. All of it passes the local test suite (`bash tests/run-tests.sh`, 253 checks) and a run-through in the browser.
 
 Do these production steps in order:
 
 - [ ] 1. In phpMyAdmin, run `SHOW COLUMNS FROM bookings;`. If there's no `id` column, run `ALTER TABLE bookings ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST;`
 - [ ] 2. Run `Data/schema.sql`. It only creates tables that are missing. If `password_reset_tokens` is missing today, forgot-password is broken on the live site right now.
 - [ ] 3. Run `Data/migrations/2026-10-15-verification-and-staff.sql` once. It adds the email-verified and staff columns and marks every existing account as verified. Running it a second time gives an error.
-- [ ] 4. Upload the changed files straight after step 3 (see [Deployment](#deployment)). Leave out your local `Assets/PHP/db_config.php` and the `tests/` folder.
+- [ ] 3b. Run `Data/migrations/2026-10-24-session-version.sql` once, right after step 3. It adds `users.session_version`, which a password reset bumps to log the account out everywhere. Nobody gets logged out by running it. Running it a second time gives an error.
+- [ ] 4. Upload the changed files straight after step 3b (see [Deployment](#deployment)). The new PHP reads both migrations' columns on every logged-in request, so uploading first would break logged-in pages. Leave out your local `Assets/PHP/db_config.php` and the `tests/` folder.
 - [ ] 5. Make staff accounts with `UPDATE users SET is_staff = 1 WHERE email = '...';`. Staff log out and back in to see the "Staff" link.
 - [ ] 6. On the live site, check that all four emails arrive: verification (sign up a test account), booking confirmation, password reset, and café cancellation (from the Staff page). Check spam too. If they land there, the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM set up in Hostinger. New accounts can't book until their verification email arrives, so this one matters.
 - [ ] 7. Ask a lawyer to review `Terms-of-Use.html` and `Privacy-Policy.html` before you treat them as final.
 
-Known gap: resetting a password doesn't log that account out on other devices.
-
-After deploying, also try the site on a real phone. So far it's only been tested at phone widths in a desktop browser. A fix for the known gap (a per-account session version that a reset bumps) is planned but not built yet; see "Next steps" in CLAUDE.md.
+After deploying, also try the site on a real phone. So far it's only been tested at phone widths in a desktop browser.
 
 ---
 
 ## What changed recently
+
+### A password reset logs out every device (2026-10-24, not deployed)
+
+Before this, resetting a password left every other logged-in session alone, so someone who had got in with the old password stayed in. Now `forgot_password.php` adds 1 to the account's `users.session_version`. Login stores that number in the session, and `check_session.php` plus every endpoint that needs a login compare it with the database (`session_user_is_current()` in `security.php`). On a mismatch the session ends, so the next page load sends that device to the login page. A deleted account ends its sessions the same way. Sessions that existed before the deploy count as version 0, so the deploy itself logs nobody out. The "Password changed" message and the Privacy Policy say so. It needs the new migration (step 3b above), and the asset tag moved to `?v=2026-10-24` because `Notify.js` changed.
 
 ### Fresh files after a deploy (2026-10-22, not deployed)
 
@@ -78,7 +81,7 @@ We ran the visitor-facing text and these docs through two editing guides (Humani
 - Booking limits. You can book up to 30 days ahead and hold 3 upcoming bookings at a time. All the booking numbers now live in `Assets/PHP/booking_rules.php`.
 - Names. Signup accepts apostrophes, hyphens, periods and accents (Nur'aini, Jean-Luc, José). Text that isn't valid UTF-8 now gets a clear error, where it used to get a misleading "required" message and a PHP warning.
 - No more `alert()` pop-ups. The site shows on-page toasts instead (`Assets/JS/Notify.js`), logging in sends you back to the page you came from, and the footer year updates itself.
-- A test suite in the repo. `bash tests/run-tests.sh` runs end-to-end checks (239 as of 2026-10-22) on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
+- A test suite in the repo. `bash tests/run-tests.sh` runs end-to-end checks (253 as of 2026-10-24) on a throwaway database and fails on any PHP warning. `bash tests/dev-server.sh` serves the site locally and catches outgoing emails.
 - The legal pages describe verification, the booking limits, café cancellations and staff access.
 - On this PC, XAMPP MariaDB's `mysql.db` system table was corrupt, so database permissions vanished every time MariaDB restarted. Repairing it also brought back Prambanan Batik's dev access.
 
@@ -136,7 +139,7 @@ Run the tests after any change. It's one command, and it never touches your dev 
 bash tests/run-tests.sh
 ```
 
-It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 239 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
+It rebuilds a throwaway `threefrogs_test` database, starts its own Apache and mail catcher, runs the 253 checks in `tests/api_test.sh`, fails if PHP logged any warning, and cleans up afterwards.
 
 This PC's setup (2026-09-29, updated 2026-10-15):
 
@@ -217,7 +220,7 @@ This PC's setup (2026-09-29, updated 2026-10-15):
 tests/                              Blocked by tests/.htaccess; don't upload it to Hostinger
 ├── run-tests.sh                    The whole end-to-end test run in one command (throwaway database)
 ├── dev-server.sh                   Local server on :8080 that catches emails
-├── api_test.sh                     The 239 checks
+├── api_test.sh                     The 253 checks
 ├── smtp_sink.py                    Saves outgoing emails as .eml files
 ├── lib.sh / httpd.conf.template    Shared helpers and the Apache config template
 └── .tmp/                           Generated and git-ignored: configs, logs, caught emails
@@ -291,7 +294,7 @@ Staff accounts (`users.is_staff = 1`, set in phpMyAdmin) get a "Staff" link in t
 Resetting takes two steps, and nobody can change a password without the emailed token:
 
 1. The user enters their email. `request_reset.php` creates a random 64-character token, stores it in `password_reset_tokens` for 1 hour, and emails a `Forgot-password.html?token=...` link.
-2. The link opens the "new password" form. `forgot_password.php` checks the token, saves the new password and deletes the token.
+2. The link opens the "new password" form. `forgot_password.php` checks the token, saves the new password, deletes the token and adds 1 to `users.session_version`, which logs the account out on every device, including the one doing the reset.
 
 ### Game list
 
@@ -338,6 +341,7 @@ Both card templates in `Boardgame.js` put `loading="lazy" decoding="async"` on t
 | avatar | VARCHAR | Relative path such as `Assets/Images/Avatars/Clam.jpg`, checked against a server-side whitelist |
 | email_verified_at | DATETIME NULL | `NULL` until the user opens the verification link or resets their password |
 | is_staff | TINYINT(1) | `1` means the account can use `Staff.html`; set by hand |
+| session_version | INT, default 0 | A password reset adds 1; sessions that logged in with an older number are logged out |
 
 ### `bookings`
 
@@ -440,6 +444,7 @@ Every endpoint sets `Content-Type: application/json` and `ini_set('display_error
 | Rate limiting against brute force and abuse | `rate_limit_exceeded()` and `record_attempt()` in `security.php`, using the `rate_limits` table. Used by `login.php`, `signup.php`, `request_reset.php`, `forgot_password.php`, `verify_email.php` and `resend_verification.php`. |
 | Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`) | `secure_session_start()` in `security.php`, used everywhere instead of `session_start()` |
 | Session fixation protection | `login.php` and `signup.php` call `session_regenerate_id(true)` after logging the user in |
+| A password reset logs out every device | `forgot_password.php` bumps `users.session_version`; `session_user_is_current()` in `security.php` ends any session with an older number. `check_session.php` and every endpoint that needs a login call it. |
 | No internal errors shown to users | Database errors go to the server log with `error_log()`, never into a JSON response |
 | Security headers, forced HTTPS, no directory listings | The root `.htaccess`. The CSP allows scripts from this site only (`script-src 'self'`). It also sets `X-Frame-Options`, HSTS and more, and skips the HTTPS redirect when `HTTP_HOST` is `localhost` or `127.0.0.1` (with or without a port) for local development. |
 | Private files blocked from the web | `.htaccess` blocks `db_config.php`, `*.xlsx`, `*.sql`, `*.log`, `*.md` and `.git*`. `Data/.htaccess` blocks that whole folder. |
@@ -447,7 +452,7 @@ Every endpoint sets `Content-Type: application/json` and `ini_set('display_error
 | No open redirect | Login's `?next=` only accepts bare page names like `Booking.html` (`safeNextPage()` in `Notify.js`) |
 | Staff role checked on the server | `staff_bookings.php` and `staff_cancel_booking.php` read `users.is_staff` from the database on every request |
 
-A new endpoint that changes data should follow the same pattern: `require_once("security.php")`, call `secure_session_start()`, and check the CSRF token before doing anything else.
+A new endpoint that changes data should follow the same pattern: `require_once("security.php")`, call `secure_session_start()`, and check the CSRF token before doing anything else. If it needs a login, its check is `!isset($_SESSION['user']) || empty($_SESSION['user']['email']) || !session_user_is_current($conn)`, after `db_connect.php`.
 
 ### 404 page
 
@@ -521,7 +526,7 @@ Headings use Righteous and body text uses Poppins, both from Google Fonts.
 6. If you changed any CSS or JS file, bump the `?v=` tag first so visitors get the new files instead of cached ones. One command does every page (Git Bash, from the project folder; put in today's date):
 
    ```bash
-   sed -i -E 's/\?v=[0-9-]+"/?v=2026-10-22"/g' *.html
+   sed -i -E 's/\?v=[0-9-]+"/?v=2026-10-24"/g' *.html
    ```
 
    Then upload the HTML pages along with the changed CSS and JS. `bash tests/run-tests.sh` fails if any page has a different tag or none.

@@ -145,6 +145,8 @@ post_form nobody request_reset.php -d 'email=userh@example.com' >/dev/null
 RESET_H=$($DB "SELECT token FROM password_reset_tokens WHERE email='userh@example.com'")
 post_form nobody forgot_password.php -d "token=$RESET_H&password=password123" >/dev/null
 check "password reset also verifies"     '1'                            "$($DB "SELECT email_verified_at IS NOT NULL FROM users WHERE email='userh@example.com'")"
+check "reset ends the signup session"    '"loggedIn":false'             "$(session h)"
+login h userh@example.com >/dev/null     # h books later on
 
 echo "=== Login / session"
 check "logout"                           '"success":true'               "$(post_form a logout.php)"
@@ -263,6 +265,29 @@ check "login with new password"          '"success":true'               "$(login
 post_form nobody request_reset.php -d 'email=userd@example.com' >/dev/null
 $DB "SET time_zone='+07:00'; UPDATE password_reset_tokens SET expires_at = NOW() - INTERVAL 1 MINUTE"
 check "reset expired token"              'expired'                      "$(post_form nobody forgot_password.php -d "token=$($DB "SELECT token FROM password_reset_tokens WHERE email='userd@example.com'")&password=newpassword1")"
+
+echo "=== Password reset logs out every device (users.session_version)"
+login e1 usere@example.com >/dev/null
+login e2 usere@example.com >/dev/null
+login e3 usere@example.com >/dev/null
+E3_TOKEN=$(tok e3)
+check "two devices logged in"            '"loggedIn":true'              "$(session e1)"
+check "session_version starts at 0"      '0'                            "$($DB "SELECT session_version FROM users WHERE email='usere@example.com'")"
+post_form nobody request_reset.php -d 'email=usere@example.com' >/dev/null
+RESET_E=$($DB "SELECT token FROM password_reset_tokens WHERE email='usere@example.com'")
+check "reset ok"                         '"success":true'               "$(post_form nobody forgot_password.php -d "token=$RESET_E&password=newpassword2")"
+check "reset bumps session_version"      '1'                            "$($DB "SELECT session_version FROM users WHERE email='usere@example.com'")"
+check "old session: booking refused"     '[401]'                        "$(post_json e3 booking.php "{\"name\":\"E\",\"date\":\"$D2\",\"start\":\"16:00\",\"end\":\"17:00\",\"people\":2,\"csrf_token\":\"$E3_TOKEN\"}")"
+check "old session: bookings refused"    '[401]'                        "$(post_form e2 get_bookings.php)"
+check "old session: logged out"          '"loggedIn":false'             "$(session e1)"
+check "signup session: logged out"       '"loggedIn":false'             "$(session e)"
+check "old password no longer works"     '[401]'                        "$(login e1 usere@example.com)"
+check "new password logs in"             '"success":true'               "$(login e1 usere@example.com newpassword2)"
+check "new session stays logged in"      '"loggedIn":true'              "$(session e1)"
+check "new session can load bookings"    '"success":true'               "$(post_form e1 get_bookings.php)"
+signup z 'User Z' 'userz@example.com' >/dev/null
+$DB "DELETE FROM users WHERE email='userz@example.com'"
+check "deleted account: session ends"    '"loggedIn":false'             "$(session z)"
 
 echo "=== Rate limiting"
 clear_rate_limits

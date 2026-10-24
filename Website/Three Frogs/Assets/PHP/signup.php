@@ -133,7 +133,8 @@ $_SESSION['user'] = [
     "email" => $email,
     "avatar" => $avatar,
     "verified" => false,
-    "is_staff" => false
+    "is_staff" => false,
+    "session_version" => 0 // the column's default for a new account
 ];
 
 $emailSent = send_verification_email($conn, $email, $name);

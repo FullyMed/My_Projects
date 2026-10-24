@@ -21,7 +21,7 @@ const FLASH_MESSAGES = {
   login_required: ["Please log in to continue.", "info"],
   logged_out: ["You're logged out. See you soon!", "success"],
   session_error: ["We couldn't check your session. Please log in again.", "error"],
-  password_reset: ["Password changed. Log in with your new one.", "success"]
+  password_reset: ["Password changed, and we've logged you out on every device. Log in with your new one.", "success"]
 };
 
 function showToast(message, type = "info") {

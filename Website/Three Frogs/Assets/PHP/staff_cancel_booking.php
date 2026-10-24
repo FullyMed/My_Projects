@@ -17,7 +17,7 @@ function respond($status, $data) {
     exit;
 }
 
-if (!isset($_SESSION['user']) || empty($_SESSION['user']['email'])) {
+if (!isset($_SESSION['user']) || empty($_SESSION['user']['email']) || !session_user_is_current($conn)) {
     respond(401, ["success" => false, "error" => "Please log in first."]);
 }
 

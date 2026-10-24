@@ -57,7 +57,9 @@ $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 // Opening the emailed reset link proves the user owns this address, so it
 // also counts as email verification (lets the real owner reclaim an address
 // someone else signed up with and never verified).
-$update = $conn->prepare("UPDATE users SET password = ?, email_verified_at = COALESCE(email_verified_at, NOW()) WHERE email = ?");
+// Bumping session_version logs the account out everywhere, including anyone
+// who got in with the old password (see session_user_is_current()).
+$update = $conn->prepare("UPDATE users SET password = ?, email_verified_at = COALESCE(email_verified_at, NOW()), session_version = session_version + 1 WHERE email = ?");
 $update->bind_param("ss", $hashedPassword, $email);
 $update->execute();
 $update->close();

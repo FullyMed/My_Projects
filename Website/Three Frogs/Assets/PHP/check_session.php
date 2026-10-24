@@ -14,31 +14,22 @@ if (!secure_session_start()) {
     exit;
 }
 
+if (isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
+    // Checked against the DB on every call: a password reset (or a deleted
+    // account) ends this session, and verifying on another device shows up here.
+    require_once("db_connect.php");
+    $current = session_user_is_current($conn);
+    $conn->close();
+
+    if (!$current) {
+        echo json_encode(["loggedIn" => false, "csrfToken" => csrf_token()]);
+        exit;
+    }
+}
+
 $token = csrf_token();
 
 if (isset($_SESSION['user']) && !empty($_SESSION['user']['email'])) {
-    // A user who hasn't verified yet often clicks the emailed link on another
-    // device, which can't update *this* session — so re-check the DB until the
-    // session sees them verified. Verified users never touch the DB here.
-    if (empty($_SESSION['user']['verified'])) {
-        require_once("db_connect.php");
-        $stmt = $conn->prepare("SELECT email_verified_at FROM users WHERE email = ?");
-        $stmt->bind_param("s", $_SESSION['user']['email']);
-        $stmt->execute();
-        $stmt->bind_result($verifiedAt);
-        $found = $stmt->fetch();
-        $stmt->close();
-        $conn->close();
-
-        if (!$found) {
-            // The account no longer exists — end the stale session.
-            $_SESSION = [];
-            echo json_encode(["loggedIn" => false, "csrfToken" => csrf_token()]);
-            exit;
-        }
-        $_SESSION['user']['verified'] = $verifiedAt !== null;
-    }
-
     http_response_code(200);
     echo json_encode([
         "loggedIn" => true,

@@ -8,29 +8,28 @@ Three Frogs is a static HTML and PHP website for a boardgame café in Surabaya, 
 
 Live domain: `threefrogsboardgame.com`, hosted on Hostinger.
 
-## Pending before deploy (as of 2026-10-22)
+## Pending before deploy (as of 2026-10-24)
 
-Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits), the writing pass after it, the 2026-10-19 design pass and the 2026-10-22 asset version tags. All of it passes `bash tests/run-tests.sh` (239 checks) and a browser run-through on the local database at desktop and phone widths.
+Nothing from 2026-09-29 onward is live. That covers the security hardening, 404 page, loading states, legal pages and image compression, plus the 2026-09-29 fix pass, the 2026-10-15 improvement pass (email verification, staff page, booking limits), the writing pass after it, the 2026-10-19 design pass, the 2026-10-22 asset version tags and the 2026-10-24 session_version fix (a password reset logs out every device). All of it passes `bash tests/run-tests.sh` (253 checks) and a browser run-through on the local database.
 
 Do the production steps in this order. Tick them off or delete them once they're done.
 
 - [ ] 1. Check that production `bookings` has an `id` column (`SHOW COLUMNS FROM bookings;` in phpMyAdmin). If not, run `ALTER TABLE bookings ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY FIRST;`.
 - [ ] 2. Run `Data/schema.sql` on the production database (phpMyAdmin → SQL). It only creates missing tables, such as `rate_limits`, `password_reset_tokens` and `email_verification_tokens`. If `password_reset_tokens` is missing today, forgot-password is already broken on the live site.
 - [ ] 3. Run `Data/migrations/2026-10-15-verification-and-staff.sql` exactly once. It adds `users.email_verified_at` and `users.is_staff` and marks every existing account as verified, so nobody suddenly loses the ability to book. Its `ADD COLUMN` lines fail if you run it twice.
-- [ ] 4. Upload every changed file to Hostinger straight after step 3 (see the Deployment section of README.md). Don't upload the local `Assets/PHP/db_config.php` (production has its own; a copy lives at `C:\CSIE\db_config.hostinger.php`) or the `tests/` folder.
+- [ ] 3b. Run `Data/migrations/2026-10-24-session-version.sql` exactly once, right after step 3. It adds `users.session_version` (default 0). It logs nobody out; its `ADD COLUMN` fails if you run it twice.
+- [ ] 4. Upload every changed file to Hostinger straight after step 3b. The new PHP reads `session_version` and `email_verified_at` on every logged-in request, so uploading before the migrations breaks logged-in pages (see the Deployment section of README.md). Don't upload the local `Assets/PHP/db_config.php` (production has its own; a copy lives at `C:\CSIE\db_config.hostinger.php`) or the `tests/` folder.
 - [ ] 5. Make staff accounts with `UPDATE users SET is_staff = 1 WHERE email = '...';`. The "Staff" navbar link appears after they log out and back in. `Staff.html` itself works for them immediately.
 - [ ] 6. On the live site, check that all four email types arrive: sign up a test account (verification), book (confirmation), reset a password, and cancel a booking from the Staff page (cancellation notice). Check spam. If they land there, the `noreply@threefrogsboardgame.com` sender may need SPF/DKIM in Hostinger. New signups can't book until the verification email arrives, so this matters.
 - [ ] 7. Have a lawyer review `Terms-of-Use.html` and `Privacy-Policy.html` before anyone treats them as final. They describe the site accurately but haven't been checked against Indonesia's UU PDP or any other law.
 
-Known gap, not fixed: a password reset doesn't end the account's other sessions. Sessions are plain PHP sessions with no per-user "log out everywhere" marker. That matters most if an attacker was already logged in. Add something like a `users.session_version` checked on each request before relying on reset as account recovery.
+### Next steps (as of 2026-10-24)
 
-### Next steps (as of 2026-10-23)
+Everything up to 2026-10-23 is committed. The 2026-10-24 session_version fix is not committed yet. What's left, in order:
 
-Everything above is committed. What's left, in order:
-
-1. The owner deploys, following the checklist above.
-2. After deploying, test on a real phone. So far only phone widths in the browser have been tested.
-3. Offered, waiting for the owner's yes: fix the known gap above. The plan is a `users.session_version` column (default 0) that login and signup copy into the session. Every endpoint that uses the session compares it and logs the user out on a mismatch, and `forgot_password.php` increments it. It needs a new dated migration in `Data/migrations/`, the column in `Data/schema.sql`, a step in the checklist above, checks in `tests/api_test.sh`, and a look at the Privacy Policy's session wording.
+1. The owner commits the session_version fix.
+2. The owner deploys, following the checklist above.
+3. After deploying, test on a real phone. So far only phone widths in the browser have been tested.
 
 ## Working rules
 
@@ -63,7 +62,7 @@ On 2026-10-15 the owner had all visitor-facing text and both docs rewritten with
 
 Set up on this PC on 2026-09-29, with test tooling added on 2026-10-15. Everything runs from Git Bash, and XAMPP's MariaDB has to be running (XAMPP Control Panel → MySQL).
 
-`bash tests/run-tests.sh` runs the whole test suite (239 checks):
+`bash tests/run-tests.sh` runs the whole test suite (253 checks):
 
 - It rebuilds a throwaway `threefrogs_test` database from `Data/schema.sql`, so it never touches dev data.
 - It starts its own Apache on port 8081 (XAMPP binaries, this folder as the document root, so `.htaccess`, the CSP and the 404 page behave as in production) and a mail catcher on port 2526.
@@ -74,7 +73,7 @@ Set up on this PC on 2026-09-29, with test tooling added on 2026-10-15. Everythi
 
 The database is XAMPP's MariaDB on port 3307. `C:\xampp\mysql\bin\my.ini` was moved off 3306 because a separate `MySQL80` Windows service owns that port, and phpMyAdmin's `config.inc.php` points at 3307 as well.
 
-- The dev database is `threefrogs_local` and the user is `threefrogs_dev`; the password is only in the local `db_config.php`. Its schema is `Data/schema.sql`, which already includes the 2026-10-15 migration.
+- The dev database is `threefrogs_local` and the user is `threefrogs_dev`; the password is only in the local `db_config.php`. Its schema is `Data/schema.sql`, which already includes the 2026-10-15 migration. The 2026-10-24 `session_version` migration was run on it on 2026-10-24.
 - Ignore the older `threefrogs` database in that MariaDB. Its schema is obsolete.
 - If the dev user suddenly gets "Access denied", run `CHECK TABLE mysql.db;`. On 2026-10-15 that system table turned out to be corrupt: MariaDB accepted grants but never saved them, so they vanished on every restart (Prambanan_Batik's dev user too). `REPAIR TABLE mysql.db;` fixed it, and the grants were re-created and confirmed to survive a restart.
 
@@ -121,7 +120,7 @@ XAMPP's PHP can't deliver email, so outside those two scripts `mail()` fails. Re
 
 Every page sends a POST to `Assets/PHP/check_session.php` before showing anything that depends on login. It returns `{ loggedIn, csrfToken, user: { name, email, avatar, emailVerified, isStaff } }`.
 
-- While `emailVerified` is false, `check_session.php` re-reads it from the database, so verifying on another device shows up here.
+- For a logged-in session, `check_session.php` reads the user's row on every call through `session_user_is_current()` (see [Session versions](#session-versions)). That ends the session after a password reset or if the account is gone, and re-reads `emailVerified`, so verifying on another device shows up here.
 - `isStaff` comes from the session. It's set at login and refreshed whenever `staff_bookings.php` runs.
 - `Navbar.js` builds the navbar after this call. HTML pages ship with only the hamburger `<button>` and an empty `<ul id="navLinks"></ul>`, never static `<li>` items.
 
@@ -138,7 +137,7 @@ Every page sends a POST to `Assets/PHP/check_session.php` before showing anythin
 
 | Table | Main columns |
 |---|---|
-| `users` | id, name, email (lowercase), password (bcrypt), avatar, email_verified_at (NULL means unverified), is_staff (0 or 1) |
+| `users` | id, name, email (lowercase), password (bcrypt), avatar, email_verified_at (NULL means unverified), is_staff (0 or 1), session_version (INT, default 0; a password reset adds 1) |
 | `bookings` | id, name, email, date, start_time, end_time, people, status (`'active'` or `'cancelled_by_cafe'`; a customer's own cancellation deletes the row) |
 | `cancellations` | email, date, start, end, cancel_time |
 | `password_reset_tokens` | id, email, token (64-character hex, unique), expires_at (1 hour) |
@@ -227,7 +226,18 @@ The content is a draft that no lawyer has reviewed, including against Indonesia'
 ### Forgot-password flow
 
 1. The user submits their email. `request_reset.php` creates a 64-character token that lasts 1 hour and emails a `Forgot-password.html?token=...` link.
-2. The link opens the page, the script reads `?token=` from the URL and shows the new-password form, and `forgot_password.php` checks the token against the database, saves the password and deletes the token.
+2. The link opens the page, the script reads `?token=` from the URL and shows the new-password form, and `forgot_password.php` checks the token against the database, saves the password, deletes the token and bumps `users.session_version`, which logs the account out on every device (see [Session versions](#session-versions)).
+
+### Session versions
+
+Added 2026-10-24 so a password reset logs the account out everywhere, including anyone who got in with the old password.
+
+- `users.session_version` starts at 0. `forgot_password.php` adds 1 on every reset. Nothing else changes it.
+- `login.php` copies it into `$_SESSION['user']['session_version']`; `signup.php` stores 0.
+- `session_user_is_current($conn)` in `security.php` reads the row and compares. On a mismatch, or if the account no longer exists, it empties the session, regenerates the ID and returns false. On a match it also refreshes `$_SESSION['user']['verified']`.
+- `check_session.php` calls it on every logged-in call, so the next page load on an old device shows the visitor as logged out and gated pages send them to Login. Every endpoint that needs a login (`booking.php`, `cancel_booking.php`, `get_bookings.php`, `update_avatar.php`, `resend_verification.php`, `staff_bookings.php`, `staff_cancel_booking.php`) adds `|| !session_user_is_current($conn)` to its login check and answers 401. A new endpoint that needs a login does the same, after `db_connect.php`.
+- A session with no `session_version` key (one that existed before the deploy) counts as 0, so the deploy logs nobody out.
+- The device doing the reset is logged out too. The "Password changed" message (`password_reset` in `Notify.js`) and section 5 of `Privacy-Policy.html` say so.
 
 The whole flow is in `Forgot-password.html`, `Forgot-password.js`, `request_reset.php` and `forgot_password.php`.
 
@@ -267,6 +277,7 @@ Both `<img>` templates in `Boardgame.js` (`renderBoardgames()` and the Collectio
 - CSRF protection. `Assets/PHP/security.php` provides `csrf_token()` and `verify_csrf_token()`. `check_session.php` gives every page a `csrfToken`, and the page scripts send it back as `csrf_token` (a form field, a JSON field or an `X-CSRF-Token` header) on every request that changes data. `Login.js` and `Signup.js` fetch it again right before submitting. On a first visit with no cookie, their page-load call and the one in `Navbar.js` run in parallel and can each start a different session, so the token cached at page load might belong to the session whose cookie lost. `login.php`, `signup.php`, `booking.php`, `cancel_booking.php`, `update_avatar.php`, `resend_verification.php` and `staff_cancel_booking.php` reject requests without a valid token. Wire any new endpoint that changes data into the same pattern.
 - Rate limiting. `rate_limit_exceeded()` and `record_attempt()` in `security.php` use the `rate_limits` table, keyed by action and identifier (IP and/or email). They cover `login.php` (per IP and per email), `signup.php` (per IP), `request_reset.php` (per IP and per email), `forgot_password.php` (per IP), `verify_email.php` (per IP) and `resend_verification.php` (per email, 3 an hour). If the table doesn't exist, the limits switch off rather than block anyone, so a missed migration can't lock every user out. Create the table (`Data/schema.sql`) to enforce them. Before 2026-09-29 this wasn't true: strict mysqli mode threw on the missing table and crashed login, signup and reset. The helpers catch it now, which was verified locally by renaming the table.
 - Session fixation. `login.php` and `signup.php` call `session_regenerate_id(true)` right after setting `$_SESSION['user']`.
+- Log out everywhere on reset. A password reset bumps `users.session_version`, and every logged-in request checks it (see [Session versions](#session-versions)).
 - Server hardening. The root `.htaccess` forces HTTPS in production, but skips the redirect when `HTTP_HOST` is `localhost` or `127.0.0.1` (with or without a port) so local development works on any port. It sets security headers (CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS), turns off directory listings, serves `404.html` through `ErrorDocument`, and blocks web access to `db_config.php` and to `*.xlsx`, `*.sql`, `*.log`, `*.md` and `.git*` files. `Data/.htaccess` blocks that whole folder, and `tests/.htaccess` blocks `tests/`. The CSP's `script-src` is only `'self'`, since the site loads no third-party scripts. Keep it free of `unsafe-inline` and `unsafe-eval`. If you need an inline `<script>` or an `onclick=` attribute, attach an event listener from a script file instead (`Booking.js` shows how the old `authPopup` button `onclick`s were replaced).
 - Links with `target="_blank"` must have `rel="noopener noreferrer"` to prevent reverse tabnabbing (see `About.html`).
 
