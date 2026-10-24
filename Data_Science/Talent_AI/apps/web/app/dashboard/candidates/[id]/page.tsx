@@ -22,7 +22,11 @@ export default function CandidateDetailPage() {
   const router = useRouter();
   const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Two kinds of error: one that stops the page from loading at all, and one
+  // from a button (View resume, Delete) that leaves the page in place. They
+  // used to share one state, so a failed button replaced the whole page.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [resumeLoading, setResumeLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
@@ -31,7 +35,7 @@ export default function CandidateDetailPage() {
   useEffect(() => {
     apiFetch<CandidateDetail>(`/candidates/${id}`)
       .then(setCandidate)
-      .catch((err) => setError(errorMessage(err)))
+      .catch((err) => setLoadError(errorMessage(err)))
       .finally(() => setLoading(false));
     apiFetch<{ id: string; title: string }[]>(`/jobs?limit=100`)
       .then(setJobs)
@@ -40,11 +44,12 @@ export default function CandidateDetailPage() {
 
   async function handleViewResume() {
     setResumeLoading(true);
+    setActionError(null);
     try {
       const { url } = await apiFetch<{ url: string }>(`/candidates/${id}/resume-url`);
       window.open(url, "_blank", "noopener,noreferrer");
     } catch (err) {
-      setError(errorMessage(err));
+      setActionError(errorMessage(err));
     } finally {
       setResumeLoading(false);
     }
@@ -53,11 +58,12 @@ export default function CandidateDetailPage() {
   async function handleDelete() {
     if (!window.confirm("This candidate and their resume will be deleted. You can't undo this.")) return;
     setDeleting(true);
+    setActionError(null);
     try {
       await apiFetch(`/candidates/${id}`, { method: "DELETE" });
       router.push("/dashboard/candidates");
     } catch (err) {
-      setError(errorMessage(err));
+      setActionError(errorMessage(err));
       setDeleting(false);
     }
   }
@@ -70,8 +76,8 @@ export default function CandidateDetailPage() {
     );
   }
 
-  if (error || !candidate) {
-    return <ErrorText>{error ?? "We couldn't find that candidate."}</ErrorText>;
+  if (loadError || !candidate) {
+    return <ErrorText>{loadError ?? "We couldn't find that candidate."}</ErrorText>;
   }
 
   return (
@@ -102,6 +108,8 @@ export default function CandidateDetailPage() {
           </Button>
         </div>
       </div>
+
+      {actionError && <ErrorText>{actionError}</ErrorText>}
 
       <Card className="p-5">
         <h2 className="mb-3 text-sm font-medium text-muted">Skills</h2>

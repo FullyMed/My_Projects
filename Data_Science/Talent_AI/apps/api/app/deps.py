@@ -40,7 +40,9 @@ def get_scoped_client(token: str) -> Client:
     return client
 
 
-async def get_current_user(authorization: str = Header(...)) -> CurrentUser:
+# A plain `def` so FastAPI runs it in the thread pool: both Supabase calls
+# below block, and every authenticated request goes through here.
+def get_current_user(authorization: str = Header(...)) -> CurrentUser:
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="You need to log in first.")
     token = authorization.removeprefix("Bearer ").strip()

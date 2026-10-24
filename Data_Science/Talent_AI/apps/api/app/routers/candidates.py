@@ -18,7 +18,7 @@ MAX_RESUME_BYTES = 10 * 1024 * 1024  # 10MB -- generous for a resume PDF
 
 
 @router.post("/upload")
-async def upload_candidate(
+def upload_candidate(
     file: UploadFile = File(...),
     category: str | None = Form(None),
     user: CurrentUser = Depends(get_current_user),
@@ -26,7 +26,9 @@ async def upload_candidate(
     if file.content_type not in ("application/pdf", "application/octet-stream"):
         raise HTTPException(status_code=400, detail="Only PDF files can be uploaded.")
 
-    file_bytes = await file.read()
+    # A sync read of the spooled upload: this route is a plain `def` (see
+    # main.py), so it already runs in the thread pool.
+    file_bytes = file.file.read()
 
     if len(file_bytes) > MAX_RESUME_BYTES:
         raise HTTPException(status_code=413, detail="That file is over the 10 MB limit.")
@@ -56,7 +58,7 @@ async def upload_candidate(
 
 
 @router.post("/upload/bulk")
-async def upload_candidates_bulk(
+def upload_candidates_bulk(
     files: list[UploadFile] = File(...),
     category: str | None = Form(None),
     user: CurrentUser = Depends(get_current_user),
@@ -71,7 +73,7 @@ async def upload_candidates_bulk(
     for file in files:
         name = file.filename or "resume.pdf"
         try:
-            file_bytes = await file.read()
+            file_bytes = file.file.read()
             if len(file_bytes) > MAX_RESUME_BYTES:
                 raise ValueError("That file is over the 10 MB limit.")
             if not file_bytes.startswith(b"%PDF-"):
@@ -93,7 +95,7 @@ async def upload_candidates_bulk(
 
 
 @router.get("")
-async def list_candidates(
+def list_candidates(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     user: CurrentUser = Depends(get_current_user),
@@ -110,7 +112,7 @@ async def list_candidates(
 
 
 @router.get("/{candidate_id}")
-async def get_candidate(
+def get_candidate(
     candidate_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
@@ -128,7 +130,7 @@ async def get_candidate(
 
 
 @router.get("/{candidate_id}/resume-url")
-async def get_candidate_resume_url(
+def get_candidate_resume_url(
     candidate_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
@@ -140,7 +142,7 @@ async def get_candidate_resume_url(
 
 
 @router.delete("/{candidate_id}", status_code=204)
-async def remove_candidate(
+def remove_candidate(
     candidate_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> None:
     client = get_scoped_client(user.token)
@@ -151,7 +153,7 @@ async def remove_candidate(
 
 
 @router.get("/{candidate_id}/insights")
-async def read_candidate_insight(
+def read_candidate_insight(
     candidate_id: str,
     job_id: str = Query(...),
     user: CurrentUser = Depends(get_current_user),
@@ -161,7 +163,7 @@ async def read_candidate_insight(
 
 
 @router.post("/{candidate_id}/insights")
-async def create_candidate_insight(
+def create_candidate_insight(
     candidate_id: str,
     job_id: str = Query(...),
     refresh: bool = Query(False),

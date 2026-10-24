@@ -44,15 +44,38 @@ def get_tenant_plan(*, client: Client, user: CurrentUser) -> str:
     return tenant_row["plan"] if tenant_row else "trial"
 
 
+# Rows asked for per request when summing the ledger. PostgREST caps every
+# response at the project's max-rows setting (1000 on Supabase by default), so
+# one plain select silently dropped everything past that row; a Pro tenant
+# making over 1000 AI calls a month was under-counted.
+_LEDGER_PAGE_SIZE = 1000
+
+
 def _tokens_used_this_month(*, client: Client, user: CurrentUser) -> int:
-    rows = (
-        client.table("usage_events")
-        .select("input_tokens, output_tokens")
-        .gte("created_at", _month_start_iso())
-        .execute()
-        .data
-    )
-    return sum(row["input_tokens"] + row["output_tokens"] for row in rows)
+    # Page through the month's ledger. count="exact" says how many rows
+    # there are, so this doesn't depend on knowing the server's max-rows cap:
+    # it keeps asking from where the last page ended until it has them all.
+    month_start = _month_start_iso()
+    total_rows: int | None = None
+    fetched = 0
+    tokens = 0
+    while total_rows is None or fetched < total_rows:
+        response = (
+            client.table("usage_events")
+            .select("input_tokens, output_tokens", count="exact")
+            .gte("created_at", month_start)
+            .order("id")
+            .range(fetched, fetched + _LEDGER_PAGE_SIZE - 1)
+            .execute()
+        )
+        rows = response.data or []
+        if total_rows is None:
+            total_rows = response.count or 0
+        if not rows:
+            break  # rows deleted mid-count; there's nothing more to read
+        tokens += sum(row["input_tokens"] + row["output_tokens"] for row in rows)
+        fetched += len(rows)
+    return tokens
 
 
 def get_usage_summary(*, client: Client, user: CurrentUser) -> dict:
@@ -114,7 +137,9 @@ def _ensure_under_count_limit(
     limit = limits.get(plan, limits.get("trial"))
     if limit is None:
         return
-    count = len(client.table(table).select("id").execute().data)
+    # A HEAD request with count="exact": Postgres counts the rows and nothing
+    # is sent back, so the count isn't cut off at PostgREST's max-rows cap.
+    count = client.table(table).select("id", count="exact", head=True).execute().count or 0
     if count >= limit:
         raise PermissionError(
             f"The Trial plan includes up to {limit} {noun}. Upgrade to Pro to add more{other_option}."

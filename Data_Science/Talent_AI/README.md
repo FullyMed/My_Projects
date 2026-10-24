@@ -254,6 +254,21 @@ Brought back later:
       page. Every page passes a WCAG AA contrast check in light and dark mode
       at phone and desktop widths. `CLAUDE.md` has the rules under "Design
       rules".
+- [x] **Fix pass (2026-10-24).** Four problems from a read of the whole
+      codebase:
+  - Every API route was `async def` while doing blocking work, so one resume
+    upload or AI review stalled every other request on the server until it
+    finished. Routes and the login check are now plain `def`, which FastAPI
+    runs in a thread pool. A test fails if an `async def` route comes back.
+  - The monthly AI usage total read only the first 1000 ledger rows, because
+    Supabase cuts responses off there without saying so. A Pro tenant making
+    more than 1000 AI reviews a month was under-counted. The total now pages
+    through every row, and the Trial caps ask Postgres for a count instead of
+    downloading rows.
+  - `apps/web/.env.local.example` was gitignored, so a fresh clone had no
+    template to copy. It's tracked now.
+  - On a candidate's page, a failed View resume or Delete replaced the whole
+    page with the error. The error now shows above the page instead.
 - [x] **Phase F (partial): production deployment.** Vercel, Cloud Run and
       Supabase went live early, before Phases B to E, so colleagues could
       try it. Monitoring and CI/CD are still open.
@@ -323,7 +338,7 @@ In production:
    logged in.
 
 `get_advisors` (Supabase's security checks) is clean apart from the
-leaked-password setting described in Phase D. The backend has about 80 unit
+leaked-password setting described in Phase D. The backend has about 90 unit
 tests (`pytest tests/`) that use a mocked Supabase client and never touch the
 network.
 

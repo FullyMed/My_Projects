@@ -9,6 +9,6 @@ router = APIRouter()
 
 
 @router.get("")
-async def read_usage(user: CurrentUser = Depends(get_current_user)) -> dict:
+def read_usage(user: CurrentUser = Depends(get_current_user)) -> dict:
     client = get_scoped_client(user.token)
     return get_usage_summary(client=client, user=user)

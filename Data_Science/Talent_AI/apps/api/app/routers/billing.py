@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
 from ..config import settings
 from ..deps import CurrentUser, get_current_user, get_scoped_client
@@ -11,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/checkout")
-async def start_checkout(user: CurrentUser = Depends(get_current_user)) -> dict:
+def start_checkout(user: CurrentUser = Depends(get_current_user)) -> dict:
     client = get_scoped_client(user.token)
     try:
         url = create_checkout_session(
@@ -26,7 +27,7 @@ async def start_checkout(user: CurrentUser = Depends(get_current_user)) -> dict:
 
 
 @router.post("/portal")
-async def open_billing_portal(user: CurrentUser = Depends(get_current_user)) -> dict:
+def open_billing_portal(user: CurrentUser = Depends(get_current_user)) -> dict:
     client = get_scoped_client(user.token)
     try:
         url = create_billing_portal_session(
@@ -50,7 +51,10 @@ async def stripe_webhook(request: Request) -> dict:
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature", "")
     try:
-        handle_stripe_event(payload=payload, sig_header=sig_header)
+        # Async only so it can await the raw body (the signature covers the
+        # exact bytes). The Supabase update inside is a blocking call, so it
+        # runs in the thread pool like every sync route does.
+        await run_in_threadpool(handle_stripe_event, payload=payload, sig_header=sig_header)
     except (ValueError, stripe.error.SignatureVerificationError) as exc:
         raise HTTPException(status_code=400, detail="Invalid signature") from exc
     except RuntimeError as exc:

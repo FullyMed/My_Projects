@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post("/run-weekly-reports")
-async def trigger_weekly_reports(x_report_token: str = Header(default="")) -> dict:
+def trigger_weekly_reports(x_report_token: str = Header(default="")) -> dict:
     # The one other deliberately unauthenticated route in this API (with
     # /billing/webhook) -- a scheduler calls this, not a signed-in browser,
     # so there's no Supabase session to require. This shared-secret header

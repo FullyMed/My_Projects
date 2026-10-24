@@ -90,8 +90,14 @@ Then run `claude` to start Claude Code in that project.
   the landing page (rules under "Design rules" in its `CLAUDE.md`). Every page
   passes a WCAG AA contrast audit in light and dark; tsc and `next build`
   pass. It's committed (`abe9b4c`), pushed and live on Vercel (checked
-  2026-10-24). Still open: the Cloud Run redeploy for the writing pass (the
-  live API still said "Missing bearer token" on 2026-10-24), rotating the
+  2026-10-24). A 2026-10-24 fix pass (not committed yet) moved every API
+  route off the event loop (plain `def`, so one upload no longer stalls the
+  server), made the AI usage total count past Supabase's 1000-row response
+  cap, tracked `apps/web/.env.local.example` and stopped a failed button from
+  blanking the candidate page; 86 tests pass and the page was checked in the
+  browser. Still open: commit, then the Cloud Run redeploy, which ships both
+  the writing pass and these fixes (the live API still said "Missing bearer
+  token" on 2026-10-24), rotating the
   OpenAI key, switching on the weekly email (SMTP + Cloud Scheduler), the
   Supabase free-tier pause, and legal/Stripe go-live before paying customers.
   The full list for the next chat is under "Next steps" at the top of its

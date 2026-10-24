@@ -29,6 +29,8 @@ def test_process_and_store_resume_inserts_tenant_scoped_row():
     mock_client.table.return_value.insert.return_value.execute.return_value.data = [
         {"id": "candidate-1", "tenant_id": "tenant-1"}
     ]
+    # ensure_can_add_candidate's count query: no candidates yet.
+    mock_client.table.return_value.select.return_value.execute.return_value.count = 0
 
     with (
         patch("app.services.candidate_service.extract_text", return_value=SAMPLE_RAW_TEXT),
@@ -78,7 +80,7 @@ def test_process_and_store_resume_rejects_empty_pdf_text():
     mock_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value.data = {
         "plan": "trial"
     }
-    mock_client.table.return_value.select.return_value.execute.return_value.data = []
+    mock_client.table.return_value.select.return_value.execute.return_value.count = 0
 
     with patch("app.services.candidate_service.extract_text", return_value="   "):
         try:

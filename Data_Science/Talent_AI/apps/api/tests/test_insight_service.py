@@ -30,6 +30,9 @@ CACHED_ROW = {
 def _resp(data):
     r = MagicMock()
     r.data = data
+    # count="exact" queries (the usage ledger) read this; a real response has
+    # the total row count there.
+    r.count = len(data) if isinstance(data, list) else None
     return r
 
 
@@ -46,7 +49,8 @@ def _usage_gte_execute(client):
     # distinct chain from the cache lookup (.limit) and candidate/job fetch
     # (.maybe_single), so it needs its own stub whenever a test reaches the actual
     # LLM-call path (ensure_within_budget runs before every real generation).
-    return client.table.return_value.select.return_value.gte.return_value.execute
+    # It pages through the ledger with .order().range().
+    return client.table.return_value.select.return_value.gte.return_value.order.return_value.range.return_value.execute
 
 
 def _fake_insights():

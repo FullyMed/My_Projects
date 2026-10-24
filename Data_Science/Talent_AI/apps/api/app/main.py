@@ -38,6 +38,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Route handlers are plain `def`, not `async def`. Everything they call
+# (supabase-py, PyMuPDF, spaCy, the embedding model, OpenAI, Stripe) blocks,
+# and FastAPI runs a plain `def` in its thread pool. An `async def` doing that
+# work would run on the event loop itself and stall every other request on
+# the instance until it finished. tests/test_threadpool.py checks this.
 app.include_router(candidates.router, prefix="/candidates", tags=["candidates"])
 app.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 app.include_router(usage.router, prefix="/usage", tags=["usage"])

@@ -7,16 +7,20 @@ convention or gotcha changes, the README whenever a feature or phase changes.
 
 ## Next steps (as of 2026-10-24)
 
-All code work so far is committed and pushed (latest `abe9b4c`), and the
-frontend is live on Vercel. Open items, most urgent first. Check the live
-state before assuming any of these is still open, and delete an item here
-once it's done.
+Code work up to `abe9b4c` is committed and pushed, and the frontend is live
+on Vercel. A 2026-10-24 fix pass isn't committed yet: routes moved off the
+event loop, AI usage counted past 1000 rows, `.env.local.example` tracked, and
+the candidate page no longer blanks on a failed button (86 tests pass, the
+page was checked in the browser). Open items, most urgent first. Check the
+live state before assuming any of these is still open, and delete an item
+here once it's done.
 
-1. **Redeploy Cloud Run (owner).** The 2026-10-16 writing pass changed the
-   API's error messages and the weekly email, but on 2026-10-24 the live API
-   still returned the old "Missing bearer token". The frontend shows server
-   messages word for word, so users see the old developer-style ones until
-   this is done. Command under "Deployment"; in his cmd terminal, with no
+1. **Commit, then redeploy Cloud Run (owner).** The 2026-10-16 writing pass
+   changed the API's error messages and the weekly email, but on 2026-10-24
+   the live API still returned the old "Missing bearer token". The frontend
+   shows server messages word for word, so users see the old developer-style
+   ones until this is done. The same redeploy ships the 2026-10-24 backend
+   fixes; the candidate page fix goes live with the push. Command under "Deployment"; in his cmd terminal, with no
    leading `&`. Check it worked: call `/jobs` with a `Basic x` auth header
    and expect "You need to log in first.".
 2. **Rotate the OpenAI API key (owner).** It was pasted into an earlier
@@ -49,7 +53,7 @@ cd apps/api
 python -m venv .venv && .venv\Scripts\activate      # Windows
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8010
-pytest tests/                                         # full suite, ~80 tests, no network
+pytest tests/                                         # full suite, ~90 tests, no network
 
 # Frontend (apps/web)
 cd apps/web
@@ -75,7 +79,10 @@ list the changed files.
 There are two `.env` files: `apps/api/.env` (`.env.example` lists every key:
 Supabase, OpenAI, Stripe, service_role, SMTP and the report secret) and
 `apps/web/.env.local` (`.env.local.example`: the Supabase publishable config
-and `NEXT_PUBLIC_API_URL`).
+and `NEXT_PUBLIC_API_URL`). Both example files are tracked in Git and hold
+placeholders only. `apps/web/.gitignore` ignores `.env*` with an exception
+for `.env.local.example`; until 2026-10-24 that exception was missing, so a
+fresh clone had no template to copy.
 
 **`CORS_ORIGINS` and `FRONTEND_URL` are production overrides that only ever
 get set directly on Cloud Run. Never copy them from the local `.env`.** The
@@ -180,6 +187,36 @@ that isn't a UUID, becomes a 404; anything else a 500), so it's answered
 inside `CORSMiddleware`. An unhandled exception is answered outside it, and
 then the browser only sees "Failed to fetch".
 
+### Routes are plain `def`, not `async def`
+
+Everything a route calls blocks: supabase-py, PyMuPDF, spaCy, the embedding
+model, OpenAI and Stripe. FastAPI runs a plain `def` route or dependency in
+its thread pool, but runs an `async def` on the event loop itself, where
+blocking code stalls every other request on the Cloud Run instance until it
+finishes. Until 2026-10-24 every route (and `get_current_user`) was
+`async def`, so one resume upload or AI review froze the API for everyone.
+Keep new routes and dependencies plain `def`. Read an upload with
+`file.file.read()`, not `await file.read()`. The one exception is
+`/billing/webhook`, which has to `await request.body()` for Stripe's
+signature check and hands the blocking part to `run_in_threadpool`.
+`tests/test_threadpool.py` fails if an `async def` route appears anywhere
+else, and checks that upload and webhook work runs off the event loop.
+
+### Counting and summing rows: never fetch them all
+
+PostgREST cuts every response off at the project's max-rows setting (1000 on
+Supabase), with no error. So `len(query.execute().data)` or a Python `sum()`
+over one select is wrong once a table passes 1000 rows. Count with
+`select("id", count="exact", head=True)` and read `.count`, which Postgres
+computes without sending rows. To sum a column, page with `.order().range()`
+and `count="exact"` until you have every row, as
+`usage_service._tokens_used_this_month` does (PostgREST's aggregate functions
+are switched off on Supabase by default). Before 2026-10-24 the AI usage
+total stopped at row 1000, so a Pro tenant making more than 1000 AI reviews a
+month was under-counted. In tests, mock that chain as
+`...gte.return_value.order.return_value.range` and give the response a real
+`count`.
+
 ### Error messages reach the user as written
 
 The frontend shows an error response's `detail` to the user word for word:
@@ -192,6 +229,10 @@ more than one place live in `apps/api/app/messages.py`. If a response has no
 string `detail` (a 422 validation list, an HTML error page) or the server
 can't be reached, the page shows a generic sentence instead of raw JSON. Code
 that needs a specific status checks `err.status`, never the message text.
+A page keeps two kinds of error apart: one that stops it loading (shown in
+place of the page) and one from a button (shown inline, with the page still
+there). The candidate page shared one state for both until 2026-10-24, so a
+failed View resume or Delete blanked the whole page.
 Supabase Auth errors on the login and signup pages go through
 `friendlyAuthError()` (`apps/web/lib/authErrors.ts`); add a case there
 instead of showing `error.message`.

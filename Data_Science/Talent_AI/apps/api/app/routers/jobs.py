@@ -27,7 +27,7 @@ class JobCreateRequest(BaseModel):
 
 
 @router.post("")
-async def create_job(
+def create_job(
     payload: JobCreateRequest, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
@@ -58,7 +58,7 @@ async def create_job(
 
 
 @router.get("")
-async def list_jobs(
+def list_jobs(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     user: CurrentUser = Depends(get_current_user),
@@ -75,7 +75,7 @@ async def list_jobs(
 
 
 @router.get("/{job_id}")
-async def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) -> dict:
+def get_job(job_id: str, user: CurrentUser = Depends(get_current_user)) -> dict:
     client = get_scoped_client(user.token)
     job = fetch_one(
         client.table("job_descriptions")
@@ -92,7 +92,7 @@ class EmailReportsRequest(BaseModel):
 
 
 @router.post("/{job_id}/email-reports")
-async def set_email_reports(
+def set_email_reports(
     job_id: str, payload: EmailReportsRequest, user: CurrentUser = Depends(get_current_user)
 ) -> dict:
     client = get_scoped_client(user.token)
@@ -108,7 +108,7 @@ async def set_email_reports(
 
 
 @router.get("/{job_id}/results")
-async def get_job_results(
+def get_job_results(
     job_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> list[dict]:
     client = get_scoped_client(user.token)
@@ -119,7 +119,7 @@ async def get_job_results(
 
 
 @router.get("/{job_id}/skill-gap")
-async def get_job_skill_gap(
+def get_job_skill_gap(
     job_id: str, user: CurrentUser = Depends(get_current_user)
 ) -> list[dict]:
     client = get_scoped_client(user.token)
@@ -130,7 +130,7 @@ async def get_job_skill_gap(
 
 
 @router.post("/{job_id}/rank")
-async def rank_job(
+def rank_job(
     job_id: str,
     top_k: int = Query(10, ge=1, le=100),
     method: str = "semantic",
