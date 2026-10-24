@@ -51,9 +51,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noResults => '尚無結果';
 
   @override
-  String get noResultsBody => '選好起點、終點和交通方式，就能看到票價。';
-
-  @override
   String get searchEmptyPickTitle => '先選路線';
 
   @override
@@ -75,9 +72,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get offlineNoCache => '這條路線還沒有儲存的結果。連上網路查一次，之後離線也看得到。';
 
   @override
-  String get offlineDataBadge => '離線資料';
-
-  @override
   String get showingCachedResults => '連不上伺服器，先顯示你儲存的結果。';
 
   @override
@@ -94,15 +88,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get clearOfflineData => '清除離線資料';
-
-  @override
-  String get duration => '時間';
-
-  @override
-  String get transfers => '轉乘';
-
-  @override
-  String get fareByCategory => '各族群票價';
 
   @override
   String get adult => '成人';
@@ -244,9 +229,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get compareHint => '選幾種交通方式，就能並排比較價格和時間。';
 
   @override
-  String get selectAtLeastOneMode => '至少選一種交通方式';
-
-  @override
   String get pickRouteFirst => '請先選路線';
 
   @override
@@ -321,9 +303,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorSearchFailed => '請檢查網路連線後再試一次。';
-
-  @override
-  String get errorApiNotReady => '這個版本無法使用即時票價，請到設定把資料來源切回「模擬」。';
 
   @override
   String get retry => '重試';
@@ -544,9 +523,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get noResults => '尚無結果';
 
   @override
-  String get noResultsBody => '選好起點、終點和交通方式，就能看到票價。';
-
-  @override
   String get searchEmptyPickTitle => '先選路線';
 
   @override
@@ -568,9 +544,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get offlineNoCache => '這條路線還沒有儲存的結果。連上網路查一次，之後離線也看得到。';
 
   @override
-  String get offlineDataBadge => '離線資料';
-
-  @override
   String get showingCachedResults => '連不上伺服器，先顯示你儲存的結果。';
 
   @override
@@ -587,15 +560,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get clearOfflineData => '清除離線資料';
-
-  @override
-  String get duration => '時間';
-
-  @override
-  String get transfers => '轉乘';
-
-  @override
-  String get fareByCategory => '各族群票價';
 
   @override
   String get adult => '成人';
@@ -737,9 +701,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get compareHint => '選幾種交通方式，就能並排比較價格和時間。';
 
   @override
-  String get selectAtLeastOneMode => '至少選一種交通方式';
-
-  @override
   String get pickRouteFirst => '請先選路線';
 
   @override
@@ -814,9 +775,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get errorSearchFailed => '請檢查網路連線後再試一次。';
-
-  @override
-  String get errorApiNotReady => '這個版本無法使用即時票價，請到設定把資料來源切回「模擬」。';
 
   @override
   String get retry => '重試';

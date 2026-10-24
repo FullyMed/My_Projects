@@ -355,10 +355,6 @@ class _ResultsCard extends StatelessWidget {
       return TffEmptyState(title: l10n.noResults, body: l10n.offlineNoCache, icon: Icons.wifi_off_rounded);
     }
 
-    if (errorKey == 'api_not_ready') {
-      return TffErrorCard(title: l10n.errorTitle, message: l10n.errorApiNotReady, onRetry: onRetry);
-    }
-
     if (errorKey == 'search_failed') {
       return TffErrorCard(title: l10n.errorTitle, message: l10n.errorSearchFailed, onRetry: onRetry);
     }

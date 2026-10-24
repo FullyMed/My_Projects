@@ -342,9 +342,16 @@ class _NarrowLayout extends StatelessWidget {
                   .labelLarge
                   ?.copyWith(fontWeight: FontWeight.w600),
               unselectedLabelStyle: Theme.of(context).textTheme.labelLarge,
+              // A tab label is one line; with large system text it shrinks
+              // to fit instead of being clipped ("Rute tersim" at 200%).
               tabs: [
-                Tab(text: l10n.favorites),
-                Tab(text: l10n.history),
+                for (final label in [l10n.favorites, l10n.history])
+                  Tab(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(label, maxLines: 1),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -547,48 +554,64 @@ class _RouteTile extends StatelessWidget {
             // On phones the labelled button would squeeze the route name down
             // to a few letters; the whole tile re-runs anyway, so go icon-only.
             final compact = constraints.maxWidth < 480;
+            // With large system text on a phone, the two buttons beside the
+            // route left it ~175 dp, narrower than "Kaohsiung" at 200%, so
+            // the name got cut. Then the buttons move under the route.
+            final stacked = compact &&
+                MediaQuery.textScalerOf(context).scale(16) > 24;
+            final text = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+            final actions = [
+              trailing,
+              const SizedBox(width: AppSpacing.sm),
+              if (compact)
+                IconButton(
+                  tooltip: l10n.rerun,
+                  onPressed: onRun,
+                  icon: Icon(Icons.play_arrow_rounded, color: cs.primary),
+                )
+              else
+                TffTextButton(
+                    label: l10n.rerun,
+                    icon: Icons.play_arrow_rounded,
+                    onPressed: onRun),
+            ];
+            if (stacked) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  text,
+                  Row(mainAxisAlignment: MainAxisAlignment.end, children: actions),
+                ],
+              );
+            }
             return Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: cs.onSurfaceVariant),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+                Expanded(child: text),
                 const SizedBox(width: AppSpacing.md),
-                trailing,
-                const SizedBox(width: AppSpacing.sm),
-                if (compact)
-                  IconButton(
-                    tooltip: l10n.rerun,
-                    onPressed: onRun,
-                    icon: Icon(Icons.play_arrow_rounded, color: cs.primary),
-                  )
-                else
-                  TffTextButton(
-                      label: l10n.rerun,
-                      icon: Icons.play_arrow_rounded,
-                      onPressed: onRun),
+                ...actions,
               ],
             );
           },

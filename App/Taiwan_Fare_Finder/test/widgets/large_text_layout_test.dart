@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,18 @@ import 'package:taiwan_fare_finder/ui/fare_result_card.dart';
 Map<String, dynamic> _arb(String tag) =>
     jsonDecode(File('lib/l10n/app_$tag.arb').readAsStringSync())
         as Map<String, dynamic>;
+
+/// Prices and route names must never end in "…". An ellipsis isn't an
+/// overflow error, so takeException() alone missed "NT$1.4…" on a phone.
+void _expectNothingCut(WidgetTester tester, String reason) {
+  for (final element in find.byType(RichText).evaluate()) {
+    final paragraph = element.renderObject! as RenderParagraph;
+    final text = paragraph.text.toPlainText();
+    if (text.startsWith('NT\$') || text.contains('→')) {
+      expect(paragraph.didExceedMaxLines, isFalse, reason: '$reason: "$text" is cut off');
+    }
+  }
+}
 
 void main() {
   final id = _arb('id');
@@ -58,15 +71,18 @@ void main() {
     await tester.tap(find.text(id['tabSaved'] as String).last);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull, reason: 'saved routes');
+    _expectNothingCut(tester, 'saved routes');
     await tester.tap(find.text(id['history'] as String).first);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull, reason: 'history');
+    _expectNothingCut(tester, 'history');
 
     // Re-run the three-mode history entry: lands on Compare with 3 results.
     await tester.tap(find.byTooltip(id['rerun'] as String).first);
     await tester.pumpAndSettle();
     expect(find.byType(FareResultCard), findsNWidgets(3));
     expect(tester.takeException(), isNull, reason: 'compare results');
+    _expectNothingCut(tester, 'compare results');
 
     // Re-run the single-mode favorite: lands on Search with a result.
     await tester.tap(find.text(id['tabSaved'] as String).last);
@@ -77,6 +93,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(FareResultCard), findsOneWidget);
     expect(tester.takeException(), isNull, reason: 'search result');
+    _expectNothingCut(tester, 'search result');
 
     for (final route in [AppRoutes.settings, AppRoutes.terms, AppRoutes.privacy, '/no-such-page']) {
       AppRouter.router.go(route);

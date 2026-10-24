@@ -13,7 +13,7 @@ A Flutter app that shows what a trip across Taiwan costs before you go. You pick
 - Speak English, Traditional Chinese and Indonesian, including the city names in saved routes.
 - Fit phones, tablets and desktops: a bottom bar on narrow screens, a side rail on wide ones, and two-column pages from 840 dp.
 - Show shimmer placeholders shaped like the real content while results load, and a themed 404 page for unknown routes.
-- Work for everyone: every text passes WCAG AA contrast in light and dark mode, tap targets are at least 48 dp, layouts hold up at 200% system text, keyboard users on web and desktop get a visible focus ring, screen readers hear what each control is and whether it's selected, and the OS "reduce motion" setting turns off movement.
+- Work for everyone: every text passes WCAG AA contrast in light and dark mode, tap targets are at least 48 dp, layouts hold up at 200% system text (prices shrink to fit rather than get cut off), keyboard users on web and desktop get a visible focus ring, screen readers hear what each control is and whether it's selected, and the OS "reduce motion" setting turns off movement.
 - Include a Terms of Use and a Privacy Policy, both translated, that say what the app stores and what it sends in API mode.
 
 ---
@@ -146,6 +146,7 @@ flutter test          # unit and widget tests (32, no network needed)
 python scripts/gen_fonts.py      # regenerate the static font weights (needs fontTools)
 flutter gen-l10n      # regenerate the ARB stubs (rarely needed)
 dart run flutter_launcher_icons  # regenerate Android, iOS and web icons from assets/icons/app_icon.png
+cd proxy && npm test             # tests for the Cloudflare Worker (no network needed)
 
 # Release builds: pass the proxy settings and obfuscate the Dart code
 flutter build apk --release \
@@ -158,6 +159,8 @@ flutter build ios --release \
 
 Run `dart format` on new files only. Most existing files predate the formatter, and formatting the whole project rewraps about 50 of them.
 
+The main `android/app/src/main/AndroidManifest.xml` must keep the `INTERNET` permission. Flutter's template only adds it to the debug and profile manifests, and without it a release build can't reach the proxy at all.
+
 A Play Store build also needs `android/key.properties` (gitignored) with `storePassword`, `keyPassword`, `keyAlias` and `storeFile` pointing at your upload keystore. The current file still holds `CHANGE_ME` placeholders, and the build falls back to debug signing until you fill them in. Keep `build/symbols/` so you can read obfuscated crash reports.
 
 ---
@@ -168,11 +171,12 @@ A Play Store build also needs `android/key.properties` (gitignored) with `storeP
 - [ ] Host the Privacy Policy and a support page at public URLs. Both stores want a URL, and an in-app screen doesn't count. The text is ready in `lib/pages/privacy_page.dart` and the `privacy*` ARB keys. The store listing files list every field that's still empty.
 - [ ] Confirm category, age rating and price for both stores. The store listing files suggest Travel, Everyone/4+ and Free, and Felix still needs to say yes.
 - [ ] Set up Android release signing. Create the upload keystore and fill in `android/key.properties`.
-- [ ] Run the app on a real Android or iOS device, or an emulator. The 2026-10-01 fix pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy, but not on a phone.
+- [x] Run the app on an Android emulator. Done 2026-10-24 on a Pixel 6 (Android 14) with a release build. It caught a missing `INTERNET` permission that broke every live search in release builds, plus fixes for TalkBack, the place picker, 200% text and some Indonesian wording. See "Open items" in [`CLAUDE.md`](CLAUDE.md).
+- [ ] Try it on a real Android phone and on iOS.
 - [ ] `.flutter-plugins-dependencies` is committed even though `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies`.
-- [ ] Add rate limiting to the proxy, so nobody who finds the URL can use up the TDX quota.
+- [ ] Deploy the proxy's new rate limits (60 requests a minute per IP, 120 TDX calls a minute in total). They're written and tested; run `npm install` and `npx wrangler deploy` in `proxy/`, then check that `/health` shows `"rateLimit": true`. See [`proxy/README.md`](proxy/README.md).
 - [ ] Rotate the old TDX client secret and update the Worker secret (see [`SECURITY.md`](SECURITY.md)).
-- [ ] Remove dead code: the unused `TffFareTable` widget and the `api_not_ready` error, which nothing can trigger any more. Update or delete the stale `architecture.md`, `design_system.md` and `ui_components_notes.md`.
+- [x] Remove dead code (2026-10-24): the unused `TffFareTable` widget, the `api_not_ready` error nothing could trigger, seven strings no screen showed, and the stale `architecture.md`, `design_system.md` and `ui_components_notes.md`. `CLAUDE.md` and this README are the references.
 
 The full list, ordered and split into what Claude can do and what only Felix can do, is under "Open items" in [`CLAUDE.md`](CLAUDE.md).
 

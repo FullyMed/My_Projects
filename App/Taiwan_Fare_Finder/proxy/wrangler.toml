@@ -7,6 +7,28 @@ compatibility_date = "2024-11-01"
 [vars]
 ALLOWED_ORIGINS = "*"
 
+# Rate limits (Wrangler 4 only; Wrangler 3 ignores this block and deploys with
+# no limit, and /health then shows "rateLimit": false). Counts are approximate
+# and per Cloudflare location. period must be 10 or 60, and namespace_id must
+# be a number unique within your Cloudflare account.
+#
+# Per client IP, every proxied request. One app search makes at most 3.
+[[ratelimits]]
+name = "IP_LIMITER"
+namespace_id = "7301"
+  [ratelimits.simple]
+  limit = 60
+  period = 60
+
+# All clients together, only requests that miss the edge cache and call TDX.
+# TDX allows about 50 calls a second; this stays far below that.
+[[ratelimits]]
+name = "UPSTREAM_LIMITER"
+namespace_id = "7302"
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
 # Secrets are NOT set here. Run once after `wrangler login`:
 #   wrangler secret put TDX_CLIENT_ID
 #   wrangler secret put TDX_CLIENT_SECRET

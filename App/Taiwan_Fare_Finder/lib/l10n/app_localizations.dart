@@ -185,12 +185,6 @@ abstract class AppLocalizations {
   /// **'No results yet'**
   String get noResults;
 
-  /// No description provided for @noResultsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick an origin, a destination and a mode to see fares.'**
-  String get noResultsBody;
-
   /// No description provided for @searchEmptyPickTitle.
   ///
   /// In en, this message translates to:
@@ -233,12 +227,6 @@ abstract class AppLocalizations {
   /// **'Nothing saved for this route yet. Search it once while you\'re online and it\'ll be here offline too.'**
   String get offlineNoCache;
 
-  /// No description provided for @offlineDataBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved offline'**
-  String get offlineDataBadge;
-
   /// No description provided for @showingCachedResults.
   ///
   /// In en, this message translates to:
@@ -274,24 +262,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear offline data'**
   String get clearOfflineData;
-
-  /// No description provided for @duration.
-  ///
-  /// In en, this message translates to:
-  /// **'Duration'**
-  String get duration;
-
-  /// No description provided for @transfers.
-  ///
-  /// In en, this message translates to:
-  /// **'Transfers'**
-  String get transfers;
-
-  /// No description provided for @fareByCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Fare breakdown'**
-  String get fareByCategory;
 
   /// No description provided for @adult.
   ///
@@ -569,12 +539,6 @@ abstract class AppLocalizations {
   /// **'Pick a few modes to see their prices and times next to each other.'**
   String get compareHint;
 
-  /// No description provided for @selectAtLeastOneMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick at least one mode'**
-  String get selectAtLeastOneMode;
-
   /// No description provided for @pickRouteFirst.
   ///
   /// In en, this message translates to:
@@ -718,12 +682,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check your internet connection and try again.'**
   String get errorSearchFailed;
-
-  /// No description provided for @errorApiNotReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Live fares aren\'t available in this build. Switch Data source to Mock in Settings.'**
-  String get errorApiNotReady;
 
   /// No description provided for @retry.
   ///

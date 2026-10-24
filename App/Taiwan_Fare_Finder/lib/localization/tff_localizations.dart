@@ -40,7 +40,6 @@ class TffLocalizations {
   String get compareFares => _t('compareFares');
   String get results => _t('results');
   String get noResults => _t('noResults');
-  String get noResultsBody => _t('noResultsBody');
   String get searchEmptyPickTitle => _t('searchEmptyPickTitle');
   String get searchEmptyPickBody => _t('searchEmptyPickBody');
   String get searchEmptyReadyTitle => _t('searchEmptyReadyTitle');
@@ -48,11 +47,7 @@ class TffLocalizations {
   String get searchEmptyNoResultsTitle => _t('searchEmptyNoResultsTitle');
   String get searchEmptyNoResultsBody => _t('searchEmptyNoResultsBody');
   String get offlineNoCache => _t('offlineNoCache');
-  String get offlineDataBadge => _t('offlineDataBadge');
   String get showingCachedResults => _t('showingCachedResults');
-  String get duration => _t('duration');
-  String get transfers => _t('transfers');
-  String get fareByCategory => _t('fareByCategory');
   String get adult => _t('adult');
   String get student => _t('student');
   String get child => _t('child');
@@ -120,7 +115,6 @@ class TffLocalizations {
   /// e.g. "HSR • TRA • MRT"
   String modesLabel(Iterable<TransportMode> modes) => modes.map(modeLabel).join(' • ');
   String get compareHint => _t('compareHint');
-  String get selectAtLeastOneMode => _t('selectAtLeastOneMode');
   String get pickRouteFirst => _t('pickRouteFirst');
 
   // Passive validation helper text
@@ -160,7 +154,6 @@ class TffLocalizations {
   String get retry => _t('retry');
 
   // Data mode errors
-  String get errorApiNotReady => _t('errorApiNotReady');
 
   // Compare: selection + sorting
   String compareSelectedCountLabel(int count) => _t('compareSelectedCountLabel').replaceAll('{count}', '$count');

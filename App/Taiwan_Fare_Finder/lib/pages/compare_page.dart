@@ -336,16 +336,6 @@ class _ComparePageState extends State<ComparePage> {
                 title: l10n.noResults,
                 body: l10n.offlineNoCache,
                 icon: Icons.wifi_off_rounded);
-          } else if (fare.errorMessage == 'api_not_ready') {
-            results = TffErrorCard(
-              title: l10n.errorTitle,
-              message: l10n.errorApiNotReady,
-              onRetry: fare.canRetry
-                  ? () => context.read<CompareFareController>().retryLast(
-                      offline: settings.offlineMode,
-                      dataMode: settings.dataMode)
-                  : null,
-            );
           } else if (fare.errorMessage == 'search_failed') {
             results = TffErrorCard(
               title: l10n.errorTitle,

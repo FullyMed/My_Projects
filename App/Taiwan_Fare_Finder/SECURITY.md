@@ -8,6 +8,7 @@ Taiwan Fare Finder runs on the user's device. The only server is a small TDX rel
 
 - No secret lives in the source. `AppConfig` (`lib/config/app_config.dart`) reads everything from `--dart-define`, normally passed in from a gitignored `tdx.env.json` passed with `--dart-define-from-file`. The app compiles in no credentials file.
 - The Worker in `proxy/` holds `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` as Worker secrets. It forwards only read-only `Rail/THSR/*` and `Rail/TRA/*` requests, gets its own bearer token, and caches responses at the edge for 6 hours.
+- The Worker rate-limits itself (`[[ratelimits]]` in `proxy/wrangler.toml`, which needs Wrangler 4): 60 requests a minute per IP, and 120 TDX calls a minute in total for requests that miss the edge cache. Over either limit it answers `429`. `/health` shows `"rateLimit": true` when both limits are active.
 - You point the app at the Worker with `--dart-define=TFF_PROXY_BASE_URL=...`. In proxy mode the app never calls `TdxAuthService`.
 - Direct mode (the `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` defines) is for local development only. A release built that way contains the secret as a plain string. R8 and Dart's `--obfuscate` don't hide string constants; this was checked against a release APK. Ship with the proxy.
 - Web builds refuse to call TDX directly when no proxy is set (`TdxFareService.fetch` throws), so the secret can't end up in `main.dart.js`.
@@ -47,7 +48,7 @@ Done:
 
 Still open:
 - [ ] Rotate the TDX client secret in the TDX portal, then update the Worker with `npx wrangler secret put TDX_CLIENT_SECRET`. An earlier value sat in plain text in a local file and a test APK, so treat it as exposed. This hasn't been confirmed as done.
-- [ ] Add rate limiting to the Worker route. Right now anyone who finds the URL can burn through your TDX quota, and the 6-hour edge cache only softens that. A Cloudflare Rate Limiting rule (Security → WAF → Rate limiting rules), for example 60 requests a minute per IP, fixes it.
+- [ ] Deploy the rate-limited Worker (written 2026-10-24): `cd proxy`, `npm install` (it moves Wrangler from 3 to 4), `npx wrangler deploy`, then check that `/health` shows `"rateLimit": true`. Until then anyone who finds the URL can burn through your TDX quota.
 - [ ] Create an upload keystore, fill in `android/key.properties`, and keep the `.jks` file outside the repo.
 - [ ] Keep `build/symbols/` from every obfuscated build so you can read crash traces.
 - [ ] Run `flutter pub outdated` now and then.

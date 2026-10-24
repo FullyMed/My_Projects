@@ -82,16 +82,21 @@ class FareResultCard extends StatelessWidget {
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 2),
-            Text(subtitle!, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
+            Text(subtitle!, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant), maxLines: 3, overflow: TextOverflow.ellipsis),
           ],
           const SizedBox(height: AppSpacing.md),
           Text(l10n.adult, style: text.labelLarge?.copyWith(color: cs.onSurfaceVariant)),
           const SizedBox(height: 2),
-          Text(
-            money(fares.adult),
-            style: text.displaySmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFeatures: _tabular),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          // A price must never end in "…": with large system text it shrinks
+          // to fit the card instead (NT$1,490 was cut to "NT$1.4…" at 200%).
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              money(fares.adult),
+              style: text.displaySmall?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFeatures: _tabular),
+              maxLines: 1,
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           DecoratedBox(
@@ -122,7 +127,7 @@ class FareResultCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(updatedLine, style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(updatedLine, style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant), maxLines: 2, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -194,9 +199,20 @@ class _TierRow extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: cs.onSurfaceVariant),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(label, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant))),
-            const SizedBox(width: AppSpacing.sm),
-            Text(value, style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontFeatures: _tabular)),
+            // Label and price share one line when they fit. With large system
+            // text the price drops under the label, so the label wraps between
+            // words instead of splitting one ("perkira-an" at 200%).
+            Expanded(
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSpacing.sm,
+                children: [
+                  Text(label, style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                  Text(value, style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700, fontFeatures: _tabular)),
+                ],
+              ),
+            ),
           ],
         ),
       ),

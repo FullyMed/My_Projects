@@ -47,7 +47,6 @@ class FareController extends ChangeNotifier {
   /// Known values:
   /// - `offline_no_cache`
   /// - `search_failed`
-  /// - `api_not_ready`
   String? get errorMessage => _error;
 
   /// Snack message key (localized in UI).
@@ -140,7 +139,7 @@ class FareController extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('FareController: search failed: $e');
-      error = e is UnimplementedError ? 'api_not_ready' : 'search_failed';
+      error = 'search_failed';
     }
 
     await refreshCacheStats();

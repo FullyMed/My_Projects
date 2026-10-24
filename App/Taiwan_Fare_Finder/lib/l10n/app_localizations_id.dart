@@ -18,7 +18,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tabCompare => 'Bandingkan';
 
   @override
-  String get tabSaved => 'Simpan';
+  String get tabSaved => 'Tersimpan';
 
   @override
   String get settings => 'Pengaturan';
@@ -51,10 +51,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get noResults => 'Belum ada hasil';
 
   @override
-  String get noResultsBody =>
-      'Pilih asal, tujuan, dan moda untuk melihat tarif.';
-
-  @override
   String get searchEmptyPickTitle => 'Pilih rute';
 
   @override
@@ -79,9 +75,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Belum ada hasil tersimpan untuk rute ini. Cari sekali saat online, nanti hasilnya tetap ada saat offline.';
 
   @override
-  String get offlineDataBadge => 'Data offline';
-
-  @override
   String get showingCachedResults =>
       'Server tidak bisa dihubungi. Ini hasil yang sudah Anda simpan.';
 
@@ -102,15 +95,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get clearOfflineData => 'Hapus data offline';
 
   @override
-  String get duration => 'Durasi';
-
-  @override
-  String get transfers => 'Transit';
-
-  @override
-  String get fareByCategory => 'Tarif per kategori';
-
-  @override
   String get adult => 'Dewasa';
 
   @override
@@ -129,13 +113,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get kmShort => 'km';
 
   @override
-  String get favorite => 'Favorit';
+  String get favorite => 'Simpan';
 
   @override
-  String get unfavorite => 'Batal favorit';
+  String get unfavorite => 'Hapus';
 
   @override
-  String get favorites => 'Favorit';
+  String get favorites => 'Rute tersimpan';
 
   @override
   String get history => 'Riwayat';
@@ -253,9 +237,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Pilih beberapa moda untuk melihat harga dan waktunya berdampingan.';
 
   @override
-  String get selectAtLeastOneMode => 'Pilih minimal satu moda';
-
-  @override
   String get pickRouteFirst => 'Pilih rute dulu';
 
   @override
@@ -298,7 +279,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get sourceCached => 'Tersimpan';
 
   @override
-  String get sourceLive => 'Langsung';
+  String get sourceLive => 'Terkini';
 
   @override
   String get routeNotServedTitle => 'Tidak ada layanan di rute ini';
@@ -334,10 +315,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get errorSearchFailed =>
       'Periksa koneksi internet Anda, lalu coba lagi.';
-
-  @override
-  String get errorApiNotReady =>
-      'Tarif langsung tidak tersedia di versi ini. Ubah sumber data ke Simulasi di Pengaturan.';
 
   @override
   String get retry => 'Coba lagi';

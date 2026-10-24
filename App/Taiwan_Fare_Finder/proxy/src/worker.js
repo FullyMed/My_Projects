@@ -13,6 +13,12 @@
  * Optional vars (wrangler.toml [vars] or dashboard):
  *   ALLOWED_ORIGINS  comma-separated list for CORS; omit or "*" to allow all
  *                    (fare data is public, so "*" is acceptable)
+ *
+ * Rate limits (wrangler.toml [[ratelimits]], needs Wrangler 4):
+ *   IP_LIMITER        per client IP, on every proxied request
+ *   UPSTREAM_LIMITER  one shared key, only on cache misses that would call TDX
+ * Both are approximate and counted per Cloudflare location. If a binding is
+ * missing the Worker lets requests through, and /health reports it.
  */
 
 const TDX_TOKEN_URL =
@@ -24,6 +30,9 @@ const ALLOWED_PREFIXES = ["Rail/THSR/", "Rail/TRA/"];
 
 // Edge-cache successful responses. Fares/timetables change rarely.
 const EDGE_CACHE_SECONDS = 6 * 60 * 60;
+
+// Matches the 60-second period in wrangler.toml, for the Retry-After header.
+const RATE_LIMIT_PERIOD_SECONDS = 60;
 
 // Module-scoped token cache (per isolate). Refreshed 60s before expiry.
 let cachedToken = null;
@@ -51,11 +60,21 @@ export default {
     }
 
     if (subPath === "" || subPath === "health") {
-      return json({ ok: true }, 200, cors);
+      // rateLimit: false means a binding is missing (e.g. deployed with
+      // Wrangler 3, which ignores [[ratelimits]]) and nothing is limited.
+      const rateLimit = Boolean(env.IP_LIMITER && env.UPSTREAM_LIMITER);
+      return json({ ok: true, rateLimit }, 200, cors);
     }
 
     if (!ALLOWED_PREFIXES.some((p) => subPath.startsWith(p))) {
       return json({ error: "path_not_allowed", path: subPath }, 403, cors);
+    }
+
+    // Per-IP limit before anything else, cache hits included: the app has no
+    // user ID to key on, and one search makes at most 3 requests.
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    if (!(await allowed(env.IP_LIMITER, `ip:${ip}`))) {
+      return rateLimited("rate_limited", cors);
     }
 
     const target = new URL(`${TDX_API_ROOT}/${subPath}`);
@@ -68,6 +87,13 @@ export default {
     const hit = await cache.match(cacheKey);
     if (hit) {
       return withCors(hit, cors);
+    }
+
+    // Shared cap on TDX calls from this location. Varying the query string
+    // skips the edge cache, and many IPs skip the per-IP limit, so this is
+    // what actually protects the TDX quota.
+    if (!(await allowed(env.UPSTREAM_LIMITER, "tdx"))) {
+      return rateLimited("upstream_busy", cors);
     }
 
     let token;
@@ -131,6 +157,29 @@ async function getToken(env) {
   cachedToken = token;
   tokenExpiresAt = now + (expiresIn - 60) * 1000;
   return token;
+}
+
+// A missing binding lets the request through (and /health says so), so a
+// config slip degrades to "no limit" instead of taking the app down.
+async function allowed(limiter, key) {
+  if (!limiter) return true;
+  try {
+    const { success } = await limiter.limit({ key });
+    return success;
+  } catch {
+    return true;
+  }
+}
+
+function rateLimited(error, cors) {
+  return new Response(JSON.stringify({ error }), {
+    status: 429,
+    headers: {
+      ...cors,
+      "Content-Type": "application/json; charset=utf-8",
+      "Retry-After": String(RATE_LIMIT_PERIOD_SECONDS),
+    },
+  });
 }
 
 function corsHeaders(origin, env) {

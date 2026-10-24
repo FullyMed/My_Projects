@@ -51,10 +51,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResults => 'No results yet';
 
   @override
-  String get noResultsBody =>
-      'Pick an origin, a destination and a mode to see fares.';
-
-  @override
   String get searchEmptyPickTitle => 'Pick a route';
 
   @override
@@ -79,9 +75,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing saved for this route yet. Search it once while you\'re online and it\'ll be here offline too.';
 
   @override
-  String get offlineDataBadge => 'Saved offline';
-
-  @override
   String get showingCachedResults =>
       'Couldn\'t reach the server. These are your saved results.';
 
@@ -100,15 +93,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearOfflineData => 'Clear offline data';
-
-  @override
-  String get duration => 'Duration';
-
-  @override
-  String get transfers => 'Transfers';
-
-  @override
-  String get fareByCategory => 'Fare breakdown';
 
   @override
   String get adult => 'Adult';
@@ -253,9 +237,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pick a few modes to see their prices and times next to each other.';
 
   @override
-  String get selectAtLeastOneMode => 'Pick at least one mode';
-
-  @override
   String get pickRouteFirst => 'Pick a route first';
 
   @override
@@ -334,10 +315,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorSearchFailed =>
       'Check your internet connection and try again.';
-
-  @override
-  String get errorApiNotReady =>
-      'Live fares aren\'t available in this build. Switch Data source to Mock in Settings.';
 
   @override
   String get retry => 'Retry';

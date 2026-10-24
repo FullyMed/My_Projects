@@ -1,1 +1,0 @@
-Create UI component guidelines for custom bottom navigation shell, cards, chips, animated swap button, tables, empty states and subtle gradients for Taiwan Fare Finder. Include interaction behaviors and animations for: selecting modes, loading results, saving favorites, switching language/theme.

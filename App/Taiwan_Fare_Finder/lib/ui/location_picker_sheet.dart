@@ -41,6 +41,9 @@ class LocationPickerSheet extends StatefulWidget {
   }) {
     return showModalBottomSheet<Location>(
       context: context,
+      // Root navigator, so the sheet and its scrim cover the shell's bottom
+      // bar. On the tab's own navigator the nav tabs stayed tappable under it.
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,

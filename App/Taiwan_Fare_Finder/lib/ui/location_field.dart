@@ -31,11 +31,25 @@ class LocationField extends StatelessWidget {
     final display = value == null ? '' : value!.nameForLocale(l10n.locale);
     final city = value == null ? '' : value!.cityForLocale(l10n.locale);
 
+    Future<void> pick() async {
+      final picked = await LocationPickerSheet.show(
+        context,
+        title: label,
+        initial: value,
+        recent: recent,
+        popular: popular,
+      );
+      if (picked != null) onChanged(picked);
+    }
+
     // One button for screen readers: "Origin, Taipei" (or "Origin, Choose a place").
+    // excludeSemantics drops the InkWell's tap action, so the node needs its
+    // own onTap or a TalkBack/VoiceOver double-tap does nothing.
     return Semantics(
       button: true,
       enabled: enabled,
       label: '$label, ${value == null ? l10n.locationPickerCtaChoose : display}',
+      onTap: enabled ? pick : null,
       excludeSemantics: true,
       child: IgnorePointer(
       ignoring: !enabled,
@@ -47,18 +61,7 @@ class LocationField extends StatelessWidget {
           builder: (context, onFocusChange) => InkWell(
           onFocusChange: onFocusChange,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: enabled
-              ? () async {
-                  final picked = await LocationPickerSheet.show(
-                    context,
-                    title: label,
-                    initial: value,
-                    recent: recent,
-                    popular: popular,
-                  );
-                  if (picked != null) onChanged(picked);
-                }
-              : null,
+          onTap: enabled ? pick : null,
           child: InputDecorator(
             decoration: InputDecoration(
               labelText: label,

@@ -16,6 +16,7 @@ flutter build apk        # build Android
 flutter build ios        # build iOS
 dart format <file>       # format NEW files only (see Key constraints)
 python scripts/gen_fonts.py  # regenerate the static font weights (needs fontTools)
+cd proxy && npm test     # Worker tests (Node's built-in runner, fakes only, no network)
 ```
 
 ---
@@ -72,6 +73,7 @@ All user-facing text (the ARB strings in every language, the store listings, the
 - One name per thing. A bookmarked route is a "saved route" (`favorites` in code, 收藏路線 in Chinese, "rute tersimpan" in Indonesian). The offline cache counts are "saved searches" and "saved fares". Buttons use verbs ("Compare fares", not "Fare comparison").
 - UI verbs: "Pick" or "Choose" for selections, "Tap" for buttons.
 - Chinese uses 你 in UI strings and 您 in the legal pages. Indonesian uses "Anda" throughout.
+- Indonesian: the Live badge is "Terkini", because "Langsung" already means a direct train (no transfer) on the same card. The Saved tab is "Tersimpan" (a noun, not the verb "Simpan").
 - The legal pages keep standard legal wording where it matters ("as is", "fitness for a particular purpose"). When you change their text, bump `termsLastUpdated` / `privacyLastUpdated` in all four ARB files.
 
 ### Fare data flow
@@ -109,7 +111,7 @@ Tests (`test/`):
 - `services/fare_service_test.dart` covers mock determinism, not-served, cache fallback, offline mode, LRU (100) and per-user clearing.
 - `services/saved_routes_test.dart` covers de-duplication that ignores mode order, and keeping other users' rows.
 - `controllers/fare_controller_test.dart` covers the stale-response guard and Search/Compare independence.
-- `widgets/` drives the real `TffApp`: the search → compare → favorite → Saved flow, Settings open/close, a zh_Hant history re-run onto Compare, overflow checks of every page at 375 dp in Indonesian and in a 1280×640 desktop window, every page with real content at 375 dp with 200% system text in Indonesian (`large_text_layout_test.dart`), and keyboard Tab/Space on the Settings choices with a visible focus ring (`keyboard_focus_test.dart`).
+- `widgets/` drives the real `TffApp`: the search → compare → favorite → Saved flow, Settings open/close, a zh_Hant history re-run onto Compare, overflow checks of every page at 375 dp in Indonesian and in a 1280×640 desktop window, every page with real content at 375 dp with 200% system text in Indonesian, with no price or route name cut off (`large_text_layout_test.dart`), and keyboard Tab/Space on the Settings choices with a visible focus ring (`keyboard_focus_test.dart`).
 
 `AppRouter.router` is a static singleton that a second `TffApp` in the same isolate can't reuse, so each widget test file pumps the app exactly once (one `testWidgets` per file).
 
@@ -137,7 +139,6 @@ Tests (`test/`):
 | `TffBadge` | Small solid label chip ("Live", "Mock data", "Saved") |
 | `TffModeChip` | Selectable transport-mode chip with a 48 dp tap target |
 | `TffFocusRing` | Draws a 2 dp primary outline around an `InkWell` control while it has keyboard focus |
-| `TffFareTable` | Fare table (adult / student / child / senior). Unused at the moment; `FareResultCard` has its own tier grid |
 | `FareResultCard` | One fare result: mode title + source badge (they wrap onto two lines when space runs out), the route on its own line, the adult price, then student/child/senior as label-and-price rows with tabular figures ("Student (est.)" when estimated) |
 | `TffErrorCard` | Inline error with an optional retry action |
 | `TffEmptyState` | Empty state with an icon and short copy |
@@ -217,10 +218,12 @@ A design pass on 2026-10-22 used the UI/UX Pro Max, taste-skill (redesign-existi
 - Touch: interactive elements are at least 48 dp. Chips use `MaterialTapTargetSize.padded` (so the `Wrap` around them uses `runSpacing: 2`), `TffTextButton` has `minimumSize: 48`, Settings choices have `minHeight: 48`, and the swap button is a 48 dp `IconButton`.
 - Feedback: anything tappable inside a `TffCard` uses `InkWell` (never a bare `GestureDetector`). Use `Ink` instead of `Container` when the tappable thing has its own background, so the ripple paints above it.
 - Keyboard: Material buttons and chips get a 2 dp outline when focused (from the theme). Custom `InkWell` controls are wrapped in `TffFocusRing`. Filled controls (the primary button, a selected chip) use an `onSurface` ring, because a teal ring disappears into a teal fill. The ring shows only in keyboard highlight mode.
-- Screen readers: Settings choices announce `selected` in a mutually exclusive group; the offline switch is merged with its label; location fields read as a button with their value ("Origin, Taipei"); fare tier rows read as one item ("Child, NT$745"); city groups announce `expanded`; picker items announce `selected`.
+- Screen readers: Settings choices announce `selected` in a mutually exclusive group; the offline switch is merged with its label; location fields read as a button with their value ("Origin, Taipei"); fare tier rows read as one item ("Child, NT$745"); city groups announce `expanded`; picker items announce `selected`. A `Semantics(excludeSemantics: true)` drops its child's tap action, so give it its own `onTap` (as `LocationField` does). Without it the location fields weren't clickable for TalkBack (found on the emulator, 2026-10-24).
+- Bottom sheets use `useRootNavigator: true`. On a tab's own navigator the sheet sat above the shell's bottom bar, and the nav tabs stayed tappable under it.
 - Type: tabular figures (`FontFeature.tabularFigures()`) on every price and count so digits line up. The adult price is `displaySmall` ExtraBold. Section titles use `titleLarge` SemiBold.
 - Motion: use `TffMotion` tokens with `TffMotion.of(context, …)`. Presses take 100 ms; small state changes 160–220 ms with the strong ease-out; pushed pages 260 ms in and 180 ms out. With reduced motion, pushed pages only fade (no slide), the swap icon doesn't turn, the skeleton holds still, and the button press doesn't scale. Mode chips don't scale on selection, because you switch them many times a session.
 - Large text: don't put fixed-ratio grids or fixed-height boxes around text. Rows that pair a label with a button or value need `Expanded`/`Flexible` on the text side; a `TffTextButton` inside a `Row` goes in `Flexible` (plus `Align` to keep it at the end). `large_text_layout_test.dart` renders every page at 200% text in Indonesian.
+- Prices and route names never end in "…". The adult price sits in a `FittedBox(scaleDown)` so it shrinks instead; the student/child/senior rows are a `Wrap`, so the price drops under the label; and Saved tiles move their buttons under the route above 150% text. The Saved page's tab labels sit in a `FittedBox(scaleDown)` too, since a `Tab` is one line and "Rute tersimpan" was clipped at 200%. On the emulator at 200%, NT$1,490 showed as "NT$1.4…" and a saved route as "Taipei → Ka…". The large-text test now fails if any `NT$…` or `A → B` text is cut off (an ellipsis is not an overflow error, so `takeException()` missed it).
 - Wide screens: Search and Compare cap their two columns at 1200 px. In the Saved page's two-column layout, both column headers have the same 48 dp minimum height so the lists start level.
 
 ### Utilities
@@ -251,7 +254,8 @@ To change the design, edit `scripts/gen_icon.py`, then run it and the command ab
 - HSR and TRA are live through TDX. Don't revert them to `UnimplementedError`. Adding a mode to the API path means adding it to `TdxFareService.fetch` and to a station map.
 - Offline must always work. The cache and the offline toggle have to function whatever the API is doing.
 - Use `Location` for UI inputs. Never pass raw city-name strings from the UI to controllers; resolve them through `LocationService` and pass `location.queryToken` for cache keys and station lookups. To display a stored token, go through `LocationService.routeLabel` / `displayName` so it's localized.
-- Run `flutter analyze` and `flutter test` before calling a change done. Both were clean on 2026-10-22 (32 tests).
+- Run `flutter analyze` and `flutter test` before calling a change done. Both were clean on 2026-10-24 (32 tests).
+- Keep `<uses-permission android:name="android.permission.INTERNET"/>` in `android/app/src/main/AndroidManifest.xml`. Flutter's template puts it only in the debug and profile manifests, so until 2026-10-24 every release build failed every live search with "Failed host lookup" (debug runs and the web build hid it).
 - Don't run `dart format .` across the repo in an unrelated change. Most files predate the formatter, and it rewraps about 50 of them, which buries the real diff. Format only new files.
 - `AnalyticsService` is a stub that only calls `debugPrint`. Don't add real tracking without a consent UI.
 - Keep the store copy in sync. `store_listing/app_store.md` and `store_listing/play_store.md` hold the App Store Connect and Play Console copy for en, zh-Hant and id. When features, cities or languages change, update them in the same change and recheck the character limits.
@@ -263,18 +267,29 @@ To change the design, edit `scripts/gen_icon.py`, then run it and the command ab
 
 Carried over between sessions. Read this before assuming the project is finished.
 
-### Next chat: start here (written 2026-10-23)
+### Next chat: start here (updated 2026-10-24)
 
-The fix pass (`7b9e6f6`), the writing pass (`8b7f424`) and the design pass (`a385eb7`) are all committed by Felix. What's left is verification and launch prep. Felix hasn't picked an order yet; the suggested order is 1, 2, 3.
+The fix pass (`7b9e6f6`), the writing pass (`8b7f424`) and the design pass (`a385eb7`) are all committed by Felix. The 2026-10-24 emulator run and its fixes are not committed yet.
+
+Done 2026-10-24: item 1, the Android emulator run (Pixel 6, Android 14, release APK built with `--dart-define-from-file=tdx.env.json`). It checked the five font weights, 48 dp targets (measured from the accessibility tree), light and dark mode, live HSR/TRA fares through the proxy, "not served" (Keelung + HSR), offline mode with and without a cached route, cache fallback with the network off, en / zh_Hant / id, and 200% system text. It found and fixed:
+- No `INTERNET` permission in the main Android manifest, so every release build failed every live search. This would have shipped to the Play Store.
+- `LocationField` wasn't clickable for TalkBack (`excludeSemantics` with no `onTap`).
+- The location picker sheet opened on the tab's navigator, so the bottom nav stayed visible and tappable under it.
+- At 200% text the adult price was cut to "NT$1.4…" and saved routes to "Taipei → Ka…". The large-text test now checks for this.
+- Indonesian used "Langsung" for both Live and Direct on the same card, and "Favorit" / "Simpan" where the rest of the copy says "rute tersimpan".
+
+Small things seen on the device and left alone (Felix's call):
+- Settings has both a back arrow and a close ✕ in the app bar; they do the same thing.
+- Tapping the "Offline mode" label doesn't toggle the switch (only the switch does; TalkBack gets the merged row).
+- `TffEmptyState` adds its own 16 dp padding, so inside Search/Compare it's narrower than the cards around it.
+- Picker rows repeat the city as a subtitle ("Taipei / Taipei"); only Banqiao / New Taipei differs.
+- A fresh install defaults to Mock data, while the store listings say HSR and TRA come from TDX. Consider defaulting to API when a proxy URL is set.
+- Right after a cold emulator boot the first lookup can fail with "Failed host lookup" even with the permission; Retry works once the emulator's network is up.
 
 Claude can do these (ask Felix first, then follow the rules in this file):
-1. Run the app on the Android emulator that's set up on this machine (`flutter emulators`, then `flutter run --dart-define-from-file=tdx.env.json`). Check the five font weights, 48 dp targets, light and dark mode, live HSR/TRA fares through the proxy, offline mode, and en / zh_Hant / id. It has never run outside the browser and the tests.
-2. Add rate limiting to the proxy (`proxy/`), e.g. per-IP limits in the Worker or a Cloudflare Rate Limiting rule. Claude writes the change; Felix deploys it with `npx wrangler deploy`.
-3. Clean up dead code and stale docs:
-   - `TffFareTable` (`lib/ui/tff_fare_table.dart`) is never used.
-   - The `api_not_ready` error can't happen any more (nothing throws `UnimplementedError`): `fare_controller.dart` (the `UnimplementedError` check and its doc comment), the `api_not_ready` branches in `search_page.dart` and `compare_page.dart`, the `errorApiNotReady` key in all four ARB files and its getter in `TffLocalizations`.
-   - `architecture.md` is out of date; `design_system.md` and `ui_components_notes.md` are one-line prompts. Delete them or make them short pointers to this file.
-   - Run `flutter analyze` and `flutter test` afterwards and update this file and `README.md`.
+1. ~~Run the app on the Android emulator~~ (done 2026-10-24, see above). A real phone is still worth a look before release.
+2. ~~Add rate limiting to the proxy~~ (written 2026-10-24, not deployed or committed yet). The Worker uses two `[[ratelimits]]` bindings: `IP_LIMITER` (60 per minute per `CF-Connecting-IP`, on every proxied request) and `UPSTREAM_LIMITER` (120 per minute on one shared key, only on edge-cache misses, so it caps TDX calls whatever the IP or query). Over a limit the Worker answers 429 with `Retry-After: 60`. A missing binding lets requests through, and `/health` then shows `"rateLimit": false`. Wrangler went from 3 to 4 (`proxy/package.json`), because Wrangler 3 drops `[[ratelimits]]` with only a warning. `proxy/package.json` is now `"type": "module"`, and `npm test` runs `proxy/test/worker.test.js` (6 tests). Checked with a `wrangler deploy --dry-run` (both bindings listed) and with `wrangler dev`, where the 61st request from one IP got a 429. A WAF rule can't do this job, because WAF rules belong to a zone and the Worker runs on `workers.dev`. Felix deploys: `cd proxy`, `npm install`, `npx wrangler deploy`, then `curl .../health`. The app shows a 429 like any failed search ("Couldn't get fares", or saved fares if it has them); a person searching won't hit 60 a minute. `npm audit` flags `undici` inside Miniflare, which only runs for `wrangler dev` and doesn't ship; `npm audit fix --force` would downgrade Wrangler to 4.35, so leave it.
+3. ~~Clean up dead code and stale docs~~ (done 2026-10-24, not committed yet). Deleted `lib/ui/tff_fare_table.dart`, the `api_not_ready` error (its branches in `search_page.dart` and `compare_page.dart`, the `UnimplementedError` check in `fare_controller.dart`, the `errorApiNotReady` string and getter) and the stale `architecture.md`, `design_system.md` and `ui_components_notes.md`. A scan for strings nothing reads also removed six more from all four ARB files and `TffLocalizations`: `noResultsBody`, `offlineDataBadge`, `duration`, `transfers`, `fareByCategory`, `selectAtLeastOneMode`. Every remaining file in `lib/` is imported somewhere. Analyze and 32 tests pass. All of it is in git history if a piece is ever wanted back.
 
 Only Felix can do these (Claude can explain the steps):
 4. Create the Android upload keystore and fill in `android/key.properties` (passwords).
@@ -290,10 +305,11 @@ Only Felix can do these (Claude can explain the steps):
 - The store listings need real public URLs. Both stores require a Privacy Policy URL, and Apple also wants a Support URL; an in-app screen doesn't count. The text to host is ready in `lib/pages/privacy_page.dart` and the `privacy*` ARB keys, and each store listing file lists the fields still empty.
 - Category, age rating and price are still only suggestions in both store listing files (Travel, Everyone/4+, Free). Felix needs to confirm them before submission.
 - Android release signing isn't set up. `android/key.properties` still holds `CHANGE_ME` placeholders and points at a keystore that doesn't exist, so release builds fall back to debug signing and can't go to the Play Store. Felix has to create the keystore himself, since it involves passwords.
-- The proxy has no rate limit, and its CORS allows `*`. Anyone with the URL can drain the TDX quota. See the checklist in `SECURITY.md`; that file also tracks rotating the old TDX secret.
-- Not yet run on a real Android/iOS device or emulator. The 2026-10-01 pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy (mock and API mode, not-served, re-run, en / zh_Hant / id). The 2026-10-22 design pass was checked with the tests (including 200% text and keyboard focus), a contrast script, and the web build in light and dark mode at phone and desktop sizes. An Android emulator is set up on this machine.
+- The proxy's rate limits are written but not deployed yet (see item 2), and its CORS still allows `*`. See the checklist in `SECURITY.md`; that file also tracks rotating the old TDX secret.
+- Stopping a background `wrangler dev` from Claude's shell leaves `workerd.exe` (and the `node` wrangler process) running and still serving port 8787. Stop them by PID afterwards (check `Get-NetTCPConnection -LocalPort 8787`).
+- Run on the Android emulator (Pixel 6, Android 14) on 2026-10-24 as a release build; not yet on a real phone or on iOS. Driving it without a screen: `adb exec-out screencap -p` for screenshots, `adb shell uiautomator dump` for the accessibility tree (node bounds in px, density 420 → divide by 2.625 for dp), `adb shell input tap x y` to tap, `adb shell settings put system font_scale 2.0` for large text (set it back to 1.0 after), `adb shell svc wifi disable` / `svc data disable` to test the cache fallback. In Git Bash set `MSYS_NO_PATHCONV=1` so `/sdcard/...` paths aren't rewritten. `adb` lives in `%LOCALAPPDATA%\Android\Sdk\platform-tools`, not on PATH.
+- A release rebuild can reuse stale Dart and asset output: on 2026-10-24 a 22-second `flutter build apk --release` shipped the old ARB strings and widgets. Before trusting an APK, check it, e.g. `unzip -p build/app/outputs/flutter-apk/app-release.apk assets/flutter_assets/lib/l10n/app_id.arb | grep tabSaved`. If it's stale, delete `.dart_tool/flutter_build` and `build/app/intermediates/flutter` and build again.
 - Reviewing the web build in the desktop app's browser pane: after changing the viewport size, Flutter sometimes keeps laying out at the old size, so screenshots come back cropped or tiled. Reload the page after resizing. To see populated screens, seed `localStorage` keys `flutter.tff_user`, `flutter.tff_settings`, `flutter.tff_favorites`, `flutter.tff_history` (each value is a JSON string of the JSON object).
 - Mock data is coarse. Distance comes from a one-dimensional west-coast km table (`FareService._cityKm`), so MRT or YouBike between distant cities gives believable-looking but meaningless numbers. In Mock mode Keelung + HSR also gets a mock fare; only API mode reports "not served". Fine for a demo mode, but it isn't real data.
 - `.flutter-plugins-dependencies` is committed even though `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies` when convenient.
-- `architecture.md` is an early design note (it still mentions gen-l10n and three languages). `design_system.md` and `ui_components_notes.md` are one-line design prompts, not documentation. This file and `README.md` are the current references.
 - Not a TODO: the Terms and Privacy contact sections use `maxfelix05@gmail.com` on purpose. It's Felix's own address, approved as a stand-in until a dedicated support address exists.
