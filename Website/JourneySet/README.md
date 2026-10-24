@@ -76,6 +76,8 @@ supabase/migrations/
 ```
 
 > **Free-tier note**: Supabase pauses free projects after about a week without activity. While paused, nobody can sign in. Restore it from the Supabase dashboard.
+>
+> To stop that happening, a GitHub Actions job (`.github/workflows/journeyset-keepalive.yml` at the root of the monorepo) runs one small read query against the project every day. It needs two repository secrets, `JOURNEYSET_SUPABASE_URL` and `JOURNEYSET_SUPABASE_ANON_KEY` (the same values as in `.env`). If a run fails, GitHub emails you; the run log says whether a secret is wrong or the project is already paused.
 
 All tables have Row Level Security enabled, so users can only read and write their own data.
 
@@ -182,7 +184,7 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 Nothing here is broken. These are known gaps, written down so they don't get lost. The first three are the next steps, most important first:
 
-- Keep the free Supabase project from pausing after a week of no traffic (a scheduled ping, or Supabase Pro). While it's paused, nobody can sign in on the live site.
+- Switch on the daily keep-alive ping (written on 2026-10-24, see the free-tier note above): commit and push the workflow, add its two repository secrets, then run it once by hand from the Actions tab. Until then the free Supabase project can still pause after a week of no traffic, and nobody can sign in while it's paused.
 - Try one password reset on the live site (it's proven on localhost only).
 - Check the app on a real phone (all phone testing so far was in an emulated screen).
 

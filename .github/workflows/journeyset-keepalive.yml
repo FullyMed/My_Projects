@@ -1,0 +1,53 @@
+# Keeps JourneySet's free Supabase project from pausing.
+#
+# Supabase pauses a free project after about a week with no database
+# activity, and then nobody can sign in on https://journeyset.vercel.app/.
+# This job runs one tiny read query every day so the project never goes idle.
+#
+# It reads `profiles` with the public anon key. Row Level Security only lets
+# signed-in users see their own rows, so the answer is always `[]`, but the
+# query still reaches Postgres, which is what counts as activity.
+#
+# Needs two repository secrets (Settings > Secrets and variables > Actions):
+#   JOURNEYSET_SUPABASE_URL       same value as VITE_SUPABASE_URL in Website/JourneySet/.env
+#   JOURNEYSET_SUPABASE_ANON_KEY  same value as VITE_SUPABASE_ANON_KEY
+#
+# If the ping fails (for example the project is already paused), the run
+# fails and GitHub emails whoever last changed the schedule below.
+
+name: JourneySet keep-alive
+
+on:
+  schedule:
+    # Every day at 03:17 UTC. Off the hour, because GitHub delays or drops
+    # scheduled runs at busy times like :00. Daily leaves plenty of room
+    # before the 7-day pause even if a few runs are skipped.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.JOURNEYSET_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.JOURNEYSET_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Add the JOURNEYSET_SUPABASE_URL and JOURNEYSET_SUPABASE_ANON_KEY repository secrets."
+            exit 1
+          fi
+          status=$(curl --silent --show-error --retry 3 --retry-delay 10 --retry-all-errors --max-time 30 \
+            --output response.json --write-out '%{http_code}' \
+            --header "apikey: $SUPABASE_ANON_KEY" \
+            --header "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "${SUPABASE_URL%/}/rest/v1/profiles?select=id&limit=1")
+          echo "HTTP $status: $(head -c 200 response.json)"
+          if [ "$status" != "200" ]; then
+            echo "::error::Supabase answered HTTP $status. 401 means a secret is wrong; anything else usually means the project is paused, so restore it from the Supabase dashboard."
+            exit 1
+          fi
