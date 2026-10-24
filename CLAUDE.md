@@ -48,7 +48,7 @@ Then run `claude` to start Claude Code in that project.
 ### Data Science / BoardGames Analyzer
 - **Type:** Python data science + Streamlit app
 - **Purpose:** Explainable hybrid board game recommendation system (undergraduate research project)
-- **Key traits:** TF-IDF + MiniLM embeddings + DistilBERT sentiment, three recommendation modes, IEEE paper included. A 2026-10-01 fix pass rebuilt sentiment and embeddings for the whole catalog (both had covered only 20 games) and re-ran the evaluation, where a popularity baseline wins and the paper says so. A 2026-10-15 writing pass ran the app text, legal pages, README, CLAUDE.md and the paper through the Humanizer and Stop Slop skills (plain, friendly app voice; formal paper; rules under "Writing style" in its `CLAUDE.md`). The writing pass is committed. A 2026-10-20 design pass (UI/UX Pro Max, taste-skill redesign-existing-projects, Frontend Design and Emil Kowalski skills; fixes, not a redesign) added visible keyboard focus and a skip link, replaced Streamlit's red accent with the app's indigo, fixed Light-theme and spinner contrast, made the Home cards real links, swapped emoji icons for SVG/Material icons, and rebuilt the Analytics charts in Altair so they're readable on phones (rules under "Design rules" in its `CLAUDE.md`). Every page passes a WCAG AA audit in both themes with the OS in both modes. All passes are committed and pushed (latest `bfbef64`); the live app hasn't been opened since, see "Check the live app" in its `CLAUDE.md`.
+- **Key traits:** TF-IDF + MiniLM embeddings + DistilBERT sentiment, three recommendation modes, IEEE paper included. A 2026-10-01 fix pass rebuilt sentiment and embeddings for the whole catalog (both had covered only 20 games) and re-ran the evaluation, where a popularity baseline wins and the paper says so. A 2026-10-15 writing pass ran the app text, legal pages, README, CLAUDE.md and the paper through the Humanizer and Stop Slop skills (plain, friendly app voice; formal paper; rules under "Writing style" in its `CLAUDE.md`). The writing pass is committed. A 2026-10-20 design pass (UI/UX Pro Max, taste-skill redesign-existing-projects, Frontend Design and Emil Kowalski skills; fixes, not a redesign) added visible keyboard focus and a skip link, replaced Streamlit's red accent with the app's indigo, fixed Light-theme and spinner contrast, made the Home cards real links, swapped emoji icons for SVG/Material icons, and rebuilt the Analytics charts in Altair so they're readable on phones (rules under "Design rules" in its `CLAUDE.md`). Every page passes a WCAG AA audit in both themes with the OS in both modes. All passes are committed and pushed (latest `bfbef64`); the live app hasn't been opened since. Open items for the next chat (live-app check, which needs the app's `*.streamlit.app` URL from the owner; a real-phone test; seven optional upgrades waiting for his yes, pinning `App/requirements.txt` first) are under "Open items / notes for next session" in its `CLAUDE.md`.
 - **Run:** `streamlit run App/app.py`
 
 ### Data Science / Talent_AI
@@ -89,7 +89,13 @@ Then run `claude` to start Claude Code in that project.
   and reveal motion with reduced-motion support, and an example ranking on
   the landing page (rules under "Design rules" in its `CLAUDE.md`). Every page
   passes a WCAG AA contrast audit in light and dark; tsc and `next build`
-  pass. Frontend only, uncommitted, for the owner to review.
+  pass. It's committed (`abe9b4c`), pushed and live on Vercel (checked
+  2026-10-24). Still open: the Cloud Run redeploy for the writing pass (the
+  live API still said "Missing bearer token" on 2026-10-24), rotating the
+  OpenAI key, switching on the weekly email (SMTP + Cloud Scheduler), the
+  Supabase free-tier pause, and legal/Stripe go-live before paying customers.
+  The full list for the next chat is under "Next steps" at the top of its
+  `CLAUDE.md`.
 - **Run:** `apps/api`: `uvicorn app.main:app --reload --port 8010` · `apps/web`: `npm run dev`
 
 ### Website / JourneySet

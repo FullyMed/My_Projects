@@ -737,7 +737,7 @@ The app has no static images at all (every chart is drawn live, with Altair sinc
 7. **Delete the legacy root `app.py` / `recommender.py`?** Felix's call.
 
 ## Check the live app (everything is committed and pushed as of 2026-10-23, `bfbef64`)
-The live app redeploys from the push on its own (entrypoint unchanged), but nobody has opened it since. Check that it starts, that Title mode returns similar games rather than blockbusters, that the Analytics charts are Altair (they need the `altair` line in `App/requirements.txt`), and that the radio and slider are indigo, not red (the `.streamlit/config.toml` accent; if they're still red, reboot the app from the Community Cloud dashboard). New deployed data: `emb_topk_csr.joblib` (8.7 MB, was 91 KB) and `sentiment_summary.csv` (21,510 games, was 20). Open the live site once to confirm it starts and Title mode returns similar games, not blockbusters.
+The live app redeploys from the push on its own (entrypoint unchanged), but nobody has opened it since. Check that it starts, that Title mode returns similar games rather than blockbusters, that the Analytics charts are Altair (they need the `altair` line in `App/requirements.txt`), and that the radio and slider are indigo, not red (the `.streamlit/config.toml` accent; if they're still red, reboot the app from the Community Cloud dashboard). The deployed data changed size too: `emb_topk_csr.joblib` is 8.7 MB (was 91 KB) and `sentiment_summary.csv` covers 21,510 games (was 20). The app's `*.streamlit.app` URL isn't written down anywhere in the repo; add it here once it's known.
 
 ---
 

@@ -5,6 +5,42 @@ README explains what the product is and why; this file is about not breaking
 things while you change the code. Keep both up to date: this file whenever a
 convention or gotcha changes, the README whenever a feature or phase changes.
 
+## Next steps (as of 2026-10-24)
+
+All code work so far is committed and pushed (latest `abe9b4c`), and the
+frontend is live on Vercel. Open items, most urgent first. Check the live
+state before assuming any of these is still open, and delete an item here
+once it's done.
+
+1. **Redeploy Cloud Run (owner).** The 2026-10-16 writing pass changed the
+   API's error messages and the weekly email, but on 2026-10-24 the live API
+   still returned the old "Missing bearer token". The frontend shows server
+   messages word for word, so users see the old developer-style ones until
+   this is done. Command under "Deployment"; in his cmd terminal, with no
+   leading `&`. Check it worked: call `/jobs` with a `Basic x` auth header
+   and expect "You need to log in first.".
+2. **Rotate the OpenAI API key (owner).** It was pasted into an earlier
+   chat. Create a new key, set it with `--update-env-vars OPENAI_API_KEY=...`
+   (that key only), then delete the old one in OpenAI.
+3. **Switch on the weekly email (owner, with help).** Set `SMTP_HOST`,
+   `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` and
+   `REPORT_TRIGGER_SECRET` on Cloud Run with a small YAML holding only those
+   keys (see "Environment"), then create a weekly Cloud Scheduler job that
+   POSTs to `/internal/run-weekly-reports` with the `X-Report-Token` header.
+   Then remove the "Weekly emails aren't being sent yet" note in
+   `dashboard/jobs/[id]/page.tsx` and update the README roadmap.
+4. **Keep the database awake.** The Supabase free tier pauses after about a
+   week without use, which breaks login on the live site. Either upgrade, or
+   add a weekly keep-alive ping (it could share the Cloud Scheduler setup).
+5. **Before paying customers.** Fill in the `[PLACEHOLDER]` legal entity and
+   jurisdiction in `terms/page.tsx` and `privacy/page.tsx` and get a lawyer's
+   review; then move Stripe from test mode to real pricing and live keys.
+6. **Offered, not started.** Pin the Python versions in `requirements.txt`;
+   Phase F CI (pytest, `tsc` and `next build` on push) and error alerting;
+   in-app delete for jobs and the account (the Privacy Policy says "email us"
+   today, so update it in the same change); a check of the 2026-10-19 design
+   pass on a real phone.
+
 ## Commands
 
 ```bash
