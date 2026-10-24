@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Pick a product and a rating from 1 to 5.';
         } elseif (!$productStmt->fetchColumn()) {
             $error = 'That product no longer exists. Pick another one.';
-        } elseif ($form['reviewer_email'] !== '' && !is_valid_email($form['reviewer_email'])) {
+        } elseif ($form['reviewer_email'] !== '' && (!is_valid_email($form['reviewer_email']) || strlen($form['reviewer_email']) > 255)) {
             $error = 'The reviewer\'s email address doesn\'t look right.';
         } else {
             $values = [

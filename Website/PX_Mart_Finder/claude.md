@@ -336,7 +336,7 @@ All of these are fixed. Since the change, tsc and the build pass, the console is
 
 ### Next steps (agreed 2026-10-23)
 Everything up to `9341e68` is committed, pushed and live, and the owner considers the current state finished. These are the open items, in order:
-1. **Confirm that a push deploys on its own.** On 2026-10-23 the live bundle matched `9341e68`, but it's unknown whether the push or a manual deploy put it there. Check Netlify, then **Deploys** (the newest entry should come from GitHub with the commit), or compare the live `assets/index-*.js` with `dist/public` after the next push. Then update [Deployment](#deployment).
+1. ~~**Confirm that a push deploys on its own.**~~ **Done 2026-10-24:** a push to `main` deploys on its own. See [Deployment](#deployment).
 2. **Test on a real phone** (iPhone Safari, Android Chrome). Mobile has only been checked in browser emulation at 375px and 320px.
 3. **Optional content**, in whatever order the owner picks:
    - Products for the 15 empty categories. The owner must supply real products or approve clearly labelled demo items; don't invent them unasked.
@@ -357,7 +357,9 @@ Everything up to `9341e68` is committed, pushed and live, and the owner consider
 ### Deployment
 Live site: **https://px-mart-finder.netlify.app/**. `netlify.toml` builds with `npm run build` on Node 22, publishes `dist/public` and sets security headers, including a CSP that allows `images.unsplash.com` as the only remote image host.
 
-**Deployed and checked live on 2026-10-23.** Before that, on 2026-10-15, the live site was still a build from before 2026-09-21, even though `9a0f4a3` had been pushed to GitHub `FullyMed/My_Projects` (a monorepo). Its `netlify.toml` headers weren't applied, so Netlify wasn't building from the repo at all. The owner linked the repo with **base directory `Website/PX_Mart_Finder`** and redeployed. Nobody has seen yet whether a push deploys on its own; the next push will show it.
+**Deployed and checked live on 2026-10-23.** Before that, on 2026-10-15, the live site was still a build from before 2026-09-21, even though `9a0f4a3` had been pushed to GitHub `FullyMed/My_Projects` (a monorepo). Its `netlify.toml` headers weren't applied, so Netlify wasn't building from the repo at all. The owner linked the repo with **base directory `Website/PX_Mart_Finder`** and redeployed.
+
+**A push to `main` deploys on its own (confirmed 2026-10-24).** The current production deploy (`6adc3579e8fbab15211baaa0`) was built from commit `dd29280` on `main`, came from GitHub with `manual_deploy: false`, and started 43 seconds after the commit. That commit only changed `CLAUDE.md`, so any push to the monorepo's `main` triggers a build, not only pushes that touch this project. Netlify skipped the upload because the files matched the previous deploy ("All files already uploaded"), and the live bundle stayed `index-D7knjVYp.js`. So after a push, wait about a minute, then run the curl checks below. Don't click deploy by hand. To see deploys: Netlify, then the `px-mart-finder` site, then **Deploys**.
 
 The 2026-10-23 check:
 - The served bundle `index-Dy2SAV7u.js` matched the local build.

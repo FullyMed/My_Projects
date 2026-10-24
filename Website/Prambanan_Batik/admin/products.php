@@ -16,15 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Your session expired. Reload the page and try again.';
     } else {
-        $id = post_string('id');
+        $id = (int)post_string('id');
 
-        if (empty($id)) {
+        if ($id < 1) {
             $error = 'We couldn\'t find that product.';
         } else {
             try {
                 $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
                 $stmt->execute([$id]);
-                $message = 'Product deleted.';
+                // 0 rows means the product was already gone (deleted in another tab, or a stray id).
+                if ($stmt->rowCount() > 0) {
+                    $message = 'Product deleted.';
+                } else {
+                    $error = 'We couldn\'t find that product. It may already be deleted.';
+                }
             } catch (Exception $e) {
                 error_log('Failed to delete product: ' . $e->getMessage());
                 $error = 'We couldn\'t delete the product. Try again.';

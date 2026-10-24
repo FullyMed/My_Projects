@@ -218,6 +218,7 @@ BATIK-001,Parang Batik Cloth,350000,Hand-drawn parang pattern on cotton,1,https:
 
 - A row with a new SKU creates a product. A row with an existing SKU updates that product's name and price, plus its description and category when those cells aren't empty.
 - Write `price` in rupiah as digits only (`350000`). The import rejects `350.000`, so it can't end up as Rp 350.
+- `sku` and `name` can be up to 255 characters. The import skips longer ones and says which row.
 - Header names can be any case, and Excel's "CSV UTF-8" format works as it is. Put double quotes around values that contain commas. The import skips any row whose column count doesn't match the header and tells you which one.
 - New products get a slug from their name. If another product already uses it, the import adds `-2`, `-3` and so on.
 - Importing the same file twice doesn't add a second copy of a photo the product already has.
@@ -289,6 +290,11 @@ UPDATE products p SET
 Proprietary and confidential. All rights reserved.
 
 ## Version history
+
+- **v2.12.1** (2026-10-24): Small admin fixes
+  - Deleting a product that's already gone (deleted in another tab, or a stray id) now says "We couldn't find that product. It may already be deleted." It used to say "Product deleted." anyway.
+  - The product form, the category form, the review form's email field and the CSV import now check lengths before saving: names, SKUs and slugs up to 255 characters, buy links up to 500, category descriptions up to about 60,000 characters, reviewer emails up to 255. The local XAMPP database used to cut long values short without a word, and a stricter production MySQL would have refused the save with only "We couldn't save the product." The text boxes also stop typing at those limits.
+  - The CSV import shortens very long slugs so a `-2` or `-3` suffix still fits.
 
 - **v2.12.0** (2026-10-20): Design pass (UI/UX Pro Max, taste-skill redesign-existing-projects, Frontend Design and Emil Kowalski skills). This was fixes, not a redesign: the colours and fonts stay.
   - Admin on phones: the sidebar used to collapse to nothing below 768px, leaving no way to move between pages. It's now a row of links across the top that scrolls sideways and shows the current page. The products table used to push the whole page sideways; tables now scroll inside their card.

@@ -26,6 +26,8 @@ On Windows, run `npm ci` inside WSL2. If you install `node_modules` on Windows a
 
 Netlify hosts the site, using the settings in `netlify.toml`. It runs `npm run build` on Node 22, publishes `dist/public`, and adds security headers, including a Content Security Policy. The build also writes `sitemap.xml` from the product and category data, so the sitemap stays in step when you add products.
 
+A push to `main` on GitHub deploys the site on its own. The build takes about a minute.
+
 If the domain changes, update it in three places: `script/sitemap.ts`, `client/public/robots.txt`, and the `og:image` and `twitter:image` tags in `client/index.html`.
 
 To try a production build on your machine:

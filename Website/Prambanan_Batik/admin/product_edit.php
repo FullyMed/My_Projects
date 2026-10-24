@@ -61,6 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Enter the price in rupiah as digits only, between 0 and 99,999,999 (for example 350000).';
         } elseif (!is_valid_buy_link($form['buy_link_shopee']) || !is_valid_buy_link($form['buy_link_tokopedia']) || !is_valid_buy_link($form['buy_link_other'])) {
             $error = 'Buy links must start with http:// or https://.';
+        } elseif (mb_strlen($form['name'], 'UTF-8') > 255 || mb_strlen($form['sku'], 'UTF-8') > 255 || mb_strlen($form['slug'], 'UTF-8') > 255) {
+            // VARCHAR(255) columns. A strict production MySQL rejects longer values; XAMPP silently cuts them.
+            $error = 'Keep the name, SKU and slug to 255 characters or fewer.';
+        } elseif (mb_strlen($form['buy_link_shopee'], 'UTF-8') > 500 || mb_strlen($form['buy_link_tokopedia'], 'UTF-8') > 500 || mb_strlen($form['buy_link_other'], 'UTF-8') > 500) {
+            $error = 'Buy links can be 500 characters at most. Copy a shorter link from the store.';
         } else {
             $currentId = $product ? (int)$product['id'] : 0;
 
@@ -187,17 +192,17 @@ $categories = $stmt->fetchAll();
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="name">Product name <span class="required">*</span></label>
-                                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($form['name'] ?? ''); ?>" required>
+                                <input type="text" id="name" name="name" maxlength="255" value="<?php echo htmlspecialchars($form['name'] ?? ''); ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="sku">SKU <span class="required">*</span></label>
-                                <input type="text" id="sku" name="sku" value="<?php echo htmlspecialchars($form['sku'] ?? ''); ?>" required>
+                                <input type="text" id="sku" name="sku" maxlength="255" value="<?php echo htmlspecialchars($form['sku'] ?? ''); ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="slug">Slug</label>
-                                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars($form['slug'] ?? ''); ?>" placeholder="Leave blank to make one from the name">
+                                <input type="text" id="slug" name="slug" maxlength="255" value="<?php echo htmlspecialchars($form['slug'] ?? ''); ?>" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
@@ -224,17 +229,17 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group full">
                                 <label for="buy_link_shopee">Shopee link</label>
-                                <input type="url" id="buy_link_shopee" name="buy_link_shopee" value="<?php echo htmlspecialchars($form['buy_link_shopee'] ?? ''); ?>">
+                                <input type="url" id="buy_link_shopee" maxlength="500" name="buy_link_shopee" value="<?php echo htmlspecialchars($form['buy_link_shopee'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="buy_link_tokopedia">Tokopedia link</label>
-                                <input type="url" id="buy_link_tokopedia" name="buy_link_tokopedia" value="<?php echo htmlspecialchars($form['buy_link_tokopedia'] ?? ''); ?>">
+                                <input type="url" id="buy_link_tokopedia" maxlength="500" name="buy_link_tokopedia" value="<?php echo htmlspecialchars($form['buy_link_tokopedia'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full">
                                 <label for="buy_link_other">Other link</label>
-                                <input type="url" id="buy_link_other" name="buy_link_other" value="<?php echo htmlspecialchars($form['buy_link_other'] ?? ''); ?>">
+                                <input type="url" id="buy_link_other" maxlength="500" name="buy_link_other" value="<?php echo htmlspecialchars($form['buy_link_other'] ?? ''); ?>">
                             </div>
                         </div>
 

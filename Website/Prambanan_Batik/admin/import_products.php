@@ -120,6 +120,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     continue;
                 }
 
+                // VARCHAR(255) columns. A strict production MySQL rejects longer values; XAMPP cuts them.
+                if (mb_strlen($sku, 'UTF-8') > 255) {
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum: the SKU is longer than 255 characters.";
+                    continue;
+                }
+                if (mb_strlen($name, 'UTF-8') > 255) {
+                    $report['failed']++;
+                    $report['errors'][] = "Row $rowNum (SKU $sku): the name is longer than 255 characters.";
+                    continue;
+                }
+
                 // Reject Indonesian thousands separators ("350.000" would otherwise import as Rp 350).
                 if (!is_numeric($price) || (float)$price < 0 || (float)$price > 99999999.99 || preg_match('/^\d{1,3}(\.\d{3})+$/', $price)) {
                     $report['failed']++;
@@ -180,6 +192,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($baseSlug === '') {
                             $baseSlug = 'product';
                         }
+                        // Leave room for a "-2", "-3" … suffix inside the 255-character slug column.
+                        $baseSlug = rtrim(mb_substr($baseSlug, 0, 240, 'UTF-8'), '-');
 
                         $stmt = $pdo->prepare(
                             'INSERT INTO products (sku, slug, name, description, price_display, category_id) VALUES (?, ?, ?, ?, ?, ?)'

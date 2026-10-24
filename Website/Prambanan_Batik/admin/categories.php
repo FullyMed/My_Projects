@@ -14,6 +14,20 @@ $error = '';
 $edit_category = null;
 $edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : null;
 
+/**
+ * '' when the values fit their columns (name/slug VARCHAR(255), description TEXT = 65,535 bytes),
+ * otherwise the message to show. A strict production MySQL rejects longer values; XAMPP cuts them.
+ */
+function categoryLengthError($name, $slug, $description) {
+    if (mb_strlen($name, 'UTF-8') > 255 || mb_strlen($slug, 'UTF-8') > 255) {
+        return 'Keep the name and slug to 255 characters or fewer.';
+    }
+    if (strlen($description) > 65535) {
+        return 'That description is too long. Keep it to about 60,000 characters.';
+    }
+    return '';
+}
+
 if ($edit_id) {
     $stmt = $pdo->prepare('SELECT id, name, slug, description FROM categories WHERE id = ? LIMIT 1');
     $stmt->execute([$edit_id]);
@@ -37,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($name === '' || $slug === '') {
                 $error = 'Enter a name for the category.';
+            } elseif (($lengthError = categoryLengthError($name, $slug, $description)) !== '') {
+                $error = $lengthError;
             } else {
                 try {
                     $stmt = $pdo->prepare('INSERT INTO categories (name, slug, description) VALUES (?, ?, ?)');
@@ -55,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($id < 1 || $name === '' || $slug === '') {
                 $error = 'Enter a name for the category.';
+            } elseif (($lengthError = categoryLengthError($name, $slug, $description)) !== '') {
+                $error = $lengthError;
             } else {
                 try {
                     $stmt = $pdo->prepare('UPDATE categories SET name = ?, slug = ?, description = ?, updated_at = NOW() WHERE id = ?');
@@ -162,12 +180,12 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="edit_name">Name</label>
-                                <input type="text" id="edit_name" name="name" value="<?php echo htmlspecialchars($edit_category['name']); ?>" required>
+                                <input type="text" id="edit_name" name="name" maxlength="255" value="<?php echo htmlspecialchars($edit_category['name']); ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="edit_slug">Slug</label>
-                                <input type="text" id="edit_slug" name="slug" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" placeholder="Leave blank to make one from the name">
+                                <input type="text" id="edit_slug" name="slug" maxlength="255" value="<?php echo htmlspecialchars($edit_category['slug']); ?>" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
@@ -190,12 +208,12 @@ $categories = $stmt->fetchAll();
 
                             <div class="form-group">
                                 <label for="name">Name</label>
-                                <input type="text" id="name" name="name" required>
+                                <input type="text" id="name" name="name" maxlength="255" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="slug">Slug</label>
-                                <input type="text" id="slug" name="slug" placeholder="Leave blank to make one from the name">
+                                <input type="text" id="slug" name="slug" maxlength="255" placeholder="Leave blank to make one from the name">
                             </div>
 
                             <div class="form-group">
