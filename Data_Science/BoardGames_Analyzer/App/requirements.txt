@@ -1,6 +1,10 @@
+# Pinned to the versions the app was tested with in the local .venv (Python 3.11.9).
+# Unpinned, Streamlit Cloud installs the newest release on every rebuild.
+# numpy 1.26.4 has no wheels for Python 3.13+, so the Cloud app must run Python 3.11 or 3.12.
 streamlit==1.52.2
-pandas
-numpy
-scikit-learn
-scipy
-altair
+pandas==2.3.3
+numpy==1.26.4
+scikit-learn==1.8.0
+scipy==1.16.3
+altair==6.0.0
+joblib==1.5.3

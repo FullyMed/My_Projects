@@ -97,7 +97,7 @@ BoardGames_Analyzer/
 │   ├── app.py                      ← Home / landing page (the sidebar labels it "app"; see "Deployment" in Section 4)
 │   ├── recommender.py              ← Self-contained copy of the engine
 │   ├── theme.py                    ← Shared CSS (light/dark) + chart color helpers
-│   ├── requirements.txt            ← Minimal deps for Streamlit Cloud deployment
+│   ├── requirements.txt            ← Pinned minimal deps for Streamlit Cloud deployment
 │   └── pages/
 │       ├── 1_Recommendation.py     ← Recommendation engine UI
 │       ├── 2_Analytics.py         ← EDA / analytics dashboard
@@ -660,6 +660,8 @@ Avoid black-box-only logic. The `make_reason()` method and matched field display
 
 `App/requirements.txt` is the Streamlit Cloud deployment manifest. If new imports are added to `App/recommender.py` or any page file, update `App/requirements.txt` too, or the live app will break silently if a dependency is missing.
 
+**Pinned versions (2026-10-24):** every line in `App/requirements.txt` is pinned with `==` to the version in the local `.venv` (Python 3.11.9): streamlit 1.52.2, pandas 2.3.3, numpy 1.26.4, scikit-learn 1.8.0, scipy 1.16.3, altair 6.0.0, joblib 1.5.3. `joblib` was added then because `recommender.py` imports it directly; before, it only arrived through scikit-learn. A `pip install --dry-run --only-binary=:all:` for Linux x86_64 resolves the set on Python 3.11 and 3.12, but **fails on 3.13** (numpy 1.26.4 has no 3.13 wheels), so the Cloud app must run Python 3.11 or 3.12. When adding or upgrading a package, install it in the venv, test the app, then pin that exact version here.
+
 ---
 
 ## NEVER DO
@@ -728,7 +730,7 @@ The legacy single-page `app.py` / `recommender.py` at the project root do **not*
 The app has no static images at all (every chart is drawn live, with Altair since 2026-10-20). The only PNGs in the repo are `Reports/images/architecture.png` (468K) and `performance_chart.png` (116K), used solely in the LaTeX paper build, together under 600K with zero effect on the deployed app. Don't re-suggest this unless static images are actually added to the app later.
 
 ## Suggested next improvements (offered to Felix 2026-10-01, not yet approved)
-1. **Pin `App/requirements.txt`** to the tested versions (venv: pandas 2.3.3, numpy 1.26.4, scikit-learn 1.8.0, scipy 1.16.3, streamlit 1.52.2). Unpinned, Streamlit Cloud installs the newest on every rebuild.
+1. ~~Pin `App/requirements.txt`~~: **done 2026-10-24** (see "Pinned versions" in Section 10).
 2. **Bootstrap confidence intervals** for the results table (paper Table II) from the user-level CSV.
 3. **Trim publisher lists in explanations**: big games list many localisation publishers, which adds noise to the reasons.
 4. **Embed description only** in `05b` (removes the name-similarity boost).
@@ -737,7 +739,7 @@ The app has no static images at all (every chart is drawn live, with Altair sinc
 7. **Delete the legacy root `app.py` / `recommender.py`?** Felix's call.
 
 ## Check the live app (everything is committed and pushed as of 2026-10-23, `bfbef64`)
-The live app redeploys from the push on its own (entrypoint unchanged), but nobody has opened it since. Check that it starts, that Title mode returns similar games rather than blockbusters, that the Analytics charts are Altair (they need the `altair` line in `App/requirements.txt`), and that the radio and slider are indigo, not red (the `.streamlit/config.toml` accent; if they're still red, reboot the app from the Community Cloud dashboard). The deployed data changed size too: `emb_topk_csr.joblib` is 8.7 MB (was 91 KB) and `sentiment_summary.csv` covers 21,510 games (was 20). The app's `*.streamlit.app` URL isn't written down anywhere in the repo; add it here once it's known.
+The live app redeploys from the push on its own (entrypoint unchanged), but nobody has opened it since. Check that it starts, that Title mode returns similar games rather than blockbusters, that the Analytics charts are Altair (they need the `altair` line in `App/requirements.txt`), and that the radio and slider are indigo, not red (the `.streamlit/config.toml` accent; if they're still red, reboot the app from the Community Cloud dashboard). The deployed data changed size too: `emb_topk_csr.joblib` is 8.7 MB (was 91 KB) and `sentiment_summary.csv` covers 21,510 games (was 20). The app's `*.streamlit.app` URL isn't written down anywhere in the repo; add it here once it's known. Since 2026-10-24 `App/requirements.txt` is pinned and needs Python 3.11 or 3.12, so also check the app's Python version in its Community Cloud settings; if it's 3.13 or newer, the rebuild fails on numpy 1.26.4.
 
 ---
 

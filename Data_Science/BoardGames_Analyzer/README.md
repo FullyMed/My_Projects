@@ -89,7 +89,7 @@ BoardGames_Analyzer/
 
 - Python 3.10 or newer
 - For development: everything in `Requirements.txt`
-- For the Streamlit Cloud deployment: the short list in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, altair)
+- For the Streamlit Cloud deployment: the short list in `App/requirements.txt` (streamlit, pandas, numpy, scikit-learn, scipy, altair, joblib), each pinned to the version the app was tested with
 
 ### Install
 
@@ -129,7 +129,7 @@ Then open `http://localhost:8501` in your browser.
 
 The live app runs on Streamlit Community Cloud from `App/app.py` in this repository.
 
-Streamlit Cloud installs the packages in `App/requirements.txt`. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are in the repository, and the app loads them at startup, so there's no build step.
+Streamlit Cloud installs the packages in `App/requirements.txt`. They're pinned to exact versions, so a rebuild installs the same set every time. The pinned numpy (1.26.4) doesn't support Python 3.13, so the app needs Python 3.11 or 3.12 on Cloud. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are in the repository, and the app loads them at startup, so there's no build step.
 
 ---
 
@@ -283,7 +283,7 @@ The paper describes the three modes and how each one scores games, then tests th
 
 - The legal pages list the GitHub repo as the only contact and say there's no published software license. Both pages need updating if a license or a contact email is added.
 - The paper and the code matched up again on 2026-10-01: real per-mode formulas, baselines, an ablation, a long-tail analysis, and the system's own explanations.
-- Suggested next steps, not yet approved: pin the versions in `App/requirements.txt`, add bootstrap confidence intervals, shorten the publisher lists in explanations, embed descriptions only, and add a second evaluation that leans less on popular games. See `CLAUDE.md` Section 12.
+- Suggested next steps, not yet approved: add bootstrap confidence intervals, shorten the publisher lists in explanations, embed descriptions only, and add a second evaluation that leans less on popular games. See `CLAUDE.md` Section 12.
 - The root single-page app (`app.py` / `recommender.py`) is a reference copy. It doesn't have the 404 page, meta tags or loading spinners that `App/` has.
 - Image compression was considered and skipped: the app has no static images, since every chart is drawn live. See `CLAUDE.md`.
 
