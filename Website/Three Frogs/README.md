@@ -22,6 +22,8 @@ Do these production steps in order:
 
 Known gap: resetting a password doesn't log that account out on other devices.
 
+After deploying, also try the site on a real phone. So far it's only been tested at phone widths in a desktop browser. A fix for the known gap (a per-account session version that a reset bumps) is planned but not built yet; see "Next steps" in CLAUDE.md.
+
 ---
 
 ## What changed recently

@@ -263,6 +263,29 @@ To change the design, edit `scripts/gen_icon.py`, then run it and the command ab
 
 Carried over between sessions. Read this before assuming the project is finished.
 
+### Next chat: start here (written 2026-10-23)
+
+The fix pass (`7b9e6f6`), the writing pass (`8b7f424`) and the design pass (`a385eb7`) are all committed by Felix. What's left is verification and launch prep. Felix hasn't picked an order yet; the suggested order is 1, 2, 3.
+
+Claude can do these (ask Felix first, then follow the rules in this file):
+1. Run the app on the Android emulator that's set up on this machine (`flutter emulators`, then `flutter run --dart-define-from-file=tdx.env.json`). Check the five font weights, 48 dp targets, light and dark mode, live HSR/TRA fares through the proxy, offline mode, and en / zh_Hant / id. It has never run outside the browser and the tests.
+2. Add rate limiting to the proxy (`proxy/`), e.g. per-IP limits in the Worker or a Cloudflare Rate Limiting rule. Claude writes the change; Felix deploys it with `npx wrangler deploy`.
+3. Clean up dead code and stale docs:
+   - `TffFareTable` (`lib/ui/tff_fare_table.dart`) is never used.
+   - The `api_not_ready` error can't happen any more (nothing throws `UnimplementedError`): `fare_controller.dart` (the `UnimplementedError` check and its doc comment), the `api_not_ready` branches in `search_page.dart` and `compare_page.dart`, the `errorApiNotReady` key in all four ARB files and its getter in `TffLocalizations`.
+   - `architecture.md` is out of date; `design_system.md` and `ui_components_notes.md` are one-line prompts. Delete them or make them short pointers to this file.
+   - Run `flutter analyze` and `flutter test` afterwards and update this file and `README.md`.
+
+Only Felix can do these (Claude can explain the steps):
+4. Create the Android upload keystore and fill in `android/key.properties` (passwords).
+5. Host the Privacy Policy and a Support page at public URLs, then add them to both store listing files.
+6. Confirm category, age rating and price (suggested: Travel, Everyone/4+, Free).
+7. Register the iOS App ID `com.felix.taiwanfarefinder` (needs the Apple Developer account; an iOS build needs a Mac).
+8. Rotate the TDX client secret in the TDX portal, then `npx wrangler secret put TDX_CLIENT_SECRET` (see `SECURITY.md`).
+9. Run `git rm --cached .flutter-plugins-dependencies` and commit it.
+
+### Details
+
 - Register the iOS App ID. The bundle ID is `com.felix.taiwanfarefinder` (tests: `.RunnerTests`), matching Android; it changed from the template's `com.mycompany.CounterApp` on 2026-10-01. The App ID and provisioning profile still need creating in the Apple Developer account before an App Store Connect record. Nobody has built it in Xcode (this machine runs Windows).
 - The store listings need real public URLs. Both stores require a Privacy Policy URL, and Apple also wants a Support URL; an in-app screen doesn't count. The text to host is ready in `lib/pages/privacy_page.dart` and the `privacy*` ARB keys, and each store listing file lists the fields still empty.
 - Category, age rating and price are still only suggestions in both store listing files (Travel, Everyone/4+, Free). Felix needs to confirm them before submission.

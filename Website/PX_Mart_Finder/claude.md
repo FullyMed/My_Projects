@@ -304,14 +304,14 @@ Earlier fixes:
 - Deleted the Replit agent state files (`.local/state/replit/`) and gitignored `.local/`.
 - Added `robots.txt`, a build-generated `sitemap.xml` and absolute `og:image` / `twitter:image` URLs.
 
-**2026-10-23 writing pass** (committed as `63dc39c`): see [Writing style](#writing-style). It also:
+**2026-10-23 writing pass** (committed as `63dc39c`, deployed): see [Writing style](#writing-style). It also:
 - fixed "1 Results" on the search page, which now reads "1 result" / "56 results" (Chinese "56 筆結果"),
 - renamed the demo branches to "Taipei (demo store)" and "Kaohsiung (demo store)" (the old names had an em dash),
 - made the "Saved" nav item and the page title agree ("Saved products"),
 - dropped five unused keys (`section`, `recentSearches`, `howToFind`, `goToAisle`, `metaStoreMapDesc`),
 - removed every em dash from `client/src`, `script/` and `index.html` (the shadcn `ui/` files are untouched).
 
-**2026-10-23 design pass** (uncommitted, for the owner to review): see [Design rules](#design-rules). A measured audit of every page in light and dark mode at 375px and desktop width found:
+**2026-10-23 design pass** (committed as `9341e68`, deployed: on 2026-10-23 the live bundle `index-D7knjVYp.js` matched the local build, with no console or CSP errors): see [Design rules](#design-rules). A measured audit of every page in light and dark mode at 375px and desktop width found:
 - 9 text colors below WCAG AA; there are now none.
 - Two `<h1>`s on most pages, and none of their own on Home and Search; there's now exactly one per page.
 - Buttons with no hover state, caused by the undefined Replit classes.
@@ -333,6 +333,16 @@ All of these are fixed. Since the change, tsc and the build pass, the console is
 - `.claude/launch.json` has `px-mart-prod-preview`, which runs `vite preview` on port 5001 and serves `dist/public`. Run `npm run build` first.
 
 ## Still to do
+
+### Next steps (agreed 2026-10-23)
+Everything up to `9341e68` is committed, pushed and live, and the owner considers the current state finished. These are the open items, in order:
+1. **Confirm that a push deploys on its own.** On 2026-10-23 the live bundle matched `9341e68`, but it's unknown whether the push or a manual deploy put it there. Check Netlify, then **Deploys** (the newest entry should come from GitHub with the commit), or compare the live `assets/index-*.js` with `dist/public` after the next push. Then update [Deployment](#deployment).
+2. **Test on a real phone** (iPhone Safari, Android Chrome). Mobile has only been checked in browser emulation at 375px and 320px.
+3. **Optional content**, in whatever order the owner picks:
+   - Products for the 15 empty categories. The owner must supply real products or approve clearly labelled demo items; don't invent them unasked.
+   - Aisle data for the demo branches (Taipei 7 products, Kaohsiung none).
+   - A drawn floor plan (simple SVG, no new library) for the store map, with the linked aisle highlighted.
+4. **Left on purpose:** a brief dark flash of the boot spinner when the OS is dark and the app is set to light. Fixing it needs an inline script, which the CSP (`script-src 'self'`) blocks.
 
 ### Data
 - 15 of the 23 categories have no products yet (they show "Coming soon"). Fresh Fruits alone is 34 of the 56 products.

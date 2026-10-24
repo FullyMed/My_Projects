@@ -180,7 +180,11 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 ## Roadmap / possible next steps
 
-Nothing here is broken. These are known gaps, written down so they don't get lost:
+Nothing here is broken. These are known gaps, written down so they don't get lost. The first three are the next steps, most important first:
+
+- Keep the free Supabase project from pausing after a week of no traffic (a scheduled ping, or Supabase Pro). While it's paused, nobody can sign in on the live site.
+- Try one password reset on the live site (it's proven on localhost only).
+- Check the app on a real phone (all phone testing so far was in an emulated screen).
 
 - Email provider: emails have gone out through custom SMTP (Gmail) since 2026-10-06. That's fine at this scale. Switch to a dedicated provider (e.g. Resend) if sign-ups grow past Gmail's daily sending limit.
 - Supabase hardening: leaked-password protection is off (it needs a paid plan). If the tables grow, rewrite the RLS policies to use `(select auth.uid())`, which is faster at scale.

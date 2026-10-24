@@ -24,6 +24,14 @@ Do the production steps in this order. Tick them off or delete them once they're
 
 Known gap, not fixed: a password reset doesn't end the account's other sessions. Sessions are plain PHP sessions with no per-user "log out everywhere" marker. That matters most if an attacker was already logged in. Add something like a `users.session_version` checked on each request before relying on reset as account recovery.
 
+### Next steps (as of 2026-10-23)
+
+Everything above is committed. What's left, in order:
+
+1. The owner deploys, following the checklist above.
+2. After deploying, test on a real phone. So far only phone widths in the browser have been tested.
+3. Offered, waiting for the owner's yes: fix the known gap above. The plan is a `users.session_version` column (default 0) that login and signup copy into the session. Every endpoint that uses the session compares it and logs the user out on a mismatch, and `forgot_password.php` increments it. It needs a new dated migration in `Data/migrations/`, the column in `Data/schema.sql`, a step in the checklist above, checks in `tests/api_test.sh`, and a look at the Privacy Policy's session wording.
+
 ## Working rules
 
 - Never commit or push. The owner does that himself. Leave changes uncommitted and list the changed files.

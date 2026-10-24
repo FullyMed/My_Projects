@@ -181,7 +181,6 @@ Contains:
 - `apply_theme(mode)`: injects both base + theme CSS
 - `chart_colors(mode)`: returns the Altair chart palette (text, grid, three bar colours) for the active theme
 - `ICONS` / `icon_svg(name, css_class)`: inline stroke SVG icons (dice, search, chart, compass) used instead of emoji
-- `style_ax(ax, fig, colors, title)`: applies consistent chart styling
 - `render_not_found(title, message, icon, show_links)`: themed "not found" card (see Section 6, "Custom 404 / not found"). Escapes `title`/`message` and collapses whitespace, because the 404 page feeds it the user-controllable `?reason=` query param (see Bug 12)
 - `set_meta_description(description)`: injects `<meta name="description">` into the real document head per page (see Section 6, "Per-page meta title / description")
 
@@ -399,7 +398,7 @@ Given that constraint, the app instead ships a **themed "Not Found" experience f
 - `App/pages/1_Recommendation.py`: the zero-results empty state uses the same component inline instead of a plain `st.info()`
 
 ## Per-page meta title / description
-Each of the 4 pages (`App/app.py`, `pages/1_Recommendation.py`, `pages/2_Analytics.py`, `pages/3_Not_Found.py`) sets:
+Each of the 6 pages (`App/app.py`, `pages/1_Recommendation.py`, `pages/2_Analytics.py`, `pages/3_Not_Found.py`, `pages/4_Terms_of_Use.py`, `pages/5_Privacy_Policy.py`) sets:
 - **Meta title**: via `st.set_page_config(page_title=...)`, Streamlit's native, fully-supported way to set the real `<title>` tag. Already distinct per page.
 - **Meta description**: via `theme.set_meta_description(text)`, called immediately after `st.set_page_config` on every page. Streamlit has **no public API** for `<meta name="description">`, so this injects it into the real top-level document head using a zero-size `st.components.v1.html` iframe with a script that reaches `window.parent.document` (same-origin, so this works). It's a standard, verified workaround. **Verified in-browser**: `document.title` and `document.querySelector('meta[name="description"]').content` were checked on the real top-level document for all 4 pages and update correctly per page.
 
@@ -477,7 +476,7 @@ Source: `Notebooks/09_Evaluation.ipynb` (evaluates the deployed `App/recommender
 
 ### Research paper
 - IEEE paper structure complete
-- 2026-10-01: methodology rewritten to match the code (per-mode formulas, real feature construction, sentiment sampling, post-ranking rules, accurate protocol); results, discussion and conclusion rewritten around the new numbers (popularity baseline wins the main protocol); Table II now shows verbatim system output; PDF recompiled
+- 2026-10-01: methodology rewritten to match the code (per-mode formulas, real feature construction, sentiment sampling, post-ranking rules, accurate protocol); results, discussion and conclusion rewritten around the new numbers (popularity baseline wins the main protocol); the explanation table (Table I) now shows verbatim system output; PDF recompiled
 
 ### App
 - Multi-page Streamlit app (`App/`) complete with Home, Recommendation, and Analytics pages
@@ -576,7 +575,7 @@ Found by an engine stress test (17 normal and edge-case queries), driving the re
 ## Bug 13: Text unreadable when the visitor's OS theme differs from the app's toggle (`App/theme.py`)
 **What was wrong:** Streamlit colours its native widgets from its own base theme, which follows the OS/browser, not this app's Light/Dark radio. Light theme + OS dark mode: `st.warning` text was `rgb(255,255,194)` on pale yellow. Dark theme + OS light mode: sidebar title, every widget label, captions, slider ticks, metric values and links came out at a ~1.4:1 contrast ratio.
 
-**Fix:** Both `_LIGHT_CSS` and `_DARK_CSS` now pin those colours explicitly, with per-kind alert colours via `[data-testid="stAlertContainer"]:has([data-testid="stAlertContent{Warning,Info,Error,Success}"])`. Button labels (markdown `<p>`s) are pinned to white in `_BASE_CSS` so the themes' paragraph colour can't bleed into the gradient buttons. A contrast audit script over every page, in all four theme × OS combinations, now reports nothing below 3:1. **Known cosmetic leftover:** `st.dataframe` draws on a canvas using Streamlit's base theme, so in a mismatched combination the table renders in the other theme's colours (still readable).
+**Fix:** Both `_LIGHT_CSS` and `_DARK_CSS` now pin those colours explicitly, with per-kind alert colours via `[data-testid="stAlertContainer"]:has([data-testid="stAlertContent{Warning,Info,Error,Success}"])`. Button labels (markdown `<p>`s) are pinned to white in `_BASE_CSS` so the themes' paragraph colour can't bleed into the gradient buttons. A contrast audit script over every page, in all four theme × OS combinations, now reports nothing below 3:1 (since the 2026-10-20 design pass, the full WCAG AA thresholds: 4.5:1 for normal text). **Known cosmetic leftover:** `st.dataframe` draws on a canvas using Streamlit's base theme, so in a mismatched combination the table renders in the other theme's colours (still readable).
 
 ## Bug 14: Sentiment covered 20 games and measured confidence, not positivity (`Notebooks/02_Preprocessing.ipynb` → `02b_sentiment_full_coverage.py`)
 **What was wrong:** NB02 read `nrows=500000` of `large_bgg-26m-reviews.csv`, which is sorted by game, so only 20 very popular games were scored. It also averaged the pipeline's `score`, which is the confidence in *whichever* label was predicted (a confidently negative review counted as ~0.99), so all 20 values sat at 0.965–0.975 and the Analytics page showed "100% positive".
@@ -715,7 +714,7 @@ Carried over from the 2026-09-18 → 2026-09-29 work adding the 404 page, per-pa
 `App/pages/4_Terms_of_Use.py` and `App/pages/5_Privacy_Policy.py` (see Section 6, "Legal pages") currently say:
 - No specific software license is published for this repo
 - Contact is "via the project's GitHub repository" (`github.com/FullyMed/My_Projects`). There's no dedicated email, because none was provided and a personal email wasn't published to a public, search-indexable page without being asked first
-- "Last updated: September 21, 2026" is a **hardcoded string** in both files. Bump it manually if either page's content changes
+- "Last updated: October 15, 2026" is a **hardcoded string** in both files. Bump it manually if either page's content changes
 
 If Felix ever wants a real license (MIT, etc.) or a dedicated contact email on those pages, both files need editing directly (search for "6. Source Code" / "8. Contact").
 
@@ -737,8 +736,8 @@ The app has no static images at all (every chart is drawn live, with Altair sinc
 6. **A second, less popularity-biased protocol** (random split, rating ≥ 7 as relevant).
 7. **Delete the legacy root `app.py` / `recommender.py`?** Felix's call.
 
-## After pushing the 2026-10-01 pass
-The live app redeploys from the push on its own (entrypoint unchanged). New deployed data: `emb_topk_csr.joblib` (8.7 MB, was 91 KB) and `sentiment_summary.csv` (21,510 games, was 20). Open the live site once to confirm it starts and Title mode returns similar games, not blockbusters.
+## Check the live app (everything is committed and pushed as of 2026-10-23, `bfbef64`)
+The live app redeploys from the push on its own (entrypoint unchanged), but nobody has opened it since. Check that it starts, that Title mode returns similar games rather than blockbusters, that the Analytics charts are Altair (they need the `altair` line in `App/requirements.txt`), and that the radio and slider are indigo, not red (the `.streamlit/config.toml` accent; if they're still red, reboot the app from the Community Cloud dashboard). New deployed data: `emb_topk_csr.joblib` (8.7 MB, was 91 KB) and `sentiment_summary.csv` (21,510 games, was 20). Open the live site once to confirm it starts and Title mode returns similar games, not blockbusters.
 
 ---
 

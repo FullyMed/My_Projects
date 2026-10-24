@@ -170,5 +170,10 @@ A Play Store build also needs `android/key.properties` (gitignored) with `storeP
 - [ ] Set up Android release signing. Create the upload keystore and fill in `android/key.properties`.
 - [ ] Run the app on a real Android or iOS device, or an emulator. The 2026-10-01 fix pass was checked with `flutter analyze`, the test suite and a release web build against the live proxy, but not on a phone.
 - [ ] `.flutter-plugins-dependencies` is committed even though `.gitignore` lists it. Remove it from the index with `git rm --cached .flutter-plugins-dependencies`.
+- [ ] Add rate limiting to the proxy, so nobody who finds the URL can use up the TDX quota.
+- [ ] Rotate the old TDX client secret and update the Worker secret (see [`SECURITY.md`](SECURITY.md)).
+- [ ] Remove dead code: the unused `TffFareTable` widget and the `api_not_ready` error, which nothing can trigger any more. Update or delete the stale `architecture.md`, `design_system.md` and `ui_components_notes.md`.
+
+The full list, ordered and split into what Claude can do and what only Felix can do, is under "Open items" in [`CLAUDE.md`](CLAUDE.md).
 
 The Terms and Privacy contact sections use `maxfelix05@gmail.com`, Felix's own address, which he approved as a stand-in until a dedicated support address exists.

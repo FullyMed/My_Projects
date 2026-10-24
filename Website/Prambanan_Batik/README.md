@@ -10,6 +10,8 @@ Last checked 2026-10-15.
 - **Product photos.** The sample products in `seed.sql` and the preview data use free Unsplash photos that show real batik, but they aren't your products. Add your own photos in Admin → Products → Images.
 - **Deploying.** Set `BASE_URL` to your domain, because the canonical and Open Graph URLs, `robots.txt` and the sitemap all come from it. If the site sits at the domain root, also change `ErrorDocument 404` in `.htaccess` to `/404.php`. See [Deploying to production](#deploying-to-production).
 - **Logout link.** Logging out uses a plain link, so another website could log an admin out by embedding that URL. It can't do anything worse than that. A POST button with a CSRF token would close the gap.
+- **Test script.** A 74-check script that exercises every page and admin action lives outside the project for now, at `C:\CSIE\prambanan_batik_checks.sh`, with run instructions at the top. It may move into the project as `tests/check.sh`.
+- **Optional ideas.** Product data for Google rich results (price and rating stars), category pages in the sitemap, and uploading product photos instead of pasting links.
 
 ## What the site does
 

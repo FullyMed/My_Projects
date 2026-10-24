@@ -285,6 +285,15 @@ On 2026-10-16 the owner had all user-facing text, the legal pages and both docs 
 
 Not broken, not asked for yet. Flagged here so a future session (or a fresh chat) has the context without re-deriving it:
 
+**Start here: the owner's open to-do list (as of 2026-10-23).** Everything up to the 2026-10-19 design pass is committed, pushed and live, and Supabase was `ACTIVE_HEALTHY`. These are the remaining optional steps, most important first. Offer them, don't do them unasked.
+
+1. **Keep Supabase from pausing.** The free project pauses after about a week with no traffic, and live sign-in breaks until someone restores it (it happened once, found 2026-09-30). The fix is a free scheduled ping every few days (for example a GitHub Actions cron calling the project's REST endpoint with the anon key stored as a repo secret), or Supabase Pro ($25/month). Offered several times; the owner hasn't chosen yet. It's the only item that can take the site down.
+2. **One password reset on the live site.** The reset flow is proven on `localhost:5173`, but the production redirect (`https://journeyset.vercel.app/reset-password`) hasn't been used yet. Needs the owner's inbox and a throwaway account (about 2 minutes).
+3. **A real-phone check.** All phone testing so far was in an emulated 375px viewport. Tap through bottom sheets, the drawer, icon buttons and the calendar dots on an actual phone.
+4. **Longer term:** a human legal review of Terms/Privacy before real or paying users; move email off Gmail SMTP (to Resend or similar) if sign-ups grow; Vite 8 / Tailwind 4 to clear the dev-tool `npm audit` warnings (nothing shipped is affected); RLS `(select auth.uid())` rewrite if tables grow.
+
+The bullets below have the detail and history for each.
+
 - **Both passes browser-verified end to end on 2026-10-06**, with a throwaway account on `localhost:5173`, each step checked against the live DB. Covered:
   - planner: add (timed + weekly), edit day / set time / clear time, complete + duplicate clicked back-to-back
   - delete confirmations: Escape cancels; confirm deletes; stacked on top of the event modal, Escape closes only the confirm
