@@ -1,0 +1,27 @@
+# Streamlit config for the BoardGames Analyzer app on Streamlit Community Cloud.
+# Community Cloud always runs from the repository root and reads only this file, so the
+# copy in Data_Science/BoardGames_Analyzer/.streamlit/config.toml (used for local runs from
+# that folder) never reaches the live app. Keep the two files identical below this header.
+
+# Explicit security-relevant defaults for Streamlit.
+# Values mirror Streamlit's own secure defaults — kept here so they can't
+# silently change and so intent is documented for reviewers.
+
+[server]
+enableXsrfProtection = true
+enableCORS = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false
+
+# Accent colour for Streamlit's own widgets (radio dots, slider, focus rings, checkboxes).
+# Without it they use Streamlit's default red, which clashes with the indigo theme in App/theme.py.
+# Set per base theme so Streamlit still follows the visitor's OS light/dark setting.
+[theme.light]
+primaryColor = "#4f46e5"
+
+[theme.dark]
+primaryColor = "#818cf8"

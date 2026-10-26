@@ -127,7 +127,9 @@ Then open `http://localhost:8501` in your browser.
 
 ## Deployment
 
-The live app runs on Streamlit Community Cloud from `App/app.py` in this repository.
+The live app is at https://boardgamediscovery.streamlit.app/. It runs on Streamlit Community Cloud from `App/app.py` in this repository.
+
+Cloud starts the app from the root of the repository, so it only reads a `.streamlit/config.toml` placed there. That's why the repository root has a copy of this project's `.streamlit/config.toml` (the indigo accent and the security settings). The copy in this folder is for local runs. The two files need to stay the same, so change both together.
 
 Streamlit Cloud installs the packages in `App/requirements.txt`. They're pinned to exact versions, so a rebuild installs the same set every time. The pinned numpy (1.26.4) doesn't support Python 3.13, so the app needs Python 3.11 or 3.12 on Cloud. The three precomputed similarity matrices (`desc_topk_csr.joblib`, `content_topk_csr.joblib`, `emb_topk_csr.joblib`) are in the repository, and the app loads them at startup, so there's no build step.
 
