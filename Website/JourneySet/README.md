@@ -77,7 +77,7 @@ supabase/migrations/
 
 > **Free-tier note**: Supabase pauses free projects after about a week without activity. While paused, nobody can sign in. Restore it from the Supabase dashboard.
 >
-> To stop that happening, a GitHub Actions job (`.github/workflows/journeyset-keepalive.yml` at the root of the monorepo) runs one small read query against the project every day. It needs two repository secrets, `JOURNEYSET_SUPABASE_URL` and `JOURNEYSET_SUPABASE_ANON_KEY` (the same values as in `.env`). If a run fails, GitHub emails you; the run log says whether a secret is wrong or the project is already paused.
+> To stop that happening, a GitHub Actions job (`.github/workflows/journeyset-keepalive.yml` at the root of the monorepo) runs one small read query against the project every day. It has been running green since 2026-10-26. It needs two repository secrets, `JOURNEYSET_SUPABASE_URL` and `JOURNEYSET_SUPABASE_ANON_KEY` (the same values as in `.env`). If a run fails, GitHub emails you; the run log says whether a secret is wrong or the project is already paused.
 
 All tables have Row Level Security enabled, so users can only read and write their own data.
 
@@ -182,9 +182,8 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 ## Roadmap / possible next steps
 
-Nothing here is broken. These are known gaps, written down so they don't get lost. The first three are the next steps, most important first:
+Nothing here is broken. These are known gaps, written down so they don't get lost. The first two are the next steps, most important first:
 
-- Finish switching on the daily keep-alive ping (see the free-tier note above). The workflow is pushed, but on 2026-10-26 its runs were failing because the two repository secrets weren't added yet, and the Supabase project had already paused (it was restored the same day). Add the secrets, then re-run the workflow from the Actions tab and check it goes green.
 - Try one password reset on the live site (it's proven on localhost only).
 - Check the app on a real phone (all phone testing so far was in an emulated screen).
 
