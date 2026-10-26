@@ -41,13 +41,15 @@ jobs:
             echo "::error::Add the JOURNEYSET_SUPABASE_URL and JOURNEYSET_SUPABASE_ANON_KEY repository secrets."
             exit 1
           fi
+          # A paused project's address stops resolving, so curl itself fails.
+          # `|| true` keeps the script going; curl still prints 000 as the code.
           status=$(curl --silent --show-error --retry 3 --retry-delay 10 --retry-all-errors --max-time 30 \
             --output response.json --write-out '%{http_code}' \
             --header "apikey: $SUPABASE_ANON_KEY" \
             --header "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "${SUPABASE_URL%/}/rest/v1/profiles?select=id&limit=1")
-          echo "HTTP $status: $(head -c 200 response.json)"
+            "${SUPABASE_URL%/}/rest/v1/profiles?select=id&limit=1" || true)
+          echo "HTTP $status: $(head -c 200 response.json 2>/dev/null)"
           if [ "$status" != "200" ]; then
-            echo "::error::Supabase answered HTTP $status. 401 means a secret is wrong; anything else usually means the project is paused, so restore it from the Supabase dashboard."
+            echo "::error::Supabase answered HTTP $status. 401 means a secret is wrong; 000 (no answer) or anything else usually means the project is paused, so restore it from the Supabase dashboard."
             exit 1
           fi

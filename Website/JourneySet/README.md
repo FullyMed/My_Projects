@@ -184,7 +184,7 @@ Hosted on Vercel; every push to `main` auto-deploys to production. `vercel.json`
 
 Nothing here is broken. These are known gaps, written down so they don't get lost. The first three are the next steps, most important first:
 
-- Switch on the daily keep-alive ping (written on 2026-10-24, see the free-tier note above): commit and push the workflow, add its two repository secrets, then run it once by hand from the Actions tab. Until then the free Supabase project can still pause after a week of no traffic, and nobody can sign in while it's paused.
+- Finish switching on the daily keep-alive ping (see the free-tier note above). The workflow is pushed, but on 2026-10-26 its runs were failing because the two repository secrets weren't added yet, and the Supabase project had already paused (it was restored the same day). Add the secrets, then re-run the workflow from the Actions tab and check it goes green.
 - Try one password reset on the live site (it's proven on localhost only).
 - Check the app on a real phone (all phone testing so far was in an emulated screen).
 
