@@ -8,7 +8,7 @@ PX Mart Finder is a prototype that helps shoppers find products inside a PX Mart
 
 It's a frontend-only portfolio project. The people who'll look at it are portfolio reviewers, recruiters, university evaluators and, possibly, PX Mart itself as a pitch. Shoppers come second.
 
-It covers one real branch, **PX Mart Wufeng (Taichung)**. The Taipei and Kaohsiung branches are demo placeholders, not real coverage. PX Mart has no part in the project. Of the 594 products, 538 (IDs `200` to `737`) come from the Wufeng branch's public foodpanda listing, with real names and photos; see [Products from foodpanda](#products-from-foodpanda). All aisle data is demo data, and only the first 56 products have any.
+It covers one real branch, **PX Mart Wufeng (Taichung)**. The Taipei and Kaohsiung branches are demo placeholders, not real coverage. PX Mart has no part in the project. Of the 591 products, 535 (IDs `200` to `737`, with gaps where three were removed after checking) come from the Wufeng branch's public foodpanda listing, with real names and photos; see [Products from foodpanda](#products-from-foodpanda). All aisle data is demo data, and only the first 56 products have any.
 
 Live site: https://px-mart-finder.netlify.app/ (see [Deployment](#deployment)).
 
@@ -43,7 +43,7 @@ framer-motion attaches native `pointerdown` listeners to each element. If a `mot
 wouter's `useLocation()` re-renders only when the **pathname** changes. When only the query string changes (`/search?sort=name` to `/search?sort=aisle`, or back and forward between two searches), a component that reads `window.location.search` while rendering doesn't update. That's why the sort and brand dropdowns did nothing until 2026-09-30: the URL changed and the list didn't. `search-results.tsx` and `store-map.tsx` read params with `useSearch()`. Reading `window.location.search` inside an event handler, to build the next URL as `updateParam` does, is fine.
 
 ### Route-level code-splitting
-`App.tsx` imports `Home` and `NotFound` directly and every other page with `React.lazy()`, inside one `<Suspense>` (a small spinner) wrapped by `Layout`, so the header and nav never flash. That took the main chunk from 629 KB to about 506 KB (162 KB gzipped). Adding the 538 foodpanda products on 2026-10-29 took it to about 758 KB (204 KB gzipped), because `products.json` is bundled and Home needs it for the category counts. What's left is react-dom, framer-motion, the Radix dropdown for the store picker and the product data, which the landing page needs, so `vite.config.ts` sets `chunkSizeWarningLimit: 800` with a comment explaining why. Don't tune `manualChunks`. `QueryClientProvider`, `TooltipProvider` and `<Toaster />` came out of the tree because nothing used them; the shadcn `ui/` files and `lib/queryClient.ts` are still on disk, unused.
+`App.tsx` imports `Home` and `NotFound` directly and every other page with `React.lazy()`, inside one `<Suspense>` (a small spinner) wrapped by `Layout`, so the header and nav never flash. That took the main chunk from 629 KB to about 506 KB (162 KB gzipped). Adding the 535 foodpanda products on 2026-10-29 took it to about 757 KB (203 KB gzipped), because `products.json` is bundled and Home needs it for the category counts. What's left is react-dom, framer-motion, the Radix dropdown for the store picker and the product data, which the landing page needs, so `vite.config.ts` sets `chunkSizeWarningLimit: 800` with a comment explaining why. Don't tune `manualChunks`. `QueryClientProvider`, `TooltipProvider` and `<Toaster />` came out of the tree because nothing used them; the shadcn `ui/` files and `lib/queryClient.ts` are still on disk, unused.
 
 ### localStorage goes through the `storage.ts` helpers
 `readStored`, `readStoredList` and `writeStored` in `lib/storage.ts` wrap every read and write in `try/catch` and check the shape: `readStoredList` drops non-string entries, `App.tsx` accepts only `"en"` or `"zh"`, and `theme-provider.tsx` accepts only `light`, `dark` or `system`. Corrupt JSON, a hand-edited value or blocked storage falls back to defaults instead of a white screen. Use these helpers for any new saved setting.
@@ -326,9 +326,13 @@ Earlier fixes:
 
 All of these are fixed. Since the change, tsc and the build pass, the console is clean, nothing scrolls sideways at 375px, and keyboard focus is visible on the blue header.
 
+**2026-10-29 fixes**, found while checking the foodpanda products:
+- **Category pages scrolled sideways at 320px** when a subcategory name was long ("Taiwanese Instant Noodles Cup & Bowls" made the page 397px wide). The rows are `Button`s, which set `whitespace-nowrap`, and grid items don't shrink below their content. `category-detail.tsx` now gives each grid item `min-w-0` and lets the name wrap (`whitespace-normal`) instead of truncating, so the whole name stays readable. Keep that pattern for any `Button` with variable-length text inside a grid.
+- **Two cherry tomato products shared one photo.** `c2` (玉女, Yu Nu 550g) used the same image as `c5` (聖女, Sheng Nu), which shows the larger elongated 聖女 kind; `c2` now uses `Yu Nu Cherry Tomatoes.webp`, like the 300g Yu Nu (`c8`). `Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes 2.webp` (round tomatoes) is referenced by nothing; it's left for the owner to delete or use.
+
 ## Build status
 - `npx tsc --noEmit`: 0 errors.
-- `npm run build`: no warnings. Main chunk about 758 KB (204 KB gzipped), including the product data; the other pages load on demand. The sitemap has 622 URLs.
+- `npm run build`: no warnings. Main chunk about 757 KB (203 KB gzipped), including the product data; the other pages load on demand. The sitemap has 619 URLs.
 - `npm run dev:client`: serves on port 5000, with zero console errors or warnings across all routes (apart from the dev-only data validation log, which passes).
 - `.claude/launch.json` has `px-mart-prod-preview`, which runs `vite preview` on port 5001 and serves `dist/public`. Run `npm run build` first.
 
@@ -339,13 +343,13 @@ Everything up to `9341e68` is committed, pushed and live, and the owner consider
 1. ~~**Confirm that a push deploys on its own.**~~ **Done 2026-10-24:** a push to `main` deploys on its own. See [Deployment](#deployment).
 2. **Test on a real phone** (iPhone Safari, Android Chrome). Mobile has only been checked in browser emulation at 375px and 320px.
 3. **Optional content**, in whatever order the owner picks:
-   - ~~Products for the 15 empty categories.~~ **Done 2026-10-29:** 538 products from the branch's foodpanda listing, at the owner's request (see [Products from foodpanda](#products-from-foodpanda)). Don't invent products unasked; new ones come from the owner or that listing.
+   - ~~Products for the 15 empty categories.~~ **Done 2026-10-29:** 535 products from the branch's foodpanda listing, at the owner's request (see [Products from foodpanda](#products-from-foodpanda)). Don't invent products unasked; new ones come from the owner or that listing.
    - Aisle data for the demo branches (Taipei 7 products, Kaohsiung none).
    - A drawn floor plan (simple SVG, no new library) for the store map, with the linked aisle highlighted.
 4. **Left on purpose:** a brief dark flash of the boot spinner when the OS is dark and the app is set to light. Fixing it needs an inline script, which the CSP (`script-src 'self'`) blocks.
 
 ### Data
-- 594 products. Only the original 56 have aisle data; the 538 foodpanda products have an empty `locationsByStore` and show "No aisle info for this branch yet". `validateData.ts` counts these instead of reporting an error.
+- 591 products. Only the original 56 have aisle data; the 535 foodpanda products have an empty `locationsByStore` and show "No aisle info for this branch yet". `validateData.ts` counts these instead of reporting an error.
 - Brand names are English in both languages (as they were before), so the Chinese UI shows "Kimlan" next to 金蘭鼓舌醬油. Translating `brand` would need a `brand_zh` field, which is a schema change.
 - foodpanda's photos are packshots on white, not cut-outs like the original 35, so in dark mode they sit in a white box. That's left as is.
 
@@ -354,8 +358,9 @@ On 2026-10-29 the owner asked for real product names (Chinese and English) and p
 - Each category has a page at `.../category/<foodpanda category id>`, with `/en/` before `/shop` for English. The pages are rendered in the browser, so plain `curl` gets no products; they were fetched with Firecrawl (`rawHtml`). Each product card has `data-testid="groceries-product-card-<id>"`, an `<img>` and a name, inside a subcategory block with an `<h2>` heading. Chinese and English were matched by that product id.
 - Up to 4 products per subcategory, counting existing ones; Fresh Fruits was skipped (it already had 34). About 43% of foodpanda's "English" names are still Chinese, and some are wrong (an English name for a different product, "AA" for 4號 batteries, which are AAA in Taiwan). The Chinese name is treated as correct, and every English name and brand was written by hand. Products whose English brand name wasn't certain, and near-duplicates, were left out rather than guessed.
 - Unbranded fresh, deli and bakery items use the brand "PX Fresh" (as the vegetables already did); unbranded household items use "PX Select".
-- Photos were downloaded at `?height=600` into `Images/<category>/<subcategory>/` (the snacks folder is `Snacks_Candies`) and converted with `npm run compress-images`: 538 photos, 22.5 MB to 13.8 MB. The live site serves them itself; nothing loads from foodpanda, so the CSP didn't change.
+- Photos were downloaded at `?height=600` into `Images/<category>/<subcategory>/` (the snacks folder is `Snacks_Candies`) and converted with `npm run compress-images`: 535 photos, about 22 MB of JPEG to 13.7 MB of WebP. Filenames are the English name with only letters, digits, spaces, dots and hyphens (`&` becomes `and`); when two products in one folder share an English name, the brand goes in front (`Safeway Ultra-Thin Condoms 12 Pieces.webp`). The live site serves them itself; nothing loads from foodpanda, so the CSP didn't change.
 - The Terms of Use (`termsSection1Body`, `termsSection5Body`, both languages) say where the names and photos come from and that they belong to their owners.
+- **Checked on 2026-10-29.** Every photo was looked at next to its Chinese and English name on contact sheets. That fixed four brands read off the pack (#271 Hazeline, not Lux; #533 Bourbon "Fettuccine", 北日本 being Bourbon's old name; #545 Valda; #527 Reeva) and removed three products: two near-duplicates of originals (a second Carrots and a second plain Lay's) and #733, whose photo showed a different variant (Bolognese) from its name (起司蘑菇). In the photos where foodpanda's English named another product, the photo matched the Chinese name. Then, on the production build (`vite preview`): all 569 local photos returned 200 as WebP; every subcategory page showed the same count as the data; all 591 product pages had one `<h1>` with the right name and photo at 320px; saving a product, Chinese names and search, the store map and the 404 worked; and no page scrolled sideways at 320px or 375px in either language. No console errors or failed requests.
 - Real aisle data for more branches.
 - Some photos sit in a folder that no longer matches the product's subcategory; the lemon's photo is in `Images/Fresh Fruits/Apples & Pears/`. The paths still work.
 
@@ -382,7 +387,7 @@ To check a deploy: `curl -s https://px-mart-finder.netlify.app/ | grep -c app-bo
 
 ### SEO
 - `client/public/robots.txt` allows everything and has a `Sitemap:` line.
-- `sitemap.xml` is **generated, not committed**. `writeSitemap` in `script/sitemap.ts` runs inside `script/build.ts` after the Vite build and writes `dist/public/sitemap.xml` from `products.json` and `categories.json`: 5 static routes, every `/category/<id>` and every `/product/<id>` (622 URLs as of 2026-10-29). It can't drift from the data. If the domain changes, update `SITE_URL` there, the `Sitemap:` line in `robots.txt`, and the absolute `og:image` / `twitter:image` in `index.html`. `/favorites` is left out on purpose, since it's per-device localStorage and always empty for a crawler. `npx vite build` alone skips the sitemap, so use `npm run build`.
+- `sitemap.xml` is **generated, not committed**. `writeSitemap` in `script/sitemap.ts` runs inside `script/build.ts` after the Vite build and writes `dist/public/sitemap.xml` from `products.json` and `categories.json`: 5 static routes, every `/category/<id>` and every `/product/<id>` (619 URLs as of 2026-10-29). It can't drift from the data. If the domain changes, update `SITE_URL` there, the `Sitemap:` line in `robots.txt`, and the absolute `og:image` / `twitter:image` in `index.html`. `/favorites` is left out on purpose, since it's per-device localStorage and always empty for a crawler. `npx vite build` alone skips the sitemap, so use `npm run build`.
 - The `og:title`, `og:description` and `og:image` in `index.html` are the same on every page. Link-preview bots don't run JavaScript, so per-page cards would need SSR or prerendering, which is out of scope.
 
 ---

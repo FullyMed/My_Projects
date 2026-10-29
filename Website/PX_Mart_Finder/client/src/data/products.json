@@ -318,7 +318,7 @@
     "locationsByStore": {
       "px_wufeng_01": { "aisle": "1", "shelf": "Refrigerated", "section_en": "Fruits", "section_zh": "水果區" }
     },
-    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Cherry Tomatoes.webp",
+    "image_url": "/Images/Fresh Fruits/Berries & Grapes/Yu Nu Cherry Tomatoes.webp",
     "keywords": ["tomato", "fruit", "cherry", "yu nu", "小番茄", "番茄", "水果"]
   },
   {
@@ -1077,7 +1077,7 @@
     "sub_category_en": "Stationery & Office Supplies",
     "sub_category_zh": "辦公文具",
     "locationsByStore": {},
-    "image_url": "/Images/Home & Office Goods/Stationery & Office Supplies/Scotch Duct Tape 48mm x 914m 1 Roll.webp",
+    "image_url": "/Images/Home & Office Goods/Stationery & Office Supplies/Scotch Duct Tape 48mm x 9.14m 1 Roll.webp",
     "keywords": ["scotch", "duct", "tape", "stationery & office supplies", "辦公文具", "日用百貨"]
   },
   {
@@ -1207,7 +1207,7 @@
     "sub_category_en": "Performance Gift Box",
     "sub_category_zh": "保健品禮盒",
     "locationsByStore": {},
-    "image_url": "/Images/Gift Box/Performance Gift Box/Seasoned Seaweed Gift Box 9 x 48g.webp",
+    "image_url": "/Images/Gift Box/Performance Gift Box/Seasoned Seaweed Gift Box 9 x 4.8g.webp",
     "keywords": ["seasoned", "seaweed", "gift", "box", "performance gift box", "保健品禮盒", "伴手禮與禮盒"]
   },
   {
@@ -1389,7 +1389,7 @@
     "sub_category_en": "Baby Formula",
     "sub_category_zh": "幼兒奶粉",
     "locationsByStore": {},
-    "image_url": "/Images/Nursery Care/Baby Formula/Nature Kids Milk Powder Ages 3-7 15kg.webp",
+    "image_url": "/Images/Nursery Care/Baby Formula/Nature Kids Milk Powder Ages 3-7 1.5kg.webp",
     "keywords": ["nature", "kids", "milk", "powder", "ages", "baby formula", "幼兒奶粉", "母嬰用品"]
   },
   {
@@ -1571,7 +1571,7 @@
     "sub_category_en": "Sexual Wellness",
     "sub_category_zh": "成人用品",
     "locationsByStore": {},
-    "image_url": "/Images/Health & Medical/Sexual Wellness/Ultra-Thin Condoms 12 Pieces.webp",
+    "image_url": "/Images/Health & Medical/Sexual Wellness/Safeway Ultra-Thin Condoms 12 Pieces.webp",
     "keywords": ["ultra-thin", "condoms", "sexual wellness", "成人用品", "醫用保健"]
   },
   {
@@ -1584,7 +1584,7 @@
     "sub_category_en": "Sexual Wellness",
     "sub_category_zh": "成人用品",
     "locationsByStore": {},
-    "image_url": "/Images/Health & Medical/Sexual Wellness/Ultra-Thin Condoms 12 Pieces 2.webp",
+    "image_url": "/Images/Health & Medical/Sexual Wellness/Smile Ultra-Thin Condoms 12 Pieces.webp",
     "keywords": ["ultra-thin", "condoms", "sexual wellness", "成人用品", "醫用保健"]
   },
   {
@@ -1753,7 +1753,7 @@
     "sub_category_en": "Body Care",
     "sub_category_zh": "身體清潔",
     "locationsByStore": {},
-    "image_url": "/Images/Personal Care/Body Care/pH55 Honey Body Wash 750ml.webp",
+    "image_url": "/Images/Personal Care/Body Care/pH5.5 Honey Body Wash 750ml.webp",
     "keywords": ["honey", "body", "wash", "body care", "身體清潔", "美妝個清"]
   },
   {
@@ -1773,7 +1773,7 @@
     "id": "271",
     "product_name_en": "Botanical Beauty Soap, Rose 3 x 125g",
     "product_name_zh": "夏士蓮植萃潤膚皂-水嫩玫瑰香 3入 x 125g",
-    "brand": "Lux",
+    "brand": "Hazeline",
     "category_en": "Personal Care",
     "category_zh": "美妝個清",
     "sub_category_en": "Body Care",
@@ -1935,7 +1935,7 @@
     "sub_category_en": "Other Oral Products",
     "sub_category_zh": "漱口水及其他口腔清潔",
     "locationsByStore": {},
-    "image_url": "/Images/Personal Care/Other Oral Products/Interdental Brushes 06mm 15 Pieces.webp",
+    "image_url": "/Images/Personal Care/Other Oral Products/Interdental Brushes 0.6mm 15 Pieces.webp",
     "keywords": ["interdental", "brushes", "other oral products", "漱口水及其他口腔清潔", "美妝個清"]
   },
   {
@@ -2117,7 +2117,7 @@
     "sub_category_en": "Cosmetics & Beauty Accessories",
     "sub_category_zh": "美妝用品",
     "locationsByStore": {},
-    "image_url": "/Images/Personal Care/Cosmetics & Beauty Accessories/Mint Lip Balm 35g.webp",
+    "image_url": "/Images/Personal Care/Cosmetics & Beauty Accessories/Mint Lip Balm 3.5g.webp",
     "keywords": ["mint", "lip", "balm", "cosmetics & beauty accessories", "美妝用品", "美妝個清"]
   },
   {
@@ -2273,7 +2273,7 @@
     "sub_category_en": "Dog Food",
     "sub_category_zh": "狗飼料/罐頭",
     "locationsByStore": {},
-    "image_url": "/Images/Pet Supplies/Dog Food/Adult Dog Food Steak Flavor 26kg.webp",
+    "image_url": "/Images/Pet Supplies/Dog Food/Adult Dog Food Steak Flavor 2.6kg.webp",
     "keywords": ["adult", "dog", "food", "steak", "flavor", "dog food", "狗飼料/罐頭", "寵物用品"]
   },
   {
@@ -2286,7 +2286,7 @@
     "sub_category_en": "Dog Food",
     "sub_category_zh": "狗飼料/罐頭",
     "locationsByStore": {},
-    "image_url": "/Images/Pet Supplies/Dog Food/Small Breed Adult Dog Food Tuna 27kg.webp",
+    "image_url": "/Images/Pet Supplies/Dog Food/Small Breed Adult Dog Food Tuna 2.7kg.webp",
     "keywords": ["small", "breed", "adult", "dog", "food", "tuna", "dog food", "狗飼料/罐頭", "寵物用品"]
   },
   {
@@ -2351,7 +2351,7 @@
     "sub_category_en": "Cat Food",
     "sub_category_zh": "貓飼料/罐頭",
     "locationsByStore": {},
-    "image_url": "/Images/Pet Supplies/Cat Food/Dry Cat Food Ocean Fish 12kg.webp",
+    "image_url": "/Images/Pet Supplies/Cat Food/Dry Cat Food Ocean Fish 1.2kg.webp",
     "keywords": ["dry", "cat", "food", "ocean", "fish", "cat food", "貓飼料/罐頭", "寵物用品"]
   },
   {
@@ -2403,7 +2403,7 @@
     "sub_category_en": "Other Pet Supplies",
     "sub_category_zh": "其他寵物用品",
     "locationsByStore": {},
-    "image_url": "/Images/Pet Supplies/Other Pet Supplies/Probiotic Tofu Cat Litter 27kg.webp",
+    "image_url": "/Images/Pet Supplies/Other Pet Supplies/Probiotic Tofu Cat Litter 2.7kg.webp",
     "keywords": ["probiotic", "tofu", "cat", "litter", "other pet supplies", "其他寵物用品", "寵物用品"]
   },
   {
@@ -2429,7 +2429,7 @@
     "sub_category_en": "Other Pet Supplies",
     "sub_category_zh": "其他寵物用品",
     "locationsByStore": {},
-    "image_url": "/Images/Pet Supplies/Other Pet Supplies/Charcoal Tofu Cat Litter 27kg.webp",
+    "image_url": "/Images/Pet Supplies/Other Pet Supplies/Charcoal Tofu Cat Litter 2.7kg.webp",
     "keywords": ["charcoal", "tofu", "cat", "litter", "other pet supplies", "其他寵物用品", "寵物用品"]
   },
   {
@@ -2689,7 +2689,7 @@
     "sub_category_en": "Dining Utensils",
     "sub_category_zh": "碗盤餐具",
     "locationsByStore": {},
-    "image_url": "/Images/Kitchen & Dining/Dining Utensils/Painted Bamboo Chopsticks 225cm 10 Pairs.webp",
+    "image_url": "/Images/Kitchen & Dining/Dining Utensils/Painted Bamboo Chopsticks 22.5cm 10 Pairs.webp",
     "keywords": ["painted", "bamboo", "chopsticks", "dining utensils", "碗盤餐具", "餐廚用品"]
   },
   {
@@ -2715,7 +2715,7 @@
     "sub_category_en": "Disposable Tablewares",
     "sub_category_zh": "免洗餐具",
     "locationsByStore": {},
-    "image_url": "/Images/Kitchen & Dining/Disposable Tablewares/Paper Cups 65oz 50 Pieces.webp",
+    "image_url": "/Images/Kitchen & Dining/Disposable Tablewares/Paper Cups 6.5oz 50 Pieces.webp",
     "keywords": ["paper", "cups", "disposable tablewares", "免洗餐具", "餐廚用品"]
   },
   {
@@ -2845,7 +2845,7 @@
     "sub_category_en": "Instant Tea & Tea Bags",
     "sub_category_zh": "茶包及茶葉",
     "locationsByStore": {},
-    "image_url": "/Images/Instant Beverages/Instant Tea & Tea Bags/Rooibos Tea 22 x 22g.webp",
+    "image_url": "/Images/Instant Beverages/Instant Tea & Tea Bags/Rooibos Tea 22 x 2.2g.webp",
     "keywords": ["rooibos", "tea", "instant tea & tea bags", "茶包及茶葉", "沖調飲品"]
   },
   {
@@ -3833,7 +3833,7 @@
     "sub_category_en": "Pantyliners",
     "sub_category_zh": "護墊",
     "locationsByStore": {},
-    "image_url": "/Images/Disposables/Pantyliners/Herbal Liners 145cm 2 x 25 Pieces.webp",
+    "image_url": "/Images/Disposables/Pantyliners/Herbal Liners 14.5cm 2 x 25 Pieces.webp",
     "keywords": ["herbal", "liners", "pantyliners", "護墊", "紙棉製品"]
   },
   {
@@ -4150,7 +4150,7 @@
   },
   {
     "id": "454",
-    "product_name_en": "Caffeine-Free Milk Tea 6 x 300ml",
+    "product_name_en": "Caffeine-Free Barley Milk Tea 6 x 300ml",
     "product_name_zh": "御茶園無咖啡因奶茶 6入 x 300ml",
     "brand": "Royal Tea Garden",
     "category_en": "Beverages",
@@ -4158,8 +4158,8 @@
     "sub_category_en": "Regular Pure Tea",
     "sub_category_zh": "茶飲",
     "locationsByStore": {},
-    "image_url": "/Images/Beverages/Regular Pure Tea/Caffeine-Free Milk Tea 6 x 300ml.webp",
-    "keywords": ["caffeine-free", "milk", "tea", "regular pure tea", "茶飲", "飲品大賞"]
+    "image_url": "/Images/Beverages/Regular Pure Tea/Caffeine-Free Barley Milk Tea 6 x 300ml.webp",
+    "keywords": ["caffeine-free", "milk", "tea", "regular pure tea", "茶飲", "飲品大賞", "barley"]
   },
   {
     "id": "455",
@@ -4795,7 +4795,7 @@
     "sub_category_en": "White Rice",
     "sub_category_zh": "白米",
     "locationsByStore": {},
-    "image_url": "/Images/Rice, Noodles & Grains/White Rice/15C Premium Rice 34kg.webp",
+    "image_url": "/Images/Rice, Noodles & Grains/White Rice/15C Premium Rice 3.4kg.webp",
     "keywords": ["premium", "rice", "white rice", "白米", "米麵雜糧"]
   },
   {
@@ -4808,7 +4808,7 @@
     "sub_category_en": "White Rice",
     "sub_category_zh": "白米",
     "locationsByStore": {},
-    "image_url": "/Images/Rice, Noodles & Grains/White Rice/Young Farmer Rice 15kg.webp",
+    "image_url": "/Images/Rice, Noodles & Grains/White Rice/Young Farmer Rice 1.5kg.webp",
     "keywords": ["young", "farmer", "rice", "white rice", "白米", "米麵雜糧"]
   },
   {
@@ -4821,7 +4821,7 @@
     "sub_category_en": "Other Rice & Grains",
     "sub_category_zh": "糙米五穀",
     "locationsByStore": {},
-    "image_url": "/Images/Rice, Noodles & Grains/Other Rice & Grains/Germ Rice 15kg.webp",
+    "image_url": "/Images/Rice, Noodles & Grains/Other Rice & Grains/Germ Rice 1.5kg.webp",
     "keywords": ["germ", "rice", "other rice & grains", "糙米五穀", "米麵雜糧"]
   },
   {
@@ -4834,7 +4834,7 @@
     "sub_category_en": "Other Rice & Grains",
     "sub_category_zh": "糙米五穀",
     "locationsByStore": {},
-    "image_url": "/Images/Rice, Noodles & Grains/Other Rice & Grains/Brown Rice 15kg.webp",
+    "image_url": "/Images/Rice, Noodles & Grains/Other Rice & Grains/Brown Rice 1.5kg.webp",
     "keywords": ["brown", "rice", "other rice & grains", "糙米五穀", "米麵雜糧"]
   },
   {
@@ -4925,7 +4925,7 @@
     "sub_category_en": "Pasta",
     "sub_category_zh": "義大利麵",
     "locationsByStore": {},
-    "image_url": "/Images/Rice, Noodles & Grains/Pasta/Spaghetti 18mm 500g.webp",
+    "image_url": "/Images/Rice, Noodles & Grains/Pasta/Spaghetti 1.8mm 500g.webp",
     "keywords": ["spaghetti", "pasta", "義大利麵", "米麵雜糧"]
   },
   {
@@ -5101,7 +5101,7 @@
     "id": "527",
     "product_name_en": "Vietnamese Beef Pho 70g",
     "product_name_zh": "越南瑞法河粉-牛肉風味 70g",
-    "brand": "Ruifa",
+    "brand": "Reeva",
     "category_en": "Rice, Noodles & Grains",
     "category_zh": "米麵雜糧",
     "sub_category_en": "Imported Instant Noodles Cups & Bowls",
@@ -5177,16 +5177,16 @@
   },
   {
     "id": "533",
-    "product_name_en": "Wide Grape Gummies 50g",
+    "product_name_en": "Fettuccine Grape Gummies 50g",
     "product_name_zh": "北日本寬版葡萄果汁軟糖 50g",
-    "brand": "Kitanihon",
+    "brand": "Bourbon",
     "category_en": "Snacks & Candies",
     "category_zh": "零食餅乾",
     "sub_category_en": "Soft Candy",
     "sub_category_zh": "軟糖",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Soft Candy/Wide Grape Gummies 50g.webp",
-    "keywords": ["wide", "grape", "gummies", "soft candy", "軟糖", "零食餅乾"]
+    "image_url": "/Images/Snacks_Candies/Soft Candy/Fettuccine Grape Gummies 50g.webp",
+    "keywords": ["wide", "grape", "gummies", "soft candy", "軟糖", "零食餅乾", "fettuccine"]
   },
   {
     "id": "534",
@@ -5315,7 +5315,7 @@
     "sub_category_en": "Gum & Mints",
     "sub_category_zh": "口香糖及涼糖",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Gum & Mints/Sugar-Free Gum Grape 364g.webp",
+    "image_url": "/Images/Snacks_Candies/Gum & Mints/Sugar-Free Gum Grape 36.4g.webp",
     "keywords": ["sugar-free", "gum", "grape", "gum & mints", "口香糖及涼糖", "零食餅乾"]
   },
   {
@@ -5335,7 +5335,7 @@
     "id": "545",
     "product_name_en": "Licorice Kumquat Throat Drops 76g",
     "product_name_zh": "樺達硬喉糖-甘草金桔口味 76g",
-    "brand": "Hua Da",
+    "brand": "Valda",
     "category_en": "Snacks & Candies",
     "category_zh": "零食餅乾",
     "sub_category_en": "Gum & Mints",
@@ -5354,7 +5354,7 @@
     "sub_category_en": "Gum & Mints",
     "sub_category_zh": "口香糖及涼糖",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Gum & Mints/Xylitol Gum Variety Pack 3 Pieces 783g.webp",
+    "image_url": "/Images/Snacks_Candies/Gum & Mints/Xylitol Gum Variety Pack 3 Pieces 78.3g.webp",
     "keywords": ["xylitol", "gum", "variety", "gum & mints", "口香糖及涼糖", "零食餅乾"]
   },
   {
@@ -5369,19 +5369,6 @@
     "locationsByStore": {},
     "image_url": "/Images/Snacks_Candies/Chips/Extra Cheese Tortilla Chips 102g.webp",
     "keywords": ["extra", "cheese", "tortilla", "chips", "洋芋片", "零食餅乾"]
-  },
-  {
-    "id": "548",
-    "product_name_en": "Classic Original Potato Chips 59.5g",
-    "product_name_zh": "樂事洋芋片-美國經典原味 59.5g",
-    "brand": "Lay's",
-    "category_en": "Snacks & Candies",
-    "category_zh": "零食餅乾",
-    "sub_category_en": "Chips",
-    "sub_category_zh": "洋芋片",
-    "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Chips/Classic Original Potato Chips 595g.webp",
-    "keywords": ["classic", "potato", "chips", "洋芋片", "零食餅乾"]
   },
   {
     "id": "549",
@@ -5458,7 +5445,7 @@
     "sub_category_en": "Seaweed & Seafood Snacks",
     "sub_category_zh": "海苔",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Seaweed & Seafood Snacks/Seasoned Seaweed Snack 3 x 26g.webp",
+    "image_url": "/Images/Snacks_Candies/Seaweed & Seafood Snacks/Seasoned Seaweed Snack 3 x 2.6g.webp",
     "keywords": ["seasoned", "seaweed", "snack", "seaweed & seafood snacks", "海苔", "零食餅乾"]
   },
   {
@@ -5484,7 +5471,7 @@
     "sub_category_en": "Seaweed & Seafood Snacks",
     "sub_category_zh": "海苔",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Seaweed & Seafood Snacks/Seasoned Seaweed 3 x 4 Sheets 69g.webp",
+    "image_url": "/Images/Snacks_Candies/Seaweed & Seafood Snacks/Seasoned Seaweed 3 x 4 Sheets 6.9g.webp",
     "keywords": ["seasoned", "seaweed", "seaweed & seafood snacks", "海苔", "零食餅乾"]
   },
   {
@@ -5653,7 +5640,7 @@
     "sub_category_en": "Sandwich Biscuits",
     "sub_category_zh": "夾心餅乾",
     "locationsByStore": {},
-    "image_url": "/Images/Snacks_Candies/Sandwich Biscuits/Mini Oreo Vanilla 613g.webp",
+    "image_url": "/Images/Snacks_Candies/Sandwich Biscuits/Mini Oreo Vanilla 61.3g.webp",
     "keywords": ["mini", "oreo", "vanilla", "sandwich biscuits", "夾心餅乾", "零食餅乾"]
   },
   {
@@ -6437,19 +6424,6 @@
     "keywords": ["baby", "bok", "choy", "leaf & flower crops", "葉菜花菜", "嚴選蔬菜"]
   },
   {
-    "id": "630",
-    "product_name_en": "Carrots 330g",
-    "product_name_zh": "胡蘿蔔 330g",
-    "brand": "PX Fresh",
-    "category_en": "Fresh Vegetables",
-    "category_zh": "嚴選蔬菜",
-    "sub_category_en": "Root & Stem Vegetables",
-    "sub_category_zh": "根莖類",
-    "locationsByStore": {},
-    "image_url": "/Images/Fresh Vegetables/Root & Stem Vegetables/Carrots 330g.webp",
-    "keywords": ["carrots", "root & stem vegetables", "根莖類", "嚴選蔬菜"]
-  },
-  {
     "id": "631",
     "product_name_en": "Imported Potatoes 450g",
     "product_name_zh": "進口馬鈴薯 450g",
@@ -7187,7 +7161,7 @@
     "sub_category_en": "Other Edible Oils",
     "sub_category_zh": "其他食用油",
     "locationsByStore": {},
-    "image_url": "/Images/Oil & Condiments/Other Edible Oils/Japanese Rice Bran Oil 24L.webp",
+    "image_url": "/Images/Oil & Condiments/Other Edible Oils/Japanese Rice Bran Oil 2.4L.webp",
     "keywords": ["japanese", "rice", "bran", "oil", "other edible oils", "其他食用油", "油品調味"]
   },
   {
@@ -7239,7 +7213,7 @@
     "sub_category_en": "Olive Oil",
     "sub_category_zh": "橄欖油",
     "locationsByStore": {},
-    "image_url": "/Images/Oil & Condiments/Olive Oil/Extra Virgin Olive Oil 250ml.webp",
+    "image_url": "/Images/Oil & Condiments/Olive Oil/Campena Extra Virgin Olive Oil 250ml.webp",
     "keywords": ["extra", "virgin", "olive", "oil", "olive oil", "橄欖油", "油品調味"]
   },
   {
@@ -7265,7 +7239,7 @@
     "sub_category_en": "Olive Oil",
     "sub_category_zh": "橄欖油",
     "locationsByStore": {},
-    "image_url": "/Images/Oil & Condiments/Olive Oil/Extra Virgin Olive Oil 250ml 2.webp",
+    "image_url": "/Images/Oil & Condiments/Olive Oil/Olitalia Extra Virgin Olive Oil 250ml.webp",
     "keywords": ["extra", "virgin", "olive", "oil", "olive oil", "橄欖油", "油品調味"]
   },
   {
@@ -7776,19 +7750,6 @@
     "keywords": ["sesame", "paste", "other sauces", "其他醬料", "油品調味"]
   },
   {
-    "id": "733",
-    "product_name_en": "Cheese Mushroom Pasta Sauce 500g",
-    "product_name_zh": "美味大師聖雷蒙頂級麵醬-起司蘑菇 500g",
-    "brand": "Master Chef",
-    "category_en": "Oil & Condiments",
-    "category_zh": "油品調味",
-    "sub_category_en": "Other Sauces",
-    "sub_category_zh": "其他醬料",
-    "locationsByStore": {},
-    "image_url": "/Images/Oil & Condiments/Other Sauces/Cheese Mushroom Pasta Sauce 500g.webp",
-    "keywords": ["cheese", "mushroom", "pasta", "sauce", "other sauces", "其他醬料", "油品調味"]
-  },
-  {
     "id": "734",
     "product_name_en": "Tonkotsu Soup Cubes 6 x 11g",
     "product_name_zh": "牛頭牌豚骨湯塊(豚骨風味) 6入 x 11g",
@@ -7811,7 +7772,7 @@
     "sub_category_en": "Broth & Soup Base",
     "sub_category_zh": "湯塊湯包",
     "locationsByStore": {},
-    "image_url": "/Images/Oil & Condiments/Broth & Soup Base/Corn and Ham Soup 2 x 497g.webp",
+    "image_url": "/Images/Oil & Condiments/Broth & Soup Base/Corn and Ham Soup 2 x 49.7g.webp",
     "keywords": ["corn", "ham", "soup", "broth & soup base", "湯塊湯包", "油品調味"]
   },
   {

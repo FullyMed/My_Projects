@@ -56,6 +56,7 @@ export default function CategoryDetail() {
             return (
               <motion.div
                 key={sub.en}
+                className="min-w-0"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -71,7 +72,8 @@ export default function CategoryDetail() {
                   onClick={() => setLocation(`/search?category=${category.id}&subcategory=${encodeURIComponent(sub.en)}`)}
                 >
                   <span className="flex flex-col items-start min-w-0 text-left">
-                    <span className={cn("font-medium truncate max-w-full", count === 0 && "text-muted-foreground")}>
+                    {/* Button sets whitespace-nowrap; long names ("Taiwanese Instant Noodles Cup & Bowls") wrap instead of widening the page at 320px. */}
+                    <span className={cn("font-medium whitespace-normal", count === 0 && "text-muted-foreground")}>
                       {language === "en" ? sub.en : sub.zh}
                     </span>
                     <span className={cn("text-xs font-normal tabular-nums", count > 0 ? "text-primary" : "text-muted-foreground")}>
@@ -80,7 +82,7 @@ export default function CategoryDetail() {
                         : t("comingSoon")}
                     </span>
                   </span>
-                  <ChevronRight className="text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                  <ChevronRight className="shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
                 </Button>
               </motion.div>
             );
