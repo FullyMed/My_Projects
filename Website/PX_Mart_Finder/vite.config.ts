@@ -39,10 +39,11 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    // Routes are already lazy-loaded (App.tsx); the ~1130KB (261KB gzip) main chunk left is
-    // react-dom + framer-motion + the Radix store picker + products.json (1381 products, which
+    // Routes are already lazy-loaded (App.tsx); the ~1483KB (320KB gzip) main chunk left is
+    // react-dom + framer-motion + the Radix store picker + products.json (2126 products, which
     // the home page needs for its category counts), all needed on the landing page.
-    chunkSizeWarningLimit: 1200,
+    // If the catalog grows again, load products.json separately instead of raising this.
+    chunkSizeWarningLimit: 1600,
   },
   server: {
     host: "0.0.0.0",
