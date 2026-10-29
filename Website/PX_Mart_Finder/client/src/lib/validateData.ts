@@ -30,9 +30,9 @@ export function validateData() {
       }
     }
 
+    // Products from the foodpanda listing have no aisle data yet; the UI shows "no aisle info" for them.
     const storeIds = Object.keys(product.locationsByStore);
     if (storeIds.length === 0) {
-      errors.push(`Product ${product.id}: No store locations defined in locationsByStore`);
       missingLocationCount++;
     }
 

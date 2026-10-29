@@ -15,7 +15,9 @@ function walk(dir: string): string[] {
 
 async function run() {
   const targets = walk(IMAGES_DIR).filter(
-    (f) => extname(f).toLowerCase() === ".png" && statSync(f).size >= SKIP_BELOW_BYTES
+    (f) =>
+      [".png", ".jpg", ".jpeg"].includes(extname(f).toLowerCase()) &&
+      statSync(f).size >= SKIP_BELOW_BYTES
   );
 
   let beforeTotal = 0;
