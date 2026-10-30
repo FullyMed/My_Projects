@@ -64,7 +64,7 @@ A few things under the hood:
 - Each page sets its own title and description, and both change when you switch language.
 - Images show a placeholder while they load and an icon if they fail.
 - Every page except Home loads on demand, which keeps the first download small.
-- The product data is its own file, downloaded alongside the app code (about 480 KB) instead of inside it, so adding products doesn't make the app code bigger.
+- The product data is a separate JSON file, downloaded alongside the app code (about 480 KB) instead of inside it, so adding products doesn't make the app code bigger.
 - Product photos are WebP files, made by `script/compress-images.ts` from PNG or JPEG originals. The first 35 went from 9.9 MB to about 0.8 MB; the 3,207 foodpanda photos went from about 130 MB to about 84 MB.
 - If saved settings in your browser get corrupted, the app falls back to its defaults instead of crashing.
 

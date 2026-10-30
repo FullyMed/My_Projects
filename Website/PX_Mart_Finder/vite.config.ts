@@ -5,20 +5,31 @@ import path from "path";
 import { defineConfig, type Plugin } from "vite";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
 
-// data.ts loads products.json with a dynamic import, which the browser would only start after the
-// main chunk has run. This preload tag lets it download both at once.
-function preloadProductsChunk(): Plugin {
+// data.ts fetches products.json as a separate file. This plugin minifies that file (the source is
+// pretty-printed, about 15% bigger) and adds a preload tag for it, because the browser would only
+// start the fetch after the main chunk has run. `crossorigin` makes the preload's credentials mode
+// match fetch()'s default, or the browser downloads the file twice.
+function isProductsJson(fileName: string): boolean {
+  return fileName.startsWith("assets/products-") && fileName.endsWith(".json");
+}
+
+function productsJsonFile(): Plugin {
   return {
-    name: "preload-products-chunk",
+    name: "products-json-file",
     apply: "build",
+    generateBundle(_options, bundle) {
+      for (const file of Object.values(bundle)) {
+        if (file.type === "asset" && isProductsJson(file.fileName)) {
+          file.source = JSON.stringify(JSON.parse(file.source.toString()));
+        }
+      }
+    },
     transformIndexHtml: {
       order: "post",
       handler(_html, ctx) {
-        const chunk = Object.values(ctx.bundle ?? {}).find(
-          (c) => c.type === "chunk" && c.name === "products",
-        );
-        if (!chunk) return [];
-        return [{ tag: "link", attrs: { rel: "modulepreload", crossorigin: true, href: `/${chunk.fileName}` }, injectTo: "head" }];
+        const asset = Object.values(ctx.bundle ?? {}).find((a) => a.type === "asset" && isProductsJson(a.fileName));
+        if (!asset) return [];
+        return [{ tag: "link", attrs: { rel: "preload", as: "fetch", crossorigin: true, href: `/${asset.fileName}` }, injectTo: "head" }];
       },
     },
   };
@@ -30,7 +41,7 @@ export default defineConfig({
     runtimeErrorOverlay(),
     tailwindcss(),
     metaImagesPlugin(),
-    preloadProductsChunk(),
+    productsJsonFile(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -59,10 +70,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    // Routes are lazy-loaded (App.tsx) and products.json is its own chunk (data.ts loads it with a
-    // dynamic import), so the main chunk is only app code, about 480KB. The limit is for the
-    // products chunk, which is plain data and grows with the catalog.
-    chunkSizeWarningLimit: 1600,
+    // Routes are lazy-loaded (App.tsx) and products.json is fetched as a separate file (data.ts),
+    // so the main chunk is only app code, about 480KB, and doesn't grow with the catalog.
+    chunkSizeWarningLimit: 500,
   },
   server: {
     host: "0.0.0.0",
