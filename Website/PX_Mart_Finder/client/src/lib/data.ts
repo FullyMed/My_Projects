@@ -1,5 +1,9 @@
-import productsJson from "../data/products.json";
 import categoriesJson from "../data/categories.json";
+
+// products.json is over 1 MB, so it's loaded with a dynamic import: Vite gives it its own chunk,
+// the app code stays small and is cached separately from the data. The top-level await keeps
+// PRODUCTS a plain array for every module that imports it.
+const { default: productsJson } = await import("../data/products.json");
 
 export type Store = {
   id: string;

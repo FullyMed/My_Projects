@@ -30,6 +30,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useLocation, useSearch } from "wouter";
 
+// Big categories have 200+ products; drawing every card at once made these pages slow on phones.
+const PAGE_SIZE = 40;
 
 export default function SearchResults() {
   const { t, language } = useLanguage();
@@ -49,6 +51,12 @@ export default function SearchResults() {
   const [debouncedQuery] = useDebounce(query, 300);
   const brandFilter = searchParams.get("brand");
   const sortBy = searchParams.get("sort") || "relevance";
+
+  // The count is stored with the list it belongs to, so a new search or filter starts back at
+  // one page on the same render instead of flashing the old count first.
+  const listKey = `${debouncedQuery}|${search}`;
+  const [shown, setShown] = useState({ key: listKey, count: PAGE_SIZE });
+  const visibleCount = shown.key === listKey ? shown.count : PAGE_SIZE;
 
   useEffect(() => {
     setQuery(q);
@@ -425,13 +433,13 @@ export default function SearchResults() {
                 key={debouncedQuery + sortBy + (brandFilter ?? "")}
                 className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
               >
-                {results.map((product, index) => (
+                {results.slice(0, visibleCount).map((product, index) => (
                   <motion.div
                     key={product.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
-                      delay: Math.min(index, 8) * 0.045,
+                      delay: Math.min(index % PAGE_SIZE, 8) * 0.045,
                       type: "spring",
                       stiffness: 300,
                       damping: 28,
@@ -441,6 +449,20 @@ export default function SearchResults() {
                   </motion.div>
                 ))}
               </motion.div>
+
+              {results.length > visibleCount && (
+                <div className="flex justify-center pt-5 pb-2">
+                  <Button
+                    variant="outline"
+                    className="min-h-11 w-full sm:w-auto px-6 rounded-full tabular-nums"
+                    onClick={() => setShown({ key: listKey, count: visibleCount + PAGE_SIZE })}
+                  >
+                    {language === "en"
+                      ? `${t("showMore")} (${results.length - visibleCount} more)`
+                      : `${t("showMore")}（還有 ${results.length - visibleCount} 筆）`}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (

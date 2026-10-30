@@ -2,8 +2,27 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
+
+// data.ts loads products.json with a dynamic import, which the browser would only start after the
+// main chunk has run. This preload tag lets it download both at once.
+function preloadProductsChunk(): Plugin {
+  return {
+    name: "preload-products-chunk",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(_html, ctx) {
+        const chunk = Object.values(ctx.bundle ?? {}).find(
+          (c) => c.type === "chunk" && c.name === "products",
+        );
+        if (!chunk) return [];
+        return [{ tag: "link", attrs: { rel: "modulepreload", crossorigin: true, href: `/${chunk.fileName}` }, injectTo: "head" }];
+      },
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
@@ -11,6 +30,7 @@ export default defineConfig({
     runtimeErrorOverlay(),
     tailwindcss(),
     metaImagesPlugin(),
+    preloadProductsChunk(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -39,10 +59,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    // Routes are already lazy-loaded (App.tsx); the ~1483KB (320KB gzip) main chunk left is
-    // react-dom + framer-motion + the Radix store picker + products.json (2126 products, which
-    // the home page needs for its category counts), all needed on the landing page.
-    // If the catalog grows again, load products.json separately instead of raising this.
+    // Routes are lazy-loaded (App.tsx) and products.json is its own chunk (data.ts loads it with a
+    // dynamic import), so the main chunk is only app code, about 480KB. The limit is for the
+    // products chunk, which is plain data and grows with the catalog.
     chunkSizeWarningLimit: 1600,
   },
   server: {

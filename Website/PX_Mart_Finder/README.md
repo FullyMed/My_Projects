@@ -4,7 +4,7 @@ Live demo: https://px-mart-finder.netlify.app/
 
 PX Mart Finder helps you find a product inside a PX Mart (全聯福利中心) supermarket. You search for it, and the app tells you the aisle and shelf. You can also browse by category and save products for your next shop.
 
-It's a portfolio prototype built around one real branch, PX Mart Wufeng in Taichung. The Taipei and Kaohsiung branches are demo placeholders. PX Mart has nothing to do with the project. Most of the 2,126 products, with their names and photos, come from the Wufeng branch's public listing on foodpanda (October 2026). The aisle data is demo data, and only the first 56 products have any.
+It's a portfolio prototype built around one real branch, PX Mart Wufeng in Taichung. The Taipei and Kaohsiung branches are demo placeholders. PX Mart has nothing to do with the project. Most of the 2,751 products, with their names and photos, come from the Wufeng branch's public listing on foodpanda (October 2026). The aisle data is demo data, and only the first 56 products have any.
 
 ## Getting started
 
@@ -44,6 +44,7 @@ npx vite preview --port 5001
 - Browse 23 categories and their subcategories. Each one shows how many products it has. Every category has products now; the one empty subcategory (Clothing, Bags) says "Coming soon" instead of leading to a blank page.
 - Products without aisle data say so plainly ("No aisle info for this branch yet") instead of showing a made-up location.
 - Filter by brand and sort by best match, name or aisle order. The filters live in the URL, so the back button and shared links keep them.
+- Long result lists show 40 products at a time, with a "Show more" button for the next 40.
 - Get "Did you mean" suggestions when a search finds nothing.
 - Save products with the heart button. Saved products stay in your browser.
 - Switch between the Wufeng branch and the two demo branches.
@@ -63,7 +64,8 @@ A few things under the hood:
 - Each page sets its own title and description, and both change when you switch language.
 - Images show a placeholder while they load and an icon if they fail.
 - Every page except Home loads on demand, which keeps the first download small.
-- Product photos are WebP files, made by `script/compress-images.ts` from PNG or JPEG originals. The first 35 went from 9.9 MB to about 0.8 MB; the 2,070 foodpanda photos went from about 85 MB to about 52 MB.
+- The product data is its own file, downloaded alongside the app code (about 480 KB) instead of inside it, so adding products doesn't make the app code bigger.
+- Product photos are WebP files, made by `script/compress-images.ts` from PNG or JPEG originals. The first 35 went from 9.9 MB to about 0.8 MB; the 2,695 foodpanda photos went from about 110 MB to about 67 MB.
 - If saved settings in your browser get corrupted, the app falls back to its defaults instead of crashing.
 
 ## Project structure
@@ -98,7 +100,7 @@ The project shows how good search and clear aisle data can save shoppers time in
 
 ## What's next
 
-- Real aisle data for the 2,070 products that don't have any yet, and for more branches
+- Real aisle data for the 2,695 products that don't have any yet, and for more branches
 - A drawn floor plan for the store map
 - Live stock levels
 - A backend and an admin page for editing products
