@@ -39,11 +39,11 @@ npx vite preview --port 5001
 
 ## What it does
 
-- Search by product name, brand or category. Small typos still find a match, and some words search their synonyms too: "soda" also looks for 可樂 and 汽水.
+- Search by product name, brand or category. A typo in a longer word still finds a match, and some words search their synonyms too: "soda" also looks for 可樂 and 汽水.
 - See the aisle and shelf for each product, per branch.
 - Browse 23 categories and their subcategories. Each one shows how many products it has. Every category has products now; the one empty subcategory (Clothing, Bags) says "Coming soon" instead of leading to a blank page.
 - Products without aisle data say so plainly ("No aisle info for this branch yet") instead of showing a made-up location.
-- Filter by brand and sort by best match, name or aisle order. The filters live in the URL, so the back button and shared links keep them.
+- Filter by brand and sort by best match (also inside a category), name or aisle order. The filters live in the URL, so the back button and shared links keep them.
 - Long result lists show 40 products at a time, with a "Show more" button for the next 40.
 - Get "Did you mean" suggestions when a search finds nothing.
 - Save products with the heart button. Saved products stay in your browser.
@@ -67,6 +67,8 @@ A few things under the hood:
 - The product data is a separate JSON file, downloaded alongside the app code (about 480 KB) instead of inside it, so adding products doesn't make the app code bigger.
 - Product photos are WebP files, made by `script/compress-images.ts` from PNG or JPEG originals. The first 35 went from 9.9 MB to about 0.8 MB; the 5,028 foodpanda photos went from about 202 MB to about 128 MB.
 - If saved settings in your browser get corrupted, the app falls back to its defaults instead of crashing.
+- Only what you type is matched loosely. Synonyms match as plain text, so "milk tea" runs one fuzzy search instead of five and finds milk teas, not batteries. On a slowed-down phone it went from about 11 seconds to 4.
+- Typo tolerance is kept for longer words only. Words of up to 5 letters must match exactly, so "soda" finds 84 sodas instead of 600 products full of soap; "tootpaste" still finds toothpaste.
 
 ## Project structure
 

@@ -33,6 +33,31 @@ import { useLocation, useSearch } from "wouter";
 // Big categories have 200+ products; drawing every card at once made these pages slow on phones.
 const PAGE_SIZE = 40;
 
+const SEARCH_KEYS = [
+  "product_name_en",
+  "product_name_zh",
+  "brand",
+  "category_en",
+  "category_zh",
+  "sub_category_en",
+  "sub_category_zh",
+  "keywords",
+] as const;
+
+// Built once when this page's chunk loads, not on every visit to the page.
+// threshold 0.19: words of up to 5 letters must match exactly and longer ones may have one typo
+// ("tootpaste", "biscut"). At 0.3, one wrong letter in a short word was allowed, so "soda" found soap,
+// "beer" found 600 unrelated products and "chips" found chopsticks. ignoreLocation lets a word match
+// anywhere in a long name; without it, matches late in a name scored worse and some were missed.
+const fuse = new Fuse(PRODUCTS, { keys: [...SEARCH_KEYS], threshold: 0.19, ignoreLocation: true });
+
+// Synonyms are words we chose, so they match as plain text against these fields. Fuzzy-matching
+// them too ran a full Fuse pass per synonym ("milk tea" took up to 11s on a slowed phone) and pulled in
+// junk: "latte" matched every "battery", and "soda" matched hundreds of soaps.
+const searchableText = PRODUCTS.map((p) =>
+  SEARCH_KEYS.flatMap((key) => p[key]).join("\n").toLowerCase()
+);
+
 export default function SearchResults() {
   const { t, language } = useLanguage();
   const { selectedStore } = useStore();
@@ -79,24 +104,29 @@ export default function SearchResults() {
     return [q, ...synonyms];
   }, [q]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(PRODUCTS, {
-      keys: [
-        "product_name_en",
-        "product_name_zh",
-        "brand",
-        "category_en",
-        "category_zh",
-        "sub_category_en",
-        "sub_category_zh",
-        "keywords",
-      ],
-      threshold: 0.3,
-    });
-  }, []);
+  // Products matching the text query, best fuzzy matches first, then synonym matches. The result
+  // list and the brand list both read this, so sorting or filtering never searches again.
+  const queryMatches = useMemo(() => {
+    const matches = new Map<string, Product>();
+    if (!q) return matches;
+
+    fuse.search(q).forEach((res) => matches.set(res.item.id, res.item));
+
+    const synonyms = expandedTerms.slice(1).map((s) => s.toLowerCase());
+    if (synonyms.length > 0) {
+      PRODUCTS.forEach((p, i) => {
+        if (!matches.has(p.id) && synonyms.some((s) => searchableText[i].includes(s))) {
+          matches.set(p.id, p);
+        }
+      });
+    }
+
+    return matches;
+  }, [q, expandedTerms]);
 
   const results = useMemo(() => {
-    let filtered: Product[] = PRODUCTS;
+    // With a query, start from the matches so "Best match" keeps their order inside a category too.
+    let filtered: Product[] = q ? Array.from(queryMatches.values()) : PRODUCTS;
 
     if (categoryId) {
       const category = CATEGORIES.find((c) => c.id === categoryId);
@@ -107,26 +137,6 @@ export default function SearchResults() {
 
     if (subcategoryName) {
       filtered = filtered.filter((p) => isInSubCategory(p, subcategoryName));
-    }
-
-    if (q) {
-      const allResults = new Map<string, Product>();
-
-      expandedTerms.forEach((term) => {
-        fuse.search(term).forEach((res) => {
-          if (!allResults.has(res.item.id)) {
-            allResults.set(res.item.id, res.item);
-          }
-        });
-      });
-
-      const fuseIds = new Set(allResults.keys());
-
-      if (categoryId || subcategoryName) {
-        filtered = filtered.filter((p) => fuseIds.has(p.id));
-      } else {
-        filtered = Array.from(allResults.values());
-      }
     }
 
     if (brandFilter) {
@@ -177,12 +187,11 @@ export default function SearchResults() {
     return sorted;
   }, [
     q,
-    expandedTerms,
+    queryMatches,
     categoryId,
     subcategoryName,
     brandFilter,
     sortBy,
-    fuse,
     language,
     selectedStore.id,
   ]);
@@ -202,12 +211,7 @@ export default function SearchResults() {
     }
 
     if (q) {
-      const allRes = new Map<string, Product>();
-      expandedTerms.forEach((term) =>
-        fuse.search(term).forEach((res) => allRes.set(res.item.id, res.item))
-      );
-      const fuseIds = new Set(allRes.keys());
-      baseResults = baseResults.filter((p) => fuseIds.has(p.id));
+      baseResults = baseResults.filter((p) => queryMatches.has(p.id));
     }
 
     const brands = new Set(baseResults.map((p) => p.brand));
@@ -215,7 +219,7 @@ export default function SearchResults() {
     // otherwise the Select renders a blank trigger with no way to see what's filtering.
     if (brandFilter) brands.add(brandFilter);
     return Array.from(brands).sort();
-  }, [q, expandedTerms, categoryId, subcategoryName, brandFilter, fuse]);
+  }, [q, queryMatches, categoryId, subcategoryName, brandFilter]);
 
   const suggestions = useMemo(() => {
     if (!q || results.length > 0) return [];
